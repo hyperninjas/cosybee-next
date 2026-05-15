@@ -1,33 +1,34 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import { PHOTOS } from "@/app/lib/photos";
-import AnalyticsPhone from "../mockups/AnalyticsPhone";
-import Hexagon from "../ui/Hexagon";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../ui/SectionContent";
+import sideImage from "@/public/energy-analytics-side.png";
+import deviceImg from "@/public/energy-saving-device.svg";
+import Image from "next/image";
 
 export default function EnergyAnalytics() {
   return (
-    <section className="relative overflow-hidden bg-neutral-50 py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-47">
       {/* decorative light hex bleeding from left edge */}
-      <Hexagon
+      {/* <Hexagon
         color="#E5E7EB"
-        className="pointer-events-none absolute -left-32 top-1/2 hidden w-56 -translate-y-1/2 sm:block lg:-left-36 lg:w-[18rem]"
-      />
+        className="pointer-events-none absolute -left-32 top-1/2 hidden w-56 -translate-y-1/2 sm:block sm:-right-27 sm:w-88 lg:w-76.75"
+      /> */}
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
+      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12  lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
         {/* left: uniform 3-hex hive cluster */}
         <SharedImageHexCluster
-          src={PHOTOS.worker}
+          src={sideImage.src}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
           fallbackColor="#3a4a5c"
-          className="mx-auto w-full max-w-75 sm:max-w-85 lg:max-w-95"
+          // bgPosition="right 120%"
+          // bgSize="cover"
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -left-50 -top-10"
         />
-
         {/* middle: title + features */}
-        <div>
+        <div className="max-w-111.5">
           <SectionTitle>Energy &amp; Savings Analytics</SectionTitle>
-          <div className="mt-8 space-y-7">
+          <div className="mt-8 space-y-8">
             <FeatureItem
               title="Savings Calculator"
               description="Track exactly how much money you're saving with solar. See monthly comparisons and cumulative savings over time."
@@ -42,10 +43,10 @@ export default function EnergyAnalytics() {
             />
           </div>
         </div>
-
         {/* right: analytics phone */}
-        <div className="flex justify-center lg:justify-end">
-          <AnalyticsPhone className="w-[260px] sm:w-[280px] lg:w-[290px]" />
+        <div className="flex justify-center lg:justify-end absolute right-0 -top-30">
+          {/* <AnalyticsPhone className="w-[260px] sm:w-[280px] lg:w-[290px]" /> */}
+          <Image src={deviceImg} alt="energy analytics dashboard" />
         </div>
       </div>
     </section>

@@ -19,6 +19,8 @@ export default function SharedImageHexCluster({
   placements,
   fallbackColor = "#2a2a2a",
   className = "",
+  bgPosition = "center",
+  bgSize = "cover",
 }: {
   src: string;
   viewBox: { w: number; h: number };
@@ -27,6 +29,8 @@ export default function SharedImageHexCluster({
   fallbackColor?: string;
   /** Width / position utilities. Height is auto from the viewBox aspect. */
   className?: string;
+  bgPosition?: string;
+  bgSize?: string;
 }) {
   const maskUrl = buildHexMaskDataUri(viewBox.w, viewBox.h, placements);
   return (
@@ -36,8 +40,9 @@ export default function SharedImageHexCluster({
       style={{
         aspectRatio: `${viewBox.w} / ${viewBox.h}`,
         backgroundImage: `url('${src}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundSize: bgSize,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: bgPosition,
         backgroundColor: fallbackColor,
         ...hexMaskStyle(maskUrl),
       }}
