@@ -3,8 +3,6 @@ import { FeatureItem, SectionTitle } from "../ui/SectionContent";
 import sideImg from "@/public/energy-management.png";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-// import windTurbines from "@/public/image 16.png";
-// import solarBottom from "@/public/image 17.png";
 
 export default function SmartEnergyManagement() {
   return (

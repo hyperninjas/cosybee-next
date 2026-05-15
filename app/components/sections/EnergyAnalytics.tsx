@@ -23,7 +23,7 @@ export default function EnergyAnalytics() {
           fallbackColor="#3a4a5c"
           // bgPosition="right 120%"
           // bgSize="cover"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -left-50 -top-10"
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -left-50 -top-10 hidden lg:block"
         />
         {/* middle: title + features */}
         <div className="max-w-111.5">
@@ -44,7 +44,7 @@ export default function EnergyAnalytics() {
           </div>
         </div>
         {/* right: analytics phone */}
-        <div className="flex justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-[286.3px]">
+        <div className="flex justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-[286.3px] hidden lg:block">
           {/* <AnalyticsPhone className="w-[260px] sm:w-[280px] lg:w-[290px]" /> */}
           <Image src={deviceImg} alt="energy analytics dashboard" />
         </div>

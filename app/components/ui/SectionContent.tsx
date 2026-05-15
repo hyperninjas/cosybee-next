@@ -1,7 +1,17 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { type ReactNode } from "react";
 import { HEX_PATH } from "@/app/lib/hex";
 import hexaCheck from "@/public/hexa-check.svg";
+import hexaSun from "@/public/hexa-sun.svg";
+import hexaDollar from "@/public/hexa-dollar.svg";
+import hexaChart from "@/public/hexa-chart.svg";
+
+const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
+  check: hexaCheck,
+  sun: hexaSun,
+  dollar: hexaDollar,
+  chart: hexaChart,
+};
 
 /** Names of the glyph drawn inside a yellow hex badge. */
 export type GlyphName = "check" | "sun" | "dollar" | "chart";
@@ -193,7 +203,7 @@ export function SectionLead({
 }) {
   return (
     <p
-      className={`mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg ${className}`}
+      className={`mt-4 max-w-xl text-base leading-relaxed text-[#545454] sm:text-base ${className}`}
     >
       {children}
     </p>
@@ -246,11 +256,16 @@ export function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
-      <HexBadge glyph={glyph} className="h-11 w-12 lg:h-12 lg:w-14" />
+    <div className="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+      <Image
+        src={GLYPH_SVGS[glyph]}
+        alt=""
+        aria-hidden
+        className="h-11 w-12 lg:h-10 lg:w-11 mt-2.5"
+      />
       <div>
-        <h3 className="text-base font-bold text-black sm:text-lg">{title}</h3>
-        <p className="mt-1 text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
+        <h3 className="text-lg font-bold text-black sm:text-lg">{title}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-[#545454]">
           {description}
         </p>
       </div>
