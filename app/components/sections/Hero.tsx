@@ -6,6 +6,11 @@ import PhoneTabs from "../mockups/phone/PhoneTabs";
 import { CtaButton } from "../ui/Cta";
 import Hexagon from "../ui/Hexagon";
 import HiveHexCluster from "../ui/HiveHexCluster";
+import beeFlowerImg from "@/public/bee-flower.png";
+import deviceImg from "@/public/hero-device.svg";
+import windTurbineImg from "@/public/wind-turbine.png";
+import heroBgImg from "@/public/hero-bg.png";
+import Image from "next/image";
 
 function HeroPhone({ className = "" }: { className?: string }) {
   return (
@@ -23,11 +28,13 @@ export default function Hero() {
       {/* background photo + gradients */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-40"
-          style={{ backgroundImage: `url('${PHOTOS.heroBg}')` }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('${heroBgImg.src}')`,
+          }}
         />
-        <div className="absolute inset-0 bg-linear-to-b from-black via-black/85 to-black/40" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
+        {/* <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black to-transparent" /> */}
       </div>
 
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-16 lg:pl-71.5 lg:pt-24 lg:pb-32">
@@ -56,12 +63,16 @@ export default function Hero() {
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
-          left={{ src: PHOTOS.windTurbine, color: "#7FA9C9" }}
-          topRight={{ src: PHOTOS.sunflower, color: "#D4A017" }}
+          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
+          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
           bottomRight={{
-            color: "#F1E89F",
+            color: "#E9E19E",
             children: (
-              <HeroPhone className="absolute left-1/2 top-[12%] w-[60%] -translate-x-1/2" />
+              <Image
+                src={deviceImg}
+                alt="cosy bee app"
+                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+              />
             ),
           }}
         />
