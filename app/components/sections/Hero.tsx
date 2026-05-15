@@ -26,17 +26,16 @@ export default function Hero() {
           className="absolute inset-0 bg-cover bg-center opacity-40"
           style={{ backgroundImage: `url('${PHOTOS.heroBg}')` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/85 to-black/40" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-black via-black/85 to-black/40" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black to-transparent" />
       </div>
 
-      {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
-      <Hexagon
-        color="#403A07"
-        className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[373.73px] h-[374.5px]"
-      />
-
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-16 lg:pl-71.5 lg:pt-24 lg:pb-32">
+        {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
+        <Hexagon
+          color="#403A07"
+          className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[403.73px] h-[374.5px]"
+        />
         {/* text */}
         <div className="relative z-10 max-w-xl">
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight sm:text-5xl lg:text-6xl xl:text-[2.5rem]">
@@ -56,7 +55,7 @@ export default function Hero() {
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
-          className="mx-auto w-full max-w-[420px] sm:max-w-[500px] lg:max-w-[560px]"
+          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
           left={{ src: PHOTOS.windTurbine, color: "#7FA9C9" }}
           topRight={{ src: PHOTOS.sunflower, color: "#D4A017" }}
           bottomRight={{
