@@ -173,8 +173,8 @@ export default function Navbar({
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`text-sm font-light tracking-wide transition-colors hover:text-white ${
-                    isActive ? "text-white" : "text-neutral-400"
+                  className={`text-[15px] font-medium tracking-wide transition-colors hover:text-white ${
+                    isActive ? "text-white" : "text-[#B3B3B3]"
                   }`}
                 >
                   {link.label}
@@ -237,8 +237,8 @@ export default function Navbar({
                     href={link.href}
                     onClick={() => setOpen(false)}
                     tabIndex={open ? 0 : -1}
-                    className={`block rounded-md px-2 py-2 text-base font-light tracking-wide transition-colors hover:bg-white/5 hover:text-white ${
-                      isActive ? "text-white" : "text-neutral-400"
+                    className={`block rounded-md px-2 py-2 text-base font-medium tracking-wide transition-colors hover:bg-white/5 hover:text-white ${
+                      isActive ? "text-white" : "text-[#B3B3B3]"
                     }`}
                   >
                     {link.label}
