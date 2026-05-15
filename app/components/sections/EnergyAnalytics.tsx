@@ -11,17 +11,17 @@ export default function EnergyAnalytics() {
       {/* decorative light hex bleeding from left edge */}
       <Hexagon
         color="#E5E7EB"
-        className="pointer-events-none absolute -left-32 top-1/2 hidden w-[14rem] -translate-y-1/2 sm:block lg:-left-36 lg:w-[18rem]"
+        className="pointer-events-none absolute -left-32 top-1/2 hidden w-56 -translate-y-1/2 sm:block lg:-left-36 lg:w-[18rem]"
       />
 
-      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
         {/* left: uniform 3-hex hive cluster */}
         <SharedImageHexCluster
           src={PHOTOS.worker}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
           fallbackColor="#3a4a5c"
-          className="mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]"
+          className="mx-auto w-full max-w-75 sm:max-w-85 lg:max-w-95"
         />
 
         {/* middle: title + features */}
