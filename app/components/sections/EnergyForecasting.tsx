@@ -121,17 +121,6 @@ export default function EnergyForecasting() {
           ]}
         />
       </div>
-
-      <div className="mx-auto mt-12 max-w-[1280px] lg:mt-16">
-        <CtaCard
-          glyph="sun"
-          glyphColor="#A3D055"
-          title="Reduce Energy Bills by Up to 40%"
-          description="By using energiebee's smart forecasting and energy management recommendations."
-          buttonText="Start Monitoring"
-          href="/start"
-        />
-      </div>
     </section>
   );
 }

@@ -203,7 +203,7 @@ export function SectionLead({
 }) {
   return (
     <p
-      className={`mt-4 max-w-xl text-base leading-relaxed text-[#545454] sm:text-base ${className}`}
+      className={`mt-4 w-full max-w-xl text-base leading-relaxed text-[#545454] sm:text-base ${className}`}
     >
       {children}
     </p>
@@ -261,7 +261,7 @@ export function FeatureCard({
         src={GLYPH_SVGS[glyph]}
         alt=""
         aria-hidden
-        className="h-11 w-12 lg:h-10 lg:w-11 mt-2.5"
+        className="h-11 w-12 lg:h-10 lg:w-11 mt-1.5"
       />
       <div>
         <h3 className="text-lg font-bold text-black sm:text-lg">{title}</h3>

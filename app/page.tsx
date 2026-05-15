@@ -5,6 +5,8 @@ import EnergyAnalytics from "./components/sections/EnergyAnalytics";
 import SmartEnergyManagement from "./components/sections/SmartEnergyManagement";
 import WhyEnergieBee from "./components/sections/WhyEnergieBee";
 import WhyChoose from "./components/sections/WhyChoose";
+import WhyEnergiebeeSolar from "./components/sections/WhyEnergiebeeSolar";
+import WorksWithAnySystem from "./components/sections/WorksWithAnySystem";
 
 export default function Home() {
   return (
@@ -14,8 +16,9 @@ export default function Home() {
       <EnergyAnalytics />
       <SmartEnergyManagement />
       <WhyEnergieBee />
+      <WhyEnergiebeeSolar />
+      <WorksWithAnySystem />
       <EnergyForecasting />
-      <WhyChoose />
     </main>
   );
 }

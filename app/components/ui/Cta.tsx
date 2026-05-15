@@ -106,15 +106,10 @@ export function CtaCard({
 }) {
   return (
     <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] sm:p-7 lg:flex-row lg:items-center lg:gap-8 lg:p-8 ${className}`}
+      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-white bg-[url(/bg-hive-grid.svg)] bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-8 lg:p-12 ${className}`}
     >
-      <HexBadge
-        glyph={glyph}
-        color={glyphColor}
-        className="h-14 w-16 sm:h-16 sm:w-20"
-      />
       <div className="flex-1">
-        <h3 className="text-xl font-extrabold leading-tight text-black sm:text-2xl lg:text-[28px]">
+        <h3 className="text-xl font-extrabold leading-tight text-black sm:text-2xl lg:text-[40px]">
           {title}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-neutral-600 sm:text-base">
