@@ -1,4 +1,5 @@
 import Hexagon from "./Hexagon";
+import { FeatureItem, SectionTitle } from "./SectionContent";
 
 const PHONES_DESK =
   "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=1400&q=75";
@@ -39,42 +40,6 @@ function SharedImageHexCluster({ src }: { src: string }) {
   );
 }
 
-function HexCheck({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 86.6"
-      className={`shrink-0 ${className}`}
-      aria-hidden
-    >
-      <path d={HEX_PATH} fill="#D7C638" />
-      <path
-        d="M30 44 L43 57 L70 30"
-        stroke="white"
-        strokeWidth="8"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function Feature({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-4">
-      <HexCheck className="mt-1 h-6 w-6 lg:h-7 lg:w-7" />
-      <div>
-        <h3 className="text-base font-semibold text-black sm:text-lg">
-          {title}
-        </h3>
-        <p className="mt-1 max-w-md text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
-          {desc}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function EnergyMonitoring() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
@@ -92,21 +57,19 @@ export default function EnergyMonitoring() {
 
         {/* text */}
         <div>
-          <h2 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-            Real-Time Energy Monitoring
-          </h2>
+          <SectionTitle>Real-Time Energy Monitoring</SectionTitle>
           <div className="mt-8 space-y-7">
-            <Feature
+            <FeatureItem
               title="Live Solar Production Tracking"
-              desc="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
+              description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
             />
-            <Feature
+            <FeatureItem
               title="Weather-Based Forecasts"
-              desc="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
+              description="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
             />
-            <Feature
+            <FeatureItem
               title="Daily Energy Overview"
-              desc="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
+              description="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
             />
           </div>
         </div>

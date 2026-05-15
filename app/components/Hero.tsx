@@ -1,4 +1,5 @@
 import Hexagon from "./Hexagon";
+import { CtaButton } from "./Cta";
 
 const BG_PHOTO =
   "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=2400&q=70";
@@ -146,12 +147,9 @@ export default function Hero() {
             usage with confidence and maximize your solar investment with
             industry-leading accuracy.
           </p>
-          <a
-            href="/get-started"
-            className="mt-10 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-12 py-4 text-lg font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 sm:text-xl"
-          >
+          <CtaButton href="/get-started" size="lg" className="mt-10">
             Get Started
-          </a>
+          </CtaButton>
         </div>
 
         {/* hexagon cluster — each hexagon is independently sized and placed */}
