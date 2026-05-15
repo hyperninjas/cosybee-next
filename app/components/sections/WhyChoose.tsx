@@ -44,13 +44,12 @@ export default function WhyChoose() {
         </div>
 
         {/* right: uniform 3-hex hive cluster */}
-        <div className="mx-auto aspect-[350/346] w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]">
-          <SharedImageHexCluster
-            src={PHOTOS.installer}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-          />
-        </div>
+        <SharedImageHexCluster
+          src={PHOTOS.installer}
+          viewBox={HIVE_3_VIEWBOX}
+          placements={HIVE_3_PLACEMENTS}
+          className="mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]"
+        />
       </div>
     </section>
   );

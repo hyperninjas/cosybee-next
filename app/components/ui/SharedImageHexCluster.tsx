@@ -9,28 +9,32 @@ import {
  * background that covers the whole cluster; an SVG `mask-image` shows only
  * the parts that fall inside the hex shapes.
  *
- * Sizing: the wrapper has no width of its own — the parent container
- * (typically with an `aspect-[w/h]` class matching the viewBox) provides it.
+ * The component sets its own `aspect-ratio` from the viewBox, so callers
+ * only need to control width (via `className`) — height follows. This
+ * keeps the mask shapes geometrically true even when scales or gaps change.
  */
 export default function SharedImageHexCluster({
   src,
   viewBox,
   placements,
   fallbackColor = "#2a2a2a",
+  className = "",
 }: {
   src: string;
-  /** Match the wrapper's aspect ratio for distortion-free corners. */
   viewBox: { w: number; h: number };
   placements: HexPlacement[];
   /** Shown while the photo loads or if its URL fails. */
   fallbackColor?: string;
+  /** Width / position utilities. Height is auto from the viewBox aspect. */
+  className?: string;
 }) {
   const maskUrl = buildHexMaskDataUri(viewBox.w, viewBox.h, placements);
   return (
     <div
       aria-hidden
-      className="h-full w-full"
+      className={className}
       style={{
+        aspectRatio: `${viewBox.w} / ${viewBox.h}`,
         backgroundImage: `url('${src}')`,
         backgroundSize: "cover",
         backgroundPosition: "center",

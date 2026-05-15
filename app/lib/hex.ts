@@ -52,39 +52,72 @@ export function hexMaskStyle(maskUrl: string): React.CSSProperties {
 }
 
 /**
- * Canonical 3-hex hive cluster: one hex on the left, two stacked on the
- * right, all three meeting near a single shared vertex — the tightest
- * symmetric arrangement of three flat-top hexagons.
+ * Canonical 3-hex hive cluster with size variation:
+ *   - A (left)  and B (top-right) share a small scale.
+ *   - C (bottom-right) is larger.
+ *
+ * All three meet at a single vertex `V` (mathematically exact contact;
+ * `HIVE_GAP` then slides each hex outward 120° from the cluster centroid
+ * to introduce uniform breathing room).
  *
  *      ____
  *     / B  \
- *    /______\___
- *    \    A /    \
- *     \    /__C__/
- *      \___/
+ *    /______\______
+ *    \    A /      \
+ *     \    /        \
+ *      \__/    C     \
+ *          \         /
+ *           \_______/
  *
- * Each hex's center sits 120° from the cluster centroid; `HIVE_GAP` moves
- * each hex outward along that axis by the same amount, so spacing stays
- * symmetric. Set `HIVE_GAP = 0` to bring the hexes back to vertex contact.
+ * The hex path is drawn in a 100×86.6 local space, so a hex of scale `s`
+ * is 100s wide and 86.6s tall. Mathematical sharp vertices (NOT the rounded
+ * curve-start points 33/67 — those are inset by 8 from the corners):
+ *     left=(0,43.3), right=(100,43.3),
+ *     top-left=(25,0), top-right=(75,0),
+ *     bottom-left=(25,86.6), bottom-right=(75,86.6).
  *
- * Wrapper: `aspect-[350/346]` is close enough for any small gap; the SVG
- * mask absorbs the few-percent distortion.
+ * Anchoring V = (100s, 86.6s) — A's right vertex, B's bottom-left vertex,
+ * and C's top-left vertex all meet at V — gives:
+ *     A.translate = (0,             43.3·s)     scale s
+ *     B.translate = (75·s,          0)          scale s
+ *     C.translate = (100·s − 25·s′, 86.6·s)     scale s′
+ *
+ * Outward-by-gap offsets are then added in normalized 120° directions:
+ *     A: (−1,   0)              ·gap   →  shift cluster +gap right
+ *     B: (+½,  −√3⁄2)           ·gap   →  shift cluster +√3⁄2·gap down
+ *     C: (+½,  +√3⁄2)           ·gap
  */
 export const HIVE_GAP = 10;
+export const HIVE_SCALE_SMALL = 2; // A and B
+export const HIVE_SCALE_LARGE = 2.5; // C — the prominent bottom-right hex
 
 const SQRT_3 = Math.sqrt(3);
 const SQRT_3_OVER_2 = SQRT_3 / 2;
+const s = HIVE_SCALE_SMALL;
+const sBig = HIVE_SCALE_LARGE;
+const g = HIVE_GAP;
 
 export const HIVE_3_VIEWBOX = {
-  w: 350 + 1.5 * HIVE_GAP,
-  h: 346.4 + SQRT_3 * HIVE_GAP,
+  w: 100 * s + 75 * sBig + 1.5 * g,
+  h: 86.6 * (s + sBig) + SQRT_3 * g,
 };
 
 export const HIVE_3_PLACEMENTS: HexPlacement[] = [
-  // A — left  (outward direction: (-1, 0))
-  { x: 0, y: 86.6 + SQRT_3_OVER_2 * HIVE_GAP, scale: 2 },
-  // B — top-right  (outward direction: (+½, -√3⁄2))
-  { x: 150 + 1.5 * HIVE_GAP, y: 0, scale: 2 },
-  // C — bottom-right  (outward direction: (+½, +√3⁄2))
-  { x: 150 + 1.5 * HIVE_GAP, y: 173.2 + SQRT_3 * HIVE_GAP, scale: 2 },
+  // A — small, left
+  { x: 0, y: 43.3 * s + SQRT_3_OVER_2 * g, scale: s },
+  // B — small, top-right
+  { x: 75 * s + 1.5 * g, y: 0, scale: s },
+  // C — LARGE, bottom-right
+  {
+    x: 100 * s - 25 * sBig + 1.5 * g,
+    y: 86.6 * s + SQRT_3 * g,
+    scale: sBig,
+  },
 ];
+
+/**
+ * Aspect ratio of the canonical hive viewBox. Use as inline
+ * `style={{ aspectRatio: HIVE_3_ASPECT }}` on wrappers so they stay in
+ * sync when the gap or scales change.
+ */
+export const HIVE_3_ASPECT = HIVE_3_VIEWBOX.w / HIVE_3_VIEWBOX.h;

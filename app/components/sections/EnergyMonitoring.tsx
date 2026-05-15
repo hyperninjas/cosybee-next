@@ -15,13 +15,12 @@ export default function EnergyMonitoring() {
 
       <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
         {/* uniform 3-hex hive cluster */}
-        <div className="mx-auto aspect-[350/346] w-full max-w-[400px] sm:max-w-[440px] lg:max-w-[480px]">
-          <SharedImageHexCluster
-            src={PHOTOS.phonesDesk}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-          />
-        </div>
+        <SharedImageHexCluster
+          src={PHOTOS.phonesDesk}
+          viewBox={HIVE_3_VIEWBOX}
+          placements={HIVE_3_PLACEMENTS}
+          className="mx-auto w-full max-w-[400px] sm:max-w-[440px] lg:max-w-[480px]"
+        />
 
         {/* text */}
         <div>

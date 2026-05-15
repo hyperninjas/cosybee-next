@@ -16,14 +16,13 @@ export default function EnergyAnalytics() {
 
       <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
         {/* left: uniform 3-hex hive cluster */}
-        <div className="mx-auto aspect-[350/346] w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]">
-          <SharedImageHexCluster
-            src={PHOTOS.worker}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-          />
-        </div>
+        <SharedImageHexCluster
+          src={PHOTOS.worker}
+          viewBox={HIVE_3_VIEWBOX}
+          placements={HIVE_3_PLACEMENTS}
+          fallbackColor="#3a4a5c"
+          className="mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]"
+        />
 
         {/* middle: title + features */}
         <div>
