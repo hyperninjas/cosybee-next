@@ -1,7 +1,5 @@
 import { type ReactNode } from "react";
-
-const HEX_PATH =
-  "M33,0 L67,0 Q75,0 79,6.93 L96,36.37 Q100,43.3 96,50.23 L79,79.67 Q75,86.6 67,86.6 L33,86.6 Q25,86.6 21,79.67 L4,50.23 Q0,43.3 4,36.37 L21,6.93 Q25,0 33,0 Z";
+import { HEX_PATH } from "@/app/lib/hex";
 
 /** Names of the glyph drawn inside a yellow hex badge. */
 export type GlyphName = "check" | "sun" | "dollar" | "chart";
