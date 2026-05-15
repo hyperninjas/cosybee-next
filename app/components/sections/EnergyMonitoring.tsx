@@ -1,3 +1,4 @@
+import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import { PHOTOS } from "@/app/lib/photos";
 import Hexagon from "../ui/Hexagon";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
@@ -13,16 +14,12 @@ export default function EnergyMonitoring() {
       />
 
       <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
-        {/* one shared photo, three hex windows */}
-        <div className="mx-auto aspect-[480/420] w-full max-w-[440px] sm:max-w-[480px] lg:max-w-[520px]">
+        {/* uniform 3-hex hive cluster */}
+        <div className="mx-auto aspect-[350/346] w-full max-w-[400px] sm:max-w-[440px] lg:max-w-[480px]">
           <SharedImageHexCluster
             src={PHOTOS.phonesDesk}
-            viewBox={{ w: 480, h: 420 }}
-            placements={[
-              { x: 10, y: 0, scale: 2.1 },
-              { x: 240, y: 20, scale: 2.1 },
-              { x: 130, y: 200, scale: 2.4 },
-            ]}
+            viewBox={HIVE_3_VIEWBOX}
+            placements={HIVE_3_PLACEMENTS}
           />
         </div>
 

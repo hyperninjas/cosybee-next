@@ -1,3 +1,4 @@
+import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import { PHOTOS } from "@/app/lib/photos";
 import AnalyticsPhone from "../mockups/AnalyticsPhone";
 import Hexagon from "../ui/Hexagon";
@@ -14,15 +15,12 @@ export default function EnergyAnalytics() {
       />
 
       <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
-        {/* left: shared-image hex cluster */}
-        <div className="mx-auto aspect-[380/560] w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[340px]">
+        {/* left: uniform 3-hex hive cluster */}
+        <div className="mx-auto aspect-[350/346] w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]">
           <SharedImageHexCluster
             src={PHOTOS.worker}
-            viewBox={{ w: 380, h: 560 }}
-            placements={[
-              { x: 50, y: 0, scale: 2.6 },
-              { x: 130, y: 270, scale: 2.6 },
-            ]}
+            viewBox={HIVE_3_VIEWBOX}
+            placements={HIVE_3_PLACEMENTS}
             fallbackColor="#3a4a5c"
           />
         </div>

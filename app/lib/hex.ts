@@ -50,3 +50,41 @@ export function hexMaskStyle(maskUrl: string): React.CSSProperties {
     maskRepeat: "no-repeat",
   };
 }
+
+/**
+ * Canonical 3-hex hive cluster: one hex on the left, two stacked on the
+ * right, all three meeting near a single shared vertex — the tightest
+ * symmetric arrangement of three flat-top hexagons.
+ *
+ *      ____
+ *     / B  \
+ *    /______\___
+ *    \    A /    \
+ *     \    /__C__/
+ *      \___/
+ *
+ * Each hex's center sits 120° from the cluster centroid; `HIVE_GAP` moves
+ * each hex outward along that axis by the same amount, so spacing stays
+ * symmetric. Set `HIVE_GAP = 0` to bring the hexes back to vertex contact.
+ *
+ * Wrapper: `aspect-[350/346]` is close enough for any small gap; the SVG
+ * mask absorbs the few-percent distortion.
+ */
+export const HIVE_GAP = 10;
+
+const SQRT_3 = Math.sqrt(3);
+const SQRT_3_OVER_2 = SQRT_3 / 2;
+
+export const HIVE_3_VIEWBOX = {
+  w: 350 + 1.5 * HIVE_GAP,
+  h: 346.4 + SQRT_3 * HIVE_GAP,
+};
+
+export const HIVE_3_PLACEMENTS: HexPlacement[] = [
+  // A — left  (outward direction: (-1, 0))
+  { x: 0, y: 86.6 + SQRT_3_OVER_2 * HIVE_GAP, scale: 2 },
+  // B — top-right  (outward direction: (+½, -√3⁄2))
+  { x: 150 + 1.5 * HIVE_GAP, y: 0, scale: 2 },
+  // C — bottom-right  (outward direction: (+½, +√3⁄2))
+  { x: 150 + 1.5 * HIVE_GAP, y: 173.2 + SQRT_3 * HIVE_GAP, scale: 2 },
+];

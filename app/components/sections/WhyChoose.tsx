@@ -1,3 +1,4 @@
+import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import { PHOTOS } from "@/app/lib/photos";
 import AnalyticsPhone from "../mockups/AnalyticsPhone";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
@@ -42,16 +43,12 @@ export default function WhyChoose() {
           </div>
         </div>
 
-        {/* right: shared-image hex cluster */}
-        <div className="mx-auto aspect-420/540 w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[340px]">
+        {/* right: uniform 3-hex hive cluster */}
+        <div className="mx-auto aspect-[350/346] w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]">
           <SharedImageHexCluster
             src={PHOTOS.installer}
-            viewBox={{ w: 420, h: 540 }}
-            placements={[
-              { x: 60, y: 0, scale: 1.7 },
-              { x: 20, y: 230, scale: 2.1 },
-              { x: 280, y: 310, scale: 1.5 },
-            ]}
+            viewBox={HIVE_3_VIEWBOX}
+            placements={HIVE_3_PLACEMENTS}
           />
         </div>
       </div>
