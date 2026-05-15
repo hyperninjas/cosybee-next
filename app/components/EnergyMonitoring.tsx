@@ -1,10 +1,43 @@
 import Hexagon from "./Hexagon";
 
-const IMG = {
-  PHONES_DESK:
-    "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=900&q=75",
-  WOOD: "https://images.unsplash.com/photo-1493780474015-ba834fd0ce2f?auto=format&fit=crop&w=900&q=75",
-};
+const PHONES_DESK =
+  "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=1400&q=75";
+
+// Rounded flat-top hexagon, drawn in its own 100×86.6 space so we can
+// `translate` + `scale` it via SVG transform attribute when laying out a
+// multi-hex cluster.
+const HEX_PATH =
+  "M33,0 L67,0 Q75,0 79,6.93 L96,36.37 Q100,43.3 96,50.23 L79,79.67 Q75,86.6 67,86.6 L33,86.6 Q25,86.6 21,79.67 L4,50.23 Q0,43.3 4,36.37 L21,6.93 Q25,0 33,0 Z";
+
+/**
+ * One image, three hex "windows". A single SVG mask containing all three
+ * rounded hex shapes is layered over one background image. The image is
+ * `background-size: cover` across the whole cluster, so the parts revealed by
+ * each hex are actually *different slices of the same photo* — moving a hex
+ * just moves which slice you see.
+ */
+function SharedImageHexCluster({ src }: { src: string }) {
+  const maskSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 420'><path d='${HEX_PATH}' transform='translate(10 0) scale(2.1)' fill='black'/><path d='${HEX_PATH}' transform='translate(240 20) scale(2.1)' fill='black'/><path d='${HEX_PATH}' transform='translate(130 200) scale(2.4)' fill='black'/></svg>`;
+  const maskUrl = `url("data:image/svg+xml;utf8,${encodeURIComponent(maskSvg)}")`;
+  return (
+    <div
+      aria-hidden
+      className="h-full w-full"
+      style={{
+        backgroundImage: `url('${src}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundColor: "#2a2a2a",
+        WebkitMaskImage: maskUrl,
+        maskImage: maskUrl,
+        WebkitMaskSize: "100% 100%",
+        maskSize: "100% 100%",
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+      }}
+    />
+  );
+}
 
 function HexCheck({ className = "" }: { className?: string }) {
   return (
@@ -13,10 +46,7 @@ function HexCheck({ className = "" }: { className?: string }) {
       className={`shrink-0 ${className}`}
       aria-hidden
     >
-      <path
-        d="M33,0 L67,0 Q75,0 79,6.93 L96,36.37 Q100,43.3 96,50.23 L79,79.67 Q75,86.6 67,86.6 L33,86.6 Q25,86.6 21,79.67 L4,50.23 Q0,43.3 4,36.37 L21,6.93 Q25,0 33,0 Z"
-        fill="#D7C638"
-      />
+      <path d={HEX_PATH} fill="#D7C638" />
       <path
         d="M30 44 L43 57 L70 30"
         stroke="white"
@@ -55,23 +85,9 @@ export default function EnergyMonitoring() {
       />
 
       <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
-        {/* hex cluster */}
-        <div className="relative mx-auto h-[360px] w-full max-w-[440px] sm:h-[420px] lg:h-[460px]">
-          <Hexagon
-            src={IMG.PHONES_DESK}
-            color="#3a3a3a"
-            className="absolute left-2 top-0 w-[180px] sm:w-[220px] lg:w-[250px]"
-          />
-          <Hexagon
-            src={IMG.PHONES_DESK}
-            color="#3a3a3a"
-            className="absolute right-0 top-[60px] w-[170px] sm:right-4 sm:w-[200px] lg:w-[225px]"
-          />
-          <Hexagon
-            src={IMG.WOOD}
-            color="#5a3a20"
-            className="absolute bottom-0 left-[80px] w-[200px] sm:left-[120px] sm:w-[240px] lg:w-[270px]"
-          />
+        {/* one shared photo, three hex windows */}
+        <div className="mx-auto aspect-[480/420] w-full max-w-[440px] sm:max-w-[480px] lg:max-w-[520px]">
+          <SharedImageHexCluster src={PHONES_DESK} />
         </div>
 
         {/* text */}
