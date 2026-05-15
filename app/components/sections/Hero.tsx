@@ -5,6 +5,7 @@ import PhoneGreeting from "../mockups/phone/PhoneGreeting";
 import PhoneTabs from "../mockups/phone/PhoneTabs";
 import { CtaButton } from "../ui/Cta";
 import Hexagon from "../ui/Hexagon";
+import HiveHexCluster from "../ui/HiveHexCluster";
 
 function HeroPhone({ className = "" }: { className?: string }) {
   return (
@@ -53,30 +54,18 @@ export default function Hero() {
           </CtaButton>
         </div>
 
-        {/* hexagon cluster — each hexagon is independently sized and placed */}
-        <div className="relative mx-auto h-[400px] w-full max-w-[420px] sm:h-[480px] sm:max-w-[500px] lg:h-[560px] lg:max-w-[560px]">
-          {/* (2/4) cream backdrop — biggest, bottom-right, back layer */}
-          <Hexagon
-            color="#F1E89F"
-            className="absolute right-0 top-[185px] w-[220px] sm:top-[215px] sm:w-[270px] lg:top-[235px] lg:w-[320px]"
-          >
-            <HeroPhone className="absolute right-[60px] top-[22px] w-[100px] sm:right-[72px] sm:top-[25px] sm:w-[125px] lg:right-[82px] lg:top-[35px] lg:w-[155px]" />
-          </Hexagon>
-
-          {/* (3/4) sunflower — top-right */}
-          <Hexagon
-            src={PHOTOS.sunflower}
-            color="#D4A017"
-            className="absolute right-2 top-1 w-[145px] sm:right-3 sm:w-[180px] lg:right-4 lg:w-[225px]"
-          />
-
-          {/* (4/4) wind turbine — middle-left */}
-          <Hexagon
-            src={PHOTOS.windTurbine}
-            color="#7FA9C9"
-            className="absolute left-2 top-[140px] w-[130px] sm:left-3 sm:top-[175px] sm:w-[160px] lg:left-4 lg:top-[215px] lg:w-[200px]"
-          />
-        </div>
+        {/* hexagon cluster — same canonical hive shape as the rest of the page */}
+        <HiveHexCluster
+          className="mx-auto w-full max-w-[420px] sm:max-w-[500px] lg:max-w-[560px]"
+          left={{ src: PHOTOS.windTurbine, color: "#7FA9C9" }}
+          topRight={{ src: PHOTOS.sunflower, color: "#D4A017" }}
+          bottomRight={{
+            color: "#F1E89F",
+            children: (
+              <HeroPhone className="absolute left-1/2 top-[12%] w-[60%] -translate-x-1/2" />
+            ),
+          }}
+        />
       </div>
     </section>
   );
