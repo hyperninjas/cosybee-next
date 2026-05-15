@@ -56,7 +56,7 @@ export default function Hero() {
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
-          className="mx-auto w-full max-w-[420px] sm:max-w-[500px] lg:max-w-[560px]"
+          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
           left={{ src: PHOTOS.windTurbine, color: "#7FA9C9" }}
           topRight={{ src: PHOTOS.sunflower, color: "#D4A017" }}
           bottomRight={{
