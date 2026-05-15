@@ -26,8 +26,8 @@ export default function Hero() {
           className="absolute inset-0 bg-cover bg-center opacity-40"
           style={{ backgroundImage: `url('${PHOTOS.heroBg}')` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/85 to-black/40" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-black via-black/85 to-black/40" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black to-transparent" />
       </div>
 
       {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
