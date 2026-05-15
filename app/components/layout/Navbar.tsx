@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
   { label: "smart", href: "/smart" },
@@ -12,6 +12,8 @@ const NAV_LINKS = [
   { label: "learn", href: "/learn" },
   { label: "shop", href: "/shop" },
 ];
+
+const MENU_ID = "site-mobile-menu";
 
 function Logo({ className }: { className?: string }) {
   return (
@@ -82,7 +84,12 @@ function UserIcon() {
   );
 }
 
-function MenuIcon() {
+/**
+ * Hamburger that morphs into an X when `open`. Both states share the same
+ * three <line>s so the transition is a pure transform — no layout reads,
+ * GPU-cheap, and motion-reduce-friendly.
+ */
+function MenuToggleIcon({ open }: { open: boolean }) {
   return (
     <svg
       width="20"
@@ -92,26 +99,44 @@ function MenuIcon() {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <path
-        d="M4 4H16"
+      <line
+        x1="4"
+        y1="4"
+        x2="16"
+        y2="4"
         stroke="#D7C638"
-        strokeWidth="1.2"
+        strokeWidth="1.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          open ? "translate-y-[6px] rotate-45" : ""
+        }`}
+        style={{ transformBox: "fill-box" }}
       />
-      <path
-        d="M1 10H19"
+      <line
+        x1="1"
+        y1="10"
+        x2="19"
+        y2="10"
         stroke="#D7C638"
-        strokeWidth="1.2"
+        strokeWidth="1.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        className={`origin-center transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
+          open ? "scale-x-0 opacity-0" : ""
+        }`}
+        style={{ transformBox: "fill-box" }}
       />
-      <path
-        d="M4 16H16"
+      <line
+        x1="4"
+        y1="16"
+        x2="16"
+        y2="16"
         stroke="#D7C638"
-        strokeWidth="1.2"
+        strokeWidth="1.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          open ? "-translate-y-[6px] -rotate-45" : ""
+        }`}
+        style={{ transformBox: "fill-box" }}
       />
     </svg>
   );
@@ -124,9 +149,19 @@ export default function Navbar({
 }) {
   const [open, setOpen] = useState(false);
 
+  // Close on Escape; only mount the listener while the menu is open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <header className="sticky top-0 z-50 bg-black text-white">
-      <nav className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-10">
+      <nav className="relative mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-10">
         <Link href="/" aria-label="Cosybee home" className="shrink-0">
           <Logo className="h-8 w-auto lg:h-10" />
         </Link>
@@ -166,18 +201,33 @@ export default function Navbar({
           </button>
           <button
             type="button"
-            aria-label="Toggle menu"
+            aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
+            aria-controls={MENU_ID}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex items-center justify-center"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-white/5 lg:hidden"
           >
-            <MenuIcon />
+            <MenuToggleIcon open={open} />
           </button>
         </div>
-      </nav>
 
-      {open && (
-        <div className="border-t border-neutral-800 lg:hidden">
+        {/* Mobile menu panel — absolutely positioned below the header so it
+            overlays content rather than pushing it down. Animated via
+            transform + opacity only, which the compositor can run off-thread
+            (no layout / paint per frame). */}
+        <div
+          id={MENU_ID}
+          aria-hidden={!open}
+          className={`absolute inset-x-0 top-full origin-top border-t border-neutral-800 bg-black/95 backdrop-blur shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] lg:hidden
+            transition-[opacity,transform] duration-300 ease-out
+            motion-reduce:transition-none
+            ${
+              open
+                ? "opacity-100 translate-y-0"
+                : "pointer-events-none -translate-y-3 opacity-0"
+            }`}
+          style={{ willChange: "transform, opacity" }}
+        >
           <ul className="flex flex-col gap-1 px-4 py-4 sm:px-6">
             {NAV_LINKS.map((link) => {
               const isActive = link.href === activeHref;
@@ -186,7 +236,8 @@ export default function Navbar({
                   <Link
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`block py-2 text-base font-light tracking-wide ${
+                    tabIndex={open ? 0 : -1}
+                    className={`block rounded-md px-2 py-2 text-base font-light tracking-wide transition-colors hover:bg-white/5 hover:text-white ${
                       isActive ? "text-white" : "text-neutral-400"
                     }`}
                   >
@@ -195,25 +246,27 @@ export default function Navbar({
                 </li>
               );
             })}
-            <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 pt-4 sm:hidden">
+            <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 px-2 pt-4 sm:hidden">
               <button
                 type="button"
                 aria-label="Search"
-                className="text-neutral-200"
+                tabIndex={open ? 0 : -1}
+                className="text-neutral-200 transition-colors hover:text-white"
               >
                 <SearchIcon />
               </button>
               <button
                 type="button"
                 aria-label="Account"
-                className="text-neutral-200"
+                tabIndex={open ? 0 : -1}
+                className="text-neutral-200 transition-colors hover:text-white"
               >
                 <UserIcon />
               </button>
             </li>
           </ul>
         </div>
-      )}
+      </nav>
     </header>
   );
 }
