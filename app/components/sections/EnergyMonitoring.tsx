@@ -26,7 +26,7 @@ export default function EnergyMonitoring() {
         {/* text */}
         <div>
           <SectionTitle>Real-Time Energy Monitoring</SectionTitle>
-          <div className="mt-8 space-y-7">
+          <div className="mt-8 space-y-8">
             <FeatureItem
               title="Live Solar Production Tracking"
               description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."

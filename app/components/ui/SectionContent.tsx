@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { type ReactNode } from "react";
 import { HEX_PATH } from "@/app/lib/hex";
+import hexaCheck from "@/public/hexa-check.svg";
 
 /** Names of the glyph drawn inside a yellow hex badge. */
 export type GlyphName = "check" | "sun" | "dollar" | "chart";
@@ -71,7 +73,7 @@ const GLYPHS: Record<GlyphName, ReactNode> = {
  */
 export function HexBadge({
   glyph,
-  color = "#D7C638",
+  color = "#EDC535",
   className = "",
 }: {
   glyph: GlyphName;
@@ -199,26 +201,30 @@ export function SectionLead({
 }
 
 /**
- * Plain feature row (no card background) — hex badge + title + description.
- * Defaults to the checkmark glyph but accepts any glyph.
+ * Plain feature row (no card background) — yellow hex check badge + title +
+ * description. Uses the static /public/hexa-check.svg.
  */
 export function FeatureItem({
   title,
   description,
-  glyph = "check",
 }: {
   title: string;
   description: string;
-  glyph?: GlyphName;
 }) {
   return (
     <div className="flex items-start gap-4">
-      <HexBadge glyph={glyph} className="mt-1 h-6 w-7 lg:h-7 lg:w-8" />
+      <Image
+        src={hexaCheck}
+        alt=""
+        aria-hidden
+        // className="mt-1 h-6 w-7 lg:h-10 lg:w-8.5"
+        className="mt-1.5"
+      />
       <div>
-        <h3 className="text-base font-semibold text-black sm:text-lg">
+        <h3 className="text-base font-bold text-[#1F1F1F] sm:text-lg">
           {title}
         </h3>
-        <p className="mt-1 max-w-md text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
+        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-[#545454] sm:text-sm">
           {description}
         </p>
       </div>
