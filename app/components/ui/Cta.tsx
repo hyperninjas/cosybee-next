@@ -4,7 +4,7 @@ import { HexBadge, type GlyphName } from "./SectionContent";
 type CtaSize = "md" | "lg";
 
 const SIZE_CLASSES: Record<CtaSize, string> = {
-  md: "px-8 py-3 text-base sm:text-lg",
+  md: "px-6 py-3.5 text-base sm:text-lg lg:text-[22px] leading-[135%]",
   lg: "px-10 py-4 text-lg sm:px-12 sm:text-xl",
 };
 
@@ -26,7 +26,7 @@ export function CtaButton({
   return (
     <a
       href={href}
-      className={`inline-flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
+      className={`inline-flex shrink-0 font-semibold text-[22px] items-center justify-center rounded-xl bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>

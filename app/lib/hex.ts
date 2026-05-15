@@ -32,7 +32,7 @@ export function buildHexMaskDataUri(
         `<path d='${HEX_PATH}' transform='translate(${p.x} ${p.y}) scale(${p.scale})' fill='black'/>`,
     )
     .join("");
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${viewBoxWidth} ${viewBoxHeight}'>${paths}</svg>`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${viewBoxWidth} ${viewBoxHeight}' preserveAspectRatio='none'>${paths}</svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 

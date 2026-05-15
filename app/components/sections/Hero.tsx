@@ -31,24 +31,24 @@ export default function Hero() {
 
       {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
       <Hexagon
-        color="#7A6F1C"
-        className="pointer-events-none absolute -left-32 top-40 -z-10 w-[26rem] sm:-left-36 sm:w-[32rem] lg:-left-40 lg:top-36 lg:w-[42rem]"
+        color="#403A07"
+        className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[373.73px] h-[374.5px]"
       />
 
-      <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-16 lg:pt-24 lg:pb-32">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-16 lg:pl-71.5 lg:pt-24 lg:pb-32">
         {/* text */}
         <div className="relative z-10 max-w-xl">
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl xl:text-[2.5rem]">
+          <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight sm:text-5xl lg:text-6xl xl:text-[2.5rem]">
             Solar Forecasting <span className="text-[#D7C638]">95%</span>
             <br />
             <span className="text-[#D7C638]">Accurate</span> Next Day
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-neutral-300 sm:text-lg">
+          <p className="mt-4 max-w-md text-lg text-neutral-300 sm:text-lg">
             Advanced AI-powered solar production predictions. Plan your energy
             usage with confidence and maximize your solar investment with
             industry-leading accuracy.
           </p>
-          <CtaButton href="/get-started" size="lg" className="mt-10">
+          <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started
           </CtaButton>
         </div>
