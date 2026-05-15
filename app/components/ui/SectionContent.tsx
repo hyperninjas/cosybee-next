@@ -80,11 +80,7 @@ export function HexBadge({
   className?: string;
 }) {
   return (
-    <svg
-      viewBox="0 0 100 86.6"
-      className={`shrink-0 ${className}`}
-      aria-hidden
-    >
+    <svg viewBox="0 0 100 86.6" className={`shrink-0 ${className}`} aria-hidden>
       <path d={HEX_PATH} fill={color} />
       {GLYPHS[glyph]}
     </svg>
@@ -178,7 +174,7 @@ export function SectionTitle({
 }) {
   return (
     <h2
-      className={`text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-5xl ${className}`}
+      className={`text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
     >
       {children}
     </h2>

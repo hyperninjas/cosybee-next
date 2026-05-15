@@ -3,23 +3,24 @@ import { PHOTOS } from "@/app/lib/photos";
 import Hexagon from "../ui/Hexagon";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../ui/SectionContent";
+import sideImage from "@/public/real-time-energy-monitoring.png";
 
 export default function EnergyMonitoring() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       {/* cream decorative hex bleeding from the top-right */}
       <Hexagon
-        color="#F1E89F"
-        className="pointer-events-none absolute -right-24 -top-16 w-[18rem] sm:-right-20 sm:w-[22rem] lg:w-[26rem]"
+        color="#F7F2E1"
+        className="pointer-events-none absolute -right-24 top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
       />
 
-      <div className="relative mx-auto grid max-w-[1440px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
-          src={PHOTOS.phonesDesk}
+          src={sideImage.src}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
-          className="mx-auto w-full max-w-[400px] sm:max-w-[440px] lg:max-w-[480px]"
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
         />
 
         {/* text */}
