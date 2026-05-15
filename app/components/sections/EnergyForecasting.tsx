@@ -83,15 +83,15 @@ function MiniPhone({ className = "" }: { className?: string }) {
 
 export default function EnergyForecasting() {
   return (
-    <section className="bg-white px-6 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+    <section className="bg-white px-6 py-20 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
       <SectionHeader
         title="Intelligent Energy Forecasting"
         description="Energiebee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings."
       />
 
-      <div className="mx-auto mt-12 grid max-w-[1280px] grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-8">
+      <div className="mx-auto flex justify-center mt-12 max-w-7xl gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-8">
         <MediaCard
-          media={<MiniPhone className="w-[180px] sm:w-[190px] lg:w-[200px]" />}
+          media={<MiniPhone className="w-45 sm:w-47.5 lg:w-50" />}
           title="Weather-Based Bloom Forecasts"
           description="Our intelligent forecasting system uses real-time weather data combined with your garden's historical performance to predict sunflower blooms and bee activity with remarkable accuracy."
           bullets={[
@@ -101,7 +101,7 @@ export default function EnergyForecasting() {
           ]}
         />
         <MediaCard
-          media={<MiniPhone className="w-[180px] sm:w-[190px] lg:w-[200px]" />}
+          media={<MiniPhone className="w-45 sm:w-47.5 lg:w-50" />}
           title="Seasonal Pattern Analysis"
           description="Track how your energy production changes through the seasons. Our AI learns from year-over-year data to deliver ever-more-accurate predictions tailored to your location."
           bullets={[
@@ -110,15 +110,17 @@ export default function EnergyForecasting() {
             "Peak season alerts",
           ]}
         />
-        <MediaCard
-          media={<MiniPhone className="w-[180px] sm:w-[190px] lg:w-[200px]" />}
-          title="Smart Usage Recommendations"
-          description="Get personalized recommendations on when to run appliances, charge batteries, or sell back to the grid based on forecasted production."
-          bullets={[
-            "Optimal usage timing",
-            "Battery charging plans",
-            "Grid export windows",
-          ]}
+      </div>
+      <div className="mx-auto max-w-225 mt-12 lg:mt-16">
+        <CtaCard
+          glyph="sun"
+          glyphColor="#A3D055"
+          title="Reduce Energy Bills by Up to 40%"
+          description="By using energiebee's smart forecasting and energy management recommendations."
+          buttonText="Start Monitoring"
+          href="/start"
+          titleClassName="!text-[25px] "
+          descClassName="!text-sm"
         />
       </div>
     </section>

@@ -135,7 +135,7 @@ export function MediaCard({
   title,
   description,
   bullets,
-  mediaBg = "#EEF6FF",
+  mediaBg = "#E5F2F6",
 }: {
   media?: ReactNode;
   title: ReactNode;
@@ -145,10 +145,10 @@ export function MediaCard({
   mediaBg?: string;
 }) {
   return (
-    <article className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
+    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-neutral-200 bg-[#FAFBFC] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
       {media && (
         <div
-          className="flex items-end justify-center px-6 pt-6"
+          className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-4 overflow-hidden max-h-76"
           style={{ backgroundColor: mediaBg }}
         >
           {media}

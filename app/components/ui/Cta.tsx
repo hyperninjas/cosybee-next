@@ -95,28 +95,44 @@ export function CtaCard({
   buttonText,
   href,
   className = "",
+  titleClassName = "",
+  descClassName = "",
 }: {
-  glyph: GlyphName;
+  glyph?: GlyphName;
   glyphColor?: string;
   title: ReactNode;
   description: ReactNode;
   buttonText: string;
   href: string;
   className?: string;
+  titleClassName?: string;
+  descClassName?: string;
 }) {
   return (
     <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-white bg-[url(/bg-hive-grid.svg)] bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-8 lg:p-12 ${className}`}
+      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-white bg-[url(/bg-hive-grid.svg)] bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-5 lg:p-12 ${className}`}
     >
+      {glyph && (
+        <HexBadge
+          glyph={glyph}
+          color={glyphColor}
+          className="h-14 w-16 sm:h-18 sm:w-22"
+        />
+      )}
       <div className="flex-1">
-        <h3 className="text-xl font-extrabold leading-tight text-black sm:text-2xl lg:text-[40px]">
+        <h3
+          className={`text-xl  font-extrabold leading-tight text-black sm:text-2xl lg:text-[40px] 
+            ${titleClassName}`}
+        >
           {title}
         </h3>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600 sm:text-base">
+        <p
+          className={`mt-2 text-sm max-w-188.25 leading-relaxed text-neutral-600 sm:text-base ${descClassName}`}
+        >
           {description}
         </p>
       </div>
-      <CtaButton href={href} className="w-full sm:w-auto">
+      <CtaButton href={href} size="md" className="w-full sm:w-auto">
         {buttonText}
       </CtaButton>
     </div>
