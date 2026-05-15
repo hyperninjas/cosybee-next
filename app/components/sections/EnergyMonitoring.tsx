@@ -1,9 +1,8 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import { PHOTOS } from "@/app/lib/photos";
 import Hexagon from "../ui/Hexagon";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../ui/SectionContent";
-import sideImage from "@/public/real-time-energy-monitoring.png";
+import sideImage from "@/public/energy-monitoring.png";
 
 export default function EnergyMonitoring() {
   return (

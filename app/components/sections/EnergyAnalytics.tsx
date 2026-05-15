@@ -2,7 +2,7 @@ import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
-import deviceImg from "@/public/energy-saving-device.svg";
+import deviceImg from "@/public/energy-saving-device.png";
 import Image from "next/image";
 
 export default function EnergyAnalytics() {
@@ -44,7 +44,7 @@ export default function EnergyAnalytics() {
           </div>
         </div>
         {/* right: analytics phone */}
-        <div className="flex justify-center lg:justify-end absolute right-0 -top-30">
+        <div className="flex justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-[286.3px]">
           {/* <AnalyticsPhone className="w-[260px] sm:w-[280px] lg:w-[290px]" /> */}
           <Image src={deviceImg} alt="energy analytics dashboard" />
         </div>
