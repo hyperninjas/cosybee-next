@@ -53,6 +53,7 @@ export default function WhyThousands() {
                 src={p.icon}
                 alt=""
                 aria-hidden
+                sizes="50px"
                 className="mx-auto h-12.5 w-auto"
               />
               <h3 className="mt-4 text-[22px] font-semibold text-black">

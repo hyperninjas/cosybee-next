@@ -16,6 +16,8 @@ export default function ReadyToReduce() {
           <Image
             src={deviceImg}
             alt="energiebee app preview"
+            sizes="(min-width: 1024px) 210px, 175px"
+            quality={50}
             className="h-auto w-44 lg:w-52"
           />
         </div>

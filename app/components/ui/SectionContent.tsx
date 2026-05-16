@@ -32,7 +32,7 @@ export type GlyphName =
 /** Subset of GlyphName that has an inline-SVG implementation for HexBadge.
  *  The newer glyphs (device, connector, pie) are rendered as standalone
  *  hex assets via FeatureCard's GLYPH_SVGS map, so they don't appear here. */
-type InlineGlyphName = "check" | "sun" | "dollar" | "chart";
+export type InlineGlyphName = "check" | "sun" | "dollar" | "chart";
 
 const GLYPHS: Record<InlineGlyphName, ReactNode> = {
   check: (

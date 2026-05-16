@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { HexBadge, type GlyphName } from "./SectionContent";
+import { HexBadge, type InlineGlyphName } from "./SectionContent";
 
 type CtaSize = "md" | "lg";
 
@@ -99,7 +99,7 @@ export function CtaCard({
   descClassName = "",
   buttonClassName = "",
 }: {
-  glyph?: GlyphName;
+  glyph?: InlineGlyphName;
   glyphColor?: string;
   title: ReactNode;
   description: ReactNode;

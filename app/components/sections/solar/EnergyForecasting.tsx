@@ -2,7 +2,7 @@ import { CtaCard } from "../../ui/Cta";
 import { MediaCard, SectionHeader } from "../../ui/SectionContent";
 import Image, { StaticImageData } from "next/image";
 import deviceImg from "@/public/hero-device.svg";
-import { type GlyphName } from "../../ui/SectionContent";
+import { type InlineGlyphName } from "../../ui/SectionContent";
 import { type ReactNode } from "react";
 
 export type MediaCardContent = {
@@ -20,7 +20,7 @@ export type ForecastingCta = {
   description: ReactNode;
   buttonText: string;
   href: string;
-  glyph?: GlyphName;
+  glyph?: InlineGlyphName;
   glyphColor?: string;
 };
 
