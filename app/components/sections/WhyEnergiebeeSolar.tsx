@@ -1,13 +1,5 @@
 import Hexagon from "../ui/Hexagon";
-import {
-  FeatureCard,
-  FeatureItem,
-  SectionLead,
-  SectionTitle,
-} from "../ui/SectionContent";
-import sideImg from "@/public/energy-management.png";
-import SharedImageHexCluster from "../ui/SharedImageHexCluster";
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+import { FeatureCard, SectionLead, SectionTitle } from "../ui/SectionContent";
 import HiveHexCluster from "../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/hero-device.svg";
@@ -16,8 +8,8 @@ import Image from "next/image";
 
 export default function WhyEnergiebeeSolar() {
   return (
-    <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
+    <section className="relative overflow-hidden bg-white py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"

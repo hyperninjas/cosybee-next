@@ -62,9 +62,9 @@ export function CtaBanner({
   href: string;
 }) {
   return (
-    <section className="px-6 py-12 sm:px-10 lg:px-16 lg:py-16">
+    <section className="px-6 py-12 sm:px-10 lg:px-30 lg:py-16">
       <div
-        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-3xl bg-white px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-16 lg:py-14"
+        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-3xl bg-white px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-30 lg:py-14"
         style={HEX_PATTERN_BG}
       >
         <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">

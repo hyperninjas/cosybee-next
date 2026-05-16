@@ -7,13 +7,7 @@ import sideImage from "@/public/energy-monitoring.png";
 export default function EnergyMonitoring() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
-      {/* cream decorative hex bleeding from the top-right */}
-      <Hexagon
-        color="#F7F2E1"
-        className="pointer-events-none absolute -right-24 top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
-      />
-
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-16">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
           src={sideImage.src}
@@ -21,9 +15,13 @@ export default function EnergyMonitoring() {
           placements={HIVE_3_PLACEMENTS}
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
         />
-
+        {/* cream decorative hex bleeding from the top-right */}
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -right-24 -top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
+        />
         {/* text */}
-        <div>
+        <div className="z-9">
           <SectionTitle>Real-Time Energy Monitoring</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem

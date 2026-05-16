@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function EnergyAnalytics() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-47">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45">
       {/* decorative light hex bleeding from left edge */}
       {/* <Hexagon
         color="#E5E7EB"
@@ -44,7 +44,7 @@ export default function EnergyAnalytics() {
           </div>
         </div>
         {/* right: analytics phone */}
-        <div className="flex justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-[286.3px] hidden lg:block">
+        <div className="justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-75 hidden lg:block">
           {/* <AnalyticsPhone className="w-[260px] sm:w-[280px] lg:w-[290px]" /> */}
           <Image src={deviceImg} alt="energy analytics dashboard" />
         </div>

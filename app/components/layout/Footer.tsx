@@ -26,7 +26,7 @@ const LEGAL_LINKS = [
 export default function Footer() {
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-8 lg:px-16 lg:pt-20 lg:pb-14">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
         <div>
           <Image
@@ -92,7 +92,7 @@ export default function Footer() {
 
       {/* bottom strip */}
       <div className="border-t border-[#FFFFFF1A] ">
-        <div className="mx-auto flex max-w-360 flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
+        <div className="mx-auto flex max-w-360 flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-30">
           <p className="text-sm font-medium text-white">
             © 2026 Energiebee. All rights reserved.
           </p>
