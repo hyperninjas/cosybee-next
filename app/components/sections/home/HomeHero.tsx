@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { CtaButton } from "../../ui/Cta";
 import heroBgImg from "@/public/hero-bg.png";
+import AppStoreButton from "../../ui/AppStoreButton";
 
 /**
  * Home hero — "One app. Total energy clarity." Background photo of
@@ -34,25 +35,7 @@ export default function HomeHero() {
             <CtaButton href="/try" size="md">
               Try it for free
             </CtaButton>
-            <a
-              href="https://apps.apple.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3.5 text-sm font-medium text-white ring-1 ring-white/20 transition-colors hover:bg-neutral-900"
-            >
-              <Image
-                src="/apple-logo.svg"
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-auto"
-                unoptimized
-              />
-              <span className="flex flex-col leading-tight">
-                <span className="text-[10px]">Download on the</span>
-                <span className="text-base font-semibold">App Store</span>
-              </span>
-            </a>
+            <AppStoreButton />
           </div>
         </div>
       </div>
