@@ -39,31 +39,32 @@ export default function WhyThousands() {
           color="#fff"
           className="pointer-events-none absolute -right-24 top-9 w-[18rem] sm:-right-36 sm:w-88 lg:w-67.5"
         />
-        <SectionHeader
-          title="Why thousands choose Energiebee"
-          description="Simple insights that help you save money from day one"
-        />
-        <div className="mx-auto mt-10 grid max-w-360 grid-cols-1 py-9 sm:grid-cols-3">
-          {POINTS.map((p) => (
-            <div
-              key={p.title}
-              className="border-r border-[#EBEBEB] px-10 text-center last:border-r-0"
-            >
-              <Image
-                src={p.icon}
-                alt=""
-                aria-hidden
-                sizes="50px"
-                className="mx-auto h-12.5 w-auto"
-              />
-              <h3 className="mt-4 text-[22px] font-semibold text-black">
-                {p.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-[#545454]">
-                {p.description}
-              </p>
-            </div>
-          ))}
+        <div className="relative z-99">
+          <SectionHeader
+            title="Why thousands choose Energiebee"
+            description="Simple insights that help you save money from day one"
+          />
+          <div className="relative z-9 mx-auto mt-10 grid max-w-360 grid-cols-1 py-9 sm:grid-cols-3">
+            {POINTS.map((p) => (
+              <div
+                key={p.title}
+                className="md:border-r border-b md:border-b-0  border-[#EBEBEB] p-10 text-center last:border-r-0 last:border-b-0"
+              >
+                <Image
+                  src={p.icon}
+                  alt=""
+                  aria-hidden
+                  className="mx-auto h-12.5 w-auto"
+                />
+                <h3 className="mt-4 text-[22px] font-semibold text-black">
+                  {p.title}
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-[#545454]">
+                  {p.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -12,7 +12,7 @@ export default function ReadyToReduce() {
     <section className="px-6 py-12 sm:px-10 lg:px-30 lg:py-25">
       <div className="mx-auto relative flex max-w-360 flex-col items-center gap-8 rounded-3xl bg-[#F7F7F7] p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
         {/* phone */}
-        <div className="shrink-0 absolute bottom-0">
+        <div className="shrink-0 absolute bottom-0 hidden lg:block">
           <Image
             src={deviceImg}
             alt="energiebee app preview"

@@ -57,7 +57,7 @@ export default function WhyEnergieBee({
   deviceAlt = "energy analytics dashboard",
 }: WhyEnergieBeeProps = {}) {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
         {/* left: phone (absolute, bleeds into the section) — wrapper
             has explicit width, image fills it via w-full h-auto so it
