@@ -39,7 +39,7 @@ export default function WhyThousands() {
           color="#fff"
           className="pointer-events-none absolute -right-24 top-9 w-[18rem] sm:-right-36 sm:w-88 lg:w-67.5"
         />
-        <div className="relative z-99">
+        <div className="relative z-9">
           <SectionHeader
             title="Why thousands choose Energiebee"
             description="Simple insights that help you save money from day one"
