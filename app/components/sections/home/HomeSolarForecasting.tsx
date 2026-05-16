@@ -21,24 +21,24 @@ export default function HomeSolarForecasting() {
         <div className="max-w-113.75 px-6 sm:px-10 lg:px-0">
           <SectionTitle>Solar Forecasting</SectionTitle>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
-            Part of the energiebee app — everything you need to monitor and
-            optimize your solar energy system.
+            A complete view of solar production, weather, and usage across the
+            day.
           </p>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              description="Track how your system performs in real time. Identify opportunities to make better use of available energy."
             />
             <FeatureCard
               glyph="dollar"
               title="Track Savings"
-              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
+              description="See how your energy use impacts your savings. Compare daily performance and long-term results."
             />
             <FeatureCard
               glyph="chart"
               title="Smart Analytics"
-              description="Get detailed insights on production patterns, grid independence, and environmental impact."
+              description="Access key insights into your system performance. Understand production patterns, independence, and overall impact."
             />
           </div>
         </div>

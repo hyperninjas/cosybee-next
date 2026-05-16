@@ -37,17 +37,17 @@ export default function HeatingSolutions() {
             <FeatureCard
               glyph="check"
               title="Live Solar Production Tracking"
-              description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
+              description="Track your solar generation in real time. See how production changes throughout the day."
             />
             <FeatureCard
               glyph="check"
               title="Weather-Based Forecasts"
-              description="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
+              description="Know what to expect from upcoming weather. Adjust your energy use based on changing conditions."
             />
             <FeatureCard
               glyph="check"
               title="Daily Energy Overview"
-              description="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
+              description="View your energy activity across the day. Understand when production increases and demand peaks."
             />
           </div>
         </div>

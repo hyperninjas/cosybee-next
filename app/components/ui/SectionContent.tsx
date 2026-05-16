@@ -5,18 +5,36 @@ import hexaCheck from "@/public/hexa-check.svg";
 import hexaSun from "@/public/hexa-sun.svg";
 import hexaDollar from "@/public/hexa-dollar.svg";
 import hexaChart from "@/public/hexa-chart.svg";
+import hexaDevice from "@/public/hexa-device.svg";
+import hexaConnector from "@/public/hexa-holo-connector.svg";
+import hexaPie from "@/public/hexa-pie-chart.svg";
 
 const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   check: hexaCheck,
   sun: hexaSun,
   dollar: hexaDollar,
   chart: hexaChart,
+  device: hexaDevice,
+  connector: hexaConnector,
+  pie: hexaPie,
 };
 
 /** Names of the glyph drawn inside a yellow hex badge. */
-export type GlyphName = "check" | "sun" | "dollar" | "chart";
+export type GlyphName =
+  | "check"
+  | "sun"
+  | "dollar"
+  | "chart"
+  | "device"
+  | "connector"
+  | "pie";
 
-const GLYPHS: Record<GlyphName, ReactNode> = {
+/** Subset of GlyphName that has an inline-SVG implementation for HexBadge.
+ *  The newer glyphs (device, connector, pie) are rendered as standalone
+ *  hex assets via FeatureCard's GLYPH_SVGS map, so they don't appear here. */
+type InlineGlyphName = "check" | "sun" | "dollar" | "chart";
+
+const GLYPHS: Record<InlineGlyphName, ReactNode> = {
   check: (
     <path
       d="M30 44 L43 57 L70 30"
@@ -86,7 +104,9 @@ export function HexBadge({
   color = "#EDC535",
   className = "",
 }: {
-  glyph: GlyphName;
+  /** Only the inline-renderable glyphs (check/sun/dollar/chart) — the
+   *  newer hex assets are used via FeatureCard, not HexBadge. */
+  glyph: InlineGlyphName;
   /** Hex fill color. Defaults to the cosybee yellow. */
   color?: string;
   className?: string;
@@ -255,10 +275,14 @@ export function FeatureCard({
   glyph,
   title,
   description,
+  titleClassName,
+  descClassName,
 }: {
   glyph: GlyphName;
   title: string;
   description: string;
+  titleClassName?: string;
+  descClassName?: string;
 }) {
   return (
     <div className="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
@@ -269,8 +293,14 @@ export function FeatureCard({
         className="h-11 w-12 lg:h-10 lg:w-11 mt-1.5"
       />
       <div>
-        <h3 className="text-lg font-bold text-black sm:text-lg">{title}</h3>
-        <p className="mt-1 text-sm leading-relaxed text-[#545454]">
+        <h3
+          className={`text-lg font-bold text-black sm:text-lg  ${titleClassName}`}
+        >
+          {title}
+        </h3>
+        <p
+          className={`mt-1 text-sm leading-relaxed text-[#545454] ${descClassName}`}
+        >
           {description}
         </p>
       </div>

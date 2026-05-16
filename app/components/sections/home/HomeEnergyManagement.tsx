@@ -18,26 +18,35 @@ export default function HomeEnergyManagement() {
         />
         {/* text — left */}
         <div className="max-w-163.5 z-9">
-          <SectionTitle className="">Energy Management</SectionTitle>
+          <SectionTitle>Energy Management</SectionTitle>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
-            Part of the energiebee app — everything you need to monitor and
-            optimize your solar energy system.
+            A clear view of how energy is used, timed, and distributed across
+            your home.
           </p>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="Energy Use"
+              description={
+                "See where and when energy is used across your home.\n Understand how demand changes throughout the day."
+              }
+              descClassName="whitespace-pre-line"
             />
             <FeatureCard
               glyph="dollar"
-              title="Track Savings"
-              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
+              title="Cost Awareness"
+              description={
+                "Understand how usage translates into cost.\nSee how your daily activity affects overall spending."
+              }
+              descClassName="whitespace-pre-line"
             />
             <FeatureCard
               glyph="chart"
-              title="Smart Analytics"
-              description="Get detailed insights on production patterns, grid independence, and environmental impact."
+              title="System Behaviour"
+              description={
+                "See how your home operates as an energy system.\nUnderstand how usage, availability, and conditions interact."
+              }
+              descClassName="whitespace-pre-line"
             />
           </div>
         </div>

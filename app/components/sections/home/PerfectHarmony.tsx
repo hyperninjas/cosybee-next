@@ -30,18 +30,18 @@ export default function PerfectHarmony() {
           </p>
           <div className="mt-4 space-y-4">
             <FeatureCard
-              glyph="sun"
+              glyph="pie"
               title="Unified Dashboard"
               description="See heating, solar, and energy data side by side. Spot patterns instantly."
             />
             <FeatureCard
-              glyph="dollar"
+              glyph="connector"
               title="Smart Connections"
               description="Your heating responds to solar production. Energy insights guide your schedule."
             />
             <FeatureCard
-              glyph="chart"
-              title="Single Source of Truth"
+              glyph="device"
+              title="Simplified Information"
               description="One app for everything. No juggling multiple accounts or interfaces."
             />
           </div>
