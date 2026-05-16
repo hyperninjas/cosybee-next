@@ -19,8 +19,9 @@ const GET_STARTED_LINKS = [
 
 const LEGAL_LINKS = [
   { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
+  { label: "Terms & Conditions", href: "/terms" },
   { label: "Cookie Policy", href: "/cookies" },
+  { label: "Data Security", href: "/data-security" },
 ];
 
 export default function Footer() {
