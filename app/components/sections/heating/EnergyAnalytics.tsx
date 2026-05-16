@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function EnergyAnalytics() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45 px-6 lg:px-0">
       {/* decorative light hex bleeding from left edge */}
       {/* <Hexagon
         color="#E5E7EB"

@@ -42,7 +42,7 @@ export default function EnergyAnalytics({
   deviceAlt = "energy analytics dashboard",
 }: EnergyAnalyticsProps = {}) {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
