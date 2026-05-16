@@ -44,14 +44,18 @@ export default function EnergyAnalytics({
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
-        {/* left: uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={clusterSrc}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
-          fallbackColor="#3a4a5c"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -left-50 -top-10 hidden lg:block"
-        />
+        {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
+            positioning + explicit width so the inner `w-full` resolves
+            against a non-zero containing block */}
+        <div className="absolute -left-50 -top-10 hidden w-125.5 lg:block">
+          <SharedImageHexCluster
+            src={clusterSrc}
+            viewBox={HIVE_3_VIEWBOX}
+            placements={HIVE_3_PLACEMENTS}
+            fallbackColor="#3a4a5c"
+            className="w-full"
+          />
+        </div>
         {/* middle: title + features */}
         <div className="max-w-111.5">
           <SectionTitle>{title}</SectionTitle>
@@ -65,9 +69,17 @@ export default function EnergyAnalytics({
             ))}
           </div>
         </div>
-        {/* right: analytics phone */}
-        <div className="justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-75 hidden lg:block">
-          <Image src={deviceSrc} alt={deviceAlt} sizes="(min-width: 1024px) 350px, 280px" quality={50} />
+        {/* right: analytics phone — wrapper has explicit width, image
+            fills it via w-full h-auto so it scales proportionally
+            instead of rendering at intrinsic size */}
+        <div className="absolute -top-20 right-0 hidden w-75 lg:block">
+          <Image
+            src={deviceSrc}
+            alt={deviceAlt}
+            sizes="(min-width: 1024px) 300px, 280px"
+            quality={50}
+            className="h-auto w-full"
+          />
         </div>
       </div>
     </section>

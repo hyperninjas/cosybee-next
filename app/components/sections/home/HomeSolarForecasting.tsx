@@ -43,13 +43,17 @@ export default function HomeSolarForecasting() {
           </div>
         </div>
 
-        {/* right: hive cluster */}
-        <SharedImageHexCluster
-          src={sideImage.src}
-          gap={5}
-          fallbackColor="#3a4a5c"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -right-40 top-0 transform-[scaleX(-1)] hidden lg:block"
-        />
+        {/* right: hive cluster — wrapper holds the absolute positioning
+            and an explicit width so the inner `w-full` has something
+            non-zero to resolve against */}
+        <div className="absolute -right-40 top-0 hidden w-125.5 lg:block">
+          <SharedImageHexCluster
+            src={sideImage.src}
+            gap={5}
+            fallbackColor="#3a4a5c"
+            className="w-full transform-[scaleX(-1)]"
+          />
+        </div>
       </div>
     </section>
   );
