@@ -9,9 +9,17 @@ export default function WhyEnergieBee() {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
-        {/* left: phone (absolute, bleeds into the section like EnergyAnalytics) */}
-        <div className="hidden lg:block lg:justify-end absolute left-0 -top-7 max-w-[345.3px]">
-          <Image src={deviceImg} alt="energy analytics dashboard" sizes="(min-width: 1024px) 350px, 280px" quality={50} />
+        {/* left: phone — wrapper has explicit width, image fills it
+            via w-full h-auto so it scales proportionally instead of
+            rendering at intrinsic size */}
+        <div className="absolute -top-7 left-0 hidden w-[345.3px] lg:block">
+          <Image
+            src={deviceImg}
+            alt="energy analytics dashboard"
+            sizes="(min-width: 1024px) 350px, 280px"
+            quality={50}
+            className="h-auto w-full"
+          />
         </div>
 
         {/* middle: title + lead + feature cards */}
@@ -40,14 +48,18 @@ export default function WhyEnergieBee() {
           </div>
         </div>
 
-        {/* right: 3-hex hive cluster — installer photo masked through the hive */}
-        <SharedImageHexCluster
-          src={sideImage.src}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
-          fallbackColor="#3a4a5c"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 absolute -right-40 top-0 transform-[scaleX(-1)] hidden lg:block"
-        />
+        {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
+            absolute positioning + explicit width so the inner `w-full`
+            has a definite reference */}
+        <div className="absolute -right-40 top-0 hidden w-125.5 lg:block">
+          <SharedImageHexCluster
+            src={sideImage.src}
+            viewBox={HIVE_3_VIEWBOX}
+            placements={HIVE_3_PLACEMENTS}
+            fallbackColor="#3a4a5c"
+            className="w-full transform-[scaleX(-1)]"
+          />
+        </div>
       </div>
     </section>
   );

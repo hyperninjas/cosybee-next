@@ -12,9 +12,17 @@ export default function HomeSolarForecasting() {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-20 text-black lg:py-25">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
-        {/* left: phone */}
-        <div className="hidden lg:block absolute left-0 -top-17 max-w-[365.3px]">
-          <Image src={deviceImg} alt="energiebee solar dashboard" />
+        {/* left: phone — wrapper has explicit width, image fills it via
+            w-full h-auto so it scales proportionally instead of rendering
+            at intrinsic size */}
+        <div className="absolute -top-17 left-0 hidden w-[365.3px] lg:block">
+          <Image
+            src={deviceImg}
+            alt="energiebee solar dashboard"
+            sizes="(min-width: 1024px) 365px, 280px"
+            quality={50}
+            className="h-auto w-full"
+          />
         </div>
 
         {/* middle: title + feature cards */}
