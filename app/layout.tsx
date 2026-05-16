@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
 
 const manrope = Manrope({
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
