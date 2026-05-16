@@ -3,10 +3,20 @@ import LegalHero from "../components/legal/LegalHero";
 import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
 
-export const metadata = {
-  title: "Cookie Policy — energiebee",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cookie Policy",
   description:
     "Exactly which cookies energiebee places on your device, why we place them, and how to stay in control.",
+  alternates: { canonical: "/cookies" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    url: "/cookies",
+    title: "Cookie Policy — energiebee",
+    description:
+      "Small files, big transparency — which cookies we place, why, and how to stay in control.",
+  },
 };
 
 /** Inline monospace token used for cookie names like `session_id`. */

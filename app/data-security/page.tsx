@@ -3,10 +3,20 @@ import LegalHero from "../components/legal/LegalHero";
 import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
 
-export const metadata = {
-  title: "Data Security — energiebee",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Data Security",
   description:
     "How energiebee protects your data — encryption, device security, cloud infrastructure, monitoring, and incident response.",
+  alternates: { canonical: "/data-security" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    url: "/data-security",
+    title: "Data Security — energiebee",
+    description:
+      "Encryption, device security, cloud infrastructure, monitoring, and incident response — how we keep your data safe.",
+  },
 };
 
 export default function DataSecurityPage() {

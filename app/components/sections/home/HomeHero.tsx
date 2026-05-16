@@ -12,9 +12,16 @@ export default function HomeHero() {
     <section className="relative isolate overflow-hidden bg-black text-white">
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${heroBgImg.src}')` }}
+        <Image
+          src={heroBgImg}
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          quality={65}
+          placeholder="blur"
+          className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-linear-to-r from-black via-black/70 to-black/0" />
       </div>

@@ -3,10 +3,20 @@ import LegalHero from "../components/legal/LegalHero";
 import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
 
-export const metadata = {
-  title: "Terms & Conditions — energiebee",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
   description:
     "Everything you need to know before you begin: your rights, our responsibilities, and how energiebee works for you.",
+  alternates: { canonical: "/terms" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    url: "/terms",
+    title: "Terms & Conditions — energiebee",
+    description:
+      "Your rights, our responsibilities, and how energiebee works for you.",
+  },
 };
 
 export default function TermsPage() {
