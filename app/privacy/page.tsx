@@ -3,10 +3,20 @@ import LegalHero from "../components/legal/LegalHero";
 import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
 
-export const metadata = {
-  title: "Privacy Policy — energiebee",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
   description:
     "How energiebee collects, uses, and protects your personal data — clearly written, with full control over your own information.",
+  alternates: { canonical: "/privacy" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    url: "/privacy",
+    title: "Privacy Policy — energiebee",
+    description:
+      "How we handle your data, with full control over your own information.",
+  },
 };
 
 export default function PrivacyPage() {

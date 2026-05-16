@@ -27,14 +27,18 @@ export default function Hero() {
     <section className="relative isolate overflow-hidden bg-black text-white">
       {/* background photo + gradients */}
       <div aria-hidden className="absolute inset-0 -z-20">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('${heroBgImg.src}')`,
-          }}
+        <Image
+          src={heroBgImg}
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          quality={65}
+          placeholder="blur"
+          className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
-        {/* <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black to-transparent" /> */}
       </div>
 
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
@@ -63,14 +67,26 @@ export default function Hero() {
         <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
           gap={5}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          left={{
+            src: windTurbineImg,
+            alt: "Wind turbines",
+            color: "#7FA9C9",
+            priority: true,
+          }}
+          topRight={{
+            src: beeFlowerImg,
+            alt: "Bee on a flower",
+            color: "#D4A017",
+            priority: true,
+          }}
           bottomRight={{
             color: "#E9E19E",
             children: (
               <Image
                 src={deviceImg}
-                alt="cosy bee app"
+                alt="cosybee app screen"
+                priority
+                fetchPriority="high"
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
               />
             ),

@@ -67,7 +67,7 @@ export default function EnergyAnalytics({
         </div>
         {/* right: analytics phone */}
         <div className="justify-center lg:justify-end absolute right-0 -top-20 max-h-146.5 max-w-75 hidden lg:block">
-          <Image src={deviceSrc} alt={deviceAlt} />
+          <Image src={deviceSrc} alt={deviceAlt} sizes="(min-width: 1024px) 350px, 280px" quality={50} />
         </div>
       </div>
     </section>

@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import Image, { type StaticImageData } from "next/image";
 import {
   HIVE_3_PLACEMENTS,
   HIVE_3_VIEWBOX,
@@ -13,30 +14,36 @@ const SINGLE_HEX_MASK = buildHexMaskDataUri(100, 86.6, [
 ]);
 
 export type HexCell = {
-  /** Image URL rendered as the hex fill. */
-  src?: string;
+  /** Image (StaticImageData from import OR URL string) shown inside the cell. */
+  src?: string | StaticImageData;
+  /** Alt text for the image. Empty by default — decorative. */
+  alt?: string;
   /** Solid color (used as a fallback while `src` loads, or on its own). */
   color?: string;
   /** Overlay content rendered above the fill. Clipped to the hex outline
    *  (the mask cascades to all descendants of the cell). */
   children?: ReactNode;
+  /** Mark this cell's image as priority — use for above-the-fold cells. */
+  priority?: boolean;
+  /** Responsive `sizes` hint for this cell's image. */
+  sizes?: string;
+  /** Image quality (0-100). Defaults to 50 — masked-through-hex at small
+   *  display sizes hides any visual loss vs. the 75 default. */
+  quality?: number;
 };
 
 /**
  * Three rounded hexagons in the canonical hive shape, each carrying its
- * own content. Sister to `SharedImageHexCluster` but lets you mix
- * different images (or images + colors + overlay children) across the
- * three slots.
+ * own content via `next/image`. Sister to `SharedImageHexCluster` but
+ * lets you mix different images across the three slots.
  *
  * Geometry comes from `HIVE_3_PLACEMENTS` / `HIVE_3_VIEWBOX` — change the
  * gap or scale constants in `lib/hex.ts` and every cluster on the page
- * (shared-image *and* multi-image) reflows together.
+ * reflows together.
  *
  * Each cell's wrapper is a positioning context, so `children` can use
  * `absolute` to overlay content. The hex mask is applied to the cell
- * wrapper, so overlay children are cropped to the hex outline too — a
- * phone or badge that would otherwise spill past the rounded corners
- * disappears cleanly at the edge.
+ * wrapper, so overlay children are cropped to the hex outline too.
  */
 export default function HiveHexCluster({
   left,
@@ -52,19 +59,20 @@ export default function HiveHexCluster({
   className?: string;
   /**
    * Override the canonical outward-push gap between hexes (viewBox units).
-   * Defaults to the shared `HIVE_GAP`. Pass `0` for exact vertex contact,
-   * or any smaller-than-default value to tighten the cluster.
+   * Defaults to the shared `HIVE_GAP`. Pass `0` for exact vertex contact.
    */
   gap?: number;
 }) {
   const cells = [left, topRight, bottomRight];
 
-  // Use the shared default constants when no custom gap is given so we
-  // don't pay for recomputation on every render in the common case.
   const { viewBox, placements } =
     gap !== undefined
       ? computeHive3Layout(gap)
       : { viewBox: HIVE_3_VIEWBOX, placements: HIVE_3_PLACEMENTS };
+
+  // Default sizes — small enough that responsive images stay tight.
+  const DEFAULT_CELL_SIZES =
+    "(min-width: 1024px) 250px, (min-width: 640px) 200px, 150px";
 
   return (
     <div
@@ -86,15 +94,23 @@ export default function HiveHexCluster({
               width: `${widthPct}%`,
               aspectRatio: "100 / 86.6",
               backgroundColor: cell.color,
-              backgroundImage: cell.src ? `url('${cell.src}')` : undefined,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
               // The mask applies to the whole painted output of this element
-              // INCLUDING its children — so overlay content (phones, badges,
-              // etc.) is cropped to the hex outline rather than the rect bbox.
+              // INCLUDING its children — so the next/image element AND any
+              // overlay content are both cropped to the hex outline.
               ...hexMaskStyle(SINGLE_HEX_MASK),
             }}
           >
+            {cell.src && (
+              <Image
+                src={cell.src}
+                alt={cell.alt ?? ""}
+                fill
+                priority={cell.priority}
+                sizes={cell.sizes ?? DEFAULT_CELL_SIZES}
+                quality={cell.quality ?? 50}
+                className="object-cover object-center"
+              />
+            )}
             {cell.children}
           </div>
         );

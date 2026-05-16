@@ -61,7 +61,7 @@ export default function WhyEnergieBee({
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
         {/* left: phone (absolute, bleeds into the section like EnergyAnalytics) */}
         <div className="hidden lg:block lg:justify-end absolute left-0 -top-7 max-w-[345.3px]">
-          <Image src={deviceSrc} alt={deviceAlt} />
+          <Image src={deviceSrc} alt={deviceAlt} sizes="(min-width: 1024px) 350px, 280px" quality={50} />
         </div>
 
         {/* middle: title + lead + feature cards */}

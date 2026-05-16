@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import Image, { type StaticImageData } from "next/image";
 import { buildHexMaskDataUri, hexMaskStyle } from "@/app/lib/hex";
 
 const HEX_MASK = buildHexMaskDataUri(100, 86.6, [{ x: 0, y: 0, scale: 1 }]);
@@ -12,20 +13,32 @@ type HexagonProps = {
    */
   className?: string;
   hexagonClassName?: string;
-  /** Image URL rendered as the hex fill. */
-  src?: string;
+  /** Image (StaticImageData from import OR URL string) shown inside the hex. */
+  src?: string | StaticImageData;
+  /** Alt text for the image. Empty by default — pass when the hex is meaningful. */
+  alt?: string;
   /** Solid background color. Used alongside `src` as a fallback while it loads. */
   color?: string;
-  /** Optional overlay content (not clipped by the mask), positioned inside. */
+  /** Optional overlay content (NOT clipped by the mask) positioned inside. */
   children?: ReactNode;
+  /** Mark as a priority load — use for above-the-fold instances (LCP). */
+  priority?: boolean;
+  /** Responsive `sizes` hint. Tune per use site for best optimisation. */
+  sizes?: string;
+  /** Image quality (0-100). Defaults to 65. */
+  quality?: number;
 };
 
 export default function Hexagon({
   className = "",
   hexagonClassName = "",
   src,
+  alt = "",
   color,
   children,
+  priority = false,
+  sizes = "(min-width: 1024px) 320px, (min-width: 640px) 220px, 160px",
+  quality = 65,
 }: HexagonProps) {
   // If the caller didn't supply a positioning class, default to `relative`
   // so the inner mask layer (absolute inset-0) can anchor itself. Tailwind
@@ -47,16 +60,24 @@ export default function Hexagon({
   return (
     <div className={wrapperClass} style={wrapperStyle}>
       <div
-        aria-hidden
         className={`absolute inset-0 ${hexagonClassName}`}
         style={{
           ...hexMaskStyle(HEX_MASK),
           backgroundColor: color,
-          backgroundImage: src ? `url('${src}')` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
         }}
-      />
+      >
+        {src && (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            priority={priority}
+            sizes={sizes}
+            quality={quality}
+            className="object-cover object-center"
+          />
+        )}
+      </div>
       {children}
     </div>
   );
