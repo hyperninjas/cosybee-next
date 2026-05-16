@@ -1,11 +1,11 @@
 import { PHOTOS } from "@/app/lib/photos";
-import EpcCard from "../mockups/phone/EpcCard";
-import PhoneFrame from "../mockups/phone/PhoneFrame";
-import PhoneGreeting from "../mockups/phone/PhoneGreeting";
-import PhoneTabs from "../mockups/phone/PhoneTabs";
-import { CtaButton } from "../ui/Cta";
-import Hexagon from "../ui/Hexagon";
-import HiveHexCluster from "../ui/HiveHexCluster";
+import EpcCard from "../../mockups/phone/EpcCard";
+import PhoneFrame from "../../mockups/phone/PhoneFrame";
+import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
+import PhoneTabs from "../../mockups/phone/PhoneTabs";
+import { CtaButton } from "../../ui/Cta";
+import Hexagon from "../../ui/Hexagon";
+import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/hero-device.svg";
 import windTurbineImg from "@/public/wind-turbine.png";
@@ -46,14 +46,13 @@ export default function Hero() {
         {/* text */}
         <div className="relative z-10 max-w-xl">
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
-            Solar Forecasting <span className="text-[#EFDF18]">95%</span>
-            <br />
-            <span className="text-[#EFDF18]">Accurate</span> Next Day
+            Heating That{" "}
+            <span className="text-[#EFDF18]">Knows You</span>
           </h1>
           <p className="mt-4 max-w-md text-lg text-neutral-300">
-            Advanced AI-powered solar production predictions. Plan your energy
-            usage with confidence and maximize your solar investment with
-            industry-leading accuracy.
+            Intelligent heating that learns your routines and adapts in real
+            time. Stay comfortable while cutting your bill — no thermostat
+            fiddling required.
           </p>
           <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started

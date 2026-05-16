@@ -1,6 +1,6 @@
-import Hexagon from "../ui/Hexagon";
-import { FeatureCard, SectionLead, SectionTitle } from "../ui/SectionContent";
-import HiveHexCluster from "../ui/HiveHexCluster";
+import Hexagon from "../../ui/Hexagon";
+import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/hero-device.svg";
 import windTurbineImg from "@/public/wind-turbine.png";
@@ -17,26 +17,26 @@ export default function WhyEnergiebeeSolar() {
         />
         {/* text — left */}
         <div className="max-w-163.5 z-9">
-          <SectionTitle>Why Choose energiebee Solar?</SectionTitle>
+          <SectionTitle>Automated Optimisation</SectionTitle>
           <SectionLead className="max-w-163.5">
-            Part of the energiebee app — everything you need to monitor and
-            optimize your solar energy system.
+            Set it once and watch your home optimize itself around your
+            routines, the weather, and your electricity prices — automatically.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="Adaptive Routines"
+              description="Schedules learn from your daily patterns and adjust themselves — no need to fiddle with timers."
             />
             <FeatureCard
               glyph="dollar"
-              title="Track Savings"
-              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
+              title="Tariff-Aware Charging"
+              description="Devices automatically charge and run when rates are lowest, cutting your bill without sacrificing comfort."
             />
             <FeatureCard
               glyph="chart"
-              title="Smart Analytics"
-              description="Get detailed insights on production patterns, grid independence, and environmental impact."
+              title="Weather-Driven Tweaks"
+              description="The system adjusts heating, cooling, and storage based on the next 24 hours of forecast data."
             />
           </div>
         </div>

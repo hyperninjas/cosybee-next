@@ -1,6 +1,6 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "../ui/SharedImageHexCluster";
-import { FeatureCard, SectionLead, SectionTitle } from "../ui/SectionContent";
+import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";
@@ -16,26 +16,26 @@ export default function WhyEnergieBee() {
 
         {/* middle: title + lead + feature cards */}
         <div className="max-w-111.5 z-9">
-          <SectionTitle>Why Choose energiebee Solar?</SectionTitle>
+          <SectionTitle>Why Choose energiebee Energy?</SectionTitle>
           <SectionLead>
-            Part of the energiebee app — everything you need to monitor and
-            optimize your solar energy system.
+            Part of the energiebee app — one dashboard for every kilowatt-hour,
+            every device, every cost.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="See Everything"
+              description="Grid, solar, battery, and individual devices — all on one timeline, with the same units and the same clarity."
             />
             <FeatureCard
               glyph="dollar"
               title="Track Savings"
-              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
+              description="Every automation logged with its hard-dollar impact. Know what's working and what's not."
             />
             <FeatureCard
               glyph="chart"
               title="Smart Analytics"
-              description="Get detailed insights on production patterns, grid independence, and environmental impact."
+              description="Trend detection, anomaly alerts, and bill projections — the analytics you'd build if you had the time."
             />
           </div>
         </div>

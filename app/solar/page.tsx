@@ -1,11 +1,11 @@
-import Hero from "../components/sections/Hero";
-import EnergyMonitoring from "../components/sections/EnergyMonitoring";
-import EnergyForecasting from "../components/sections/EnergyForecasting";
-import EnergyAnalytics from "../components/sections/EnergyAnalytics";
-import SmartEnergyManagement from "../components/sections/SmartEnergyManagement";
-import WhyEnergieBee from "../components/sections/WhyEnergieBee";
-import WhyEnergiebeeSolar from "../components/sections/WhyEnergiebeeSolar";
-import WorksWithAnySystem from "../components/sections/WorksWithAnySystem";
+import Hero from "../components/sections/solar/Hero";
+import EnergyMonitoring from "../components/sections/solar/EnergyMonitoring";
+import EnergyForecasting from "../components/sections/solar/EnergyForecasting";
+import EnergyAnalytics from "../components/sections/solar/EnergyAnalytics";
+import SmartEnergyManagement from "../components/sections/solar/SmartEnergyManagement";
+import WhyEnergieBee from "../components/sections/solar/WhyEnergieBee";
+import WhyEnergiebeeSolar from "../components/sections/solar/WhyEnergiebeeSolar";
+import WorksWithAnySystem from "../components/sections/solar/WorksWithAnySystem";
 
 export default function Home() {
   return (

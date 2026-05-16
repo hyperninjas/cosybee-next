@@ -1,12 +1,12 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import { PHOTOS } from "@/app/lib/photos";
-import AnalyticsPhone from "../mockups/AnalyticsPhone";
-import SharedImageHexCluster from "../ui/SharedImageHexCluster";
+import AnalyticsPhone from "../../mockups/AnalyticsPhone";
+import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import {
   FeatureCard,
   SectionLead,
   SectionTitle,
-} from "../ui/SectionContent";
+} from "../../ui/SectionContent";
 
 export default function WhyChoose() {
   return (

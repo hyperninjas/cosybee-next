@@ -1,7 +1,7 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import Hexagon from "../ui/Hexagon";
-import SharedImageHexCluster from "../ui/SharedImageHexCluster";
-import { FeatureItem, SectionTitle } from "../ui/SectionContent";
+import Hexagon from "../../ui/Hexagon";
+import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
 
 export default function EnergyMonitoring() {
@@ -23,19 +23,19 @@ export default function EnergyMonitoring() {
         />
         {/* text */}
         <div className="z-9">
-          <SectionTitle>Real-Time Energy Monitoring</SectionTitle>
+          <SectionTitle>Real-Time Heating Insights</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Live Solar Production Tracking"
-              description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
+              title="Live Boiler Performance"
+              description="See exactly what your boiler is doing right now — flow temperature, demand, and efficiency at a glance."
             />
             <FeatureItem
-              title="Weather-Based Forecasts"
-              description="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
+              title="Room-by-Room Temperatures"
+              description="Track every smart radiator and thermostat together. Spot cold spots before they become uncomfortable."
             />
             <FeatureItem
-              title="Daily Energy Overview"
-              description="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
+              title="Daily Heating Overview"
+              description="Visual graphs showing heating runtime, gas usage, and the warmest hour of the day — at a glance."
             />
           </div>
         </div>
