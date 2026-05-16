@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { CtaButton } from "../../ui/Cta";
-import heroBgImg from "@/public/hero-bg.png";
+import heroBgImg from "@/public/home-hero-bg.png";
 import AppStoreButton from "../../ui/AppStoreButton";
 
 /**
@@ -23,22 +23,22 @@ export default function HomeHero() {
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-black via-black/70 to-black/0" />
+        <div className="absolute inset-0 bg-[linear-gradient(112.98deg,rgba(0,0,0,0.8)_5.9%,rgba(0,0,0,0)_76.63%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-360 px-6 pt-16 pb-24 sm:px-10 lg:px-30 lg:pt-20 lg:pb-28">
-        <div className="max-w-xl">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[56px]">
+      <div className="relative mx-auto max-w-360 px-6 sm:px-10 lg:px-30 py-48.5">
+        <div className="max-w-175">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
             One app.
             <br />
             Total energy clarity.
           </h1>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-neutral-300 sm:text-lg">
+          <p className="mt-5 max-w-129.5 text-base text-neutral-300 sm:text-[22px] leading-7">
             Energiebee reveals how your household spends energy day by day —
             helping you reduce waste and improve efficiency. Create a home that
             feels lighter, smarter, and aligned with the way you live.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-14 flex flex-wrap items-center gap-4">
             <CtaButton href="/try" size="md">
               Try it for free
             </CtaButton>
