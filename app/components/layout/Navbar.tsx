@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
@@ -143,11 +144,22 @@ function MenuToggleIcon({ open }: { open: boolean }) {
 }
 
 export default function Navbar({
-  activeHref = "/solar",
+  activeHref,
 }: {
+  /** Optional override. When omitted, the active link is derived from
+   *  the current URL via `usePathname()`. */
   activeHref?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const currentPath = activeHref ?? pathname;
+
+  // A link is active when its href exactly matches the current path or
+  // is a prefix of it (so `/solar/details` still highlights "solar").
+  const isLinkActive = (href: string) => {
+    if (href === "/") return currentPath === "/";
+    return currentPath === href || currentPath.startsWith(`${href}/`);
+  };
 
   // Close on Escape; only mount the listener while the menu is open.
   useEffect(() => {
@@ -168,7 +180,7 @@ export default function Navbar({
 
         <ul className="hidden items-center gap-8 lg:flex xl:gap-12">
           {NAV_LINKS.map((link) => {
-            const isActive = link.href === activeHref;
+            const isActive = isLinkActive(link.href);
             return (
               <li key={link.href}>
                 <Link
@@ -230,7 +242,7 @@ export default function Navbar({
         >
           <ul className="flex flex-col gap-1 px-4 py-4 sm:px-6">
             {NAV_LINKS.map((link) => {
-              const isActive = link.href === activeHref;
+              const isActive = isLinkActive(link.href);
               return (
                 <li key={link.href}>
                   <Link

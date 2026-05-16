@@ -3,7 +3,7 @@ import { FeatureItem, SectionTitle } from "../ui/SectionContent";
 import sideImg from "@/public/energy-management.png";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import type { FeatureItemContent } from "./EnergyMonitoring";
+import { FeatureItemContent } from "./solar/EnergyMonitoring";
 
 export type SmartEnergyManagementProps = {
   title?: string;
