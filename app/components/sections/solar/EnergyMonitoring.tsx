@@ -4,13 +4,47 @@ import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
 
-export default function EnergyMonitoring() {
+export type FeatureItemContent = {
+  title: string;
+  description: string;
+};
+
+export type EnergyMonitoringProps = {
+  title?: string;
+  features?: FeatureItemContent[];
+  /** Side photo masked through the hex cluster. */
+  imageSrc?: string;
+};
+
+const DEFAULT_FEATURES: FeatureItemContent[] = [
+  {
+    title: "Live Solar Production Tracking",
+    description:
+      "Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates.",
+  },
+  {
+    title: "Weather-Based Forecasts",
+    description:
+      "Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively.",
+  },
+  {
+    title: "Daily Energy Overview",
+    description:
+      "View comprehensive daily energy production with visual graphs showing peak generation times and total output.",
+  },
+];
+
+export default function EnergyMonitoring({
+  title = "Real-Time Energy Monitoring",
+  features = DEFAULT_FEATURES,
+  imageSrc = sideImage.src,
+}: EnergyMonitoringProps = {}) {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
-          src={sideImage.src}
+          src={imageSrc}
           gap={5}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
@@ -23,20 +57,15 @@ export default function EnergyMonitoring() {
         />
         {/* text */}
         <div className="z-9">
-          <SectionTitle>Real-Time Energy Monitoring</SectionTitle>
+          <SectionTitle>{title}</SectionTitle>
           <div className="mt-8 space-y-8">
-            <FeatureItem
-              title="Live Solar Production Tracking"
-              description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
-            />
-            <FeatureItem
-              title="Weather-Based Forecasts"
-              description="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
-            />
-            <FeatureItem
-              title="Daily Energy Overview"
-              description="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
-            />
+            {features.map((f) => (
+              <FeatureItem
+                key={f.title}
+                title={f.title}
+                description={f.description}
+              />
+            ))}
           </div>
         </div>
       </div>
