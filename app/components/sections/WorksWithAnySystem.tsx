@@ -7,7 +7,7 @@ import { CtaCard } from "../ui/Cta";
  */
 export default function WorksWithAnySystem() {
   return (
-    <section className="mx-auto max-w-7xl pb-11">
+    <section className="mx-auto max-w-7xl pb-11 px-4 lg:px-0">
       <CtaCard
         title="Works With Any Solar System"
         description="Compatible with all major solar panel brands and inverters. Whether you have a small residential system or a larger commercial installation."

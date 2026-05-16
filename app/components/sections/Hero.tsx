@@ -63,6 +63,7 @@ export default function Hero() {
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
+          gap={5}
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
           topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
           bottomRight={{

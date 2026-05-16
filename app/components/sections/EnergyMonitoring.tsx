@@ -11,6 +11,7 @@ export default function EnergyMonitoring() {
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
           src={sideImage.src}
+          gap={5}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"

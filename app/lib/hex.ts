@@ -87,33 +87,44 @@ export function hexMaskStyle(maskUrl: string): React.CSSProperties {
  *     B: (+½,  −√3⁄2)           ·gap   →  shift cluster +√3⁄2·gap down
  *     C: (+½,  +√3⁄2)           ·gap
  */
-export const HIVE_GAP = 10;
+export const HIVE_GAP = 5;
 export const HIVE_SCALE_SMALL = 2; // A and B
 export const HIVE_SCALE_LARGE = 2.5; // C — the prominent bottom-right hex
 
 const SQRT_3 = Math.sqrt(3);
 const SQRT_3_OVER_2 = SQRT_3 / 2;
-const s = HIVE_SCALE_SMALL;
-const sBig = HIVE_SCALE_LARGE;
-const g = HIVE_GAP;
 
-export const HIVE_3_VIEWBOX = {
-  w: 100 * s + 75 * sBig + 1.5 * g,
-  h: 86.6 * (s + sBig) + SQRT_3 * g,
-};
+/**
+ * Compute the hive viewBox and per-hex placements for a given outward-push
+ * `gap` (in viewBox units). The canonical layout uses `HIVE_GAP`; pass a
+ * smaller value to tighten the cluster, 0 for exact vertex contact.
+ */
+export function computeHive3Layout(gap: number = HIVE_GAP) {
+  const s = HIVE_SCALE_SMALL;
+  const sBig = HIVE_SCALE_LARGE;
+  const g = gap;
+  const viewBox = {
+    w: 100 * s + 75 * sBig + 1.5 * g,
+    h: 86.6 * (s + sBig) + SQRT_3 * g,
+  };
+  const placements: HexPlacement[] = [
+    // A — small, left
+    { x: 0, y: 43.3 * s + SQRT_3_OVER_2 * g, scale: s },
+    // B — small, top-right
+    { x: 75 * s + 1.5 * g, y: 0, scale: s },
+    // C — LARGE, bottom-right
+    {
+      x: 100 * s - 25 * sBig + 1.5 * g,
+      y: 86.6 * s + SQRT_3 * g,
+      scale: sBig,
+    },
+  ];
+  return { viewBox, placements };
+}
 
-export const HIVE_3_PLACEMENTS: HexPlacement[] = [
-  // A — small, left
-  { x: 0, y: 43.3 * s + SQRT_3_OVER_2 * g, scale: s },
-  // B — small, top-right
-  { x: 75 * s + 1.5 * g, y: 0, scale: s },
-  // C — LARGE, bottom-right
-  {
-    x: 100 * s - 25 * sBig + 1.5 * g,
-    y: 86.6 * s + SQRT_3 * g,
-    scale: sBig,
-  },
-];
+const defaultHive3 = computeHive3Layout(HIVE_GAP);
+export const HIVE_3_VIEWBOX = defaultHive3.viewBox;
+export const HIVE_3_PLACEMENTS = defaultHive3.placements;
 
 /**
  * Aspect ratio of the canonical hive viewBox. Use as inline

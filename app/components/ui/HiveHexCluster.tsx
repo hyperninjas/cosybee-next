@@ -3,6 +3,7 @@ import {
   HIVE_3_PLACEMENTS,
   HIVE_3_VIEWBOX,
   buildHexMaskDataUri,
+  computeHive3Layout,
   hexMaskStyle,
 } from "@/app/lib/hex";
 
@@ -42,25 +43,39 @@ export default function HiveHexCluster({
   topRight,
   bottomRight,
   className = "",
+  gap,
 }: {
   left: HexCell;
   topRight: HexCell;
   bottomRight: HexCell;
   /** Width / position utilities. Height follows the hive aspect ratio. */
   className?: string;
+  /**
+   * Override the canonical outward-push gap between hexes (viewBox units).
+   * Defaults to the shared `HIVE_GAP`. Pass `0` for exact vertex contact,
+   * or any smaller-than-default value to tighten the cluster.
+   */
+  gap?: number;
 }) {
   const cells = [left, topRight, bottomRight];
+
+  // Use the shared default constants when no custom gap is given so we
+  // don't pay for recomputation on every render in the common case.
+  const { viewBox, placements } =
+    gap !== undefined
+      ? computeHive3Layout(gap)
+      : { viewBox: HIVE_3_VIEWBOX, placements: HIVE_3_PLACEMENTS };
 
   return (
     <div
       className={`relative ${className}`}
-      style={{ aspectRatio: `${HIVE_3_VIEWBOX.w} / ${HIVE_3_VIEWBOX.h}` }}
+      style={{ aspectRatio: `${viewBox.w} / ${viewBox.h}` }}
     >
       {cells.map((cell, i) => {
-        const p = HIVE_3_PLACEMENTS[i];
-        const leftPct = (p.x / HIVE_3_VIEWBOX.w) * 100;
-        const topPct = (p.y / HIVE_3_VIEWBOX.h) * 100;
-        const widthPct = ((100 * p.scale) / HIVE_3_VIEWBOX.w) * 100;
+        const p = placements[i];
+        const leftPct = (p.x / viewBox.w) * 100;
+        const topPct = (p.y / viewBox.h) * 100;
+        const widthPct = ((100 * p.scale) / viewBox.w) * 100;
         return (
           <div
             key={i}

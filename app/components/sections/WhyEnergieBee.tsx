@@ -1,5 +1,4 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import AnalyticsPhone from "../mockups/AnalyticsPhone";
 import SharedImageHexCluster from "../ui/SharedImageHexCluster";
 import { FeatureCard, SectionLead, SectionTitle } from "../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
@@ -16,7 +15,7 @@ export default function WhyEnergieBee() {
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="max-w-111.5">
+        <div className="max-w-111.5 z-9">
           <SectionTitle>Why Choose energiebee Solar?</SectionTitle>
           <SectionLead>
             Part of the energiebee app — everything you need to monitor and
