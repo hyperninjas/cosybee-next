@@ -22,5 +22,23 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icon", sizes: "32x32", type: "image/png" },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
+    // Screenshots unlock the richer PWA install UI in Chrome / Edge.
+    // Need at least one wide (desktop) and one non-wide (mobile).
+    screenshots: [
+      {
+        src: "/api/screenshot/wide",
+        sizes: "1280x720",
+        type: "image/png",
+        form_factor: "wide",
+        label: `${SITE_NAME} — smart home energy dashboard`,
+      },
+      {
+        src: "/api/screenshot/narrow",
+        sizes: "640x1136",
+        type: "image/png",
+        form_factor: "narrow",
+        label: `${SITE_NAME} — mobile app`,
+      },
+    ],
   };
 }
