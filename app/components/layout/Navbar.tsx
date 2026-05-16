@@ -161,7 +161,7 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-50 bg-black text-white">
-      <nav className="relative mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-10">
+      <nav className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30">
         <Link href="/" aria-label="Cosybee home" className="shrink-0">
           <Logo className="h-8 w-auto lg:h-10" />
         </Link>
