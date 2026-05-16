@@ -1,7 +1,8 @@
 import { CtaCard } from "../ui/Cta";
 import CosybeeMark from "../ui/CosybeeMark";
 import { MediaCard, SectionHeader } from "../ui/SectionContent";
-
+import Image from "next/image";
+import deviceImg from "@/public/hero-device.svg";
 /** Compact phone mockup tuned to sit inside a MediaCard's media slot. */
 function MiniPhone({ className = "" }: { className?: string }) {
   return (
@@ -83,15 +84,21 @@ function MiniPhone({ className = "" }: { className?: string }) {
 
 export default function EnergyForecasting() {
   return (
-    <section className="bg-white px-6 py-20 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+    <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto">
       <SectionHeader
         title="Intelligent Energy Forecasting"
-        description="Energiebee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings."
+        description="Energiebee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings"
       />
 
-      <div className="mx-auto flex justify-center mt-12 max-w-7xl gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-8">
+      <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
         <MediaCard
-          media={<MiniPhone className="w-45 sm:w-47.5 lg:w-50" />}
+          media={
+            <Image
+              alt="Weather-Based Bloom Forecasts"
+              src={deviceImg}
+              className="w-45 sm:w-47.5 lg:w-64"
+            />
+          }
           title="Weather-Based Bloom Forecasts"
           description="Our intelligent forecasting system uses real-time weather data combined with your garden's historical performance to predict sunflower blooms and bee activity with remarkable accuracy."
           bullets={[
@@ -101,7 +108,13 @@ export default function EnergyForecasting() {
           ]}
         />
         <MediaCard
-          media={<MiniPhone className="w-45 sm:w-47.5 lg:w-50" />}
+          media={
+            <Image
+              alt="Weather-Based Bloom Forecasts"
+              src={deviceImg}
+              className="w-45 sm:w-47.5 lg:w-64"
+            />
+          }
           title="Seasonal Pattern Analysis"
           description="Track how your energy production changes through the seasons. Our AI learns from year-over-year data to deliver ever-more-accurate predictions tailored to your location."
           bullets={[
@@ -121,6 +134,7 @@ export default function EnergyForecasting() {
           href="/start"
           titleClassName="!text-[25px] "
           descClassName="!text-sm"
+          buttonClassName="!text-lg"
         />
       </div>
     </section>

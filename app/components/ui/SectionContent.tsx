@@ -41,9 +41,9 @@ const GLYPHS: Record<GlyphName, ReactNode> = {
       <line x1="-18" y1="0" x2="-14" y2="0" />
       <line x1="14" y1="0" x2="18" y2="0" />
       <line x1="-13" y1="-13" x2="-10" y2="-10" />
-      <line x1="10" y1="-13" x2="13" y2="-10" />
+      <line x1="10" y1="-11" x2="13" y2="-14" />
       <line x1="-13" y1="13" x2="-10" y2="10" />
-      <line x1="10" y1="13" x2="13" y2="10" />
+      <line x1="10" y1="11" x2="13" y2="14" />
     </g>
   ),
   dollar: (
@@ -113,12 +113,12 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto max-w-3xl text-center ${className}`}>
-      <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-5xl">
+    <div className={`mx-auto text-center ${className}`}>
+      <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-[40px]">
         {title}
       </h2>
       {description && (
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 sm:text-lg">
+        <p className="mx-auto mt-1.5 text-base leading-relaxed text-neutral-600 sm:text-lg">
           {description}
         </p>
       )}
@@ -145,27 +145,32 @@ export function MediaCard({
   mediaBg?: string;
 }) {
   return (
-    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-neutral-200 bg-[#FAFBFC] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
+    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
       {media && (
         <div
-          className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-4 overflow-hidden max-h-76"
+          className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-6 overflow-hidden max-h-100"
           style={{ backgroundColor: mediaBg }}
         >
           {media}
         </div>
       )}
       <div className="p-6 sm:p-7">
-        <h3 className="text-2xl font-bold leading-tight text-black sm:text-[28px]">
+        <h3 className="text-2xl font-extrabold leading-tight text-black sm:text-[24px]">
           {title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-base">
+        <p className="mt-3 text-sm leading-relaxed text-[#545454] sm:text-base">
           {description}
         </p>
         {bullets && bullets.length > 0 && (
           <ul className="mt-5 space-y-3">
             {bullets.map((b) => (
               <li key={b} className="flex items-center gap-3">
-                <HexBadge glyph="check" className="h-5 w-6 lg:h-6 lg:w-7" />
+                <Image
+                  src={hexaCheck}
+                  alt=""
+                  aria-hidden
+                  className="h-5 w-6 lg:h-6 lg:w-7"
+                />
                 <span className="text-sm text-black sm:text-base">{b}</span>
               </li>
             ))}

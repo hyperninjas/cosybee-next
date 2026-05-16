@@ -97,6 +97,7 @@ export function CtaCard({
   className = "",
   titleClassName = "",
   descClassName = "",
+  buttonClassName = "",
 }: {
   glyph?: GlyphName;
   glyphColor?: string;
@@ -107,10 +108,11 @@ export function CtaCard({
   className?: string;
   titleClassName?: string;
   descClassName?: string;
+  buttonClassName?: string;
 }) {
   return (
     <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-white bg-[url(/bg-hive-grid.svg)] bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-5 lg:p-12 ${className}`}
+      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-5 lg:p-12 ${className}`}
     >
       {glyph && (
         <HexBadge
@@ -132,7 +134,11 @@ export function CtaCard({
           {description}
         </p>
       </div>
-      <CtaButton href={href} size="md" className="w-full sm:w-auto">
+      <CtaButton
+        href={href}
+        size="md"
+        className={`w-full sm:w-auto ${buttonClassName}`}
+      >
         {buttonText}
       </CtaButton>
     </div>

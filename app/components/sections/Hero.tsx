@@ -46,9 +46,9 @@ export default function Hero() {
         {/* text */}
         <div className="relative z-10 max-w-xl">
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
-            Solar Forecasting <span className="text-[#D7C638]">95%</span>
+            Solar Forecasting <span className="text-[#EFDF18]">95%</span>
             <br />
-            <span className="text-[#D7C638]">Accurate</span> Next Day
+            <span className="text-[#EFDF18]">Accurate</span> Next Day
           </h1>
           <p className="mt-4 max-w-md text-lg text-neutral-300">
             Advanced AI-powered solar production predictions. Plan your energy
