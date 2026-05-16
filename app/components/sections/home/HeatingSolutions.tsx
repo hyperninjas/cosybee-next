@@ -9,7 +9,7 @@ import sideImage from "@/public/energy-monitoring.png";
  */
 export default function HeatingSolutions() {
   return (
-    <section className="relative overflow-hidden bg-black py-20 text-white lg:py-25">
+    <section className="relative overflow-hidden py-20 text-white lg:py-25">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
         {/* cluster — left */}
         <SharedImageHexCluster
@@ -23,9 +23,7 @@ export default function HeatingSolutions() {
 
         {/* text — right */}
         <div>
-          <SectionTitle className="!text-white">
-            Heating Solutions
-          </SectionTitle>
+          <SectionTitle className="!text-white">Heating Solutions</SectionTitle>
           <div className="mt-8 space-y-7">
             <FeatureItem
               title="Live Solar Production Tracking"

@@ -1,9 +1,6 @@
 import Image from "next/image";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import {
-  FeatureCard,
-  SectionTitle,
-} from "../../ui/SectionContent";
+import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import deviceImg from "@/public/energy-saving-device.png";
 import sideImage from "@/public/energy-analytics-side.png";
 
@@ -13,7 +10,7 @@ import sideImage from "@/public/energy-analytics-side.png";
  */
 export default function HomeSolarForecasting() {
   return (
-    <section className="relative overflow-hidden bg-white py-20 text-black lg:py-25">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-20 text-black lg:py-25">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
         {/* left: phone */}
         <div className="hidden lg:block absolute left-0 -top-7 max-w-[345.3px]">

@@ -42,7 +42,7 @@ export default function Hexagon({
   const callerSetsHeight = /(?:^|[\s:])h-/.test(className);
   const wrapperStyle = callerSetsHeight
     ? undefined
-    : { aspectRatio: "1.1547 / 1" };
+    : { aspectRatio: "1.16 / 1" };
 
   return (
     <div className={wrapperClass} style={wrapperStyle}>
