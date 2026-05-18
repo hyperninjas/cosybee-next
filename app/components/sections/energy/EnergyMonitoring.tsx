@@ -14,7 +14,7 @@ export default function EnergyMonitoring() {
           gap={5}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
