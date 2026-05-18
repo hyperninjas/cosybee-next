@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "embla-carousel-react": "^9.0.0-rc02",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"

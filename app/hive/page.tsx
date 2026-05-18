@@ -1,18 +1,31 @@
 import type { Metadata } from "next";
-import ComingSoon from "../components/layout/ComingSoon";
+import HiveFeatured from "../components/sections/hive/HiveFeatured";
+import HiveFilterBar from "../components/sections/hive/HiveFilterBar";
+import HiveHero from "../components/sections/hive/HiveHero";
+import HiveLatestArticles from "../components/sections/hive/HiveLatestArticles";
+import Divider from "../components/ui/Divider";
 
 export const metadata: Metadata = {
   title: "The Hive",
-  description: "Community, support, and product updates for energiebee users.",
+  description:
+    "Insights, stories, and expert advice on sustainable energy solutions for modern homes.",
   alternates: { canonical: "/hive" },
-  robots: { index: false, follow: true },
+  openGraph: {
+    url: "/hive",
+    title: "The Hive — energiebee",
+    description:
+      "Insights, stories, and expert advice on sustainable energy solutions for modern homes.",
+  },
 };
 
 export default function HivePage() {
   return (
-    <ComingSoon
-      title="The Hive"
-      description="Community, support, and product updates for energiebee users. We're getting it ready — check back soon."
-    />
+    <main className="flex-1">
+      <HiveHero />
+      <HiveFilterBar />
+      <Divider />
+      <HiveFeatured />
+      <HiveLatestArticles />
+    </main>
   );
 }
