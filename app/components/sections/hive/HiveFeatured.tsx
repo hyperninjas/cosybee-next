@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import Avatar from "../../ui/Avatar";
 import { CtaButton } from "../../ui/Cta";
 import { getFeaturedArticles, type HiveArticle } from "@/app/lib/hive-articles";
+import Dot from "../../ui/Dot";
 
 const SLIDES: HiveArticle[] = getFeaturedArticles();
 
@@ -52,7 +53,7 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
       <div className="flex flex-col h-full p-8 sm:p-10">
         <div className="flex items-center gap-4 text-base">
           <span className="font-semibold text-[#EE3D1A]">{slide.category}</span>
-          <span className="bg-[#CCC8C8] h-0.75 w-0.75 rounded-full"></span>
+          <Dot />
           <span className="text-[#545454] text-[15px] font-medium">
             {slide.readTime}
           </span>
