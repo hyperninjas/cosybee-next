@@ -36,9 +36,9 @@ function ArticleCard({ a }: { a: HiveArticle }) {
         </p>
         <div className="mt-auto pt-4">
           <Divider />
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-5">
             <Avatar name={a.author.name} className="h-11 w-11" />
-            <span className="text-sm font-medium text-black">
+            <span className="text-[15px] font-bold text-black">
               {a.author.name}
             </span>
           </div>
