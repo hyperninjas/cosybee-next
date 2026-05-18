@@ -1,7 +1,9 @@
 import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
-import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
+// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import illustration from "@/public/illustration-cookies.svg";
+import Image from "next/image";
 
 import type { Metadata } from "next";
 
@@ -35,7 +37,9 @@ export default function CookiesPage() {
         label="Cookie Policy"
         title="How We Use Cookies on Our Website"
         subtitle="Small files, big transparency, here's exactly what we place on your device, why, and how you stay in control."
-        illustration={<LegalIllustrationPlaceholder />}
+        illustration={
+          <Image src={illustration} alt="" className="max-h-111.25 w-auto" />
+        }
       />
 
       <LegalContainer>
@@ -49,14 +53,13 @@ export default function CookiesPage() {
           </p>
           <p>
             Cookies are not viruses or harmful programs. They cannot access
-            other files on your device or execute code. They simply store
-            small pieces of information that help websites function and
-            improve over time.
+            other files on your device or execute code. They simply store small
+            pieces of information that help websites function and improve over
+            time.
           </p>
           <p>
-            Similar technologies such as pixels, web beacons, and local
-            storage work in comparable ways and are also covered by this
-            policy.
+            Similar technologies such as pixels, web beacons, and local storage
+            work in comparable ways and are also covered by this policy.
           </p>
         </LegalSection>
 
@@ -89,9 +92,9 @@ export default function CookiesPage() {
             <li>Improve the overall experience for our users.</li>
           </ul>
           <p>
-            We do not use cookies to collect sensitive personal information
-            such as financial details or passwords, and we do not sell cookie
-            data to third parties.
+            We do not use cookies to collect sensitive personal information such
+            as financial details or passwords, and we do not sell cookie data to
+            third parties.
           </p>
         </LegalSection>
 
@@ -183,9 +186,9 @@ export default function CookiesPage() {
           <p>
             These cookies are used to deliver advertisements and content that
             are more relevant to you and your interests. They may also be used
-            to limit how many times you see an advertisement and to measure
-            the effectiveness of marketing campaigns. These cookies may track
-            your browsing activity across other websites.
+            to limit how many times you see an advertisement and to measure the
+            effectiveness of marketing campaigns. These cookies may track your
+            browsing activity across other websites.
           </p>
           <ul>
             <li>
@@ -214,10 +217,9 @@ export default function CookiesPage() {
           <p>
             Some pages on our Website may include content embedded from
             third-party services (such as YouTube videos, social media sharing
-            buttons, or maps). These third parties may set their own cookies
-            on your device. We do not control these cookies and recommend
-            reviewing the privacy and cookie policies of those services
-            directly:
+            buttons, or maps). These third parties may set their own cookies on
+            your device. We do not control these cookies and recommend reviewing
+            the privacy and cookie policies of those services directly:
           </p>
           <ul>
             <li>
@@ -260,14 +262,14 @@ export default function CookiesPage() {
           </p>
           <p>
             <strong>Session cookies</strong> are temporary and are deleted from
-            your device automatically when you close your browser. They are
-            used to manage your activity during a single visit.
+            your device automatically when you close your browser. They are used
+            to manage your activity during a single visit.
           </p>
           <p>
             <strong>Persistent cookies</strong> remain on your device for a set
             period (as specified in Section 4) or until you delete them
-            manually. They are used to remember your preferences across
-            multiple visits.
+            manually. They are used to remember your preferences across multiple
+            visits.
           </p>
         </LegalSection>
 
@@ -277,16 +279,16 @@ export default function CookiesPage() {
             <strong>Cookie Banner</strong>: When you first visit our Website,
             you will be shown a cookie consent banner. You can choose to accept
             all cookies, accept only essential cookies, or customise your
-            preferences by category. You can update your choices at any time
-            by clicking the &ldquo;Cookie Settings&rdquo; link in the footer
-            of our Website.
+            preferences by category. You can update your choices at any time by
+            clicking the &ldquo;Cookie Settings&rdquo; link in the footer of our
+            Website.
           </p>
           <p>
-            <strong>Browser Settings</strong>: Most browsers allow you to
-            view, manage, block, or delete cookies through their settings.
-            Please note that blocking certain cookies may affect the
-            functionality of our Website. Here are links to cookie management
-            instructions for common browsers:
+            <strong>Browser Settings</strong>: Most browsers allow you to view,
+            manage, block, or delete cookies through their settings. Please note
+            that blocking certain cookies may affect the functionality of our
+            Website. Here are links to cookie management instructions for common
+            browsers:
           </p>
           <ul>
             <li>
@@ -355,8 +357,8 @@ export default function CookiesPage() {
         <LegalSection title="Cookies & the App">
           <p>
             Our Energiebee mobile application (&ldquo;App&rdquo;) does not use
-            browser cookies. However, the App does use similar technologies
-            such as local storage and device identifiers to:
+            browser cookies. However, the App does use similar technologies such
+            as local storage and device identifiers to:
           </p>
           <ul>
             <li>Keep you logged in between sessions;</li>
@@ -375,11 +377,10 @@ export default function CookiesPage() {
           <p>
             Some browsers include a &ldquo;Do Not Track&rdquo; (DNT) feature
             that signals to websites that you do not want to be tracked. There
-            is currently no universally agreed standard for how websites
-            should respond to DNT signals. At present, our Website does not
-            alter its behaviour in response to DNT signals, but you can use
-            the controls described in Section 6 to manage your cookie
-            preferences.
+            is currently no universally agreed standard for how websites should
+            respond to DNT signals. At present, our Website does not alter its
+            behaviour in response to DNT signals, but you can use the controls
+            described in Section 6 to manage your cookie preferences.
           </p>
         </LegalSection>
 
@@ -387,14 +388,13 @@ export default function CookiesPage() {
           <p>
             We may update this Cookie Policy from time to time to reflect
             changes in the cookies we use, applicable law, or our business
-            practices. We will notify you of any significant changes by
-            updating the &ldquo;Last updated&rdquo; date at the top of this
-            page and, where appropriate, by displaying a new cookie consent
-            banner.
+            practices. We will notify you of any significant changes by updating
+            the &ldquo;Last updated&rdquo; date at the top of this page and,
+            where appropriate, by displaying a new cookie consent banner.
           </p>
           <p>
-            We encourage you to review this policy periodically to stay
-            informed about how we use cookies.
+            We encourage you to review this policy periodically to stay informed
+            about how we use cookies.
           </p>
           <p className="mt-8 text-sm text-neutral-500">
             Last updated: May 2026

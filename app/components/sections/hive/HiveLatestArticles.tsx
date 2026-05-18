@@ -3,8 +3,9 @@ import Link from "next/link";
 import { getLatestArticles, type HiveArticle } from "@/app/lib/hive-articles";
 import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
+import Dot from "../../ui/Dot";
 
-function ArticleCard({ a }: { a: HiveArticle }) {
+export function ArticleCard({ a }: { a: HiveArticle }) {
   return (
     <Link
       href={`/hive/${a.slug}`}
@@ -22,7 +23,7 @@ function ArticleCard({ a }: { a: HiveArticle }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="flex flex-wrap items-center gap-2 text-[15px] max-h-8 font-medium text-[#545454]">
           <span>{a.readTime}</span>
-          <span className="bg-[#CCC8C8] h-0.75 w-0.75 rounded-full"></span>
+          <Dot />
           <span>{a.author.date}</span>
           <span className="ml-auto h-8 rounded-full border border-[#E6E6E6] bg-[#FAFAFA] px-3 py-1 font-semibold tracking-normal text-[#DE3B24] max-w-32.5 text-nowrap text-ellipsis overflow-hidden">
             {a.category}

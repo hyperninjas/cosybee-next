@@ -1,7 +1,9 @@
 import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
-import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
+// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import illustration from "@/public/illustration-terms-conditions.svg";
+import Image from "next/image";
 
 import type { Metadata } from "next";
 
@@ -26,7 +28,9 @@ export default function TermsPage() {
         label="Terms & Conditions"
         title="Everything You Need to Know Before You Begin"
         subtitle="Understand your rights, our responsibilities, and how energiebee works for you, clearly written, no hidden surprises."
-        illustration={<LegalIllustrationPlaceholder />}
+        illustration={
+          <Image src={illustration} alt="" className="max-h-90 w-auto" />
+        }
       />
 
       <LegalContainer>
@@ -62,8 +66,8 @@ export default function TermsPage() {
               associated components.
             </li>
             <li>
-              <strong>App</strong> — The Energiebee mobile application
-              available on iOS and Android platforms.
+              <strong>App</strong> — The Energiebee mobile application available
+              on iOS and Android platforms.
             </li>
             <li>
               <strong>Energiebee</strong> — Energiebee Limited, our group,
@@ -94,21 +98,25 @@ export default function TermsPage() {
               You are a resident of the United Kingdom or another country where
               our Services are lawfully available.
             </li>
-            <li>You have the legal capacity to enter into a binding contract.</li>
-            <li>All information you provide to us is accurate and up to date.</li>
+            <li>
+              You have the legal capacity to enter into a binding contract.
+            </li>
+            <li>
+              All information you provide to us is accurate and up to date.
+            </li>
           </ul>
           <p>
             <strong>1.3</strong> Our Services are intended for domestic,
-            residential use of any company or business purposes unless
-            otherwise agreed with us in writing.
+            residential use of any company or business purposes unless otherwise
+            agreed with us in writing.
           </p>
         </LegalSection>
 
         <LegalSection title="Purchasing a Device">
           <p>
             <strong>2.1</strong> All orders placed through our website or
-            authorized retailers are subject to acceptance by us. We reserve
-            the right to refuse or cancel any order at our discretion.
+            authorized retailers are subject to acceptance by us. We reserve the
+            right to refuse or cancel any order at our discretion.
           </p>
           <p>
             <strong>2.2</strong> Prices are displayed in Great British Pounds
@@ -123,21 +131,20 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>2.4</strong> Delivery timescales are estimates only. We are
-            not liable for delays caused by circumstances outside our
-            reasonable control.
+            not liable for delays caused by circumstances outside our reasonable
+            control.
           </p>
         </LegalSection>
 
         <LegalSection title="Right to Cancel & Returns">
           <p>
             <strong>3.1 Consumers only:</strong> Under the Consumer Contracts
-            (Information, Cancellation and Additional Charges) Regulations
-            2013, you have the right to cancel your order within 14 calendar
-            days of receiving the Device, without giving a reason.
+            (Information, Cancellation and Additional Charges) Regulations 2013,
+            you have the right to cancel your order within 14 calendar days of
+            receiving the Device, without giving a reason.
           </p>
           <p>
-            <strong>3.2</strong> To exercise your right to cancel, contact us
-            at{" "}
+            <strong>3.2</strong> To exercise your right to cancel, contact us at{" "}
             <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> with
             your order details.
           </p>
@@ -156,8 +163,8 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>3.5</strong> Refunds will be processed within 14 days of
-            receiving the returned Device, using the same payment method as
-            your original purchase.
+            receiving the returned Device, using the same payment method as your
+            original purchase.
           </p>
           <p>
             <strong>3.6</strong> The right to cancel does not apply to digital
@@ -183,9 +190,9 @@ export default function TermsPage() {
             <strong>4.3</strong> Installation of the Device is your
             responsibility unless a professional installation service has been
             purchased from us or an authorized partner. You must ensure that
-            installation complies with all applicable UK electrical
-            regulations, including BS 7671 (IET Wiring Regulations). We
-            recommend installation by a qualified electrician.
+            installation complies with all applicable UK electrical regulations,
+            including BS 7671 (IET Wiring Regulations). We recommend
+            installation by a qualified electrician.
           </p>
           <p>
             <strong>4.4</strong> You must not:
@@ -203,17 +210,17 @@ export default function TermsPage() {
           </ul>
           <p>
             <strong>4.5</strong> The Device must only be used with a compatible
-            internet connection and power supply meeting the specifications
-            set out in the product documentation.
+            internet connection and power supply meeting the specifications set
+            out in the product documentation.
           </p>
         </LegalSection>
 
         <LegalSection title="Mobile Application & Account">
           <p>
             <strong>5.1</strong> To access the full functionality of the App,
-            you must create an Account. You are responsible for maintaining
-            the confidentiality of your login credentials and for all activity
-            that occurs under your Account.
+            you must create an Account. You are responsible for maintaining the
+            confidentiality of your login credentials and for all activity that
+            occurs under your Account.
           </p>
           <p>
             <strong>5.2</strong> You agree to notify us immediately at{" "}
@@ -222,37 +229,36 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>5.3</strong> We reserve the right to suspend or terminate
-            your Account if we reasonably believe you have breached these
-            Terms, provided false information, or are engaged in fraudulent
-            activity.
+            your Account if we reasonably believe you have breached these Terms,
+            provided false information, or are engaged in fraudulent activity.
           </p>
           <p>
             <strong>5.4</strong> The App may be updated from time to time to
-            improve functionality, security, or performance. You are
-            responsible for keeping the App updated. We cannot guarantee that
-            older versions of the App will remain functional.
+            improve functionality, security, or performance. You are responsible
+            for keeping the App updated. We cannot guarantee that older versions
+            of the App will remain functional.
           </p>
           <p>
             <strong>5.5</strong> We may offer premium features through paid
-            Subscription plans. Subscription terms, pricing, and billing
-            cycles will be clearly presented at the point of purchase.
-            Subscriptions will auto-renew unless cancelled before the renewal
-            date in accordance with Section 6.
+            Subscription plans. Subscription terms, pricing, and billing cycles
+            will be clearly presented at the point of purchase. Subscriptions
+            will auto-renew unless cancelled before the renewal date in
+            accordance with Section 6.
           </p>
         </LegalSection>
 
         <LegalSection title="Intellectual Property">
           <p>
             <strong>6.1</strong> All intellectual property rights in the Device
-            firmware, App, website, branding, content, and associated
-            materials are owned by or licensed to Energiebee Limited. Nothing
-            in these Terms transfers any intellectual property rights to you.
+            firmware, App, website, branding, content, and associated materials
+            are owned by or licensed to Energiebee Limited. Nothing in these
+            Terms transfers any intellectual property rights to you.
           </p>
           <p>
             <strong>6.2</strong> We grant you a limited, non-exclusive,
             non-transferable, revocable licence to use the App solely for
-            personal, non-commercial purposes in connection with your Device,
-            in accordance with these Terms.
+            personal, non-commercial purposes in connection with your Device, in
+            accordance with these Terms.
           </p>
           <p>
             <strong>6.3</strong> You must not copy, reproduce, distribute, or
@@ -266,13 +272,13 @@ export default function TermsPage() {
             <strong>7.1</strong> The App collects and processes energy usage
             data from your Device to display metrics, provide insights, and
             improve our Services. By using the App, you consent to this data
-            processing as described in our{" "}
-            <a href="/privacy">Privacy Policy</a>.
+            processing as described in our <a href="/privacy">Privacy Policy</a>
+            .
           </p>
           <p>
             <strong>7.2</strong> Your energy data is associated with your
-            Account and is not sold to third parties. We may use anonymized
-            and aggregated data for product development and research purposes.
+            Account and is not sold to third parties. We may use anonymized and
+            aggregated data for product development and research purposes.
           </p>
           <p>
             <strong>7.3</strong> You retain ownership of your personal energy
@@ -282,9 +288,9 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>7.4</strong> We implement appropriate technical and
-            organizational measures to protect your data. However, no method
-            of transmission over the internet is completely secure, and we
-            cannot guarantee absolute security.
+            organizational measures to protect your data. However, no method of
+            transmission over the internet is completely secure, and we cannot
+            guarantee absolute security.
           </p>
         </LegalSection>
 
@@ -320,8 +326,8 @@ export default function TermsPage() {
           <p>
             <strong>8.4</strong> Your statutory rights as a consumer under the
             Consumer Rights Act 2015 are not affected by this warranty. You are
-            entitled to goods that are of satisfactory quality, fit for
-            purpose, and as described.
+            entitled to goods that are of satisfactory quality, fit for purpose,
+            and as described.
           </p>
         </LegalSection>
 
@@ -365,18 +371,18 @@ export default function TermsPage() {
         <LegalSection title="Third-Party Services & Integrations">
           <p>
             <strong>10.1</strong> The App may integrate with third-party
-            platforms (such as smart-home ecosystems, energy suppliers, or
-            voice assistants). We do not control these third parties and are
-            not responsible for the availability, accuracy, or conduct of any
+            platforms (such as smart-home ecosystems, energy suppliers, or voice
+            assistants). We do not control these third parties and are not
+            responsible for the availability, accuracy, or conduct of any
             third-party services.
           </p>
           <p>
-            <strong>10.2</strong> Your use of third-party services is subject
-            to their own terms and conditions and privacy policies.
+            <strong>10.2</strong> Your use of third-party services is subject to
+            their own terms and conditions and privacy policies.
           </p>
           <p>
-            <strong>10.3</strong> We do not endorse any third-party services
-            and are not liable for any loss arising from your use of them in
+            <strong>10.3</strong> We do not endorse any third-party services and
+            are not liable for any loss arising from your use of them in
             connection with our Services.
           </p>
         </LegalSection>
@@ -390,8 +396,7 @@ export default function TermsPage() {
               data.
             </li>
             <li>
-              Transmit any harmful, offensive, fraudulent, or malicious
-              content.
+              Transmit any harmful, offensive, fraudulent, or malicious content.
             </li>
             <li>Interfere with the proper functioning of the App or Device.</li>
             <li>Use automated scripts or bots to interact with the App.</li>
@@ -418,21 +423,21 @@ export default function TermsPage() {
 
         <LegalSection title="Changes to These Terms">
           <p>
-            <strong>12.1</strong> We may update these Terms from time to time
-            to reflect changes in our Services, applicable laws, or business
+            <strong>12.1</strong> We may update these Terms from time to time to
+            reflect changes in our Services, applicable laws, or business
             practices.
           </p>
           <p>
             <strong>12.2</strong> We will notify you of material changes by
             email (to the address associated with your Account) or via a
-            prominent notice within the App, at least 14 days before the
-            changes take effect.
+            prominent notice within the App, at least 14 days before the changes
+            take effect.
           </p>
           <p>
             <strong>12.3</strong> Your continued use of the Services after the
-            effective date of any changes constitutes acceptance of the
-            revised Terms. If you do not agree to the changes, you may
-            terminate your Account and cease using the Services.
+            effective date of any changes constitutes acceptance of the revised
+            Terms. If you do not agree to the changes, you may terminate your
+            Account and cease using the Services.
           </p>
         </LegalSection>
 
@@ -453,9 +458,9 @@ export default function TermsPage() {
             committed to resolving disputes fairly. Before initiating legal
             proceedings, we encourage you to contact us directly at{" "}
             <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> to
-            seek an amicable resolution. If we are unable to resolve a
-            dispute, you may also have the right to use the Online Dispute
-            Resolution (ODR) platform provided by the European Commission at{" "}
+            seek an amicable resolution. If we are unable to resolve a dispute,
+            you may also have the right to use the Online Dispute Resolution
+            (ODR) platform provided by the European Commission at{" "}
             <a
               href="https://ec.europa.eu/consumers/odr"
               target="_blank"
@@ -465,7 +470,9 @@ export default function TermsPage() {
             </a>
             .
           </p>
-          <p className="mt-8 text-sm text-neutral-500">Last updated: May 2026</p>
+          <p className="mt-8 text-sm text-neutral-500">
+            Last updated: May 2026
+          </p>
         </LegalSection>
       </LegalContainer>
     </main>
