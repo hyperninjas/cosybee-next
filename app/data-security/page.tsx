@@ -1,7 +1,9 @@
 import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
-import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
+// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import illustration from "@/public/illustration-cookies.svg";
+import Image from "next/image";
 
 import type { Metadata } from "next";
 
@@ -26,7 +28,9 @@ export default function DataSecurityPage() {
         label="Data Security"
         title="Your Data Is Safe With Us"
         subtitle="We build security into everything we do, from the device in your home to the app on your phone."
-        illustration={<LegalIllustrationPlaceholder />}
+        illustration={
+          <Image src={illustration} alt="" className="max-h-110.75 w-auto" />
+        }
       />
 
       <LegalContainer>
@@ -34,40 +38,39 @@ export default function DataSecurityPage() {
           <p>
             At Energiebee, security is not an afterthought, it is built into
             every layer of how we design, develop, and operate our products.
-            From the moment your Energiebee Device connects to your home
-            network to the instant energy data appears in your App, we apply
-            rigorous measures to ensure your information remains private,
-            protected, and under your control.
+            From the moment your Energiebee Device connects to your home network
+            to the instant energy data appears in your App, we apply rigorous
+            measures to ensure your information remains private, protected, and
+            under your control.
           </p>
           <p>
             We are committed to complying with the UK General Data Protection
             Regulation (UK GDPR), the Data Protection Act 2018, and recognised
-            industry security standards. We continuously review and improve
-            our security practices as technology and threats evolve.
+            industry security standards. We continuously review and improve our
+            security practices as technology and threats evolve.
           </p>
         </LegalSection>
 
         <LegalSection title="Data Encryption">
           <p>
             All data transmitted between your Energiebee Device, the App, and
-            our servers is protected using Transport Layer Security (TLS 1.2
-            or higher) — the same encryption standard used by banks and
-            financial institutions. This ensures that your energy data cannot
-            be intercepted or read by unauthorised parties while in transit.
+            our servers is protected using Transport Layer Security (TLS 1.2 or
+            higher) — the same encryption standard used by banks and financial
+            institutions. This ensures that your energy data cannot be
+            intercepted or read by unauthorised parties while in transit.
           </p>
           <p>
             Data stored on our servers — including your account information,
             energy usage records, and device settings — is encrypted at rest
-            using industry-standard AES-256 encryption. This means that even
-            in the unlikely event of unauthorised access to our storage
-            systems, your data would be unreadable without the correct
-            decryption keys.
+            using industry-standard AES-256 encryption. This means that even in
+            the unlikely event of unauthorised access to our storage systems,
+            your data would be unreadable without the correct decryption keys.
           </p>
           <p>
             Your account password is never stored in plain text. We use a
             one-way cryptographic hashing algorithm (bcrypt) so that your
-            password cannot be recovered or read by anyone, including
-            Energiebee staff.
+            password cannot be recovered or read by anyone, including Energiebee
+            staff.
           </p>
         </LegalSection>
 
@@ -76,8 +79,8 @@ export default function DataSecurityPage() {
             Your Energiebee Device communicates with our platform over an
             encrypted channel. Each Device is assigned a unique,
             cryptographically secure identifier at the point of manufacture,
-            ensuring that only your authorised Device can communicate with
-            your account.
+            ensuring that only your authorised Device can communicate with your
+            account.
           </p>
           <p>We apply the following measures at the device level:</p>
           <p>
@@ -92,9 +95,9 @@ export default function DataSecurityPage() {
             Energiebee signature, protecting against malicious software.
           </p>
           <p>
-            <strong>Automatic security updates</strong> — When security
-            patches are available, they are delivered automatically to your
-            Device to keep it protected without requiring action from you.
+            <strong>Automatic security updates</strong> — When security patches
+            are available, they are delivered automatically to your Device to
+            keep it protected without requiring action from you.
           </p>
           <p>
             <strong>Isolated communication</strong> — Your Device only
@@ -122,20 +125,20 @@ export default function DataSecurityPage() {
             left unattended.
           </p>
           <p>
-            <strong>Two-factor authentication (2FA)</strong> — We offer
-            optional two-factor authentication for your Energiebee account,
-            adding an additional layer of protection beyond your password. We
-            strongly recommend enabling this feature.
+            <strong>Two-factor authentication (2FA)</strong> — We offer optional
+            two-factor authentication for your Energiebee account, adding an
+            additional layer of protection beyond your password. We strongly
+            recommend enabling this feature.
           </p>
           <p>
-            <strong>Biometric login</strong> — On supported devices, you can
-            use fingerprint or face recognition to access the App securely and
+            <strong>Biometric login</strong> — On supported devices, you can use
+            fingerprint or face recognition to access the App securely and
             conveniently.
           </p>
           <p>
-            <strong>Certificate pinning</strong> — The App verifies the
-            identity of our servers before transmitting any data, protecting
-            against man-in-the-middle attacks even on untrusted networks.
+            <strong>Certificate pinning</strong> — The App verifies the identity
+            of our servers before transmitting any data, protecting against
+            man-in-the-middle attacks even on untrusted networks.
           </p>
         </LegalSection>
 
@@ -143,8 +146,8 @@ export default function DataSecurityPage() {
           <p>
             Your data is hosted on secure, enterprise-grade cloud
             infrastructure. Our hosting environment is provided by a reputable,
-            ISO 27001-certified cloud provider operating data centres within
-            the United Kingdom and European Economic Area (EEA).
+            ISO 27001-certified cloud provider operating data centres within the
+            United Kingdom and European Economic Area (EEA).
           </p>
           <p>Key infrastructure security measures include:</p>
           <p>
@@ -159,9 +162,9 @@ export default function DataSecurityPage() {
             Shared or generic credentials are not permitted.
           </p>
           <p>
-            <strong>Network segmentation</strong> — Our systems are divided
-            into isolated network zones so that a compromise of one area
-            cannot easily spread to others.
+            <strong>Network segmentation</strong> — Our systems are divided into
+            isolated network zones so that a compromise of one area cannot
+            easily spread to others.
           </p>
           <p>
             <strong>Firewall and intrusion detection</strong> — We deploy web
@@ -194,8 +197,8 @@ export default function DataSecurityPage() {
           <p>
             <strong>Security monitoring</strong> — Our systems are monitored
             around the clock for anomalous activity, unauthorised access
-            attempts, and potential threats. Alerts are investigated promptly
-            by our security team.
+            attempts, and potential threats. Alerts are investigated promptly by
+            our security team.
           </p>
           <p>
             <strong>Dependency management</strong> — We regularly review and
@@ -230,9 +233,9 @@ export default function DataSecurityPage() {
             </li>
           </ul>
           <p>
-            Access to personal data is restricted to those who genuinely need
-            it to carry out their role. We regularly review access permissions
-            and revoke them promptly when they are no longer required.
+            Access to personal data is restricted to those who genuinely need it
+            to carry out their role. We regularly review access permissions and
+            revoke them promptly when they are no longer required.
           </p>
         </LegalSection>
 
@@ -256,8 +259,8 @@ export default function DataSecurityPage() {
             </li>
             <li>
               Our notification to you will clearly describe the nature of the
-              breach, the data involved, the likely consequences, and the
-              steps we are taking to address it;
+              breach, the data involved, the likely consequences, and the steps
+              we are taking to address it;
             </li>
             <li>
               We will take immediate remedial action to contain the breach,
@@ -274,25 +277,25 @@ export default function DataSecurityPage() {
 
         <LegalSection title="Your Role in Keeping Your Account Secure">
           <p>
-            Security is a shared responsibility. There are steps you can take
-            to help protect your Energiebee account and data:
+            Security is a shared responsibility. There are steps you can take to
+            help protect your Energiebee account and data:
           </p>
           <ul>
             <li>
-              Use a strong, unique password for your Energiebee account —
-              avoid reusing passwords from other services;
+              Use a strong, unique password for your Energiebee account — avoid
+              reusing passwords from other services;
             </li>
             <li>
-              Enable two-factor authentication (2FA) in the App settings for
-              an extra layer of protection;
+              Enable two-factor authentication (2FA) in the App settings for an
+              extra layer of protection;
             </li>
             <li>
               Keep the Energiebee App updated to ensure you always have the
               latest security improvements;
             </li>
             <li>
-              Do not share your login credentials with anyone, including
-              people you trust;
+              Do not share your login credentials with anyone, including people
+              you trust;
             </li>
             <li>Log out of the App when using a shared or public device;</li>
             <li>
@@ -308,24 +311,22 @@ export default function DataSecurityPage() {
 
         <LegalSection title="Third-Party Security">
           <p>
-            Where we share data with trusted third-party service providers
-            (such as cloud hosting, payment processing, or analytics
-            providers), we ensure they meet our security standards through:
+            Where we share data with trusted third-party service providers (such
+            as cloud hosting, payment processing, or analytics providers), we
+            ensure they meet our security standards through:
           </p>
           <ul>
             <li>
               Contractual obligations requiring them to implement appropriate
               technical and organisational security measures;
             </li>
-            <li>
-              Data processing agreements (DPAs) compliant with UK GDPR;
-            </li>
+            <li>Data processing agreements (DPAs) compliant with UK GDPR;</li>
             <li>Due diligence assessments before onboarding new suppliers;</li>
             <li>Ongoing monitoring of supplier security practices.</li>
           </ul>
           <p>
-            We only share the minimum amount of data necessary for third
-            parties to perform their services on our behalf.
+            We only share the minimum amount of data necessary for third parties
+            to perform their services on our behalf.
           </p>
         </LegalSection>
 
@@ -335,20 +336,20 @@ export default function DataSecurityPage() {
             privacy standards. Our security programme is aligned with:
           </p>
           <p>
-            <strong>UK GDPR &amp; Data Protection Act 2018</strong> — We
-            process personal data lawfully, transparently, and securely in
-            accordance with UK data protection law.
+            <strong>UK GDPR &amp; Data Protection Act 2018</strong> — We process
+            personal data lawfully, transparently, and securely in accordance
+            with UK data protection law.
           </p>
           <p>
             <strong>Cyber Essentials</strong> — We work towards alignment with
             the UK government-backed Cyber Essentials framework, which covers
-            the fundamental security controls needed to protect against the
-            most common cyber threats.
+            the fundamental security controls needed to protect against the most
+            common cyber threats.
           </p>
           <p>
-            <strong>OWASP Top 10</strong> — Our development practices are
-            guided by the Open Web Application Security Project (OWASP) Top
-            10, addressing the most critical web application security risks.
+            <strong>OWASP Top 10</strong> — Our development practices are guided
+            by the Open Web Application Security Project (OWASP) Top 10,
+            addressing the most critical web application security risks.
           </p>
           <p className="mt-8 text-sm text-neutral-500">
             This Data Security page was last reviewed and updated on 15 May

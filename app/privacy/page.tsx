@@ -1,7 +1,9 @@
+import Image from "next/image";
 import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
-import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
+// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import illustration from "@/public/illustration-privacy-policy.svg";
 
 import type { Metadata } from "next";
 
@@ -26,7 +28,9 @@ export default function PrivacyPage() {
         label="Privacy Policy"
         title="Your Privacy Matters to Us"
         subtitle="We believe you should always know what data we collect, why we collect it, and how it's used, with full control over your own information."
-        illustration={<LegalIllustrationPlaceholder />}
+        illustration={
+          <Image src={illustration} alt="" className="max-h-112.5 w-auto" />
+        }
       />
 
       <LegalContainer>
@@ -63,8 +67,8 @@ export default function PrivacyPage() {
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
           </p>
           <p>
-            This policy is governed by the UK General Data Protection
-            Regulation (UK GDPR) and the Data Protection Act 2018.
+            This policy is governed by the UK General Data Protection Regulation
+            (UK GDPR) and the Data Protection Act 2018.
           </p>
         </LegalSection>
 
@@ -85,8 +89,8 @@ export default function PrivacyPage() {
               <strong>Device &amp; Energy Data</strong>: Energy consumption
               readings, usage patterns, appliance activity data, and device
               status information transmitted from your Energiebee Device to the
-              App. This data is linked to your account and your home, but not
-              to your wider identity unless you choose to provide it.
+              App. This data is linked to your account and your home, but not to
+              your wider identity unless you choose to provide it.
             </li>
             <li>
               <strong>App Usage Data</strong>: Information about how you
@@ -123,16 +127,12 @@ export default function PrivacyPage() {
             <li>Create an account or make a purchase;</li>
             <li>Set up or register your Device;</li>
             <li>Contact our support team;</li>
-            <li>
-              Subscribe to our newsletter or marketing communications;
-            </li>
+            <li>Subscribe to our newsletter or marketing communications;</li>
             <li>Respond to surveys or promotions.</li>
           </ul>
           <h3>Automatically when you:</h3>
           <ul>
-            <li>
-              Use the App (energy data, usage analytics, technical data);
-            </li>
+            <li>Use the App (energy data, usage analytics, technical data);</li>
             <li>
               Visit our Website (cookies, IP address, browsing behaviour);
             </li>
@@ -145,9 +145,7 @@ export default function PrivacyPage() {
           <ul>
             <li>Payment processors confirming transaction status;</li>
             <li>Analytics providers helping us understand App usage;</li>
-            <li>
-              Retailers or partners from whom you purchased your Device.
-            </li>
+            <li>Retailers or partners from whom you purchased your Device.</li>
           </ul>
         </LegalSection>
 
@@ -173,26 +171,26 @@ export default function PrivacyPage() {
           </p>
           <p>
             <strong>To provide customer support</strong> — Responding to your
-            queries, troubleshooting Device or App issues, and managing
-            warranty or returns. This is in our legitimate interests and to
-            perform our contract with you.
+            queries, troubleshooting Device or App issues, and managing warranty
+            or returns. This is in our legitimate interests and to perform our
+            contract with you.
           </p>
           <p>
             <strong>To improve our products and services</strong> — Using
             anonymised and aggregated energy data and app usage data to develop
-            new features, fix bugs, and enhance the user experience. This is
-            in our legitimate interests.
+            new features, fix bugs, and enhance the user experience. This is in
+            our legitimate interests.
           </p>
           <p>
             <strong>To send marketing communications</strong> — Sending you
             news, offers, and updates about Energiebee products and services,
-            where you have opted in or where we have a legitimate interest to
-            do so. You can opt out at any time.
+            where you have opted in or where we have a legitimate interest to do
+            so. You can opt out at any time.
           </p>
           <p>
             <strong>To comply with legal obligations</strong> — Retaining
-            transaction records, responding to lawful requests from
-            authorities, and meeting our obligations under UK law.
+            transaction records, responding to lawful requests from authorities,
+            and meeting our obligations under UK law.
           </p>
           <p>
             <strong>To protect against fraud and misuse</strong> — Monitoring
@@ -206,8 +204,8 @@ export default function PrivacyPage() {
           <p>Under UK GDPR, we rely on the following legal bases:</p>
           <p>
             <strong>Contractual necessity</strong> — Processing required to
-            fulfil your order, set up your account, and deliver the Services
-            you have purchased.
+            fulfil your order, set up your account, and deliver the Services you
+            have purchased.
           </p>
           <p>
             <strong>Legitimate interests</strong> — Improving our products,
@@ -217,8 +215,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             <strong>Legal obligation</strong> — Complying with applicable laws,
-            including tax, consumer protection, and data protection
-            regulations.
+            including tax, consumer protection, and data protection regulations.
           </p>
           <p>
             <strong>Consent</strong> — Where we rely on your consent (for
@@ -235,8 +232,8 @@ export default function PrivacyPage() {
           </p>
           <ul>
             <li>
-              Your energy data is used only to provide you with insights
-              through the App and to improve Energiebee products;
+              Your energy data is used only to provide you with insights through
+              the App and to improve Energiebee products;
             </li>
             <li>
               We will never sell your individual energy data to third parties,
@@ -244,8 +241,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               We may use anonymised and aggregated energy data (which cannot
-              identify you) for research, benchmarking, and product
-              development;
+              identify you) for research, benchmarking, and product development;
             </li>
             <li>
               You can request deletion of your energy data at any time — see
@@ -256,23 +252,22 @@ export default function PrivacyPage() {
 
         <LegalSection title="Sharing Your Data">
           <p>
-            We do not sell your personal data. We share it only in the
-            following circumstances:
+            We do not sell your personal data. We share it only in the following
+            circumstances:
           </p>
           <p>
             <strong>Service providers</strong> — Trusted third parties who help
             us operate our business, including cloud hosting providers, payment
-            processors, email delivery services, customer support platforms,
-            and analytics tools. These providers are contractually bound to
-            process your data only on our instructions and in accordance with
-            UK GDPR.
+            processors, email delivery services, customer support platforms, and
+            analytics tools. These providers are contractually bound to process
+            your data only on our instructions and in accordance with UK GDPR.
           </p>
           <p>
             <strong>Smart-home integrations</strong> — If you choose to connect
             your Energiebee Device to third-party smart-home platforms (such as
             Amazon Alexa, Google Home, or Apple HomeKit), limited data will be
-            shared with those platforms in accordance with your instructions
-            and their own privacy policies.
+            shared with those platforms in accordance with your instructions and
+            their own privacy policies.
           </p>
           <p>
             <strong>Legal and regulatory authorities</strong> — Where required
@@ -293,8 +288,7 @@ export default function PrivacyPage() {
             Where data is transferred to countries outside the UK, we ensure
             that appropriate safeguards are in place, such as UK adequacy
             regulations or the UK International Data Transfer Agreement (IDTA),
-            to protect your data to the same standard as required under UK
-            GDPR.
+            to protect your data to the same standard as required under UK GDPR.
           </p>
         </LegalSection>
 
@@ -306,8 +300,8 @@ export default function PrivacyPage() {
           <ul>
             <li>
               <strong>Account data</strong> — Retained for the duration of your
-              account and for up to 6 years after account closure, to meet
-              legal and tax obligations.
+              account and for up to 6 years after account closure, to meet legal
+              and tax obligations.
             </li>
             <li>
               <strong>Energy &amp; device data</strong> — Retained for as long
@@ -328,8 +322,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
           <p>
-            When data is no longer needed, it is securely deleted or
-            anonymised.
+            When data is no longer needed, it is securely deleted or anonymised.
           </p>
         </LegalSection>
 
@@ -343,9 +336,9 @@ export default function PrivacyPage() {
             function correctly. These cannot be disabled.
           </p>
           <p>
-            <strong>Analytics cookies</strong> — Help us understand how
-            visitors use our Website (e.g. Google Analytics). These are only
-            set with your consent.
+            <strong>Analytics cookies</strong> — Help us understand how visitors
+            use our Website (e.g. Google Analytics). These are only set with
+            your consent.
           </p>
           <p>
             <strong>Marketing cookies</strong> — Used to show you relevant
@@ -373,8 +366,8 @@ export default function PrivacyPage() {
           </p>
           <p>
             <strong>Right to erasure</strong> — You can ask us to delete your
-            data, subject to certain legal exceptions (e.g. we must keep
-            records for tax purposes).
+            data, subject to certain legal exceptions (e.g. we must keep records
+            for tax purposes).
           </p>
           <p>
             <strong>Right to restrict processing</strong> — You can ask us to
@@ -394,7 +387,9 @@ export default function PrivacyPage() {
             processing.
           </p>
           <p>
-            <strong>Right not to be subject to automated decision-making</strong>{" "}
+            <strong>
+              Right not to be subject to automated decision-making
+            </strong>{" "}
             — We do not make solely automated decisions that significantly
             affect you.
           </p>
@@ -414,13 +409,11 @@ export default function PrivacyPage() {
           <ul>
             <li>Encryption of data in transit (TLS) and at rest;</li>
             <li>Secure, access-controlled cloud infrastructure;</li>
-            <li>
-              Regular security assessments and penetration testing;
-            </li>
+            <li>Regular security assessments and penetration testing;</li>
             <li>Staff training on data protection;</li>
             <li>
-              Strict access controls — only authorised personnel can access
-              your data, on a need-to-know basis.
+              Strict access controls — only authorised personnel can access your
+              data, on a need-to-know basis.
             </li>
           </ul>
           <p>
@@ -433,8 +426,8 @@ export default function PrivacyPage() {
 
         <LegalSection title="Children's Privacy">
           <p>
-            Our Services are not directed at children under the age of 18. We
-            do not knowingly collect personal data from anyone under 18. If you
+            Our Services are not directed at children under the age of 18. We do
+            not knowingly collect personal data from anyone under 18. If you
             believe a child has provided us with personal data, please contact
             us at{" "}
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>{" "}
@@ -445,33 +438,33 @@ export default function PrivacyPage() {
         <LegalSection title="Links to Third-Party Websites">
           <p>
             Our Website or App may contain links to third-party websites or
-            services. We are not responsible for the privacy practices of
-            those third parties. We encourage you to read the privacy policy
-            of any website or service you visit.
+            services. We are not responsible for the privacy practices of those
+            third parties. We encourage you to read the privacy policy of any
+            website or service you visit.
           </p>
         </LegalSection>
 
         <LegalSection title="Changes to This Policy">
           <p>
             We may update this Privacy Policy from time to time to reflect
-            changes in our practices, technology, or legal requirements. We
-            will notify you of significant changes by email or via a prominent
-            notice in the App at least 14 days before the changes take effect.
-            The &ldquo;Last updated&rdquo; date at the top of this page will
-            always reflect the most recent version.
+            changes in our practices, technology, or legal requirements. We will
+            notify you of significant changes by email or via a prominent notice
+            in the App at least 14 days before the changes take effect. The
+            &ldquo;Last updated&rdquo; date at the top of this page will always
+            reflect the most recent version.
           </p>
         </LegalSection>
 
         <LegalSection title="How to Complain">
           <p>
-            If you have concerns about how we handle your personal data,
-            please contact us first at{" "}
+            If you have concerns about how we handle your personal data, please
+            contact us first at{" "}
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
           </p>
           <p>
             If you remain unsatisfied, you have the right to lodge a complaint
-            with the Information Commissioner&rsquo;s Office (ICO), the UK
-            data protection regulator:
+            with the Information Commissioner&rsquo;s Office (ICO), the UK data
+            protection regulator:
           </p>
           <ul>
             <li>
