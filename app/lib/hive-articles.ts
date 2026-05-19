@@ -3,22 +3,39 @@ import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import solarPanelImg from "@/public/solar-panal.png";
 
+/** A single content block inside a section. Strings render as
+ *  paragraphs; `{ items }` objects render as bulleted lists. */
+export type ArticleBlock = string | { items: string[] };
+
 export type ArticleSection = {
-  heading: string;
-  paragraphs: string[];
+  /** Section heading. Omit for an unheaded lead/intro block. */
+  heading?: string;
+  /** Plain paragraphs. Use this for simple prose sections. */
+  paragraphs?: string[];
+  /** Mixed paragraphs and lists. Strings render as <p>, objects with
+   *  `items` render as <ul>. Wins over `paragraphs` when both set. */
+  blocks?: ArticleBlock[];
 };
 
 export type ArticleBody = {
+  /** Bold subtitle rendered under the article H1. */
+  lede?: string;
   sections: ArticleSection[];
   /** Optional photo rendered after the last section, full-width. */
   inlineImage?: { src: StaticImageData; alt: string };
+  /** Optional call-to-action button rendered at the end of the body. */
+  cta?: { label: string; href?: string };
 };
 
 export type HiveArticle = {
   slug: string;
   category: string;
   readTime: string;
+  /** Visible H1 / card title. */
   title: string;
+  /** Optional <title> + og:title override for search engines. Falls
+   *  back to `title` when omitted. */
+  seoTitle?: string;
   /** Short blurb shown on cards (latest grid + related). */
   description: string;
   image: StaticImageData;
@@ -154,9 +171,9 @@ export function getFeaturedArticles(): HiveArticle[] {
   return HIVE_ARTICLES.filter((a) => a.carouselIntro && a.carouselBody);
 }
 
-/** Latest grid (excludes the featured ones if you ever want to). */
-export function getLatestArticles(limit = 3): HiveArticle[] {
-  return HIVE_ARTICLES.slice(0, limit);
+/** Latest grid. Omit `limit` (or pass `undefined`) to get every article. */
+export function getLatestArticles(limit?: number): HiveArticle[] {
+  return limit === undefined ? HIVE_ARTICLES : HIVE_ARTICLES.slice(0, limit);
 }
 
 /** Related articles for the in-article footer (excludes the current one). */

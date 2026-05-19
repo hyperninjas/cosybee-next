@@ -8,6 +8,7 @@ import {
   getRelatedArticles,
 } from "@/app/lib/hive-articles";
 import { ArticleCard } from "@/app/components/sections/hive/HiveLatestArticles";
+import { CtaButton } from "@/app/components/ui/Cta";
 import Dot from "@/app/components/ui/Dot";
 import Avatar from "@/app/components/ui/Avatar";
 
@@ -23,18 +24,48 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article?.body) return {};
+  const seoTitle = article.seoTitle ?? article.title;
   return {
-    title: article.title,
+    title: seoTitle,
     description: article.description,
     alternates: { canonical: `/hive/${article.slug}` },
     openGraph: {
       url: `/hive/${article.slug}`,
-      title: `${article.title} — energiebee`,
+      title: `${seoTitle} — energiebee`,
       description: article.description,
       type: "article",
       images: [{ url: article.image.src, alt: article.imageAlt }],
     },
   };
+}
+
+const URL_RE = /(https?:\/\/[^\s)]+)/g;
+
+/** Split a paragraph string into text + clickable links. Trailing
+ *  punctuation tucked onto the URL ("…2024.") is pulled back into
+ *  the text so it doesn't end up inside the href. */
+function linkify(text: string) {
+  const parts = text.split(URL_RE);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      const trail = part.match(/[.,;:!?]+$/)?.[0] ?? "";
+      const href = trail ? part.slice(0, -trail.length) : part;
+      return (
+        <span key={i}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="break-all text-[#1b6ac9] underline transition-colors hover:text-[#0b4ec9]"
+          >
+            {href}
+          </a>
+          {trail}
+        </span>
+      );
+    }
+    return part;
+  });
 }
 
 function BackArrow() {
@@ -179,20 +210,55 @@ export default async function HiveArticlePage({
           />
         </div>
 
+        {/* lede / subtitle */}
+        {article.body.lede && (
+          <p className="mt-10 px-10 lg:px-20 text-lg font-bold leading-snug text-black sm:text-xl">
+            {article.body.lede}
+          </p>
+        )}
+
         {/* body */}
         <div className="mt-10 px-10 lg:px-20 space-y-6 text-[#545454]">
-          {article.body.sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="text-xl max-w-147.5 font-bold leading-tight text-black sm:text-[28px]">
-                {section.heading}
-              </h2>
-              {section.paragraphs.map((p, i) => (
-                <p key={i} className="mt-4 leading-relaxed text-base">
-                  {p}
-                </p>
-              ))}
-            </section>
-          ))}
+          {article.body.sections.map((section, sectionIndex) => {
+            const blocks = section.blocks ?? section.paragraphs ?? [];
+            return (
+              <section key={sectionIndex}>
+                {section.heading && (
+                  <h2 className="text-xl max-w-147.5 font-bold leading-tight text-black sm:text-[28px]">
+                    {section.heading}
+                  </h2>
+                )}
+                {blocks.map((block, i) => {
+                  const spacing = section.heading || i > 0 ? "mt-4" : "";
+                  if (typeof block === "string") {
+                    return (
+                      <p
+                        key={i}
+                        className={`leading-relaxed text-base ${spacing}`}
+                      >
+                        {linkify(block)}
+                      </p>
+                    );
+                  }
+                  return (
+                    <ul
+                      key={i}
+                      className={`list-disc space-y-2 pl-6 ${spacing}`}
+                    >
+                      {block.items.map((item, j) => (
+                        <li
+                          key={j}
+                          className="leading-relaxed text-base marker:text-[#545454]"
+                        >
+                          {linkify(item)}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })}
+              </section>
+            );
+          })}
         </div>
 
         {/* in-body image */}
@@ -205,6 +271,19 @@ export default async function HiveArticlePage({
               sizes="(min-width: 800px) 800px, 100vw"
               className="object-cover"
             />
+          </div>
+        )}
+
+        {/* end-of-article CTA */}
+        {article.body.cta && (
+          <div className="mt-12 flex justify-center px-10 lg:px-20">
+            <CtaButton
+              href={article.body.cta.href ?? "#"}
+              size="md"
+              className="text-lg!"
+            >
+              {article.body.cta.label}
+            </CtaButton>
           </div>
         )}
       </article>
