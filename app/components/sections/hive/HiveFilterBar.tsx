@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-
-const CATEGORIES = [
+export const HIVE_CATEGORIES = [
   "All",
   "Nature Knows Best",
   "Eco Living",
   "Home & Living",
   "Innovation",
-];
+] as const;
+
+export type HiveCategory = (typeof HIVE_CATEGORIES)[number];
 
 function SearchIcon() {
   return (
@@ -29,15 +29,24 @@ function SearchIcon() {
   );
 }
 
-/**
- * Search input + horizontal category chip row. State is local (visual
- * filter only — wire to actual filtering when the article list becomes
- * data-driven).
- */
-export default function HiveFilterBar() {
-  const [active, setActive] = useState("All");
-  const [query, setQuery] = useState("");
+type Props = {
+  query: string;
+  onQueryChange: (q: string) => void;
+  category: HiveCategory;
+  onCategoryChange: (cat: HiveCategory) => void;
+};
 
+/**
+ * Controlled search input + horizontal category chip row. Filter
+ * state lives in the parent (see HiveBrowse) so the featured carousel
+ * and latest grid can react to it.
+ */
+export default function HiveFilterBar({
+  query,
+  onQueryChange,
+  category,
+  onCategoryChange,
+}: Props) {
   return (
     <div className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
       <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -50,20 +59,20 @@ export default function HiveFilterBar() {
             type="search"
             placeholder="Search articles..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => onQueryChange(e.target.value)}
             className="w-full rounded-full border border-neutral-200 bg-white py-3.25 pl-12 pr-4 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/40"
           />
         </label>
 
         {/* category chips */}
         <div className="flex flex-wrap items-center gap-2">
-          {CATEGORIES.map((cat) => {
-            const isActive = active === cat;
+          {HIVE_CATEGORIES.map((cat) => {
+            const isActive = category === cat;
             return (
               <button
                 key={cat}
                 type="button"
-                onClick={() => setActive(cat)}
+                onClick={() => onCategoryChange(cat)}
                 className={`rounded-full px-5 py-3.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white shadow-[0_8px_20px_-8px_rgba(238,61,26,0.5)]"

@@ -39,8 +39,8 @@ function ChevronRight({ className }: { className?: string }) {
 
 function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
   return (
-    <article className="grid grid-cols-1 overflow-hidden lg:grid-cols-[1fr_1fr]">
-      <div className="relative aspect-4/3 lg:aspect-auto lg:h-122.5">
+    <article className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[1fr_1fr]">
+      <div className="relative aspect-4/3 lg:aspect-auto lg:h-full">
         <Image
           src={slide.image}
           alt={slide.imageAlt}
@@ -65,7 +65,7 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
           <p className="text-[#545454] mt-4">{slide.carouselIntro}</p>
         )}
         {slide.carouselBody && (
-          <p className="text-base text-[#545454] mt-8 line-clamp-4">
+          <p className="text-base text-[#545454] mt-4 line-clamp-3">
             {slide.carouselBody}
           </p>
         )}
@@ -176,7 +176,7 @@ export default function HiveFeatured() {
             type="button"
             aria-label="Previous slide"
             onClick={scrollPrev}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_64px_80px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_34px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronLeft />
           </button>
@@ -184,7 +184,7 @@ export default function HiveFeatured() {
             type="button"
             aria-label="Next slide"
             onClick={scrollNext}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_64px_80px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_34px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronRight />
           </button>
