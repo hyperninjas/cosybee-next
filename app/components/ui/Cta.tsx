@@ -26,7 +26,7 @@ export function CtaButton({
   return (
     <a
       href={href}
-      className={`inline-flex shrink-0 font-semibold text-[22px] items-center justify-center rounded-xl bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
+      className={`inline-flex shrink-0 font-semibold text-[22px] items-center justify-center rounded-lg bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>
@@ -64,7 +64,7 @@ export function CtaBanner({
   return (
     <section className="px-6 py-12 sm:px-10 lg:px-30 lg:py-16">
       <div
-        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-3xl bg-white px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-30 lg:py-14"
+        className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-white px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-30 lg:py-14"
         style={HEX_PATTERN_BG}
       >
         <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">

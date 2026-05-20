@@ -14,16 +14,16 @@ import Hexagon from "../../ui/Hexagon";
 export default function PerfectHarmony() {
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] py-20 text-black lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="max-w-163.5 z-9">
+        <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
           <SectionTitle>Everything in perfect harmony</SectionTitle>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
+          <p className="mt-3 max-w-xl text-base max-[1200px]:text-center leading-relaxed text-[#545454]">
             A single app that brings together heating, solar, and energy.
             Receive real-time information, monitor changes, and make decisions
             with peace of mind, only when necessary.
@@ -45,7 +45,7 @@ export default function PerfectHarmony() {
               description="One app for everything. No juggling multiple accounts or interfaces."
             />
           </div>
-          <CtaButton href="/try" size="md" className="mt-10">
+          <CtaButton href="/try" size="md" className="mt-10 w-fit">
             Experience the App
           </CtaButton>
         </div>
