@@ -1,53 +1,24 @@
-import type { StaticImageData } from "next/image";
 import beeFlowerImg from "@/public/bee-flower.png";
+import { type Article, createBlog } from "./articles";
 
-/** A single content block inside a section. Strings render as
- *  paragraphs; `{ items }` objects render as bulleted lists. */
-export type ArticleBlock = string | { items: string[] };
+// Re-exported so existing `@/app/lib/hive-articles` type imports keep working.
+export type {
+  Article as HiveArticle,
+  ArticleBlock,
+  ArticleSection,
+  ArticleBody,
+} from "./articles";
 
-export type ArticleSection = {
-  /** Section heading. Omit for an unheaded lead/intro block. */
-  heading?: string;
-  /** Plain paragraphs. Use this for simple prose sections. */
-  paragraphs?: string[];
-  /** Mixed paragraphs and lists. Strings render as <p>, objects with
-   *  `items` render as <ul>. Wins over `paragraphs` when both set. */
-  blocks?: ArticleBlock[];
-};
+/** Categories shown in the hive filter bar. */
+export const HIVE_CATEGORIES = [
+  "All",
+  "Nature Knows Best",
+  "Eco Living",
+  "Home & Living",
+  "Innovation",
+] as const;
 
-export type ArticleBody = {
-  /** Bold subtitle rendered under the article H1. */
-  lede?: string;
-  sections: ArticleSection[];
-  /** Optional photo rendered after the last section, full-width. */
-  inlineImage?: { src: StaticImageData; alt: string };
-  /** Optional call-to-action button rendered at the end of the body. */
-  cta?: { label: string; href?: string };
-};
-
-export type HiveArticle = {
-  slug: string;
-  category: string;
-  readTime: string;
-  /** Visible H1 / card title. */
-  title: string;
-  /** Optional <title> + og:title override for search engines. Falls
-   *  back to `title` when omitted. */
-  seoTitle?: string;
-  /** Short blurb shown on cards (latest grid + related). */
-  description: string;
-  image: StaticImageData;
-  imageAlt: string;
-  author: { name: string; date: string };
-  /** Two-line hook shown in the featured carousel. */
-  carouselIntro?: string;
-  /** Slightly longer carousel body — only used when promoted. */
-  carouselBody?: string;
-  /** Full article body. Articles without `body` aren't routable. */
-  body?: ArticleBody;
-};
-
-export const HIVE_ARTICLES: HiveArticle[] = [
+export const HIVE_ARTICLES: Article[] = [
   {
     slug: "a-warm-hive-a-cosy-home",
     category: "Nature Knows Best",
@@ -1129,26 +1100,10 @@ export const HIVE_ARTICLES: HiveArticle[] = [
   },
 ];
 
-export function getArticleBySlug(slug: string): HiveArticle | undefined {
-  return HIVE_ARTICLES.find((a) => a.slug === slug);
-}
+const hive = createBlog(HIVE_ARTICLES);
 
-/** Articles flagged for the home/featured carousel. */
-export function getFeaturedArticles(): HiveArticle[] {
-  return HIVE_ARTICLES.filter((a) => a.carouselIntro && a.carouselBody);
-}
-
-/** Latest grid. Omit `limit` (or pass `undefined`) to get every article. */
-export function getLatestArticles(limit?: number): HiveArticle[] {
-  return limit === undefined ? HIVE_ARTICLES : HIVE_ARTICLES.slice(0, limit);
-}
-
-/** Related articles for the in-article footer (excludes the current one). */
-export function getRelatedArticles(slug: string, limit = 2): HiveArticle[] {
-  return HIVE_ARTICLES.filter((a) => a.slug !== slug).slice(0, limit);
-}
-
-/** Routable article slugs — used by generateStaticParams. */
-export function getPublishedSlugs(): string[] {
-  return HIVE_ARTICLES.filter((a) => a.body).map((a) => a.slug);
-}
+export const getArticleBySlug = hive.getBySlug;
+export const getFeaturedArticles = hive.getFeatured;
+export const getLatestArticles = hive.getLatest;
+export const getRelatedArticles = hive.getRelated;
+export const getPublishedSlugs = hive.getPublishedSlugs;

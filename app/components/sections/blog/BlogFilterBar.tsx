@@ -1,15 +1,5 @@
 "use client";
 
-export const HIVE_CATEGORIES = [
-  "All",
-  "Nature Knows Best",
-  "Eco Living",
-  "Home & Living",
-  "Innovation",
-] as const;
-
-export type HiveCategory = (typeof HIVE_CATEGORIES)[number];
-
 function SearchIcon() {
   return (
     <svg
@@ -30,18 +20,21 @@ function SearchIcon() {
 }
 
 type Props = {
+  categories: readonly string[];
   query: string;
   onQueryChange: (q: string) => void;
-  category: HiveCategory;
-  onCategoryChange: (cat: HiveCategory) => void;
+  category: string;
+  onCategoryChange: (cat: string) => void;
 };
 
 /**
  * Controlled search input + horizontal category chip row. Filter
- * state lives in the parent (see HiveBrowse) so the featured carousel
- * and latest grid can react to it.
+ * state lives in the parent (see BlogBrowse) so the featured carousel
+ * and latest grid can react to it. Categories are passed in so each
+ * blog (hive, learn, …) can define its own.
  */
-export default function HiveFilterBar({
+export default function BlogFilterBar({
+  categories,
   query,
   onQueryChange,
   category,
@@ -66,7 +59,7 @@ export default function HiveFilterBar({
 
         {/* category chips */}
         <div className="flex flex-nowrap overflow-auto items-center gap-2 px-4">
-          {HIVE_CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = category === cat;
             return (
               <button
