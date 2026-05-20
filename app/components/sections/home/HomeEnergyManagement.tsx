@@ -17,37 +17,39 @@ export default function HomeEnergyManagement() {
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="max-w-163.5 z-9">
-          <SectionTitle>Energy Management</SectionTitle>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
-            A clear view of how energy is used, timed, and distributed across
-            your home.
-          </p>
-          <div className="mt-8 space-y-4">
-            <FeatureCard
-              glyph="sun"
-              title="Energy Use"
-              description={
-                "See where and when energy is used across your home.\n Understand how demand changes throughout the day."
-              }
-              descClassName="whitespace-pre-line"
-            />
-            <FeatureCard
-              glyph="dollar"
-              title="Cost Awareness"
-              description={
-                "Understand how usage translates into cost.\nSee how your daily activity affects overall spending."
-              }
-              descClassName="whitespace-pre-line"
-            />
-            <FeatureCard
-              glyph="chart"
-              title="System Behaviour"
-              description={
-                "See how your home operates as an energy system.\nUnderstand how usage, availability, and conditions interact."
-              }
-              descClassName="whitespace-pre-line"
-            />
+        <div className=" flex flex-col max-[1200px]:items-center  z-9">
+          <div className="max-w-163.5">
+            <SectionTitle>Energy Management</SectionTitle>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
+              A clear view of how energy is used, timed, and distributed across
+              your home.
+            </p>
+            <div className="mt-8 space-y-4">
+              <FeatureCard
+                glyph="sun"
+                title="Energy Use"
+                description={
+                  "See where and when energy is used across your home.\n Understand how demand changes throughout the day."
+                }
+                descClassName="whitespace-pre-line"
+              />
+              <FeatureCard
+                glyph="dollar"
+                title="Cost Awareness"
+                description={
+                  "Understand how usage translates into cost.\nSee how your daily activity affects overall spending."
+                }
+                descClassName="whitespace-pre-line"
+              />
+              <FeatureCard
+                glyph="chart"
+                title="System Behaviour"
+                description={
+                  "See how your home operates as an energy system.\nUnderstand how usage, availability, and conditions interact."
+                }
+                descClassName="whitespace-pre-line"
+              />
+            </div>
           </div>
         </div>
 

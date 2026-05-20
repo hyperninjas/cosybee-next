@@ -42,12 +42,12 @@ export default function EnergyAnalytics({
   deviceAlt = "energy analytics dashboard",
 }: EnergyAnalyticsProps = {}) {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-45 px-6 lg:px-0">
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 min-[1200px]:py-45 px-6 lg:px-0">
+      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
             against a non-zero containing block */}
-        <div className="absolute -left-50 -top-10 hidden w-125.5 lg:block">
+        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={clusterSrc}
             viewBox={HIVE_3_VIEWBOX}
@@ -57,7 +57,7 @@ export default function EnergyAnalytics({
           />
         </div>
         {/* middle: title + features */}
-        <div className="max-w-111.5">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
           <SectionTitle>{title}</SectionTitle>
           <div className="mt-8 space-y-8">
             {features.map((f) => (
@@ -68,11 +68,21 @@ export default function EnergyAnalytics({
               />
             ))}
           </div>
+          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
+          <div className="w-75 min-[1200px]:hidden mt-10">
+            <Image
+              src={deviceSrc}
+              alt={deviceAlt}
+              sizes="(min-width: 1024px) 300px, 280px"
+              quality={50}
+              className="h-auto w-full"
+            />
+          </div>
         </div>
         {/* right: analytics phone — wrapper has explicit width, image
             fills it via w-full h-auto so it scales proportionally
             instead of rendering at intrinsic size */}
-        <div className="absolute -top-20 right-0 hidden w-75 lg:block">
+        <div className="absolute -top-20 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceSrc}
             alt={deviceAlt}

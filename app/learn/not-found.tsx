@@ -8,6 +8,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function HiveNotFound() {
-  return <BlogNotFound basePath="/hive" backLabel="Back to Hive" />;
+export default function LearnNotFound() {
+  return <BlogNotFound basePath="/learn" backLabel="Back to Learn" />;
 }

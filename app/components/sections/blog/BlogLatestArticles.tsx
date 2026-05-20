@@ -3,19 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { getLatestArticles, type HiveArticle } from "@/app/lib/hive-articles";
+import { type Article } from "@/app/lib/articles";
 import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
-import type { HiveCategory } from "./HiveFilterBar";
 
 const INITIAL_VISIBLE = 3;
 const LOAD_STEP = 3;
 
-export function ArticleCard({ a }: { a: HiveArticle }) {
+export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
   return (
     <Link
-      href={`/hive/${a.slug}`}
+      href={`${basePath}/${a.slug}`}
       className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="relative aspect-[1.39]">
@@ -60,7 +59,7 @@ export function ArticleCard({ a }: { a: HiveArticle }) {
   );
 }
 
-function matchesArticle(a: HiveArticle, q: string) {
+function matchesArticle(a: Article, q: string) {
   if (!q) return true;
   const haystack =
     `${a.title} ${a.description} ${a.author.name} ${a.category}`.toLowerCase();
@@ -68,48 +67,58 @@ function matchesArticle(a: HiveArticle, q: string) {
 }
 
 type Props = {
+  articles: Article[];
+  basePath: string;
   query?: string;
-  category?: HiveCategory;
+  category?: string;
 };
 
 /**
  * "Latest Articles" — heading + 3-column responsive grid of article
  * cards. Starts with INITIAL_VISIBLE articles and reveals LOAD_STEP
  * more on each click of Load More. When the parent provides a query
- * or non-"All" category, the list is filtered and the visible count
- * resets so users see the freshest matches first.
+ * or non-"All" category, the list is filtered and the heading reflects
+ * the active filter.
  */
-export default function HiveLatestArticles({
+export default function BlogLatestArticles({
+  articles,
+  basePath,
   query = "",
   category = "All",
 }: Props) {
-  const allArticles = getLatestArticles();
   const [visible, setVisible] = useState(INITIAL_VISIBLE);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return allArticles.filter(
+    return articles.filter(
       (a) =>
         (category === "All" || a.category === category) && matchesArticle(a, q),
     );
-  }, [allArticles, query, category]);
+  }, [articles, query, category]);
 
-  const articles = filtered.slice(0, visible);
+  const shown = filtered.slice(0, visible);
   const canLoadMore = visible < filtered.length;
 
+  const q = query.trim();
+  const heading = q
+    ? `Results for "${q}"`
+    : category !== "All"
+      ? category
+      : "Latest Articles";
+
   return (
-    <section className="mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 lg:pt-0">
-      <h2 className="text-2xl font-bold text-black sm:text-[32px]">
-        Latest Articles
-      </h2>
+    <section
+      className={`mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 ${heading === "Latest Articles" ? "lg:pt-0" : ""} `}
+    >
+      <h2 className="text-2xl font-bold text-black sm:text-[32px]">{heading}</h2>
       {filtered.length === 0 ? (
         <p className="mt-8 text-base text-[#545454]">
           No articles match your search. Try a different keyword or category.
         </p>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 lg:gap-8">
-          {articles.map((a) => (
-            <ArticleCard key={a.slug} a={a} />
+          {shown.map((a) => (
+            <ArticleCard key={a.slug} a={a} basePath={basePath} />
           ))}
         </div>
       )}

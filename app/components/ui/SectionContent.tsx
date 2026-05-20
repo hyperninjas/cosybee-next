@@ -211,7 +211,7 @@ export function SectionTitle({
 }) {
   return (
     <h2
-      className={`text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
+      className={`text-3xl font-extrabold leading-tight max-[1200px]:text-center tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
     >
       {children}
     </h2>

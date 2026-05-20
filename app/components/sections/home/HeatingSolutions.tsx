@@ -13,7 +13,7 @@ import sideImage from "@/public/energy-monitoring.png";
 export default function HeatingSolutions() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
+      <div className="relative mx-auto max-w-360 gap-12 px-6 sm:px-10  lg:gap-16 lg:px-30 flex flex-col lg:flex-row items-center">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#F7F2E1"
@@ -31,7 +31,7 @@ export default function HeatingSolutions() {
         />
 
         {/* text — right */}
-        <div className="max-w-163.5 z-9">
+        <div className="min-[1200px]:max-w-163.5 md:max-w-153.5  z-9">
           <SectionTitle>Heating Solutions</SectionTitle>
           <div className="mt-8 space-y-4">
             <FeatureCard

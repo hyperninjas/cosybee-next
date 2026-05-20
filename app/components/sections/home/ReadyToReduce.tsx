@@ -21,7 +21,7 @@ export default function ReadyToReduce() {
             className="h-auto w-44 lg:w-52"
           />
         </div>
-        <div className="h-auto w-44 lg:w-52"></div>
+        <div className="h-auto hidden lg:block w-44 lg:w-52"></div>
         {/* text + buttons */}
         <div className="flex-1 text-center lg:text-left">
           <h2 className="text-2xl font-extrabold leading-tight text-black sm:text-3xl lg:text-[40px]">
@@ -31,7 +31,7 @@ export default function ReadyToReduce() {
             Download the free Energiebee app and start taking control today
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-            <CtaButton href="/download" size="md">
+            <CtaButton href="/download" size="md" className="h-[58.66px]">
               Download Free App
             </CtaButton>
             <AppStoreButton color="#545454" />

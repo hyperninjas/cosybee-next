@@ -39,7 +39,7 @@ export default function HomeHero() {
             feels lighter, smarter, and aligned with the way you live.
           </p>
           <div className="mt-14 flex flex-wrap items-center gap-4">
-            <CtaButton href="/try" size="md">
+            <CtaButton href="/try" size="md" className="h-[58.66px]">
               Try it for free
             </CtaButton>
             <AppStoreButton />

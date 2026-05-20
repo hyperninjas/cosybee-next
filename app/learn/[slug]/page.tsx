@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  getArticleBySlug,
-  getPublishedSlugs,
-  getRelatedArticles,
-} from "@/app/lib/hive-articles";
+  getLearnArticleBySlug,
+  getPublishedLearnSlugs,
+  getRelatedLearnArticles,
+} from "@/app/lib/learn-articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 
 /** Prerender every routable article at build time. Slugs without a
  *  body are intentionally excluded — they're card-only stubs. */
 export function generateStaticParams() {
-  return getPublishedSlugs().map((slug) => ({ slug }));
+  return getPublishedLearnSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/hive/[slug]">): Promise<Metadata> {
+}: PageProps<"/learn/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = getLearnArticleBySlug(slug);
   if (!article?.body) return {};
   const seoTitle = article.seoTitle ?? article.title;
   return {
     title: seoTitle,
     description: article.description,
-    alternates: { canonical: `/hive/${article.slug}` },
+    alternates: { canonical: `/learn/${article.slug}` },
     openGraph: {
-      url: `/hive/${article.slug}`,
+      url: `/learn/${article.slug}`,
       title: `${seoTitle} — energiebee`,
       description: article.description,
       type: "article",
@@ -34,19 +34,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function HiveArticlePage({
+export default async function LearnArticlePage({
   params,
-}: PageProps<"/hive/[slug]">) {
+}: PageProps<"/learn/[slug]">) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = getLearnArticleBySlug(slug);
   if (!article?.body) notFound();
 
   return (
     <ArticleDetail
       article={{ ...article, body: article.body }}
-      related={getRelatedArticles(article.slug)}
-      basePath="/hive"
-      backLabel="Back to Blog"
+      related={getRelatedLearnArticles(article.slug)}
+      basePath="/learn"
+      backLabel="Back to Learn"
     />
   );
 }

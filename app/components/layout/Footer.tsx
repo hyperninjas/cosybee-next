@@ -93,8 +93,8 @@ export default function Footer() {
 
       {/* bottom strip */}
       <div className="border-t border-[#FFFFFF1A] ">
-        <div className="mx-auto flex max-w-360 flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-30">
-          <p className="text-sm font-medium text-white">
+        <div className="mx-auto flex max-w-360 flex-col-reverse gap-4 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-10 lg:px-30">
+          <p className="text-sm font-medium text-white md:mt-0 mt-2">
             © 2026 Energiebee. All rights reserved.
           </p>
           <ul className="flex flex-wrap items-center gap-6">

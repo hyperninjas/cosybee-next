@@ -5,12 +5,17 @@ import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import sideImage from "@/public/bee-hive.png";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 
+type Props = {
+  title: string;
+  description: string;
+};
+
 /**
- * Hive hero — same structural pattern as the solar Hero (background
- * photo, decorative olive hex bleeding from the left, 3-hex cluster on
- * the right) but with hive-specific copy and no CTA button.
+ * Blog hero — background photo, decorative olive hex bleeding from the
+ * left, and a 3-hex cluster on the right. Copy is passed in so each
+ * blog (hive, learn, …) supplies its own title + description.
  */
-export default function HiveHero() {
+export default function BlogHero({ title, description }: Props) {
   return (
     <section className="relative isolate overflow-hidden bg-black text-white">
       {/* background photo + bottom-fade overlay */}
@@ -39,12 +44,9 @@ export default function HiveHero() {
         {/* text */}
         <div className="relative z-10 max-w-xl">
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
-            The Hive
+            {title}
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">
-            Insights, stories, and expert advice on sustainable energy solutions
-            for modern homes.
-          </p>
+          <p className="mt-4 max-w-md text-lg text-neutral-300">{description}</p>
         </div>
 
         <SharedImageHexCluster

@@ -1,26 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { type Article } from "@/app/lib/articles";
 import Divider from "../../ui/Divider";
-import HiveFeatured from "./HiveFeatured";
-import HiveFilterBar, { type HiveCategory } from "./HiveFilterBar";
-import HiveLatestArticles from "./HiveLatestArticles";
+import BlogFeatured from "./BlogFeatured";
+import BlogFilterBar from "./BlogFilterBar";
+import BlogLatestArticles from "./BlogLatestArticles";
+
+type Props = {
+  articles: Article[];
+  featured: Article[];
+  categories: readonly string[];
+  /** Link base for article cards/links, e.g. "/hive" or "/learn". */
+  basePath: string;
+};
 
 /**
- * Client wrapper that owns the hive filter state (search query +
+ * Client wrapper that owns the blog filter state (search query +
  * active category) and shares it with the filter bar and the latest
  * articles grid. The featured carousel collapses with a CSS
  * `grid-rows` transition when any filter is active so users land
  * straight on results.
  */
-export default function HiveBrowse() {
+export default function BlogBrowse({
+  articles,
+  featured,
+  categories,
+  basePath,
+}: Props) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<HiveCategory>("All");
+  const [category, setCategory] = useState("All");
   const isFiltered = query.trim() !== "" || category !== "All";
 
   return (
     <>
-      <HiveFilterBar
+      <BlogFilterBar
+        categories={categories}
         query={query}
         onQueryChange={setQuery}
         category={category}
@@ -36,10 +51,15 @@ export default function HiveBrowse() {
         }`}
       >
         <div className="min-h-0 overflow-hidden">
-          <HiveFeatured />
+          <BlogFeatured slides={featured} basePath={basePath} />
         </div>
       </div>
-      <HiveLatestArticles query={query} category={category} />
+      <BlogLatestArticles
+        articles={articles}
+        basePath={basePath}
+        query={query}
+        category={category}
+      />
     </>
   );
 }

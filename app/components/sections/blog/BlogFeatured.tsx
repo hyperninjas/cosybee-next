@@ -5,10 +5,8 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../../ui/Avatar";
 import { CtaButton } from "../../ui/Cta";
-import { getFeaturedArticles, type HiveArticle } from "@/app/lib/hive-articles";
+import { type Article } from "@/app/lib/articles";
 import Dot from "../../ui/Dot";
-
-const SLIDES: HiveArticle[] = getFeaturedArticles();
 
 function ChevronLeft({ className }: { className?: string }) {
   return (
@@ -37,7 +35,15 @@ function ChevronRight({ className }: { className?: string }) {
   );
 }
 
-function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
+function Slide({
+  slide,
+  basePath,
+  priority,
+}: {
+  slide: Article;
+  basePath: string;
+  priority: boolean;
+}) {
   return (
     <article className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[1fr_1fr]">
       <div className="relative aspect-4/3 lg:aspect-auto lg:h-full">
@@ -58,7 +64,10 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
             {slide.readTime}
           </span>
         </div>
-        <h2 className="text-2xl tracking-[-0.03em] font-extrabold text-black sm:text-3xl lg:text-[40px] mt-3">
+        <h2
+          title={slide.title}
+          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-black sm:text-3xl lg:text-[40px] mt-3"
+        >
           {slide.title}
         </h2>
         {slide.carouselIntro && (
@@ -69,7 +78,7 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
             {slide.carouselBody}
           </p>
         )}
-        <div className="flex items-center gap-3 mt-auto">
+        <div className="flex items-center gap-3 mt-4">
           <Avatar name={slide.author.name} />
           <div className="text-base">
             <div className="font-bold text-black text-lg">
@@ -81,7 +90,7 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
           </div>
         </div>
         <CtaButton
-          href={`/hive/${slide.slug}`}
+          href={`${basePath}/${slide.slug}`}
           size="md"
           className="mt-8 w-full font-semibold text-lg! h-13.25!"
         >
@@ -93,17 +102,22 @@ function Slide({ slide, priority }: { slide: HiveArticle; priority: boolean }) {
 }
 
 /**
- * Featured-article carousel powered by Embla Carousel v9. Slides come
- * from `getFeaturedArticles()` (articles flagged with `carouselIntro`
- * / `carouselBody`). Supports drag/swipe out of the box, plus arrows
- * and clickable dots wired to the Embla API.
+ * Featured-article carousel powered by Embla Carousel v9. Slides are
+ * passed in (articles flagged with `carouselIntro` / `carouselBody`)
+ * along with the link `basePath` (e.g. "/hive" or "/learn"). Supports
+ * drag/swipe, arrows, and clickable dots wired to the Embla API.
  *
  * Note: useEmblaCarousel returns a 3-tuple in v9 — [rootRef, api, apiSync].
- * The 2nd element is `undefined` until the carousel mounts; the 3rd is
- * the always-defined synchronous handle. We use the 2nd here so calls
+ * The 2nd element is `undefined` until the carousel mounts, so calls
  * naturally no-op pre-mount via optional chaining.
  */
-export default function HiveFeatured() {
+export default function BlogFeatured({
+  slides,
+  basePath,
+}: {
+  slides: Article[];
+  basePath: string;
+}) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -119,7 +133,7 @@ export default function HiveFeatured() {
     emblaApi.on("reinit", onSelect);
   }, [emblaApi]);
 
-  if (SLIDES.length === 0) return null;
+  if (slides.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
@@ -129,15 +143,15 @@ export default function HiveFeatured() {
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
-          {SLIDES.map((s, i) => (
+          {slides.map((s, i) => (
             <div
               key={s.slug}
               className="min-w-0 flex-[0_0_100%]"
               role="group"
               aria-roledescription="slide"
-              aria-label={`${i + 1} of ${SLIDES.length}`}
+              aria-label={`${i + 1} of ${slides.length}`}
             >
-              <Slide slide={s} priority={i === 0} />
+              <Slide slide={s} basePath={basePath} priority={i === 0} />
             </div>
           ))}
         </div>
@@ -151,7 +165,7 @@ export default function HiveFeatured() {
             role="tablist"
             aria-label="Featured article slides"
           >
-            {SLIDES.map((s, i) => {
+            {slides.map((s, i) => {
               const isActive = i === selectedIndex;
               return (
                 <button
@@ -176,7 +190,7 @@ export default function HiveFeatured() {
             type="button"
             aria-label="Previous slide"
             onClick={scrollPrev}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_34px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronLeft />
           </button>
@@ -184,7 +198,7 @@ export default function HiveFeatured() {
             type="button"
             aria-label="Next slide"
             onClick={scrollNext}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_34px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronRight />
           </button>

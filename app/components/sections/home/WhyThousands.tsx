@@ -44,11 +44,11 @@ export default function WhyThousands() {
             title="Why thousands choose Energiebee"
             description="Simple insights that help you save money from day one"
           />
-          <div className="relative z-9 mx-auto mt-10 grid max-w-360 grid-cols-1 py-9 sm:grid-cols-3">
+          <div className="relative z-9 mx-auto min-[1000px]:mt-10 grid max-w-360 grid-cols-1 py-9 max-[1000px]:pb-0 min-[1000px]:grid-cols-3">
             {POINTS.map((p) => (
               <div
                 key={p.title}
-                className="md:border-r border-b md:border-b-0  border-[#EBEBEB] p-10 text-center last:border-r-0 last:border-b-0"
+                className="min-[1000px]:border-r border-b min-[1000px]:border-b-0  border-[#EBEBEB] p-10 text-center last:border-r-0 last:border-b-0"
               >
                 <Image
                   src={p.icon}

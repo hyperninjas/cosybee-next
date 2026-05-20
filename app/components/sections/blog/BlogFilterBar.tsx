@@ -1,15 +1,5 @@
 "use client";
 
-export const HIVE_CATEGORIES = [
-  "All",
-  "Nature Knows Best",
-  "Eco Living",
-  "Home & Living",
-  "Innovation",
-] as const;
-
-export type HiveCategory = (typeof HIVE_CATEGORIES)[number];
-
 function SearchIcon() {
   return (
     <svg
@@ -30,18 +20,21 @@ function SearchIcon() {
 }
 
 type Props = {
+  categories: readonly string[];
   query: string;
   onQueryChange: (q: string) => void;
-  category: HiveCategory;
-  onCategoryChange: (cat: HiveCategory) => void;
+  category: string;
+  onCategoryChange: (cat: string) => void;
 };
 
 /**
  * Controlled search input + horizontal category chip row. Filter
- * state lives in the parent (see HiveBrowse) so the featured carousel
- * and latest grid can react to it.
+ * state lives in the parent (see BlogBrowse) so the featured carousel
+ * and latest grid can react to it. Categories are passed in so each
+ * blog (hive, learn, …) can define its own.
  */
-export default function HiveFilterBar({
+export default function BlogFilterBar({
+  categories,
   query,
   onQueryChange,
   category,
@@ -65,17 +58,17 @@ export default function HiveFilterBar({
         </label>
 
         {/* category chips */}
-        <div className="flex flex-wrap items-center gap-2">
-          {HIVE_CATEGORIES.map((cat) => {
+        <div className="flex flex-nowrap overflow-auto items-center gap-2 px-4">
+          {categories.map((cat) => {
             const isActive = category === cat;
             return (
               <button
                 key={cat}
                 type="button"
                 onClick={() => onCategoryChange(cat)}
-                className={`rounded-full px-5 py-3.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
-                    ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white shadow-[0_8px_20px_-8px_rgba(238,61,26,0.5)]"
+                    ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white "
                     : "bg-[#F3F3F3] text-[#545454] hover:bg-neutral-200"
                 }`}
               >
