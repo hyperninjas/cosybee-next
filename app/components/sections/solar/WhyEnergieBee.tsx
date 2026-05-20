@@ -58,11 +58,11 @@ export default function WhyEnergieBee({
 }: WhyEnergieBeeProps = {}) {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25 px-6 lg:px-0">
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10">
+      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone (absolute, bleeds into the section) — wrapper
             has explicit width, image fills it via w-full h-auto so it
             scales proportionally instead of rendering at intrinsic size */}
-        <div className="absolute -top-7 left-0 hidden w-[345.3px] lg:block">
+        <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
           <Image
             src={deviceSrc}
             alt={deviceAlt}
@@ -73,9 +73,19 @@ export default function WhyEnergieBee({
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="max-w-111.5 z-9">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
           <SectionTitle>{title}</SectionTitle>
-          <SectionLead>{lead}</SectionLead>
+          <SectionLead className="max-[1200px]:text-center">{lead}</SectionLead>
+          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
+          <div className="w-[345.3px] min-[1200px]:hidden mt-8">
+            <Image
+              src={deviceSrc}
+              alt={deviceAlt}
+              sizes="(min-width: 1024px) 350px, 280px"
+              quality={50}
+              className="h-auto w-full"
+            />
+          </div>
           <div className="mt-8 space-y-4">
             {cards.map((c) => (
               <FeatureCard
@@ -91,7 +101,7 @@ export default function WhyEnergieBee({
         {/* right: 3-hex hive cluster (mirrored, installer photo) —
             wrapper holds the absolute positioning + explicit width so
             the inner `w-full` has a definite reference */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 lg:block">
+        <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={clusterSrc}
             viewBox={HIVE_3_VIEWBOX}

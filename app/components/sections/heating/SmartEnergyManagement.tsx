@@ -7,14 +7,14 @@ import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 export default function SmartEnergyManagement() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-22.5">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
           className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="z-9">
+        <div className="z-9 flex flex-col max-[1200px]:items-center min-[1200px]:max-w-163.5">
           <SectionTitle>Smart Heating Control</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
