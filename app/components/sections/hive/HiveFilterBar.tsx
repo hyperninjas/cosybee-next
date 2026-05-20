@@ -65,7 +65,7 @@ export default function HiveFilterBar({
         </label>
 
         {/* category chips */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-nowrap overflow-auto items-center gap-2 px-4">
           {HIVE_CATEGORIES.map((cat) => {
             const isActive = category === cat;
             return (
@@ -73,9 +73,9 @@ export default function HiveFilterBar({
                 key={cat}
                 type="button"
                 onClick={() => onCategoryChange(cat)}
-                className={`rounded-full px-5 py-3.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
-                    ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white shadow-[0_8px_20px_-8px_rgba(238,61,26,0.5)]"
+                    ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white "
                     : "bg-[#F3F3F3] text-[#545454] hover:bg-neutral-200"
                 }`}
               >

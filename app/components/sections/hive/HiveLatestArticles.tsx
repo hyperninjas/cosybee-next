@@ -97,10 +97,19 @@ export default function HiveLatestArticles({
   const articles = filtered.slice(0, visible);
   const canLoadMore = visible < filtered.length;
 
+  const q = query.trim();
+  const heading = q
+    ? `Results for "${q}"`
+    : category !== "All"
+      ? category
+      : "Latest Articles";
+
   return (
-    <section className="mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 lg:pt-0">
+    <section
+      className={`mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 ${heading === "Latest Articles" ? "lg:pt-0" : ""} `}
+    >
       <h2 className="text-2xl font-bold text-black sm:text-[32px]">
-        Latest Articles
+        {heading}
       </h2>
       {filtered.length === 0 ? (
         <p className="mt-8 text-base text-[#545454]">
