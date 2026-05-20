@@ -1,19 +1,38 @@
 import type { Metadata } from "next";
-import ComingSoon from "../components/layout/ComingSoon";
+import BlogHero from "../components/sections/blog/BlogHero";
+import BlogBrowse from "../components/sections/blog/BlogBrowse";
+import {
+  LEARN_ARTICLES,
+  LEARN_CATEGORIES,
+  getFeaturedLearnArticles,
+} from "../lib/learn-articles";
 
 export const metadata: Metadata = {
   title: "Learn",
   description:
     "Guides, tutorials, and energy-saving tips from the energiebee team.",
   alternates: { canonical: "/learn" },
-  robots: { index: false, follow: true },
+  openGraph: {
+    url: "/learn",
+    title: "Learn — energiebee",
+    description:
+      "Guides, tutorials, and energy-saving tips from the energiebee team.",
+  },
 };
 
 export default function LearnPage() {
   return (
-    <ComingSoon
-      title="Learn"
-      description="Guides, tutorials, and energy-saving tips from the energiebee team. We're writing them now — back soon with everything you need to know."
-    />
+    <main className="flex-1">
+      <BlogHero
+        title="Learn"
+        description="Guides, tutorials, and energy-saving tips from the energiebee team."
+      />
+      <BlogBrowse
+        articles={LEARN_ARTICLES}
+        featured={getFeaturedLearnArticles()}
+        categories={LEARN_CATEGORIES}
+        basePath="/learn"
+      />
+    </main>
   );
 }
