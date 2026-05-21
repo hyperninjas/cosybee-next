@@ -43,13 +43,13 @@ const DEFAULT_CARDS: MediaCardContent[] = [
     ],
   },
   {
-    title: "Seasonal Pattern Analysis",
+    title: "Smart Energy Usage Recommendations",
     description:
-      "Track how your energy production changes through the seasons. Our AI learns from year-over-year data to deliver ever-more-accurate predictions tailored to your location.",
+      "Get intelligent notifications on the best times to use high-energy appliances based on solar production forecasts, maximizing your energy independence and savings.",
     bullets: [
-      "Year-on-year comparisons",
-      "Sunshine hour modeling",
-      "Peak season alerts",
+      "Optimal usage timing alerts",
+      "Peak production windows",
+      "Battery charging optimization",
     ],
   },
 ];

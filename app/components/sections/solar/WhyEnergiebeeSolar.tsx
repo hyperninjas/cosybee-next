@@ -72,7 +72,7 @@ export default function WhyEnergiebeeSolar({
   bottomRight = DEFAULT_BOTTOM_RIGHT,
 }: WhyEnergiebeeSolarProps = {}) {
   return (
-    <section className="relative overflow-hidden bg-white py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
@@ -82,7 +82,9 @@ export default function WhyEnergiebeeSolar({
         {/* text — left */}
         <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
           <SectionTitle>{title}</SectionTitle>
-          <SectionLead className="max-w-163.5 max-[1200px]:text-center">{lead}</SectionLead>
+          <SectionLead className="max-w-163.5 max-[1200px]:text-center">
+            {lead}
+          </SectionLead>
           <div className="mt-8 space-y-4">
             {cards.map((c) => (
               <FeatureCard

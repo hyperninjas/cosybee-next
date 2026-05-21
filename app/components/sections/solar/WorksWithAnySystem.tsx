@@ -20,13 +20,15 @@ export default function WorksWithAnySystem({
   href = "/start",
 }: WorksWithAnySystemProps = {}) {
   return (
-    <section className="mx-auto max-w-360 pb-11 pt-4 px-4 lg:px-30">
-      <CtaCard
-        title={title}
-        description={description}
-        buttonText={buttonText}
-        href={href}
-      />
+    <section className="bg-[#F7F7F7]">
+      <div className="mx-auto max-w-360 pb-11 pt-4 px-4 lg:px-30 bg-[#F7F7F7]">
+        <CtaCard
+          title={title}
+          description={description}
+          buttonText={buttonText}
+          href={href}
+        />
+      </div>
     </section>
   );
 }

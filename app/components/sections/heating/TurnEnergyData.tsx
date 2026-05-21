@@ -4,7 +4,7 @@ import sideImg from "@/public/energy-management.png";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 
-export default function SmartEnergyManagement() {
+export default function TurnEnergyData() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-22.5">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
@@ -15,19 +15,19 @@ export default function SmartEnergyManagement() {
         />
         {/* text — left */}
         <div className="z-9 flex flex-col max-[1200px]:items-center min-[1200px]:max-w-163.5">
-          <SectionTitle>Smart Heating Control</SectionTitle>
+          <SectionTitle>Turn Energy Data Into Real Savings</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Zone-Based Heating"
-              description="Heat only the rooms you actually use. Save up to 30% by targeting comfort, not the entire house."
+              title="Savings Intelligence"
+              description="Identify opportunities to reduce heating costs through smarter decisions."
             />
             <FeatureItem
-              title="Geofencing"
-              description="Your home pre-warms when you head back and dials down when you leave — automatically, no app required."
+              title="Grid Independence Tracking"
+              description="Measure how much energy your home is saving from external grid dependency."
             />
             <FeatureItem
-              title="Boiler Optimisation"
-              description="AI tunes flow temperatures and cycling patterns for maximum efficiency without overshoot or short-cycling."
+              title="Carbon & Efficiency Metrics"
+              description="Understand your environmental impact through clear, actionable energy metrics."
             />
           </div>
         </div>

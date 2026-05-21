@@ -1,39 +1,33 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";
 
-export default function WhyEnergieBee() {
+export default function SmarterUnderstanding() {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: phone — wrapper has explicit width, image fills it
-            via w-full h-auto so it scales proportionally instead of
-            rendering at intrinsic size */}
+        {/* left: phone mockup */}
         <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
-            alt="energy analytics dashboard"
+            alt="energy dashboard"
             sizes="(min-width: 1024px) 350px, 280px"
             quality={50}
             className="h-auto w-full"
           />
         </div>
 
-        {/* middle: title + lead + feature cards */}
+        {/* middle: title + feature cards */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
-          <SectionTitle>Why Choose energiebee Heating?</SectionTitle>
-          <SectionLead className="max-[1200px]:text-center">
-            Part of the energiebee app — everything you need to monitor,
-            control, and optimize your home heating.
-          </SectionLead>
+          <SectionTitle>A Smarter Understanding of Your Home</SectionTitle>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-[345.3px] min-[1200px]:hidden mt-8">
             <Image
               src={deviceImg}
-              alt="energy analytics dashboard"
+              alt="energy dashboard"
               sizes="(min-width: 1024px) 350px, 280px"
               quality={50}
               className="h-auto w-full"
@@ -42,25 +36,23 @@ export default function WhyEnergieBee() {
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Comfort"
-              description="Hit your ideal temperature in every room, every hour of the day — without thinking about it."
+              title="Battery Optimisation Insights"
+              description="Improve how stored energy is used across your home system."
             />
             <FeatureCard
               glyph="dollar"
-              title="Track Savings"
-              description="See exactly how much money smarter heating saves you, with monthly and year-over-year comparisons."
+              title="Connected Home Signals"
+              description="Prepare your home for real-time energy coordination and future smart integrations."
             />
             <FeatureCard
               glyph="chart"
-              title="Smart Analytics"
-              description="Detailed insights on runtime, gas usage, and per-room efficiency — find the wins."
+              title="Indoor Air Quality Awareness"
+              description="Monitor air quality conditions that affect comfort, health, and energy efficiency."
             />
           </div>
         </div>
 
-        {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
-            absolute positioning + explicit width so the inner `w-full`
-            has a definite reference */}
+        {/* right: 3-hex hive cluster (mirrored) */}
         <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}

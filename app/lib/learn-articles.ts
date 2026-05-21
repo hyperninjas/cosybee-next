@@ -8,6 +8,7 @@ export const LEARN_CATEGORIES = [
   "Solar",
   "EPC",
   "Tariffs",
+  "Company",
 ] as const;
 
 /**
@@ -658,6 +659,43 @@ export const LEARN_ARTICLES: Article[] = [
         },
       ],
       cta: { label: "Check Your Home's Potential Savings" },
+    },
+  },
+  {
+    slug: "about-us",
+    category: "Company",
+    readTime: "4 min read",
+    title: "About us",
+    seoTitle: "About energiebee",
+    description:
+      "How energiebee brings solar, consumption, weather, and pricing into a single flow — and the beekeeping roots behind that way of thinking.",
+    image: beeFlowerImg,
+    imageAlt: "A rural family home with beehives in the background",
+    author: { name: "Chris Glasser", date: "20 May 2026" },
+    body: {
+      sections: [
+        {
+          paragraphs: [
+            "In most homes, energy appears in separate moments. Solar panels produce. Appliances consume. A bill arrives later.",
+            "EnergieBee brings those parts into a single flow.",
+            "We build tools that reveal how energy moves through a home as the day unfolds. Solar generation, daily consumption, weather, and pricing come together in one continuous view, allowing the behaviour of a home to become visible over time.",
+            "As this picture becomes clearer, patterns begin to appear. Mornings take shape. Evenings carry their own peaks. Seasons settle into rhythms that repeat and evolve.",
+            "From there, decisions begin to follow what is already happening.",
+            "Our way of thinking comes from much earlier places.",
+            "We grew up in families connected to the land, where life follows seasons and work moves with natural cycles. In those environments, energy can easily be observed, used with care, and understood as something that connects every part of daily life.",
+            "Nature holds its own intelligence.",
+            "Energy moves continuously. Each process supports another. What appears in one place finds a purpose in another. Over time, this creates systems that sustain themselves and remain in balance.",
+            "Bees have always been part of that understanding.",
+            "We come from families of beekeepers who learned to observe how hives develop, how they adapt, and how they sustain themselves through coordination. Each bee contributes. The hive grows through shared effort, awareness, and timing.",
+            "Where bees are present, ecosystems strengthen. They care for their surroundings while sustaining their own home. They use resources with precision, shaping environments that remain productive and alive.",
+            "This is the kind of system we look to. EnergieBee is built with that same perspective.",
+            "A home is a living system. Energy moves through it, shaped by daily life, changing conditions, and small decisions made over time. When that movement becomes visible, the home gains the ability to respond with greater clarity.",
+            "The system works quietly in the background, adapting as conditions shift and following the rhythm of everyday life.",
+            "Over time, energy becomes something the home can read.",
+            "A clearer home. A quieter system. A better way to live with energy.",
+          ],
+        },
+      ],
     },
   },
 ];

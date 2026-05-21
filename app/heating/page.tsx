@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Hero from "../components/sections/heating/Hero";
-import EnergyMonitoring from "../components/sections/heating/EnergyMonitoring";
-import EnergyForecasting from "../components/sections/heating/EnergyForecasting";
-import EnergyAnalytics from "../components/sections/heating/EnergyAnalytics";
-import SmartEnergyManagement from "../components/sections/heating/SmartEnergyManagement";
-import WhyEnergieBee from "../components/sections/heating/WhyEnergieBee";
-import WhyEnergiebeeSolar from "../components/sections/heating/WhyEnergiebeeSolar";
-import WorksWithAnySystem from "../components/sections/heating/WorksWithAnySystem";
+import AccurateIntelligence from "../components/sections/heating/AccurateIntelligence";
+import UnderstandOptimise from "../components/sections/heating/UnderstandOptimise";
+import TurnEnergyData from "../components/sections/heating/TurnEnergyData";
+import SmarterUnderstanding from "../components/sections/heating/SmarterUnderstanding";
+import ConnectedEcosystem from "../components/sections/heating/ConnectedEcosystem";
+import WhyChoose from "../components/sections/heating/WhyChoose";
 
 export const metadata: Metadata = {
   title: "Smart Heating Control",
@@ -34,13 +33,12 @@ export default function HeatingPage() {
   return (
     <main className="flex-1">
       <Hero />
-      <EnergyMonitoring />
-      <EnergyAnalytics />
-      <SmartEnergyManagement />
-      <WhyEnergieBee />
-      <WhyEnergiebeeSolar />
-      <WorksWithAnySystem />
-      <EnergyForecasting />
+      <AccurateIntelligence />
+      <UnderstandOptimise />
+      <TurnEnergyData />
+      <SmarterUnderstanding />
+      <ConnectedEcosystem />
+      <WhyChoose />
     </main>
   );
 }
