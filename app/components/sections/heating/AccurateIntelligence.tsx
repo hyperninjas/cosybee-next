@@ -4,7 +4,7 @@ import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
 
-export default function EnergyMonitoring() {
+export default function AccurateIntelligence() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
@@ -23,19 +23,19 @@ export default function EnergyMonitoring() {
         />
         {/* text */}
         <div className="z-9 flex flex-col max-[1200px]:items-center min-[1200px]:max-w-163.5">
-          <SectionTitle>Real-Time Heating Insights</SectionTitle>
+          <SectionTitle>Accurate Intelligence for a Smarter, Greener Home</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Live Boiler Performance"
-              description="See exactly what your boiler is doing right now — flow temperature, demand, and efficiency at a glance."
+              title="High-Accuracy Energy Forecasting"
+              description="Our models analyse real-time usage, system behaviour, and external conditions to predict heating demand with high precision."
             />
             <FeatureItem
-              title="Room-by-Room Temperatures"
-              description="Track every smart radiator and thermostat together. Spot cold spots before they become uncomfortable."
+              title="Climate-Aware Intelligence"
+              description="We integrate live weather and environmental data to continuously adapt energy predictions and reduce wasted heating cycles."
             />
             <FeatureItem
-              title="Daily Heating Overview"
-              description="Visual graphs showing heating runtime, gas usage, and the warmest hour of the day — at a glance."
+              title="Efficiency-First System Design"
+              description="Every insight is built to reduce unnecessary energy consumption — helping you save money while lowering your carbon footprint."
             />
           </div>
         </div>

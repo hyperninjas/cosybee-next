@@ -41,22 +41,25 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.5fr_1fr] lg:gap-2 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
         {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
         <Hexagon
           color="#403A07"
           className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[403.73px] h-[374.5px]"
         />
         {/* text */}
-        <div className="relative z-10 max-w-xl">
+        <div className="relative z-10 max-w-138.75">
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
-            Heating That{" "}
-            <span className="text-[#EFDF18]">Knows You</span>
+            Home Heating Intelligence
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">
-            Intelligent heating that learns your routines and adapts in real
-            time. Stay comfortable while cutting your bill — no thermostat
-            fiddling required.
+          <p className="mt-4 max-w-2xl text-lg text-[#ffffff]">
+            Predictive energy intelligence that helps you understand, optimise,
+            and reduce your home heating consumption.
+          </p>
+          <p className="mt-4 max-w-2xl text-lg text-[#ffffff]">
+            Powered by high-accuracy forecasting models, real-time energy data,
+            and climate-aware intelligence that reduces waste, cost, and carbon
+            impact.
           </p>
           <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started
@@ -65,7 +68,7 @@ export default function Hero() {
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
-          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
+          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-107.5"
           gap={5}
           left={{
             src: windTurbineImg,

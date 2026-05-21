@@ -5,19 +5,11 @@ import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/energy-saving-device.png";
 import Image from "next/image";
 
-export default function EnergyAnalytics() {
+export default function UnderstandOptimise() {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 min-[1200px]:py-45 px-6 lg:px-0">
-      {/* decorative light hex bleeding from left edge */}
-      {/* <Hexagon
-        color="#E5E7EB"
-        className="pointer-events-none absolute -left-32 top-1/2 hidden w-56 -translate-y-1/2 sm:block sm:-right-27 sm:w-88 lg:w-76.75"
-      /> */}
-
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12  lg:gap-10">
-        {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
-            positioning + explicit width so the inner `w-full` resolves
-            against a non-zero containing block */}
+      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
+        {/* left: uniform 3-hex hive cluster */}
         <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
@@ -29,38 +21,37 @@ export default function EnergyAnalytics() {
         </div>
         {/* middle: title + features */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
-          <SectionTitle>Heating &amp; Savings Analytics</SectionTitle>
+          <SectionTitle>Understand and Optimise Your Home Energy Today</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Savings Calculator"
-              description="See exactly how much smart scheduling saves on your gas and electricity bills, month over month."
+              title="Real-Time Energy Forecasting"
+              description="Predict heating demand using live usage patterns and system behaviour."
             />
             <FeatureItem
-              title="Comfort Hours Tracking"
-              description="Measure how often each room stays in your ideal temperature band. Optimize without sacrificing comfort."
+              title="Weather-Adaptive Insights"
+              description="Adjust energy expectations based on local climate conditions."
             />
             <FeatureItem
-              title="Carbon Footprint Impact"
-              description="Visualize the CO2 reduced by smarter heating decisions and zone-based scheduling — every saving counts."
+              title="Daily Energy Overview"
+              description="A simple breakdown of energy usage, efficiency, and production every day."
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-75 min-[1200px]:hidden mt-10">
             <Image
               src={deviceImg}
-              alt="energy analytics dashboard"
+              alt="energy dashboard"
               sizes="(min-width: 1024px) 300px, 280px"
               quality={50}
               className="h-auto w-full"
             />
           </div>
         </div>
-        {/* right: analytics phone — wrapper has explicit width, image
-            fills it via w-full h-auto so it scales proportionally */}
+        {/* right: phone mockup */}
         <div className="absolute -top-20 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceImg}
-            alt="energy analytics dashboard"
+            alt="energy dashboard"
             sizes="(min-width: 1024px) 300px, 280px"
             quality={50}
             className="h-auto w-full"
