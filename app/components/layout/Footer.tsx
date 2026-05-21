@@ -14,6 +14,7 @@ const GET_STARTED_LINKS = [
   { label: "Download App (Free)", href: "#" },
   { label: "Heating Control", href: "#" },
   { label: "Save £300+ Annually", href: "#" },
+  { label: "About Us", href: "/learn/about-us" },
   { label: "Contact Support", href: "/contact" },
 ];
 
