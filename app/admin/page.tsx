@@ -28,7 +28,7 @@ export default async function AdminDashboard() {
         <div className="flex gap-3">
           <Link
             href="/admin/posts/new?blog=hive"
-            className="rounded-lg bg-[#FF8A7A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#ff7765] hover:shadow-md"
+            className="rounded-lg bg-[#E63B2E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#D32F22] hover:shadow-md"
           >
             + New Hive post
           </Link>
