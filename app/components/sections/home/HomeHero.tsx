@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { CtaButton } from "../../ui/Cta";
-import heroBgImg from "@/public/home-hero-bg.png";
+import heroBgImg from "@/public/energibee-hero-image.png";
 import AppStoreButton from "../../ui/AppStoreButton";
 
 /**
@@ -14,7 +14,7 @@ export default function HomeHero() {
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
           src={heroBgImg}
-          alt=""
+          alt="Hero image - dashboard of EnergieBee app"
           fill
           priority
           fetchPriority="high"
@@ -34,9 +34,8 @@ export default function HomeHero() {
             Total energy clarity.
           </h1>
           <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7">
-            Energiebee reveals how your household spends energy day by day —
-            helping you reduce waste and improve efficiency. Create a home that
-            feels lighter, smarter, and aligned with the way you live.
+            <strong>EnergieBee</strong> shows how your home uses energy day by
+            day. Understand heating, solar and energy balance in one place.
           </p>
           <div className="mt-14 flex flex-wrap items-center gap-4">
             <CtaButton href="/try" size="md" className="h-[58.66px]">

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import AppStoreButton from "../../ui/AppStoreButton";
 import { CtaButton } from "../../ui/Cta";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/clarity-energy.png";
 
 /**
  * Final CTA — phone mockup on the left, headline + two download CTAs on
@@ -15,20 +15,24 @@ export default function ReadyToReduce() {
         <div className="shrink-0 absolute bottom-0 hidden lg:block">
           <Image
             src={deviceImg}
-            alt="energiebee app preview"
+            alt="EnergieBee app preview"
             sizes="(min-width: 1024px) 210px, 175px"
             quality={50}
-            className="h-auto w-44 lg:w-52"
+            className="h-auto w-44 lg:w-59"
           />
         </div>
-        <div className="h-auto hidden lg:block w-44 lg:w-52"></div>
+        <div className="h-auto hidden lg:block w-44 lg:w-59"></div>
         {/* text + buttons */}
         <div className="flex-1 text-center lg:text-left">
+          <p className="mt-1.5 text-base leading-relaxed text-[#545454] sm:text-lg">
+            EnergieBee helps you understand your home energy in a simple and
+            connected way. One system. One view. Total clarity.
+          </p>{" "}
           <h2 className="text-2xl font-extrabold leading-tight text-black sm:text-3xl lg:text-[40px]">
-            Ready to reduce your energy costs?
+            Bring clarity to your home energy.
           </h2>
           <p className="mt-1.5 text-base leading-relaxed text-[#545454] sm:text-lg">
-            Download the free Energiebee app and start taking control today
+            More time for what matters.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
             <CtaButton href="/download" size="md" className="h-[58.66px]">

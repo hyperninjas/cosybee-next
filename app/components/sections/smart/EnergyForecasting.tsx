@@ -1,31 +1,32 @@
 import { CtaCard } from "../../ui/Cta";
 import { MediaCard, SectionHeader } from "../../ui/SectionContent";
 import Image from "next/image";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-usage-recommendation.png";
+import deviceWeatherImg from "@/public/device-snap-weather-forecast.png";
 
 export default function EnergyForecasting() {
   return (
     <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
       <SectionHeader
         title="Predictive Analytics"
-        description="Energiebee uses behavioral data and AI to predict your home's energy patterns, helping you optimize usage and maximize savings"
+        description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings"
       />
 
       <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
         <MediaCard
           media={
             <Image
-              alt="Behavioral Pattern Forecasts"
-              src={deviceImg}
+              alt="Weather-Based Bloom Forecasts"
+              src={deviceWeatherImg}
               className="w-45 sm:w-47.5 lg:w-64"
             />
           }
-          title="Behavioral Pattern Forecasts"
-          description="Our intelligent system learns from your daily habits to predict when each room will be in use — and pre-conditions the energy load accordingly."
+          title="Weather-Based Bloom Forecasts"
+          description="Our intelligent forecasting system uses real-time weather data combined with your garden's historical performance to predict sunflower blooms and bee activity with remarkable accuracy."
           bullets={[
-            "7-day device usage forecasts",
-            "Hourly load predictions",
-            "Pattern-based recommendations",
+            "7-day solar production forecasts",
+            "Hourly generation predictions",
+            "Weather impact analysis",
           ]}
         />
         <MediaCard
@@ -37,11 +38,11 @@ export default function EnergyForecasting() {
             />
           }
           title="Smart Energy Usage Recommendations"
-          description="Get intelligent notifications on the best times to use high-energy appliances based on solar production forecasts, maximizing energy independence and savings."
+          description="Get intelligent notifications on the best times to use high-energy appliances based on solar production forecasts, maximizing your energy independence and savings."
           bullets={[
             "Optimal usage timing alerts",
             "Peak production windows",
-            "Battery charging suggestions",
+            "Battery charging optimization",
           ]}
         />
       </div>
@@ -50,7 +51,7 @@ export default function EnergyForecasting() {
           glyph="sun"
           glyphColor="#A3D055"
           title="Reduce Energy Bills by Up to 40%"
-          description="By using energiebee's smart forecasting and energy management recommendations."
+          description="By using EnergieBee's smart forecasting and energy management recommendations."
           buttonText="Start Monitoring"
           href="/start"
           titleClassName="!text-[25px] "

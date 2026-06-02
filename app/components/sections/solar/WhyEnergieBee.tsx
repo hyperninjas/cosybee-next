@@ -49,8 +49,8 @@ const DEFAULT_CARDS: FeatureCardContent[] = [
 ];
 
 export default function WhyEnergieBee({
-  title = "Why Choose energiebee Solar?",
-  lead = "Part of the energiebee app — everything you need to monitor and optimize your solar energy system.",
+  title = "Why Choose EnergieBee Solar?",
+  lead = "Part of the EnergieBee app — everything you need to monitor and optimize your solar energy system.",
   cards = DEFAULT_CARDS,
   clusterSrc = sideImage.src,
   deviceSrc = deviceImg,

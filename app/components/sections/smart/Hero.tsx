@@ -1,26 +1,26 @@
-import { PHOTOS } from "@/app/lib/photos";
-import EpcCard from "../../mockups/phone/EpcCard";
-import PhoneFrame from "../../mockups/phone/PhoneFrame";
-import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
-import PhoneTabs from "../../mockups/phone/PhoneTabs";
+// import { PHOTOS } from "@/app/lib/photos";
+// import EpcCard from "../../mockups/phone/EpcCard";
+// import PhoneFrame from "../../mockups/phone/PhoneFrame";
+// import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
+// import PhoneTabs from "../../mockups/phone/PhoneTabs";
 import { CtaButton } from "../../ui/Cta";
 import Hexagon from "../../ui/Hexagon";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-hero.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import heroBgImg from "@/public/hero-bg.png";
+import heroBgImg from "@/public/smart-hero-bg.png";
 import Image from "next/image";
 
-function HeroPhone({ className = "" }: { className?: string }) {
-  return (
-    <PhoneFrame className={className}>
-      <PhoneGreeting />
-      <PhoneTabs />
-      <EpcCard />
-    </PhoneFrame>
-  );
-}
+// function HeroPhone({ className = "" }: { className?: string }) {
+//   return (
+//     <PhoneFrame className={className}>
+//       <PhoneGreeting />
+//       <PhoneTabs />
+//       <EpcCard />
+//     </PhoneFrame>
+//   );
+// }
 
 export default function Hero() {
   return (
@@ -29,7 +29,7 @@ export default function Hero() {
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
           src={heroBgImg}
-          alt=""
+          alt="hero image of smart "
           fill
           priority
           fetchPriority="high"
@@ -49,14 +49,14 @@ export default function Hero() {
         />
         {/* text */}
         <div className="relative z-10 max-w-xl">
-          <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
-            Works With Your{" "}
+          <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem] whitespace-pre-line">
+            {"Works With \n Your "}
             <span className="text-[#EFDF18]">Smart Home</span>
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">
-            Connect every device in your home and let AI orchestrate energy
-            usage automatically. Reduce waste, save money, and stay in control
-            — all from one app.
+          <p className="mt-4 max-w-md text-lg text-white">
+            Advanced AI-powered solar production predictions. Plan your energy
+            usage with confidence and maximize your solar investment with
+            industry-leading accuracy.
           </p>
           <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started
@@ -84,7 +84,7 @@ export default function Hero() {
             children: (
               <Image
                 src={deviceImg}
-                alt="cosybee app screen"
+                alt="energie Bee app screen"
                 priority
                 fetchPriority="high"
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"

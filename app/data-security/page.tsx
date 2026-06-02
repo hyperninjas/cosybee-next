@@ -10,12 +10,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Data Security",
   description:
-    "How energiebee protects your data — encryption, device security, cloud infrastructure, monitoring, and incident response.",
+    "How EnergieBee protects your data — encryption, device security, cloud infrastructure, monitoring, and incident response.",
   alternates: { canonical: "/data-security" },
   robots: { index: true, follow: true },
   openGraph: {
     url: "/data-security",
-    title: "Data Security — energiebee",
+    title: "Data Security — EnergieBee",
     description:
       "Encryption, device security, cloud infrastructure, monitoring, and incident response — how we keep your data safe.",
   },
@@ -36,9 +36,9 @@ export default function DataSecurityPage() {
       <LegalContainer>
         <LegalSection title="Our Commitment to Security">
           <p>
-            At Energiebee, security is not an afterthought, it is built into
+            At EnergieBee, security is not an afterthought, it is built into
             every layer of how we design, develop, and operate our products.
-            From the moment your Energiebee Device connects to your home network
+            From the moment your EnergieBee Device connects to your home network
             to the instant energy data appears in your App, we apply rigorous
             measures to ensure your information remains private, protected, and
             under your control.
@@ -53,7 +53,7 @@ export default function DataSecurityPage() {
 
         <LegalSection title="Data Encryption">
           <p>
-            All data transmitted between your Energiebee Device, the App, and
+            All data transmitted between your EnergieBee Device, the App, and
             our servers is protected using Transport Layer Security (TLS 1.2 or
             higher) — the same encryption standard used by banks and financial
             institutions. This ensures that your energy data cannot be
@@ -69,14 +69,14 @@ export default function DataSecurityPage() {
           <p>
             Your account password is never stored in plain text. We use a
             one-way cryptographic hashing algorithm (bcrypt) so that your
-            password cannot be recovered or read by anyone, including Energiebee
+            password cannot be recovered or read by anyone, including EnergieBee
             staff.
           </p>
         </LegalSection>
 
         <LegalSection title="Device & Network Security">
           <p>
-            Your Energiebee Device communicates with our platform over an
+            Your EnergieBee Device communicates with our platform over an
             encrypted channel. Each Device is assigned a unique,
             cryptographically secure identifier at the point of manufacture,
             ensuring that only your authorised Device can communicate with your
@@ -90,9 +90,9 @@ export default function DataSecurityPage() {
           </p>
           <p>
             <strong>Firmware signing</strong> — All software updates are
-            digitally signed by Energiebee before being delivered to your
+            digitally signed by EnergieBee before being delivered to your
             Device. Your Device will only accept updates that carry a valid
-            Energiebee signature, protecting against malicious software.
+            EnergieBee signature, protecting against malicious software.
           </p>
           <p>
             <strong>Automatic security updates</strong> — When security patches
@@ -101,7 +101,7 @@ export default function DataSecurityPage() {
           </p>
           <p>
             <strong>Isolated communication</strong> — Your Device only
-            communicates with Energiebee&rsquo;s verified cloud infrastructure.
+            communicates with EnergieBee&rsquo;s verified cloud infrastructure.
             It does not make outbound connections to unknown or unverified
             servers.
           </p>
@@ -109,7 +109,7 @@ export default function DataSecurityPage() {
 
         <LegalSection title="App Security">
           <p>
-            The Energiebee mobile application is designed with security at its
+            The EnergieBee mobile application is designed with security at its
             core:
           </p>
           <p>
@@ -126,7 +126,7 @@ export default function DataSecurityPage() {
           </p>
           <p>
             <strong>Two-factor authentication (2FA)</strong> — We offer optional
-            two-factor authentication for your Energiebee account, adding an
+            two-factor authentication for your EnergieBee account, adding an
             additional layer of protection beyond your password. We strongly
             recommend enabling this feature.
           </p>
@@ -151,14 +151,14 @@ export default function DataSecurityPage() {
           </p>
           <p>Key infrastructure security measures include:</p>
           <p>
-            <strong>Access controls</strong> — Only authorised Energiebee
+            <strong>Access controls</strong> — Only authorised EnergieBee
             personnel with a legitimate business need can access production
             systems. Access is granted on a strictly need-to-know basis and is
             logged and audited.
           </p>
           <p>
             <strong>Multi-factor authentication</strong> — All internal system
-            access by Energiebee staff requires multi-factor authentication.
+            access by EnergieBee staff requires multi-factor authentication.
             Shared or generic credentials are not permitted.
           </p>
           <p>
@@ -211,7 +211,7 @@ export default function DataSecurityPage() {
         <LegalSection title="Employee & Internal Security">
           <p>
             We recognise that people are a critical part of any security
-            strategy. All Energiebee employees and contractors who handle
+            strategy. All EnergieBee employees and contractors who handle
             personal data are required to:
           </p>
           <ul>
@@ -268,9 +268,9 @@ export default function DataSecurityPage() {
             </li>
           </ul>
           <p>
-            If you suspect that your Energiebee account has been compromised,
+            If you suspect that your EnergieBee account has been compromised,
             please contact us immediately at{" "}
-            <a href="mailto:security@energiebee.com">security@energiebee.com</a>
+            <a href="mailto:security@EnergieBee.com">security@EnergieBee.com</a>
             .
           </p>
         </LegalSection>
@@ -278,11 +278,11 @@ export default function DataSecurityPage() {
         <LegalSection title="Your Role in Keeping Your Account Secure">
           <p>
             Security is a shared responsibility. There are steps you can take to
-            help protect your Energiebee account and data:
+            help protect your EnergieBee account and data:
           </p>
           <ul>
             <li>
-              Use a strong, unique password for your Energiebee account — avoid
+              Use a strong, unique password for your EnergieBee account — avoid
               reusing passwords from other services;
             </li>
             <li>
@@ -290,7 +290,7 @@ export default function DataSecurityPage() {
               extra layer of protection;
             </li>
             <li>
-              Keep the Energiebee App updated to ensure you always have the
+              Keep the EnergieBee App updated to ensure you always have the
               latest security improvements;
             </li>
             <li>
@@ -300,11 +300,11 @@ export default function DataSecurityPage() {
             <li>Log out of the App when using a shared or public device;</li>
             <li>
               Contact us immediately at{" "}
-              <a href="mailto:security@energiebee.com">
-                security@energiebee.com
+              <a href="mailto:security@EnergieBee.com">
+                security@EnergieBee.com
               </a>{" "}
               if you notice any suspicious activity on your account or receive
-              unexpected communications claiming to be from Energiebee.
+              unexpected communications claiming to be from EnergieBee.
             </li>
           </ul>
         </LegalSection>
@@ -332,7 +332,7 @@ export default function DataSecurityPage() {
 
         <LegalSection title="Compliance & Certifications">
           <p>
-            Energiebee is committed to meeting recognised data security and
+            EnergieBee is committed to meeting recognised data security and
             privacy standards. Our security programme is aligned with:
           </p>
           <p>
@@ -353,7 +353,7 @@ export default function DataSecurityPage() {
           </p>
           <p className="mt-8 text-sm text-neutral-500">
             This Data Security page was last reviewed and updated on 15 May
-            2026. Energiebee Limited is a company registered in England and
+            2026. EnergieBee Limited is a company registered in England and
             Wales.
           </p>
         </LegalSection>

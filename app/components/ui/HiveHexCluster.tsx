@@ -51,6 +51,7 @@ export default function HiveHexCluster({
   bottomRight,
   className = "",
   gap,
+  cornerInset,
 }: {
   left: HexCell;
   topRight: HexCell;
@@ -62,6 +63,12 @@ export default function HiveHexCluster({
    * Defaults to the shared `HIVE_GAP`. Pass `0` for exact vertex contact.
    */
   gap?: number;
+  /**
+   * Corner-radius dial for the rounded hex outline. Defaults to 8 (the
+   * canonical look). Smaller = sharper corners (e.g. `4` is noticeably
+   * pointier, `2` is almost angular); larger = rounder.
+   */
+  cornerInset?: number;
 }) {
   const cells = [left, topRight, bottomRight];
 
@@ -69,6 +76,13 @@ export default function HiveHexCluster({
     gap !== undefined
       ? computeHive3Layout(gap)
       : { viewBox: HIVE_3_VIEWBOX, placements: HIVE_3_PLACEMENTS };
+
+  const cellMask =
+    cornerInset !== undefined
+      ? buildHexMaskDataUri(100, 86.6, [{ x: 0, y: 0, scale: 1 }], {
+          cornerInset,
+        })
+      : SINGLE_HEX_MASK;
 
   // Default sizes — small enough that responsive images stay tight.
   const DEFAULT_CELL_SIZES =
@@ -97,7 +111,7 @@ export default function HiveHexCluster({
               // The mask applies to the whole painted output of this element
               // INCLUDING its children — so the next/image element AND any
               // overlay content are both cropped to the hex outline.
-              ...hexMaskStyle(SINGLE_HEX_MASK),
+              ...hexMaskStyle(cellMask),
             }}
           >
             {cell.src && (

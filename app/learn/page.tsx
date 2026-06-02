@@ -6,13 +6,13 @@ import { getArticles, getFeatured, getCategories } from "../lib/articles";
 export const metadata: Metadata = {
   title: "Learn",
   description:
-    "Guides, tutorials, and energy-saving tips from the energiebee team.",
+    "Guides, tutorials, and energy-saving tips from the EnergieBee team.",
   alternates: { canonical: "/learn" },
   openGraph: {
     url: "/learn",
-    title: "Learn — energiebee",
+    title: "Learn — EnergieBee",
     description:
-      "Guides, tutorials, and energy-saving tips from the energiebee team.",
+      "Guides, tutorials, and energy-saving tips from the EnergieBee team.",
   },
 };
 
@@ -30,7 +30,7 @@ export default async function LearnPage({
     <main className="flex-1">
       <BlogHero
         title="Learn"
-        description="Guides, tutorials, and energy-saving tips from the energiebee team."
+        description="Guides, tutorials, and energy-saving tips from the EnergieBee team."
       />
       <BlogBrowse
         articles={articles}

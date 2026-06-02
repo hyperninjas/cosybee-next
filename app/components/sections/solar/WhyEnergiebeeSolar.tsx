@@ -6,12 +6,12 @@ import {
 } from "../../ui/SectionContent";
 import HiveHexCluster, { HexCell } from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-solar-why-energiebee.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 import type { FeatureCardContent } from "./WhyEnergieBee";
 
-export type WhyEnergiebeeSolarProps = {
+export type WhyEnergieBeeSolarProps = {
   title?: string;
   lead?: string;
   cards?: FeatureCardContent[];
@@ -63,14 +63,14 @@ const DEFAULT_BOTTOM_RIGHT: HexCell = {
   ),
 };
 
-export default function WhyEnergiebeeSolar({
-  title = "Why Choose energiebee Solar?",
-  lead = "Part of the energiebee app — everything you need to monitor and optimize your solar energy system.",
+export default function WhyEnergieBeeSolar({
+  title = "Why Choose EnergieBee Solar?",
+  lead = "Part of the EnergieBee app — everything you need to monitor and optimize your solar energy system.",
   cards = DEFAULT_CARDS,
   left = DEFAULT_LEFT,
   topRight = DEFAULT_TOP_RIGHT,
   bottomRight = DEFAULT_BOTTOM_RIGHT,
-}: WhyEnergiebeeSolarProps = {}) {
+}: WhyEnergieBeeSolarProps = {}) {
   return (
     <section className="relative overflow-hidden bg-[#F7F7F7] py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">

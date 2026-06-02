@@ -33,6 +33,7 @@ export default function SharedImageHexCluster({
   priority = false,
   sizes = "(min-width: 1024px) 500px, (min-width: 640px) 440px, 320px",
   quality = 50,
+  cornerInset,
 }: {
   src: string | StaticImageData;
   alt?: string;
@@ -64,6 +65,12 @@ export default function SharedImageHexCluster({
    * indistinguishable from 75 at half the bytes.
    */
   quality?: number;
+  /**
+   * Corner-radius dial for the rounded hex outline. Defaults to 8 (the
+   * canonical look). Smaller = sharper corners (e.g. `4` is noticeably
+   * pointier, `2` is almost angular); larger = rounder.
+   */
+  cornerInset?: number;
 }) {
   // Use the shared default constants when no overrides are given so we
   // don't pay for recomputation on every render in the common case.
@@ -78,7 +85,12 @@ export default function SharedImageHexCluster({
     placements = placementsProp ?? HIVE_3_PLACEMENTS;
   }
 
-  const maskUrl = buildHexMaskDataUri(viewBox.w, viewBox.h, placements);
+  const maskUrl = buildHexMaskDataUri(
+    viewBox.w,
+    viewBox.h,
+    placements,
+    cornerInset !== undefined ? { cornerInset } : undefined,
+  );
   return (
     <div
       className={`relative ${className}`}

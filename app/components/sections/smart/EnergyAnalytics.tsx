@@ -2,12 +2,12 @@ import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
-import deviceImg from "@/public/energy-saving-device.png";
+import deviceImg from "@/public/device-snap-energy-analytics.png";
 import Image from "next/image";
 
 export default function EnergyAnalytics() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 min-[1200px]:py-45 px-6 lg:px-0">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 min-[1200px]:py-45! px-6 lg:px-0">
       {/* decorative light hex bleeding from left edge */}
       {/* <Hexagon
         color="#E5E7EB"
@@ -32,16 +32,16 @@ export default function EnergyAnalytics() {
           <SectionTitle>Energy &amp; Savings Analytics</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Smart Savings Tracker"
-              description="See exactly how much your automations save you each month. Track cumulative savings across every connected device."
+              title="Savings Calculator"
+              description="Track exactly how much money you're saving with solar. See monthly comparisons and cumulative savings over time."
             />
             <FeatureItem
-              title="Device Usage Patterns"
-              description="Visualize which devices use the most energy and when. Spot waste and optimize your routines effortlessly."
+              title="Grid Independence Metrics"
+              description="Monitor your energy independence level. Understand how much of your power comes from solar vs. the grid."
             />
             <FeatureItem
               title="Carbon Footprint Impact"
-              description="Measure the CO2 reduced through smart scheduling and renewable-first usage. See the difference your choices make."
+              description="Visualize your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet."
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}

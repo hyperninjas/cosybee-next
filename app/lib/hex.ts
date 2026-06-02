@@ -6,6 +6,46 @@
 export const HEX_PATH =
   "M33,0 L67,0 Q75,0 79,6.93 L96,36.37 Q100,43.3 96,50.23 L79,79.67 Q75,86.6 67,86.6 L33,86.6 Q25,86.6 21,79.67 L4,50.23 Q0,43.3 4,36.37 L21,6.93 Q25,0 33,0 Z";
 
+/**
+ * Build the rounded flat-top hex path for the 100×86.6 box, with a
+ * tunable corner inset. The inset is how many units along each edge the
+ * straight segment ends before the quadratic curve begins — smaller =
+ * sharper corners, larger = rounder. Default `HEX_PATH` uses 8.
+ */
+export function buildHexPath(inset: number): string {
+  const vertices: ReadonlyArray<readonly [number, number]> = [
+    [25, 0], // top-left
+    [75, 0], // top-right
+    [100, 43.3], // right
+    [75, 86.6], // bottom-right
+    [25, 86.6], // bottom-left
+    [0, 43.3], // left
+  ];
+  const r = (n: number) => +n.toFixed(2);
+  const insetAlong = (
+    from: readonly [number, number],
+    toward: readonly [number, number],
+  ): readonly [number, number] => {
+    const dx = toward[0] - from[0];
+    const dy = toward[1] - from[1];
+    const len = Math.hypot(dx, dy);
+    return [from[0] + (dx / len) * inset, from[1] + (dy / len) * inset];
+  };
+
+  const points = vertices.map((v, i) => {
+    const prev = vertices[(i + 5) % 6];
+    const next = vertices[(i + 1) % 6];
+    return { v, start: insetAlong(v, prev), end: insetAlong(v, next) };
+  });
+
+  let d = `M${r(points[0].end[0])},${r(points[0].end[1])}`;
+  for (let i = 1; i <= 6; i++) {
+    const p = points[i % 6];
+    d += ` L${r(p.start[0])},${r(p.start[1])} Q${r(p.v[0])},${r(p.v[1])} ${r(p.end[0])},${r(p.end[1])}`;
+  }
+  return d + " Z";
+}
+
 /** Placement of a single hex within a `SharedImageHexCluster` viewBox. */
 export type HexPlacement = {
   /** X translation in viewBox units. */
@@ -25,11 +65,16 @@ export function buildHexMaskDataUri(
   viewBoxWidth: number,
   viewBoxHeight: number,
   placements: HexPlacement[],
+  options?: { cornerInset?: number },
 ): string {
+  const path =
+    options?.cornerInset !== undefined
+      ? buildHexPath(options.cornerInset)
+      : HEX_PATH;
   const paths = placements
     .map(
       (p) =>
-        `<path d='${HEX_PATH}' transform='translate(${p.x} ${p.y}) scale(${p.scale})' fill='black'/>`,
+        `<path d='${path}' transform='translate(${p.x} ${p.y}) scale(${p.scale})' fill='black'/>`,
     )
     .join("");
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${viewBoxWidth} ${viewBoxHeight}' preserveAspectRatio='none'>${paths}</svg>`;

@@ -1,9 +1,13 @@
 import Hexagon from "../../ui/Hexagon";
-import { FeatureItem, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureItem,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import { CtaButton } from "../../ui/Cta";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-heating-eco-system.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 
@@ -44,6 +48,7 @@ export default function ConnectedEcosystem() {
         {/* hexagon cluster */}
         <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
+          cornerInset={4}
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
           topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
           bottomRight={{
@@ -52,7 +57,7 @@ export default function ConnectedEcosystem() {
               <Image
                 src={deviceImg}
                 alt="cosy bee app"
-                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[13%] w-[65%] -translate-x-1/2"
               />
             ),
           }}
@@ -63,8 +68,8 @@ export default function ConnectedEcosystem() {
       <div className="mx-auto mt-12 max-w-360 px-6 sm:px-10 lg:px-30">
         <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
           <div>
-            <h3 className="text-xl font-extrabold leading-tight text-black sm:text-2xl">
-              Launching August 2026 — Early Access Available.
+            <h3 className="text-xl font-extrabold leading-tight text-black sm:text-[36px] whitespace-pre-line">
+              {"Launching August 2026 \n Early Access Available."}
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-[#545454] sm:text-base">
               Be part of the first wave of connected home energy intelligence.

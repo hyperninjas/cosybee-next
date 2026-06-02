@@ -1,12 +1,16 @@
 import Hexagon from "../../ui/Hexagon";
-import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureCard,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-smart-optimisation.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 
-export default function WhyEnergiebeeSolar() {
+export default function WhyEnergieBeeSolar() {
   return (
     <section className="relative overflow-hidden bg-white py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
@@ -19,30 +23,31 @@ export default function WhyEnergiebeeSolar() {
         <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
           <SectionTitle>Automated Optimisation</SectionTitle>
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
-            Set it once and watch your home optimize itself around your
-            routines, the weather, and your electricity prices — automatically.
+            Part of the energiebee app - everything you need to monitor and
+            optimize your solar energy system.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Adaptive Routines"
-              description="Schedules learn from your daily patterns and adjust themselves — no need to fiddle with timers."
+              title="Maximize Production"
+              description="Track real-time solar generation and get insights to optimize energy production."
             />
             <FeatureCard
               glyph="dollar"
-              title="Tariff-Aware Charging"
-              description="Devices automatically charge and run when rates are lowest, cutting your bill without sacrificing comfort."
+              title="Track Savings"
+              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
             />
             <FeatureCard
               glyph="chart"
-              title="Weather-Driven Tweaks"
-              description="The system adjusts heating, cooling, and storage based on the next 24 hours of forecast data."
+              title="Smart Analytics"
+              description="Get detailed insights on production patterns, grid independence, and environmental impact."
             />
           </div>
         </div>
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
         <HiveHexCluster
+          cornerInset={4}
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
           topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
@@ -52,7 +57,7 @@ export default function WhyEnergiebeeSolar() {
               <Image
                 src={deviceImg}
                 alt="cosy bee app"
-                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[12%] w-[68%] -translate-x-1/2"
               />
             ),
           }}

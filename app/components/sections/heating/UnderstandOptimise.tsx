@@ -2,7 +2,7 @@ import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
-import deviceImg from "@/public/energy-saving-device.png";
+import deviceImg from "@/public/device-snap-heating-dashboard.png";
 import Image from "next/image";
 
 export default function UnderstandOptimise() {
@@ -21,7 +21,9 @@ export default function UnderstandOptimise() {
         </div>
         {/* middle: title + features */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
-          <SectionTitle>Understand and Optimise Your Home Energy Today</SectionTitle>
+          <SectionTitle>
+            Understand and Optimise Your Home Energy Today
+          </SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
               title="Real-Time Energy Forecasting"
