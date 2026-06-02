@@ -1,7 +1,7 @@
 import Image from "next/image";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
-import deviceImg from "@/public/energy-saving-device.png";
+import deviceImg from "@/public/device-solar-rating.png";
 import sideImage from "@/public/energy-analytics-side.png";
 
 /**
@@ -15,7 +15,7 @@ export default function HomeSolarForecasting() {
         {/* left: phone — wrapper has explicit width, image fills it via
             w-full h-auto so it scales proportionally instead of rendering
             at intrinsic size */}
-        <div className="absolute -top-17 left-0 hidden w-[365.3px] min-[1200px]:block">
+        <div className="absolute -top-17 left-0 hidden w-[305.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="EnergieBee solar dashboard"
@@ -28,25 +28,25 @@ export default function HomeSolarForecasting() {
         {/* middle: title + feature cards */}
         <div className="min-[1200px]:max-w-113.75 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center px-6 sm:px-10 lg:px-0">
           <SectionTitle>Solar Forecasting</SectionTitle>
-          <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-[#545454]">
+          {/* <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-[#545454]">
             A complete view of solar production, weather, and usage across the
             day.
-          </p>
+          </p> */}
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximize Production"
-              description="Track how your system performs in real time. Identify opportunities to make better use of available energy."
+              description="See how your solar performs day by day."
             />
             <FeatureCard
               glyph="dollar"
               title="Track Savings"
-              description="See how your energy use impacts your savings. Compare daily performance and long-term results."
+              description="See how daily energy habits affect savings."
             />
             <FeatureCard
               glyph="chart"
-              title="Smart Analytics"
-              description="Access key insights into your system performance. Understand production patterns, independence, and overall impact."
+              title="Smart Insights"
+              description="Understand patterns across your home energy."
             />
           </div>
           <div className="w-[365.3px] -ml-3 min-[1200px]:hidden mt-4">

@@ -1,8 +1,13 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+// import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "../../ui/Hexagon";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+// import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
-import sideImage from "@/public/energy-monitoring.png";
+// import sideImage from "@/public/energy-monitoring.png";
+import Image from "next/image";
+import HiveHexCluster from "../../ui/HiveHexCluster";
+import windTurbineImg from "@/public/wind-turbine.png";
+import deviceImg from "@/public/device-heating-rating.png";
+import beeFlowerImg from "@/public/bee-flower.png";
 
 /**
  * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
@@ -19,17 +24,27 @@ export default function HeatingSolutions() {
           color="#F7F2E1"
           className="pointer-events-none absolute -right-24 -top-10 w-[18rem] sm:-right-36 sm:w-88 lg:w-76.75"
         />
-
         {/* cluster — left */}
-        <SharedImageHexCluster
-          src={sideImage.src}
-          gap={5}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
-          fallbackColor="#1a1a1a"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
-        />
 
+        <HiveHexCluster
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
+          gap={5}
+          cornerInset={4}
+          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
+          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={deviceImg}
+                alt="EnergieBee app"
+                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
+                quality={50}
+                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+              />
+            ),
+          }}
+        />
         {/* text — right */}
         <div className="min-[1200px]:max-w-163.5 md:max-w-153.5  z-9">
           <SectionTitle>Heating Solutions</SectionTitle>
@@ -37,22 +52,25 @@ export default function HeatingSolutions() {
             <FeatureCard
               glyph="check"
               title="Live Solar Production Tracking"
+              descClassName="whitespace-pre-line"
               description={
-                "Track your solar generation in real time.\n See how production changes throughout the day."
+                "Track solar production in real time.\n See how sunlight shapes your energy balance."
               }
             />
             <FeatureCard
               glyph="check"
               title="Weather-Based Forecasts"
+              descClassName="whitespace-pre-line"
               description={
-                "Know what to expect from upcoming weather.\n Adjust your energy use based on changing conditions."
+                "See how weather affects your home energy.\n Plan ahead with clearer visibility."
               }
             />
             <FeatureCard
               glyph="check"
               title="Daily Energy Overview"
+              descClassName="whitespace-pre-line"
               description={
-                "View your energy activity across the day.\n Understand when production increases and demand peaks."
+                "Understand how energy changes throughout the day.\n See patterns and peak demand."
               }
             />
           </div>

@@ -4,7 +4,7 @@ import { CtaButton } from "../../ui/Cta";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-energy-rating.png";
 import Hexagon from "../../ui/Hexagon";
 
 /**
@@ -14,35 +14,37 @@ import Hexagon from "../../ui/Hexagon";
 export default function PerfectHarmony() {
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] py-20 text-black lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
-          <SectionTitle>Everything in perfect harmony</SectionTitle>
+        <div className="min-[1200px]:max-w-170.5 flex flex-col max-[1200px]:items-center z-9">
+          <SectionTitle>Everything connected in one place</SectionTitle>
           <p className="mt-3 max-w-xl text-base max-[1200px]:text-center leading-relaxed text-[#545454]">
-            A single app that brings together heating, solar, and energy.
-            Receive real-time information, monitor changes, and make decisions
-            with peace of mind, only when necessary.
+            A single app to see how your home performs in real conditions and
+            understand your energy balance.
           </p>
           <div className="mt-4 space-y-4">
             <FeatureCard
               glyph="pie"
-              title="Unified Dashboard"
+              descClassName="whitespace-pre-line"
+              title="Unified view of your home"
               description="See heating, solar, and energy data side by side. Spot patterns instantly."
             />
             <FeatureCard
               glyph="connector"
+              descClassName="whitespace-pre-line"
               title="Smart Connections"
-              description="Your heating responds to solar production. Energy insights guide your schedule."
+              description="Energy insights help your home adapt to changing conditions."
             />
             <FeatureCard
               glyph="device"
+              descClassName="whitespace-pre-line"
               title="Simplified Information"
-              description="One app for everything. No juggling multiple accounts or interfaces."
+              description="Understand what is happening and why it changes."
             />
           </div>
           <CtaButton href="/try" size="md" className="mt-10 w-fit">
@@ -53,6 +55,7 @@ export default function PerfectHarmony() {
         <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
           gap={5}
+          cornerInset={4}
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
           topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
           bottomRight={{

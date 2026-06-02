@@ -1,7 +1,10 @@
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
-import sideImage from "@/public/energy-management.png";
 import Hexagon from "../../ui/Hexagon";
+import Image from "next/image";
+import HiveHexCluster from "../../ui/HiveHexCluster";
+import windTurbineImg from "@/public/wind-turbine.png";
+import deviceImg from "@/public/device-energy-rating.png";
+import beeFlowerImg from "@/public/bee-flower.png";
 
 /**
  * Home "Energy Management" — dark variant with title + 3 feature cards
@@ -20,45 +23,54 @@ export default function HomeEnergyManagement() {
         <div className=" flex flex-col max-[1200px]:items-center  z-9">
           <div className="max-w-163.5">
             <SectionTitle>Energy Management</SectionTitle>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
+            {/* <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
               A clear view of how energy is used, timed, and distributed across
               your home.
-            </p>
+            </p> */}
             <div className="mt-8 space-y-4">
               <FeatureCard
                 glyph="sun"
                 title="Energy Use"
-                description={
-                  "See where and when energy is used across your home.\n Understand how demand changes throughout the day."
-                }
+                description={"See where and when energy is used."}
                 descClassName="whitespace-pre-line"
               />
               <FeatureCard
                 glyph="dollar"
                 title="Cost Awareness"
-                description={
-                  "Understand how usage translates into cost.\nSee how your daily activity affects overall spending."
-                }
+                description={"Understand how energy patterns affect costs."}
                 descClassName="whitespace-pre-line"
               />
               <FeatureCard
                 glyph="chart"
                 title="System Behaviour"
                 description={
-                  "See how your home operates as an energy system.\nUnderstand how usage, availability, and conditions interact."
+                  "See how weather, solar and home activity interact."
                 }
-                descClassName="whitespace-pre-line"
+                descClassName={"whitespace-pre-line"}
               />
             </div>
           </div>
         </div>
 
         {/* cluster — right */}
-        <SharedImageHexCluster
-          src={sideImage.src}
+        <HiveHexCluster
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
-          fallbackColor="#1a1a1a"
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
+          cornerInset={4}
+          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
+          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={deviceImg}
+                alt="EnergieBee app"
+                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
+                quality={50}
+                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+              />
+            ),
+          }}
         />
       </div>
     </section>

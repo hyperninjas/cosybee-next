@@ -7,7 +7,7 @@ import AppStoreBadge from "./AppStoreBadge";
  * class on the wrapper.
  */
 export default function AppStoreButton({
-  href = "https://apps.apple.com/",
+  href = "#",
   className = "",
   color,
 }: {

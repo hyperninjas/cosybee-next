@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: "energy", href: "/energy" },
   { label: "hive", href: "/hive" },
   { label: "learn", href: "/learn" },
-  { label: "shop", href: "/shop" },
+  // { label: "shop", href: "/shop" },
 ];
 
 const MENU_ID = "site-mobile-menu";
@@ -197,7 +197,7 @@ export default function Navbar({
         </ul>
 
         <div className="flex items-center gap-4 text-neutral-200 sm:gap-6">
-          <button
+          {/* <button
             type="button"
             aria-label="Search"
             className="hidden text-neutral-200 transition-colors hover:text-white sm:inline-flex"
@@ -210,7 +210,7 @@ export default function Navbar({
             className="hidden text-neutral-200 transition-colors hover:text-white sm:inline-flex"
           >
             <UserIcon />
-          </button>
+          </button> */}
           <button
             type="button"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -258,7 +258,7 @@ export default function Navbar({
                 </li>
               );
             })}
-            <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 px-2 pt-4 sm:hidden">
+            {/* <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 px-2 pt-4 sm:hidden">
               <button
                 type="button"
                 aria-label="Search"
@@ -275,7 +275,7 @@ export default function Navbar({
               >
                 <UserIcon />
               </button>
-            </li>
+            </li> */}
           </ul>
         </div>
       </nav>
