@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Generate unique build ID for each deployment to help with Server Action cache invalidation
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
+  },
+
   // Keep these out of the bundler so they load as normal Node modules:
   // BlockNote's server renderer pulls in React client APIs (createContext)
   // that can't be evaluated under the RSC "react-server" condition, and
