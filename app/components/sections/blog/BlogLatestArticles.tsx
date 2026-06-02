@@ -8,6 +8,11 @@ import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
 
+/** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
+function isExternalUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
 const INITIAL_VISIBLE = 3;
 const LOAD_STEP = 3;
 
@@ -24,6 +29,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
           fill
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
           className="object-cover"
+          unoptimized={isExternalUrl(a.image)}
         />
       </div>
       <div className="flex flex-1 flex-col p-6">

@@ -1,8 +1,48 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { deletePost, setStatus } from "./actions";
+
+/** Simple spinner for loading states. */
+function Spinner({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={`animate-spin h-4 w-4 ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  );
+}
+
+/** Fallback for invalid local image paths (seeded placeholder data). */
+function getValidImageUrl(coverImage: string): string {
+  if (!coverImage) return "/bee-flower.png";
+  // External URLs (API media, https, etc.) are valid
+  if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
+    return coverImage;
+  }
+  // Local paths starting with /images/ likely don't exist
+  if (coverImage.startsWith("/images/")) {
+    return "/bee-flower.png";
+  }
+  return coverImage;
+}
 
 export type Row = {
   id: string;
@@ -48,36 +88,108 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function DeleteButton({ id }: { id: string }) {
+function DeleteButton({ id, blog, slug }: { id: string; blog: string; slug: string }) {
   const [confirming, setConfirming] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
   if (!confirming) {
     return (
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-md border border-[#F3C2BC] px-3 py-1.5 text-sm font-medium text-[#B4332A] hover:bg-[#FDECEC]"
+        className="rounded-md border border-[#E5E5E5] bg-white px-3 py-1.5 text-sm font-medium text-[#666] transition-colors hover:border-[#F3C2BC] hover:bg-[#FFF8F7] hover:text-[#B4332A]"
       >
         Delete
       </button>
     );
   }
+
+  const handleDelete = () => {
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("blog", blog);
+    formData.append("slug", slug);
+    startTransition(() => {
+      deletePost(formData);
+    });
+  };
+
   return (
-    <form action={deletePost} className="flex items-center gap-1">
-      <input type="hidden" name="id" value={id} />
+    <div className="flex items-center gap-1.5">
       <button
-        type="submit"
-        className="rounded-md bg-[#B4332A] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#9c2c24]"
+        type="button"
+        onClick={handleDelete}
+        disabled={isPending}
+        className="flex items-center gap-1.5 rounded-md bg-[#B4332A] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#9c2c24] disabled:opacity-70"
       >
-        Confirm
+        {isPending ? (
+          <>
+            <Spinner className="text-white" />
+            Deleting…
+          </>
+        ) : (
+          "Confirm"
+        )}
       </button>
       <button
         type="button"
         onClick={() => setConfirming(false)}
-        className="rounded-md border border-[#DBDBDB] px-3 py-1.5 text-sm font-medium hover:bg-[#F2F2F2]"
+        disabled={isPending}
+        className="rounded-md border border-[#DBDBDB] px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[#F2F2F2] disabled:opacity-50"
       >
         Cancel
       </button>
-    </form>
+    </div>
+  );
+}
+
+function StatusToggleButton({
+  id,
+  blog,
+  slug,
+  status,
+}: {
+  id: string;
+  blog: string;
+  slug: string;
+  status: string;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const isPublished = status === "PUBLISHED";
+
+  const handleToggle = () => {
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("blog", blog);
+    formData.append("slug", slug);
+    formData.append("status", isPublished ? "DRAFT" : "PUBLISHED");
+    startTransition(() => {
+      setStatus(formData);
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggle}
+      disabled={isPending}
+      className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-70 ${
+        isPublished
+          ? "border-[#E5E5E5] bg-white text-[#666] hover:border-[#DBDBDB] hover:bg-[#F9F9F9]"
+          : "border-[#C6E7C9] bg-[#E8F5E9] text-[#1E7B34] hover:bg-[#DCF0DE]"
+      }`}
+    >
+      {isPending ? (
+        <>
+          <Spinner />
+          {isPublished ? "Unpublishing…" : "Publishing…"}
+        </>
+      ) : isPublished ? (
+        "Unpublish"
+      ) : (
+        "Publish"
+      )}
+    </button>
   );
 }
 
@@ -175,7 +287,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={r.coverImage}
+                src={getValidImageUrl(r.coverImage)}
                 alt=""
                 className="h-14 w-20 shrink-0 rounded-lg bg-[#F2F2F2] object-cover"
               />
@@ -203,32 +315,24 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
               <div className="flex shrink-0 items-center gap-2">
                 <Link
                   href={`/admin/posts/${r.id}/edit`}
-                  className="rounded-md border border-[#DBE6EB] px-3 py-1.5 text-sm font-medium hover:bg-[#F2F7F9]"
+                  className="rounded-md bg-[#1b1b1b] px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#333]"
                 >
                   Edit
                 </Link>
                 <Link
                   href={`/admin/posts/${r.id}/preview`}
                   target="_blank"
-                  className="rounded-md border border-[#DBE6EB] px-3 py-1.5 text-sm font-medium hover:bg-[#F2F7F9]"
+                  className="rounded-md border border-[#E5E5E5] bg-white px-3 py-1.5 text-sm font-medium text-[#666] transition-colors hover:border-[#DBDBDB] hover:bg-[#F9F9F9]"
                 >
                   Preview
                 </Link>
-                <form action={setStatus}>
-                  <input type="hidden" name="id" value={r.id} />
-                  <input
-                    type="hidden"
-                    name="status"
-                    value={r.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED"}
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-md border border-[#DBE6EB] px-3 py-1.5 text-sm font-medium hover:bg-[#F2F7F9]"
-                  >
-                    {r.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                  </button>
-                </form>
-                <DeleteButton id={r.id} />
+                <StatusToggleButton
+                  id={r.id}
+                  blog={r.blog}
+                  slug={r.slug}
+                  status={r.status}
+                />
+                <DeleteButton id={r.id} blog={r.blog} slug={r.slug} />
               </div>
             </li>
           ))}

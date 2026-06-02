@@ -1,12 +1,11 @@
 "use server";
 
-import sharp from "sharp";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/app/lib/db";
-import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { slugify, normalizeTag } from "@/app/lib/slug";
-import { estimateReadTimeFromJson, excerptFromJson } from "@/app/lib/read-time";
+import { excerptFromJson } from "@/app/lib/read-time";
+import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { adminApi } from "./lib/api";
 import type { SaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
 
@@ -21,13 +20,6 @@ function str(form: FormData, key: string): string {
 function optStr(form: FormData, key: string): string | null {
   const v = str(form, key);
   return v === "" ? null : v;
-}
-
-/** Today as e.g. "1 Jun 2026". */
-function formatToday(): string {
-  const d = new Date();
-  const month = d.toLocaleString("en-GB", { month: "short" });
-  return `${d.getDate()} ${month} ${d.getFullYear()}`;
 }
 
 /** Parse + clean the JSON tag list submitted by the chip input. */
@@ -56,33 +48,17 @@ function parseTags(form: FormData): string[] {
 }
 
 /**
- * Persist an uploaded image to the database (BLOB) and return its
- * `/media/[id]` URL. Re-encodes to web-friendly WebP (max 1600px,
- * auto-oriented) so a 5MB phone photo isn't stored/served at full size.
- * Storing in the DB means uploads work on a read-only serverless
- * filesystem with no external blob service.
+ * Upload an image to the backend and return its URL.
  */
-async function persistUpload(file: File | null): Promise<string | null> {
+async function uploadToBackend(file: File | null): Promise<string | null> {
   if (!file || file.size === 0) return null;
-  const input = Buffer.from(await file.arrayBuffer());
-
-  let data: Buffer;
-  let mimeType: string;
   try {
-    data = await sharp(input)
-      .rotate()
-      .resize({ width: 1600, withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
-    mimeType = "image/webp";
-  } catch {
-    // Formats sharp can't process (e.g. SVG) — store as-is.
-    data = input;
-    mimeType = file.type || "application/octet-stream";
+    const result = await adminApi.uploadMedia(file);
+    return result.url;
+  } catch (e) {
+    console.error("Upload failed:", e);
+    return null;
   }
-
-  const media = await prisma.media.create({ data: { data, mimeType } });
-  return `/media/${media.id}`;
 }
 
 /**
@@ -91,8 +67,9 @@ async function persistUpload(file: File | null): Promise<string | null> {
  */
 export async function uploadImage(formData: FormData): Promise<string> {
   await assertAdmin();
-  const url = await persistUpload(formData.get("file") as File | null);
-  if (!url) throw new Error("No file provided");
+  const file = formData.get("file") as File | null;
+  const url = await uploadToBackend(file);
+  if (!url) throw new Error("Upload failed");
   return url;
 }
 
@@ -104,24 +81,16 @@ async function uniqueSlug(
 ): Promise<string> {
   let slug = base;
   let n = 2;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const clash = await prisma.post.findFirst({
-      where: { blog, slug, ...(excludeId ? { id: { not: excludeId } } : {}) },
-      select: { id: true },
-    });
-    if (!clash) return slug;
+  while (await adminApi.checkSlugExists(blog, slug, excludeId ?? undefined)) {
     slug = `${base}-${n++}`;
+    if (n > 100) break; // Safety limit
   }
+  return slug;
 }
 
 /**
  * Create or update a post. Returns a {@link SaveState} with inline
- * field errors on validation failure (rendered in the form); on
- * success it revalidates affected paths and redirects to the dashboard.
- *
- * Reduces manual work: derives the slug, computes read time from the
- * body, and defaults SEO/author/carousel fields when left blank.
+ * field errors on validation failure; on success it redirects to dashboard.
  */
 export async function savePost(
   _prev: SaveState,
@@ -130,21 +99,31 @@ export async function savePost(
   await assertAdmin();
 
   const id = optStr(formData, "id");
-  // Coerce the controlled fields to safe values rather than erroring.
   const rawBlog = str(formData, "blog");
   const blog = BLOGS.has(rawBlog) ? rawBlog : "hive";
   const rawStatus = str(formData, "status");
   const status = STATUSES.has(rawStatus) ? rawStatus : "DRAFT";
   const title = str(formData, "title");
-  const contentJson = str(formData, "contentJson") || "[]";
+  const contentJsonStr = str(formData, "contentJson") || "[]";
 
-  // Cover: a new upload wins, else the existing path, else a fallback —
-  // so a post can publish with nothing but a title (Medium-style).
-  const uploaded = await persistUpload(formData.get("coverFile") as File | null);
-  const coverImage =
-    uploaded ?? (str(formData, "coverImage") || "/bee-flower.png");
+  // Parse contentJson as object and generate HTML
+  // Backend expects { blocks: [...] } format, not raw array
+  let blocks: unknown[];
+  try {
+    blocks = JSON.parse(contentJsonStr);
+  } catch {
+    blocks = [];
+  }
+  if (!Array.isArray(blocks)) blocks = [];
 
-  // --- validation (only the title is truly required) ----------------
+  const contentJson = { blocks };
+  const contentHtml = await contentJsonToHtml(blocks);
+
+  // Cover: upload new file or keep existing
+  const uploaded = await uploadToBackend(formData.get("coverFile") as File | null);
+  const coverImage = uploaded ?? (str(formData, "coverImage") || "/bee-flower.png");
+
+  // Validation
   const fieldErrors: Record<string, string> = {};
   if (!title) fieldErrors.title = "Add a title before saving.";
 
@@ -155,18 +134,15 @@ export async function savePost(
     return { ok: false, error: "Please fix the highlighted fields.", fieldErrors };
   }
 
-  // --- derived / auto-filled values ---------------------------------
+  // Derived values
   const slug = await uniqueSlug(blog, base, id);
-  const contentHtml = await contentJsonToHtml(contentJson);
-  const readTime = str(formData, "readTime") || estimateReadTimeFromJson(contentJson);
-  // Excerpt: explicit description, else first slice of the body.
-  const description =
-    str(formData, "description") || excerptFromJson(contentJson);
+  const readTimeMinutes = parseInt(str(formData, "readTime")) ||
+    Math.max(1, Math.round(countWordsFromJson(contentJsonStr) / 200));
+  const description = str(formData, "description") || excerptFromJson(contentJsonStr);
   const tags = parseTags(formData);
   const featured = formData.get("featured") === "on";
 
-  // CTA: internal links get a leading slash; external links get a
-  // protocol (and render with target=_blank via the ctaExternal flag).
+  // CTA handling
   const ctaLabel = optStr(formData, "ctaLabel");
   const ctaExternal = formData.get("ctaExternal") === "on";
   let ctaHref = optStr(formData, "ctaHref");
@@ -180,12 +156,10 @@ export async function savePost(
     }
   }
 
-  // Featured posts need carousel copy — fall back to lede/description.
+  // Carousel fields
   const lede = optStr(formData, "lede");
-  const carouselIntro =
-    optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
-  const carouselBody =
-    optStr(formData, "carouselBody") ?? (featured ? description : null);
+  const carouselIntro = optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
+  const carouselBody = optStr(formData, "carouselBody") ?? (featured ? description : null);
 
   const data = {
     blog,
@@ -195,8 +169,8 @@ export async function savePost(
     seoDescription: optStr(formData, "seoDescription"),
     description,
     category: str(formData, "category") || "Uncategorized",
-    tags: JSON.stringify(tags),
-    readTime,
+    tags,
+    readTime: readTimeMinutes,
     coverImage,
     coverImageAlt: str(formData, "coverImageAlt") || title,
     lede,
@@ -204,7 +178,7 @@ export async function savePost(
     ctaHref,
     ctaExternal: ctaHref ? ctaExternal : false,
     authorName: str(formData, "authorName") || "energiebee",
-    authorDate: str(formData, "authorDate") || formatToday(),
+    authorDate: str(formData, "authorDate") || new Date().toISOString(),
     carouselIntro,
     carouselBody,
     featured,
@@ -215,27 +189,9 @@ export async function savePost(
 
   try {
     if (id) {
-      const existing = await prisma.post.findUnique({
-        where: { id },
-        select: { publishedAt: true },
-      });
-      await prisma.post.update({
-        where: { id },
-        data: {
-          ...data,
-          publishedAt:
-            status === "PUBLISHED" && !existing?.publishedAt
-              ? new Date()
-              : existing?.publishedAt ?? null,
-        },
-      });
+      await adminApi.updatePost(id, data);
     } else {
-      await prisma.post.create({
-        data: {
-          ...data,
-          publishedAt: status === "PUBLISHED" ? new Date() : null,
-        },
-      });
+      await adminApi.createPost(data);
     }
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };
@@ -251,44 +207,61 @@ export async function savePost(
 export async function setStatus(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = str(formData, "id");
+  const blog = str(formData, "blog");
+  const slug = str(formData, "slug");
   const status = str(formData, "status");
-  if (!id || !STATUSES.has(status)) return;
+  if (!id || !blog || !slug || !STATUSES.has(status)) return;
 
-  const post = await prisma.post.findUnique({
-    where: { id },
-    select: { blog: true, slug: true, publishedAt: true },
-  });
-  if (!post) return;
+  try {
+    await adminApi.setStatus(id, status);
 
-  await prisma.post.update({
-    where: { id },
-    data: {
-      status,
-      publishedAt:
-        status === "PUBLISHED" && !post.publishedAt ? new Date() : post.publishedAt,
-    },
-  });
-
-  revalidatePath("/admin");
-  revalidatePath(`/${post.blog}`);
-  revalidatePath(`/${post.blog}/${post.slug}`);
+    revalidatePath("/admin");
+    revalidatePath(`/${blog}`);
+    revalidatePath(`/${blog}/${slug}`);
+  } catch (e) {
+    console.error("setStatus failed:", e);
+  }
 }
 
 /** Permanently delete a post. */
 export async function deletePost(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = str(formData, "id");
-  if (!id) return;
+  const blog = str(formData, "blog");
+  const slug = str(formData, "slug");
+  if (!id || !blog || !slug) return;
 
-  const post = await prisma.post.findUnique({
-    where: { id },
-    select: { blog: true, slug: true },
-  });
-  if (!post) return;
+  try {
+    await adminApi.deletePost(id);
 
-  await prisma.post.delete({ where: { id } });
+    revalidatePath("/admin");
+    revalidatePath(`/${blog}`);
+    revalidatePath(`/${blog}/${slug}`);
+  } catch (e) {
+    console.error("deletePost failed:", e);
+  }
+}
 
-  revalidatePath("/admin");
-  revalidatePath(`/${post.blog}`);
-  revalidatePath(`/${post.blog}/${post.slug}`);
+/** Count words from JSON content. */
+function countWordsFromJson(contentJson: string): number {
+  try {
+    const blocks = JSON.parse(contentJson);
+    if (!Array.isArray(blocks)) return 0;
+    const text = blocks
+      .map((b: { content?: unknown }) => extractText(b.content))
+      .join(" ");
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  } catch {
+    return 0;
+  }
+}
+
+function extractText(node: unknown): string {
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) return node.map(extractText).join(" ");
+  if (node && typeof node === "object") {
+    const n = node as { text?: string; content?: unknown };
+    return `${n.text ?? ""} ${n.content ? extractText(n.content) : ""}`;
+  }
+  return "";
 }

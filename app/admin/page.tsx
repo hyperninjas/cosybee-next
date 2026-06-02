@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
     status: p.status,
     featured: p.featured,
     coverImage: p.coverImage,
-    updatedAt: p.updatedAt.toISOString(),
+    updatedAt: p.updatedAt,
   }));
 
   return (
@@ -25,18 +25,18 @@ export default async function AdminDashboard() {
           <h1 className="text-2xl font-extrabold">Posts</h1>
           <p className="mt-1 text-sm text-[#545454]">{posts.length} total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Link
             href="/admin/posts/new?blog=hive"
-            className="rounded-lg bg-[#FF8A7A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#ff7765]"
+            className="rounded-lg bg-[#FF8A7A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#ff7765] hover:shadow-md"
           >
-            New Hive post
+            + New Hive post
           </Link>
           <Link
             href="/admin/posts/new?blog=learn"
-            className="rounded-lg border border-[#FF8A7A] px-4 py-2 text-sm font-semibold text-[#FF8A7A] hover:bg-[#FFF5F2]"
+            className="rounded-lg bg-[#1b1b1b] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#333] hover:shadow-md"
           >
-            New Learn post
+            + New Learn post
           </Link>
         </div>
       </div>

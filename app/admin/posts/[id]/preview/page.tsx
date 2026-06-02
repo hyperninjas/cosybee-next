@@ -7,7 +7,9 @@ import { getPostArticle } from "@/app/admin/lib/queries";
 // it will appear once published.
 export default async function PreviewPage({
   params,
-}: PageProps<"/admin/posts/[id]/preview">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const article = await getPostArticle(id);
   if (!article) notFound();

@@ -1,178 +1,120 @@
 import "server-only";
-import type { Post } from "@/app/generated/prisma/client";
-import { prisma } from "./db";
+import { api, type ApiPost, type Blog } from "./api";
 import type { Article } from "./article-types";
 
 export type { Article } from "./article-types";
+export type { Blog } from "./api";
 
-export type Blog = "hive" | "learn";
+/** Format minutes as "N min read" string for display. */
+function formatReadTime(minutes: number): string {
+  return `${minutes} min read`;
+}
 
-// Columns needed for cards/listings — deliberately excludes the heavy
-// contentJson/contentHtml so list queries stay light.
-const CARD_FIELDS = {
-  id: true,
-  blog: true,
-  slug: true,
-  category: true,
-  readTime: true,
-  title: true,
-  seoTitle: true,
-  seoDescription: true,
-  description: true,
-  tags: true,
-  coverImage: true,
-  coverImageAlt: true,
-  authorName: true,
-  authorDate: true,
-  carouselIntro: true,
-  carouselBody: true,
-} as const;
-
-type CardRow = Pick<Post, keyof typeof CARD_FIELDS>;
-
-/** Safely parse the JSON-encoded tags column into a string[]. */
-function parseTags(raw: string): string[] {
+/** Format ISO date string to display format (e.g., "Jan 15, 2025"). */
+function formatAuthorDate(isoDate: string): string {
   try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((t) => typeof t === "string") : [];
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
-    return [];
+    return isoDate;
   }
 }
 
-function toCard(row: CardRow): Article {
+/** Default placeholder image for posts without valid cover images. */
+const PLACEHOLDER_IMAGE = "/bee-flower.png";
+
+/** Check if image URL is valid (external URL or known local file). */
+function getValidImageUrl(coverImage: string | null | undefined): string {
+  if (!coverImage) return PLACEHOLDER_IMAGE;
+  // External URLs (API media, https, etc.) are valid
+  if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
+    return coverImage;
+  }
+  // Local paths starting with /images/ likely don't exist (seeded placeholder data)
+  if (coverImage.startsWith("/images/")) {
+    return PLACEHOLDER_IMAGE;
+  }
+  // Other local paths (like /bee-flower.png) are assumed valid
+  return coverImage;
+}
+
+/** Transform API post to frontend Article shape. */
+function toArticle(post: ApiPost): Article {
   return {
-    id: row.id,
-    blog: row.blog,
-    slug: row.slug,
-    category: row.category,
-    readTime: row.readTime,
-    title: row.title,
-    seoTitle: row.seoTitle ?? undefined,
-    seoDescription: row.seoDescription ?? undefined,
-    description: row.description,
-    tags: parseTags(row.tags),
-    image: row.coverImage,
-    imageAlt: row.coverImageAlt,
-    author: { name: row.authorName, date: row.authorDate },
-    carouselIntro: row.carouselIntro ?? undefined,
-    carouselBody: row.carouselBody ?? undefined,
+    id: post.id,
+    blog: post.blog,
+    slug: post.slug,
+    category: post.category ?? "",
+    readTime: formatReadTime(post.readTime ?? 1),
+    title: post.title,
+    seoTitle: post.seoTitle ?? undefined,
+    seoDescription: post.seoDescription ?? undefined,
+    description: post.description ?? "",
+    tags: Array.isArray(post.tags) ? post.tags : [],
+    image: getValidImageUrl(post.coverImage),
+    imageAlt: post.coverImageAlt ?? "",
+    author: {
+      name: post.authorName ?? "energiebee",
+      date: formatAuthorDate(post.authorDate ?? ""),
+    },
+    carouselIntro: post.carouselIntro ?? undefined,
+    carouselBody: post.carouselBody ?? undefined,
+    lede: post.lede ?? undefined,
+    cta: post.ctaLabel
+      ? {
+          label: post.ctaLabel,
+          href: post.ctaHref ?? undefined,
+          external: post.ctaExternal ?? false,
+        }
+      : undefined,
+    contentHtml: post.contentHtml ?? "",
   };
 }
 
-/** Published articles for a blog, newest first (card fields only). */
+/** Published articles for a blog, newest first. */
 export async function getArticles(blog: Blog): Promise<Article[]> {
-  const rows = await prisma.post.findMany({
-    where: { blog, status: "PUBLISHED" },
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    select: CARD_FIELDS,
-  });
-  return rows.map(toCard);
+  const response = await api.getPosts(blog);
+  return response.data.map(toArticle);
 }
 
-/** Articles flagged for the featured carousel (need both carousel fields). */
+/** Articles flagged for the featured carousel. */
 export async function getFeatured(blog: Blog): Promise<Article[]> {
-  const rows = await prisma.post.findMany({
-    where: {
-      blog,
-      status: "PUBLISHED",
-      featured: true,
-      carouselIntro: { not: null },
-      carouselBody: { not: null },
-    },
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    select: CARD_FIELDS,
-  });
-  return rows.map(toCard);
+  const response = await api.getFeatured(blog);
+  return response.data.map(toArticle);
 }
 
 /** Distinct categories for a blog's filter bar, prefixed with "All". */
 export async function getCategories(blog: Blog): Promise<string[]> {
-  const rows = await prisma.post.findMany({
-    where: { blog, status: "PUBLISHED" },
-    distinct: ["category"],
-    orderBy: { category: "asc" },
-    select: { category: true },
-  });
-  return ["All", ...rows.map((r) => r.category)];
+  const response = await api.getCategories(blog);
+  return ["All", ...response.data];
 }
 
-/**
- * A single published article with rendered body HTML. Uses a
- * write-through cache: if `contentHtml` hasn't been rendered yet
- * (e.g. for seeded posts), render it from `contentJson` once and
- * persist it so later requests skip the work.
- */
+/** A single published article with rendered body HTML. */
 export async function getArticleBySlug(
   blog: Blog,
   slug: string,
 ): Promise<Article | null> {
-  const row = await prisma.post.findFirst({
-    where: { blog, slug, status: "PUBLISHED" },
-  });
-  if (!row) return null;
-
-  let html = row.contentHtml;
-  if (!html) {
-    // Lazy-load the BlockNote renderer so list pages never bundle it.
-    const { contentJsonToHtml } = await import("./blocknote");
-    html = await contentJsonToHtml(row.contentJson);
-    await prisma.post
-      .update({ where: { id: row.id }, data: { contentHtml: html } })
-      .catch(() => {});
-  }
-
-  return {
-    ...toCard(row),
-    lede: row.lede ?? undefined,
-    cta: row.ctaLabel
-      ? {
-          label: row.ctaLabel,
-          href: row.ctaHref ?? undefined,
-          external: row.ctaExternal,
-        }
-      : undefined,
-    contentHtml: html,
-  };
+  const post = await api.getPost(blog, slug);
+  if (!post) return null;
+  return toArticle(post);
 }
 
-/**
- * Related articles for the in-article footer (excludes current),
- * ranked by relevance: shared tags weigh most, same category next,
- * recency breaks ties (Array.sort is stable).
- */
+/** Related articles for the in-article footer (excludes current). */
 export async function getRelated(
   blog: Blog,
   slug: string,
   limit = 2,
 ): Promise<Article[]> {
-  const current = await prisma.post.findFirst({
-    where: { blog, slug, status: "PUBLISHED" },
-    select: { tags: true, category: true },
-  });
-  const rows = await prisma.post.findMany({
-    where: { blog, status: "PUBLISHED", slug: { not: slug } },
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    select: CARD_FIELDS,
-  });
-
-  const curTags = current ? parseTags(current.tags) : [];
-  const scored = rows
-    .map((r) => {
-      const shared = parseTags(r.tags).filter((t) => curTags.includes(t)).length;
-      const sameCat = current && r.category === current.category ? 1 : 0;
-      return { r, score: shared * 2 + sameCat };
-    })
-    .sort((a, b) => b.score - a.score);
-
-  return scored.slice(0, limit).map((s) => toCard(s.r));
+  const response = await api.getRelated(blog, slug, limit);
+  return response.data.map(toArticle);
 }
 
 /** Published slugs for a blog — used by generateStaticParams. */
 export async function getPublishedSlugs(blog: Blog): Promise<string[]> {
-  const rows = await prisma.post.findMany({
-    where: { blog, status: "PUBLISHED" },
-    select: { slug: true },
-  });
-  return rows.map((r) => r.slug);
+  const response = await api.getSlugs(blog);
+  return response.data;
 }

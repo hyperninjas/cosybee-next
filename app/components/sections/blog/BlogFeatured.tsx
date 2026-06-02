@@ -8,6 +8,11 @@ import { CtaButton } from "../../ui/Cta";
 import { type Article } from "@/app/lib/article-types";
 import Dot from "../../ui/Dot";
 
+/** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
+function isExternalUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
 function ChevronLeft({ className }: { className?: string }) {
   return (
     <svg
@@ -54,6 +59,7 @@ function Slide({
           sizes="(min-width: 1024px) 600px, 100vw"
           className="object-cover"
           priority={priority}
+          unoptimized={isExternalUrl(slide.image)}
         />
       </div>
       <div className="flex flex-col h-full p-8 sm:p-10">

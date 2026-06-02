@@ -1,11 +1,19 @@
-import { slugify } from "./slug";
+/** Turn arbitrary text into a URL-safe slug. */
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // strip accents
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export type TocItem = { id: string; text: string; level: number };
 
 /**
  * Inject stable `id`s into the article HTML's h2/h3 headings and return
- * a flat table-of-contents. Pure string processing over our own
- * server-rendered HTML (so the shapes are predictable).
+ * a flat table-of-contents. Pure string processing over server-rendered HTML.
  */
 export function buildToc(html: string): { html: string; items: TocItem[] } {
   const items: TocItem[] = [];

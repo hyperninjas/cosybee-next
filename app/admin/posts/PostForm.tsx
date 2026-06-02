@@ -178,9 +178,23 @@ export default function PostForm({
   const [state, formAction] = useActionState(savePost, initialSaveState);
   const errors = state?.fieldErrors ?? {};
 
-  const initialBlocks: PartialBlock[] = post?.contentJson
-    ? (JSON.parse(post.contentJson) as PartialBlock[])
-    : [];
+  const initialBlocks: PartialBlock[] = (() => {
+    if (!post?.contentJson) return [];
+    try {
+      const parsed = JSON.parse(post.contentJson);
+      // Handle { blocks: [...] } format from backend
+      if (parsed && typeof parsed === "object" && "blocks" in parsed && Array.isArray(parsed.blocks)) {
+        return parsed.blocks as PartialBlock[];
+      }
+      // Handle raw array format
+      if (Array.isArray(parsed)) {
+        return parsed as PartialBlock[];
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  })();
 
   const statusRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);

@@ -10,6 +10,11 @@ import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
 import ArticleToc from "./ArticleToc";
 
+/** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
+function isExternalUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
 function BackArrow() {
   return (
     <svg
@@ -114,6 +119,7 @@ export default function ArticleDetail({
             priority
             sizes="(min-width: 800px) 800px, 100vw"
             className="object-cover"
+            unoptimized={isExternalUrl(article.image)}
           />
         </div>
 

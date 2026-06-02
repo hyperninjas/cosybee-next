@@ -7,9 +7,10 @@ import {
   getInternalRoutes,
 } from "@/app/admin/lib/queries";
 
-function parseTags(raw: string): string[] {
+function ensureTagsArray(tags: string[] | string): string[] {
+  if (Array.isArray(tags)) return tags;
   try {
-    const v = JSON.parse(raw);
+    const v = JSON.parse(tags);
     return Array.isArray(v) ? v.filter((t) => typeof t === "string") : [];
   } catch {
     return [];
@@ -18,7 +19,9 @@ function parseTags(raw: string): string[] {
 
 export default async function EditPostPage({
   params,
-}: PageProps<"/admin/posts/[id]/edit">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const [post, categories, tags, routes] = await Promise.all([
     getPost(id),
@@ -36,9 +39,9 @@ export default async function EditPostPage({
     seoTitle: post.seoTitle ?? "",
     seoDescription: post.seoDescription ?? "",
     description: post.description,
-    tags: parseTags(post.tags),
+    tags: ensureTagsArray(post.tags),
     category: post.category,
-    readTime: post.readTime,
+    readTime: typeof post.readTime === "number" ? `${post.readTime} min read` : post.readTime,
     coverImage: post.coverImage,
     coverImageAlt: post.coverImageAlt,
     lede: post.lede ?? "",
@@ -51,7 +54,9 @@ export default async function EditPostPage({
     carouselBody: post.carouselBody ?? "",
     featured: post.featured,
     status: post.status,
-    contentJson: post.contentJson,
+    contentJson: typeof post.contentJson === "string"
+      ? post.contentJson
+      : JSON.stringify(post.contentJson),
   };
 
   return (

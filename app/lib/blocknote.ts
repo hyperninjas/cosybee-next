@@ -1,37 +1,40 @@
+import "server-only";
 import { ServerBlockNoteEditor } from "@blocknote/server-util";
 import type { PartialBlock } from "@blocknote/core";
-import DOMPurify from "isomorphic-dompurify";
 
-// Server-only BlockNote helpers. Used by the seed and by admin Server
-// Actions to turn a stored BlockNote document into the sanitized HTML
-// the public article page renders — so the editor never ships to the
-// public bundle.
-
-/** Parse the JSON we persist in `Post.contentJson` back into blocks. */
-export function parseBlocks(contentJson: string): PartialBlock[] {
-  try {
-    const parsed = JSON.parse(contentJson);
-    return Array.isArray(parsed) ? (parsed as PartialBlock[]) : [];
-  } catch {
-    return [];
-  }
+/**
+ * Convert BlockNote JSON blocks to HTML string.
+ * Uses server-side rendering for generating the HTML.
+ */
+export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
+  const editor = ServerBlockNoteEditor.create();
+  const html = await editor.blocksToFullHTML(blocks);
+  return html;
 }
 
 /**
- * Render BlockNote blocks to clean, sanitized semantic HTML
- * (paragraphs, headings, lists, links, images). `blocksToHTMLLossy`
- * gives plain tags we can style with our own CSS rather than
- * BlockNote's editor classes.
+ * Parse a JSON string of blocks and convert to HTML.
+ * Accepts either an array of blocks or { blocks: [...] } format.
+ * Returns empty string if parsing fails.
  */
-export async function renderBlocksToHtml(
-  blocks: PartialBlock[],
-): Promise<string> {
-  const editor = ServerBlockNoteEditor.create();
-  const html = await editor.blocksToHTMLLossy(blocks);
-  return DOMPurify.sanitize(html, { ADD_ATTR: ["target", "rel"] });
-}
+export async function contentJsonToHtml(contentJson: string | object | unknown[]): Promise<string> {
+  try {
+    let data = typeof contentJson === "string"
+      ? JSON.parse(contentJson)
+      : contentJson;
 
-/** Convenience: JSON string -> sanitized HTML. */
-export async function contentJsonToHtml(contentJson: string): Promise<string> {
-  return renderBlocksToHtml(parseBlocks(contentJson));
+    // Handle { blocks: [...] } format
+    if (data && typeof data === "object" && "blocks" in data && Array.isArray((data as { blocks: unknown[] }).blocks)) {
+      data = (data as { blocks: unknown[] }).blocks;
+    }
+
+    if (!Array.isArray(data)) {
+      return "";
+    }
+
+    return blocksToHtml(data as PartialBlock[]);
+  } catch (e) {
+    console.error("Failed to convert contentJson to HTML:", e);
+    return "";
+  }
 }

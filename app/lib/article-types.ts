@@ -1,7 +1,7 @@
 // Client-safe article shape shared by the blog UI components. Kept
-// free of any server imports (Prisma, BlockNote) so client components
-// can import the type without dragging server code into their bundle.
-// The DB query layer lives in `articles.ts` (server-only).
+// free of any server imports so client components can import the type
+// without dragging server code into their bundle. The API query layer
+// lives in `articles.ts` (server-only).
 
 export type Article = {
   id: string;
