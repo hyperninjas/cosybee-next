@@ -56,9 +56,7 @@ export default function Footer() {
 
         {/* why EnergieBee */}
         <div>
-          <h3 className="text-lg font-bold tracking-[0.08em]">
-            WHY EnergieBee
-          </h3>
+          <h3 className="text-lg font-bold tracking-[0.08em]">Latest Blogs</h3>
           <ul className="mt-5 space-y-4.5">
             {WHY_LINKS.map((link) => (
               <li key={link.label}>
