@@ -1,0 +1,84 @@
+// Prisma 7 schema. The connection URL lives in `prisma.config.ts` (v7
+// no longer accepts `url` here); the runtime client uses a driver
+// adapter (see app/lib/db.ts). SQLite has no enums, so `blog` and
+// `status` are plain strings constrained at the app layer.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// One blog post. Powers both /hive and /learn (distinguished by
+/// `blog`) and the admin panel. Published posts surface on the public
+/// site; drafts are admin-only.
+model Post {
+  id String @id @default(cuid())
+
+  /// Which blog this belongs to: "hive" | "learn".
+  blog String
+  /// URL slug, unique within a blog.
+  slug String
+
+  title       String
+  /// Optional <title>/og:title override; falls back to `title`.
+  seoTitle    String?
+  /// Optional meta-description override; falls back to `description`.
+  seoDescription String?
+  description String
+  category    String
+  /// JSON-encoded string[] (SQLite has no array type).
+  tags        String  @default("[]")
+  readTime    String
+
+  /// Public path to the cover image (e.g. "/uploads/abc.png").
+  coverImage    String
+  coverImageAlt String
+
+  /// Bold subtitle rendered under the H1.
+  lede String?
+
+  /// Optional end-of-article call-to-action button.
+  ctaLabel    String?
+  ctaHref     String?
+  /// When true, ctaHref is an external URL (opens in a new tab).
+  ctaExternal Boolean @default(false)
+
+  authorName String
+  authorDate String
+
+  /// Two-line hook + body for the featured carousel. Both present =>
+  /// eligible to be featured.
+  carouselIntro String?
+  carouselBody  String?
+  featured      Boolean @default(false)
+
+  /// "DRAFT" | "PUBLISHED".
+  status String @default("DRAFT")
+
+  /// BlockNote document as JSON (PartialBlock[]) — the editable source.
+  contentJson String
+  /// Server-rendered HTML derived from `contentJson` — what the public
+  /// page displays (keeps the editor off the public bundle).
+  contentHtml String @default("")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  @@unique([blog, slug])
+  @@index([blog, status])
+}
+
+/// Uploaded images, stored in the database (BLOB) so they work on a
+/// read-only serverless filesystem without any external blob service.
+/// Served via the /media/[id] route with immutable cache headers.
+model Media {
+  id        String   @id @default(cuid())
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+}

@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude
+
+# prisma / sqlite
+/prisma/*.db
+/prisma/*.db-journal
+/app/generated
+
+# admin image uploads (local-first storage)
+/public/uploads

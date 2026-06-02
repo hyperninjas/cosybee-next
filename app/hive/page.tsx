@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import BlogHero from "../components/sections/blog/BlogHero";
 import BlogBrowse from "../components/sections/blog/BlogBrowse";
-import {
-  HIVE_ARTICLES,
-  HIVE_CATEGORIES,
-  getFeaturedArticles,
-} from "../lib/hive-articles";
+import { getArticles, getFeatured, getCategories } from "../lib/articles";
 
 export const metadata: Metadata = {
   title: "The Hive",
@@ -20,7 +16,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HivePage() {
+export default async function HivePage({
+  searchParams,
+}: PageProps<"/hive">) {
+  const { tag } = await searchParams;
+  const [articles, featured, categories] = await Promise.all([
+    getArticles("hive"),
+    getFeatured("hive"),
+    getCategories("hive"),
+  ]);
+
   return (
     <main className="flex-1">
       <BlogHero
@@ -28,10 +33,11 @@ export default function HivePage() {
         description="Insights, stories, and expert advice on sustainable energy solutions for modern homes."
       />
       <BlogBrowse
-        articles={HIVE_ARTICLES}
-        featured={getFeaturedArticles()}
-        categories={HIVE_CATEGORIES}
+        articles={articles}
+        featured={featured}
+        categories={categories}
         basePath="/hive"
+        initialTag={typeof tag === "string" ? tag : undefined}
       />
     </main>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { type Article } from "@/app/lib/articles";
+import { type Article } from "@/app/lib/article-types";
 import Divider from "../../ui/Divider";
 import BlogFeatured from "./BlogFeatured";
 import BlogFilterBar from "./BlogFilterBar";
@@ -13,6 +13,8 @@ type Props = {
   categories: readonly string[];
   /** Link base for article cards/links, e.g. "/hive" or "/learn". */
   basePath: string;
+  /** Active tag from the URL (?tag=…) to pre-filter by. */
+  initialTag?: string;
 };
 
 /**
@@ -27,10 +29,12 @@ export default function BlogBrowse({
   featured,
   categories,
   basePath,
+  initialTag,
 }: Props) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
-  const isFiltered = query.trim() !== "" || category !== "All";
+  const [tag, setTag] = useState(initialTag ?? "");
+  const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
 
   return (
     <>
@@ -54,11 +58,24 @@ export default function BlogBrowse({
           <BlogFeatured slides={featured} basePath={basePath} />
         </div>
       </div>
+      {tag && (
+        <div className="mx-auto max-w-360 px-6 pt-8 sm:px-10 lg:px-30">
+          <button
+            type="button"
+            onClick={() => setTag("")}
+            className="inline-flex items-center gap-2 rounded-full bg-[#EBF2F5] px-3 py-1.5 text-sm font-semibold text-[#1b4a5e] hover:bg-[#dce8ed]"
+          >
+            Filtering by #{tag}
+            <span aria-hidden className="text-[#1b4a5e]/60">✕</span>
+          </button>
+        </div>
+      )}
       <BlogLatestArticles
         articles={articles}
         basePath={basePath}
         query={query}
         category={category}
+        tag={tag}
       />
     </>
   );

@@ -17,15 +17,19 @@ export function CtaButton({
   children,
   size = "md",
   className = "",
+  external = false,
 }: {
   href: string;
   children: ReactNode;
   size?: CtaSize;
   className?: string;
+  /** Open in a new tab with safe rel — for off-site links. */
+  external?: boolean;
 }) {
   return (
     <a
       href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={`inline-flex shrink-0 font-semibold text-[22px] items-center justify-center rounded-lg bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
     >
       {children}

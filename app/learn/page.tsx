@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import BlogHero from "../components/sections/blog/BlogHero";
 import BlogBrowse from "../components/sections/blog/BlogBrowse";
-import {
-  LEARN_ARTICLES,
-  LEARN_CATEGORIES,
-  getFeaturedLearnArticles,
-} from "../lib/learn-articles";
+import { getArticles, getFeatured, getCategories } from "../lib/articles";
 
 export const metadata: Metadata = {
   title: "Learn",
@@ -20,7 +16,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LearnPage() {
+export default async function LearnPage({
+  searchParams,
+}: PageProps<"/learn">) {
+  const { tag } = await searchParams;
+  const [articles, featured, categories] = await Promise.all([
+    getArticles("learn"),
+    getFeatured("learn"),
+    getCategories("learn"),
+  ]);
+
   return (
     <main className="flex-1">
       <BlogHero
@@ -28,10 +33,11 @@ export default function LearnPage() {
         description="Guides, tutorials, and energy-saving tips from the energiebee team."
       />
       <BlogBrowse
-        articles={LEARN_ARTICLES}
-        featured={getFeaturedLearnArticles()}
-        categories={LEARN_CATEGORIES}
+        articles={articles}
+        featured={featured}
+        categories={categories}
         basePath="/learn"
+        initialTag={typeof tag === "string" ? tag : undefined}
       />
     </main>
   );

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { type Article } from "@/app/lib/articles";
+import { type Article } from "@/app/lib/article-types";
 import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
@@ -45,6 +45,18 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-[#545454]">
           {a.description}
         </p>
+        {a.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {a.tags.slice(0, 3).map((t) => (
+              <span
+                key={t}
+                className="rounded-md bg-[#F3F3F3] px-2 py-0.5 text-xs font-medium text-[#666]"
+              >
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="mt-auto pt-4">
           <Divider />
           <div className="mt-4 flex items-center gap-5">
@@ -62,7 +74,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
 function matchesArticle(a: Article, q: string) {
   if (!q) return true;
   const haystack =
-    `${a.title} ${a.description} ${a.author.name} ${a.category}`.toLowerCase();
+    `${a.title} ${a.description} ${a.author.name} ${a.category} ${a.tags.join(" ")}`.toLowerCase();
   return haystack.includes(q);
 }
 
@@ -71,6 +83,7 @@ type Props = {
   basePath: string;
   query?: string;
   category?: string;
+  tag?: string;
 };
 
 /**
@@ -85,6 +98,7 @@ export default function BlogLatestArticles({
   basePath,
   query = "",
   category = "All",
+  tag = "",
 }: Props) {
   const [visible, setVisible] = useState(INITIAL_VISIBLE);
 
@@ -92,9 +106,11 @@ export default function BlogLatestArticles({
     const q = query.trim().toLowerCase();
     return articles.filter(
       (a) =>
-        (category === "All" || a.category === category) && matchesArticle(a, q),
+        (category === "All" || a.category === category) &&
+        (!tag || a.tags.includes(tag)) &&
+        matchesArticle(a, q),
     );
-  }, [articles, query, category]);
+  }, [articles, query, category, tag]);
 
   const shown = filtered.slice(0, visible);
   const canLoadMore = visible < filtered.length;
@@ -102,9 +118,11 @@ export default function BlogLatestArticles({
   const q = query.trim();
   const heading = q
     ? `Results for "${q}"`
-    : category !== "All"
-      ? category
-      : "Latest Articles";
+    : tag
+      ? `#${tag}`
+      : category !== "All"
+        ? category
+        : "Latest Articles";
 
   return (
     <section

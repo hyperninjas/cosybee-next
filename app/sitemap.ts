@@ -1,17 +1,16 @@
 import type { MetadataRoute } from "next";
 import { ROUTES, SITE_URL } from "./lib/site";
-import { getPublishedSlugs } from "./lib/hive-articles";
-import { getPublishedLearnSlugs } from "./lib/learn-articles";
+import { getPublishedSlugs } from "./lib/articles";
 
 /**
- * Generates /sitemap.xml at build time.
+ * Generates /sitemap.xml.
  *
  * Static pages come from the canonical `ROUTES` list — add a new page →
  * add it to `ROUTES` in lib/site.ts. Blog article pages are derived
- * automatically from the article data, so adding an article (with a
- * body) to hive-articles.ts / learn-articles.ts requires no change here.
+ * automatically from published posts in the database, so publishing an
+ * article in the admin panel surfaces it here with no code change.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
   const staticRoutes = ROUTES.map((route) => ({
@@ -21,9 +20,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route.priority,
   }));
 
+  const [hiveSlugs, learnSlugs] = await Promise.all([
+    getPublishedSlugs("hive"),
+    getPublishedSlugs("learn"),
+  ]);
+
   const articleRoutes = [
-    ...getPublishedSlugs().map((slug) => `/hive/${slug}`),
-    ...getPublishedLearnSlugs().map((slug) => `/learn/${slug}`),
+    ...hiveSlugs.map((slug) => `/hive/${slug}`),
+    ...learnSlugs.map((slug) => `/learn/${slug}`),
   ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified,

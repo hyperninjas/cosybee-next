@@ -2,6 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
+  // Keep these out of the bundler so they load as normal Node modules:
+  // BlockNote's server renderer pulls in React client APIs (createContext)
+  // that can't be evaluated under the RSC "react-server" condition, and
+  // better-sqlite3 is a native addon.
+  serverExternalPackages: [
+    "@blocknote/server-util",
+    "@blocknote/core",
+    "@blocknote/react",
+    "@prisma/adapter-libsql",
+    "@libsql/client",
+    "sharp",
+  ],
   // Strip console.* (except errors) from production builds — small bytes
   // saved, plus removes leaked dev logs.
   compiler: {
@@ -27,6 +40,13 @@ const nextConfig: NextConfig = {
     // CSS request on first paint. Uses Beasties (formerly Critters) under
     // the hood. Falls back gracefully if the optimiser can't run.
     optimizeCss: true,
+
+    // Cover-image uploads go through a Server Action (multipart POST).
+    // The default body limit is 1MB — too small for real photos, which
+    // caused 400 / connection-reset errors on save. Allow up to 10MB.
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
 
   // No client-side source maps in production — they're large and only useful

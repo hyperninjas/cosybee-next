@@ -1,39 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type Article } from "@/app/lib/articles";
+import { type Article } from "@/app/lib/article-types";
+import { buildToc } from "@/app/lib/toc";
 import { ArticleCard } from "./BlogLatestArticles";
 import { CtaButton } from "../../ui/Cta";
 import Dot from "../../ui/Dot";
 import Avatar from "../../ui/Avatar";
-
-const URL_RE = /(https?:\/\/[^\s)]+)/g;
-
-/** Split a paragraph string into text + clickable links. Trailing
- *  punctuation tucked onto the URL ("…2024.") is pulled back into
- *  the text so it doesn't end up inside the href. */
-function linkify(text: string) {
-  const parts = text.split(URL_RE);
-  return parts.map((part, i) => {
-    if (i % 2 === 1) {
-      const trail = part.match(/[.,;:!?]+$/)?.[0] ?? "";
-      const href = trail ? part.slice(0, -trail.length) : part;
-      return (
-        <span key={i}>
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="break-all text-[#1b6ac9] underline transition-colors hover:text-[#0b4ec9]"
-          >
-            {href}
-          </a>
-          {trail}
-        </span>
-      );
-    }
-    return part;
-  });
-}
+import ShareButton from "./ShareButton";
+import ReadingProgress from "./ReadingProgress";
+import ArticleToc from "./ArticleToc";
 
 function BackArrow() {
   return (
@@ -50,27 +25,9 @@ function BackArrow() {
   );
 }
 
-function ShareIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="h-6 w-6"
-    >
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-    </svg>
-  );
-}
-
 type Props = {
-  /** Article with a guaranteed body (caller handles notFound). */
-  article: Article & { body: NonNullable<Article["body"]> };
+  /** Published article with rendered body HTML (caller handles notFound). */
+  article: Article;
   related: Article[];
   /** Link base, e.g. "/hive" or "/learn". */
   basePath: string;
@@ -90,9 +47,13 @@ export default function ArticleDetail({
   basePath,
   backLabel,
 }: Props) {
+  const { html, items: toc } = buildToc(article.contentHtml ?? "");
+
   return (
     <main className="flex-1">
-      <article className="mx-auto max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20">
+      <ReadingProgress />
+      <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
+      <article className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20">
         {/* back link */}
         <Link
           href={basePath}
@@ -107,13 +68,26 @@ export default function ArticleDetail({
           <h1 className="text-[24px] font-bold text-black sm:text-[28px]">
             {article.title}
           </h1>
-          <div className="mt-2 flex items-center gap-3 text-xs">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
             <span className="inline-flex items-center rounded-full border border-[#DBE6EB] bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
               {article.category}
             </span>
             <Dot />
             <span className="text-[#545454]">{article.readTime}</span>
           </div>
+          {article.tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {article.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`${basePath}?tag=${encodeURIComponent(tag)}`}
+                  className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-[#545454] transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
+                >
+                  {`#${tag}`}
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -127,13 +101,7 @@ export default function ArticleDetail({
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              aria-label="Share article"
-              className="flex h-16 w-16 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black transition-colors hover:bg-neutral-50"
-            >
-              <ShareIcon />
-            </button>
+            <ShareButton title={article.title} />
           </div>
         </header>
 
@@ -150,82 +118,39 @@ export default function ArticleDetail({
         </div>
 
         {/* lede / subtitle */}
-        {article.body.lede && (
+        {article.lede && (
           <p className="mt-10 px-10 lg:px-20 text-lg font-bold leading-snug text-black sm:text-xl">
-            {article.body.lede}
+            {article.lede}
           </p>
         )}
 
-        {/* body */}
-        <div className="mt-10 px-10 lg:px-20 space-y-6 text-[#545454]">
-          {article.body.sections.map((section, sectionIndex) => {
-            const blocks = section.blocks ?? section.paragraphs ?? [];
-            return (
-              <section key={sectionIndex}>
-                {section.heading && (
-                  <h2 className="text-xl max-w-147.5 font-bold leading-tight text-black sm:text-[28px]">
-                    {section.heading}
-                  </h2>
-                )}
-                {blocks.map((block, i) => {
-                  const spacing = section.heading || i > 0 ? "mt-4" : "";
-                  if (typeof block === "string") {
-                    return (
-                      <p
-                        key={i}
-                        className={`leading-relaxed text-base ${spacing}`}
-                      >
-                        {linkify(block)}
-                      </p>
-                    );
-                  }
-                  return (
-                    <ul
-                      key={i}
-                      className={`list-disc space-y-2 pl-6 ${spacing}`}
-                    >
-                      {block.items.map((item, j) => (
-                        <li
-                          key={j}
-                          className="leading-relaxed text-base marker:text-[#545454]"
-                        >
-                          {linkify(item)}
-                        </li>
-                      ))}
-                    </ul>
-                  );
-                })}
-              </section>
-            );
-          })}
-        </div>
-
-        {/* in-body image */}
-        {article.body.inlineImage && (
-          <div className="relative mt-12 aspect-video overflow-hidden rounded-3xl">
-            <Image
-              src={article.body.inlineImage.src}
-              alt={article.body.inlineImage.alt}
-              fill
-              sizes="(min-width: 800px) 800px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        )}
+        {/* body — server-rendered HTML from the BlockNote document */}
+        <div
+          className="article-body mt-10 px-10 lg:px-20 text-[#545454]"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
 
         {/* end-of-article CTA */}
-        {article.body.cta && (
+        {article.cta && (
           <div className="mt-12 flex justify-center px-10 lg:px-20">
             <CtaButton
-              href={article.body.cta.href ?? "#"}
+              href={article.cta.href ?? "#"}
+              external={article.cta.external}
               size="md"
               className="text-lg!"
             >
-              {article.body.cta.label}
+              {article.cta.label}
             </CtaButton>
           </div>
         )}
       </article>
+
+        {toc.length > 1 && (
+          <aside className="hidden w-60 shrink-0 pt-18.5 xl:block">
+            <ArticleToc items={toc} />
+          </aside>
+        )}
+      </div>
 
       {/* more blogs */}
       {related.length > 0 && (

@@ -1,13 +1,4 @@
-import beeFlowerImg from "@/public/bee-flower.png";
-import { type Article, createBlog } from "./articles";
-
-// Re-exported so existing `@/app/lib/hive-articles` type imports keep working.
-export type {
-  Article as HiveArticle,
-  ArticleBlock,
-  ArticleSection,
-  ArticleBody,
-} from "./articles";
+import type { LegacyArticle } from "./types";
 
 /** Categories shown in the hive filter bar. */
 export const HIVE_CATEGORIES = [
@@ -18,7 +9,7 @@ export const HIVE_CATEGORIES = [
   "Innovation",
 ] as const;
 
-export const HIVE_ARTICLES: Article[] = [
+export const HIVE_ARTICLES: LegacyArticle[] = [
   {
     slug: "a-warm-hive-a-cosy-home",
     category: "Nature Knows Best",
@@ -26,7 +17,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "A Warm Hive, a Cosy Home",
     description:
       "What a beehive can teach us about home energy: how coordination, timing and small adjustments create steady comfort without constant control.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A hand holding a smart thermostat displaying 74 degrees",
     author: { name: "Chris Glasser", date: "5 Apr 2026" },
     carouselIntro: "There is something quietly reassuring about a beehive.",
@@ -60,7 +51,7 @@ export const HIVE_ARTICLES: Article[] = [
     seoTitle: "Energy, Without the Noise: Calm and Smart homes",
     description:
       "Why calm coordination belongs at the heart of every home — and how the energiebee app brings that quiet to everyday life.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Bees clustered on a honeycomb at rest",
     author: { name: "Chris Glasser", date: "12 Apr 2026" },
     carouselIntro:
@@ -110,7 +101,7 @@ export const HIVE_ARTICLES: Article[] = [
       "From Waste to Wisdom: A New Approach to Home Energy Understanding",
     description:
       "A clear exploration of how household energy works across heating, solar, weather, and daily routines, and how unified visibility supports better energy awareness and coordination.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Bees moving over honeycomb in coordinated patterns",
     author: { name: "Elliot Smith", date: "18 Apr 2026" },
     carouselIntro: "Energy shapes daily life in continuous and often invisible ways.",
@@ -272,7 +263,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "How Your Home Heating System Works",
     description:
       "A quiet look at how home heating systems work, and how small patterns of warmth, timing, and movement shape comfort throughout the day.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Bees clustered for warmth inside a hive",
     author: { name: "Mina Frost", date: "22 Apr 2026" },
     body: {
@@ -352,7 +343,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Is Solar Right for My Home?",
     description:
       "Thinking about solar panels? Learn what to check, how they affect your home, and whether they make sense for your energy use.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Bee-friendly garden with hive in the foreground",
     author: { name: "Lila Del Ray", date: "29 Apr 2026" },
     body: {
@@ -453,7 +444,7 @@ export const HIVE_ARTICLES: Article[] = [
       "Smart Energy Management: Leveraging Weather Data for a Greener Home",
     description:
       "How meteorological insight shapes energy efficiency, solar performance, and household awareness.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Bees in flight against an overcast sky",
     author: { name: "Elliot Smith", date: "4 May 2026" },
     body: {
@@ -548,7 +539,7 @@ export const HIVE_ARTICLES: Article[] = [
       "The Big Picture: How Smarter Home Energy Can Transform the UK's Grid and Households",
     description:
       "Discover how intelligent energy systems inspired by nature can help the UK reduce costs, cut emissions, and build a more resilient energy future — from home heating to national impact.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A honeybee at work — small actions, large effects",
     author: { name: "Chris Glasser", date: "10 May 2026" },
     carouselIntro: "The UK's energy landscape is changing fast.",
@@ -639,7 +630,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Why a Bee? A View on Work, Community and Energy",
     description:
       "What a bee reveals about work, community and distributed energy, and how these ideas shape how Energiebee designs and builds energy systems.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A worker bee resting on a wildflower",
     author: { name: "Chris Glasser", date: "22 May 2026" },
     body: {
@@ -677,7 +668,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Why EPC Ratings Are Not Enough to Understand Your Home's Energy Use",
     description:
       "And how real-time energy insight changes the way homes are understood.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A smart thermostat reading on a wall at home",
     author: { name: "Elliot Smith", date: "28 May 2026" },
     body: {
@@ -816,7 +807,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Why We're Looking at Beehives Again — Lessons from Rudolf Steiner",
     description:
       "What can a beehive teach us about energy systems, adaptive homes, and maintaining balance without continuous intervention?",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A natural beehive in daylight",
     author: { name: "Mina Frost", date: "4 Jun 2026" },
     body: {
@@ -859,7 +850,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Why Your Energy Bills Don't Match Your EPC Rating",
     description:
       "Understanding the gap between predicted energy use and real household costs.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A household energy bill on a kitchen table",
     author: { name: "Elliot Smith", date: "11 Jun 2026" },
     body: {
@@ -987,7 +978,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Understanding Solar Energy: Benefits and Applications for a Sustainable Future",
     description:
       "How sunlight becomes part of everyday energy systems — from photovoltaic panels to passive design and hybrid integrations.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Sunlight filtering through a hive entrance",
     author: { name: "Lila Del Ray", date: "16 May 2026" },
     body: {
@@ -1100,10 +1091,3 @@ export const HIVE_ARTICLES: Article[] = [
   },
 ];
 
-const hive = createBlog(HIVE_ARTICLES);
-
-export const getArticleBySlug = hive.getBySlug;
-export const getFeaturedArticles = hive.getFeatured;
-export const getLatestArticles = hive.getLatest;
-export const getRelatedArticles = hive.getRelated;
-export const getPublishedSlugs = hive.getPublishedSlugs;

@@ -1,72 +1,178 @@
-import type { StaticImageData } from "next/image";
+import "server-only";
+import type { Post } from "@/app/generated/prisma/client";
+import { prisma } from "./db";
+import type { Article } from "./article-types";
 
-/** A single content block inside a section. Strings render as
- *  paragraphs; `{ items }` objects render as bulleted lists. */
-export type ArticleBlock = string | { items: string[] };
+export type { Article } from "./article-types";
 
-export type ArticleSection = {
-  /** Section heading. Omit for an unheaded lead/intro block. */
-  heading?: string;
-  /** Plain paragraphs. Use this for simple prose sections. */
-  paragraphs?: string[];
-  /** Mixed paragraphs and lists. Strings render as <p>, objects with
-   *  `items` render as <ul>. Wins over `paragraphs` when both set. */
-  blocks?: ArticleBlock[];
-};
+export type Blog = "hive" | "learn";
 
-export type ArticleBody = {
-  /** Bold subtitle rendered under the article H1. */
-  lede?: string;
-  sections: ArticleSection[];
-  /** Optional photo rendered after the last section, full-width. */
-  inlineImage?: { src: StaticImageData; alt: string };
-  /** Optional call-to-action button rendered at the end of the body. */
-  cta?: { label: string; href?: string };
-};
+// Columns needed for cards/listings — deliberately excludes the heavy
+// contentJson/contentHtml so list queries stay light.
+const CARD_FIELDS = {
+  id: true,
+  blog: true,
+  slug: true,
+  category: true,
+  readTime: true,
+  title: true,
+  seoTitle: true,
+  seoDescription: true,
+  description: true,
+  tags: true,
+  coverImage: true,
+  coverImageAlt: true,
+  authorName: true,
+  authorDate: true,
+  carouselIntro: true,
+  carouselBody: true,
+} as const;
 
-export type Article = {
-  slug: string;
-  category: string;
-  readTime: string;
-  /** Visible H1 / card title. */
-  title: string;
-  /** Optional <title> + og:title override for search engines. Falls
-   *  back to `title` when omitted. */
-  seoTitle?: string;
-  /** Short blurb shown on cards (latest grid + related). */
-  description: string;
-  image: StaticImageData;
-  imageAlt: string;
-  author: { name: string; date: string };
-  /** Two-line hook shown in the featured carousel. */
-  carouselIntro?: string;
-  /** Slightly longer carousel body — only used when promoted. */
-  carouselBody?: string;
-  /** Full article body. Articles without `body` aren't routable. */
-  body?: ArticleBody;
-};
+type CardRow = Pick<Post, keyof typeof CARD_FIELDS>;
+
+/** Safely parse the JSON-encoded tags column into a string[]. */
+function parseTags(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((t) => typeof t === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function toCard(row: CardRow): Article {
+  return {
+    id: row.id,
+    blog: row.blog,
+    slug: row.slug,
+    category: row.category,
+    readTime: row.readTime,
+    title: row.title,
+    seoTitle: row.seoTitle ?? undefined,
+    seoDescription: row.seoDescription ?? undefined,
+    description: row.description,
+    tags: parseTags(row.tags),
+    image: row.coverImage,
+    imageAlt: row.coverImageAlt,
+    author: { name: row.authorName, date: row.authorDate },
+    carouselIntro: row.carouselIntro ?? undefined,
+    carouselBody: row.carouselBody ?? undefined,
+  };
+}
+
+/** Published articles for a blog, newest first (card fields only). */
+export async function getArticles(blog: Blog): Promise<Article[]> {
+  const rows = await prisma.post.findMany({
+    where: { blog, status: "PUBLISHED" },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: CARD_FIELDS,
+  });
+  return rows.map(toCard);
+}
+
+/** Articles flagged for the featured carousel (need both carousel fields). */
+export async function getFeatured(blog: Blog): Promise<Article[]> {
+  const rows = await prisma.post.findMany({
+    where: {
+      blog,
+      status: "PUBLISHED",
+      featured: true,
+      carouselIntro: { not: null },
+      carouselBody: { not: null },
+    },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: CARD_FIELDS,
+  });
+  return rows.map(toCard);
+}
+
+/** Distinct categories for a blog's filter bar, prefixed with "All". */
+export async function getCategories(blog: Blog): Promise<string[]> {
+  const rows = await prisma.post.findMany({
+    where: { blog, status: "PUBLISHED" },
+    distinct: ["category"],
+    orderBy: { category: "asc" },
+    select: { category: true },
+  });
+  return ["All", ...rows.map((r) => r.category)];
+}
 
 /**
- * Binds a set of article query helpers to a specific article list.
- * One blog (hive, learn, …) is one call to `createBlog`, keeping each
- * blog's content fully independent while sharing the same logic.
+ * A single published article with rendered body HTML. Uses a
+ * write-through cache: if `contentHtml` hasn't been rendered yet
+ * (e.g. for seeded posts), render it from `contentJson` once and
+ * persist it so later requests skip the work.
  */
-export function createBlog(articles: Article[]) {
+export async function getArticleBySlug(
+  blog: Blog,
+  slug: string,
+): Promise<Article | null> {
+  const row = await prisma.post.findFirst({
+    where: { blog, slug, status: "PUBLISHED" },
+  });
+  if (!row) return null;
+
+  let html = row.contentHtml;
+  if (!html) {
+    // Lazy-load the BlockNote renderer so list pages never bundle it.
+    const { contentJsonToHtml } = await import("./blocknote");
+    html = await contentJsonToHtml(row.contentJson);
+    await prisma.post
+      .update({ where: { id: row.id }, data: { contentHtml: html } })
+      .catch(() => {});
+  }
+
   return {
-    all: articles,
-    getBySlug: (slug: string): Article | undefined =>
-      articles.find((a) => a.slug === slug),
-    /** Articles flagged for the featured carousel. */
-    getFeatured: (): Article[] =>
-      articles.filter((a) => a.carouselIntro && a.carouselBody),
-    /** Latest grid. Omit `limit` to get every article. */
-    getLatest: (limit?: number): Article[] =>
-      limit === undefined ? articles : articles.slice(0, limit),
-    /** Related articles for the in-article footer (excludes current). */
-    getRelated: (slug: string, limit = 2): Article[] =>
-      articles.filter((a) => a.slug !== slug).slice(0, limit),
-    /** Routable slugs — used by generateStaticParams. */
-    getPublishedSlugs: (): string[] =>
-      articles.filter((a) => a.body).map((a) => a.slug),
+    ...toCard(row),
+    lede: row.lede ?? undefined,
+    cta: row.ctaLabel
+      ? {
+          label: row.ctaLabel,
+          href: row.ctaHref ?? undefined,
+          external: row.ctaExternal,
+        }
+      : undefined,
+    contentHtml: html,
   };
+}
+
+/**
+ * Related articles for the in-article footer (excludes current),
+ * ranked by relevance: shared tags weigh most, same category next,
+ * recency breaks ties (Array.sort is stable).
+ */
+export async function getRelated(
+  blog: Blog,
+  slug: string,
+  limit = 2,
+): Promise<Article[]> {
+  const current = await prisma.post.findFirst({
+    where: { blog, slug, status: "PUBLISHED" },
+    select: { tags: true, category: true },
+  });
+  const rows = await prisma.post.findMany({
+    where: { blog, status: "PUBLISHED", slug: { not: slug } },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: CARD_FIELDS,
+  });
+
+  const curTags = current ? parseTags(current.tags) : [];
+  const scored = rows
+    .map((r) => {
+      const shared = parseTags(r.tags).filter((t) => curTags.includes(t)).length;
+      const sameCat = current && r.category === current.category ? 1 : 0;
+      return { r, score: shared * 2 + sameCat };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, limit).map((s) => toCard(s.r));
+}
+
+/** Published slugs for a blog — used by generateStaticParams. */
+export async function getPublishedSlugs(blog: Blog): Promise<string[]> {
+  const rows = await prisma.post.findMany({
+    where: { blog, status: "PUBLISHED" },
+    select: { slug: true },
+  });
+  return rows.map((r) => r.slug);
 }

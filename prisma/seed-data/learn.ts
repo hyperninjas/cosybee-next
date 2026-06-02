@@ -1,5 +1,4 @@
-import beeFlowerImg from "@/public/bee-flower.png";
-import { type Article, createBlog } from "./articles";
+import type { LegacyArticle } from "./types";
 
 /** Categories shown in the learn filter bar. */
 export const LEARN_CATEGORIES = [
@@ -15,7 +14,7 @@ export const LEARN_CATEGORIES = [
  * Learn-section articles. Independent from the hive blog — content here
  * does not overlap with `HIVE_ARTICLES`.
  */
-export const LEARN_ARTICLES: Article[] = [
+export const LEARN_ARTICLES: LegacyArticle[] = [
   {
     slug: "should-i-upgrade-to-a-heat-pump",
     category: "Heating",
@@ -23,7 +22,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "Should I Upgrade to a Heat Pump?",
     description:
       "How a heat pump works with your home's insulation, heat distribution, and even solar to deliver steady, efficient warmth.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A heat pump unit outside a home",
     author: { name: "Mina Frost", date: "18 May 2026" },
     carouselIntro:
@@ -89,7 +88,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "What's a TRV and Is It Right for Me?",
     description:
       "What a thermostatic radiator valve does, and how room-by-room control creates a home where warmth follows how you live.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A thermostatic radiator valve on a radiator",
     author: { name: "Mina Frost", date: "18 May 2026" },
     body: {
@@ -150,7 +149,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "What's My Home's EPC Rating?",
     description:
       "What an EPC rating really tells you about your home's energy, and where small changes make a meaningful difference.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "An energy performance certificate rating chart",
     author: { name: "Elliot Smith", date: "19 May 2026" },
     body: {
@@ -213,7 +212,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "How to Reduce Heating Energy Waste",
     description:
       "Small, intentional adjustments that cut wasted heat and bring your home's energy use back into balance.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A warm, balanced living room",
     author: { name: "Mina Frost", date: "19 May 2026" },
     body: {
@@ -318,7 +317,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "Is Solar Right for My Home?",
     description:
       "Find out if solar energy is right for your home. Learn how sunlight, roof structure, and energy usage affect solar performance and discover how your home could become a smarter energy system with EnergieBee.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "Solar panels on a home roof at midday",
     author: { name: "Lila Del Ray", date: "19 May 2026" },
     carouselIntro:
@@ -445,7 +444,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "Should I Upgrade My Boiler?",
     description:
       "Find out if you should upgrade your boiler. Learn how boiler efficiency affects heating performance, energy usage, and home comfort — and how upgrading can improve your home's energy system with energiebee.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A modern home boiler unit",
     author: { name: "Mina Frost", date: "20 May 2026" },
     body: {
@@ -554,7 +553,7 @@ export const LEARN_ARTICLES: Article[] = [
     title: "Am I on the Best Energy Tariff?",
     description:
       "Find out if you are on the best energy tariff. Learn how tariff structures influence energy costs and how your home usage patterns affect savings with energiebee.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "An energy bill and tariff comparison",
     author: { name: "Elliot Smith", date: "20 May 2026" },
     carouselIntro:
@@ -669,7 +668,7 @@ export const LEARN_ARTICLES: Article[] = [
     seoTitle: "About energiebee",
     description:
       "How energiebee brings solar, consumption, weather, and pricing into a single flow — and the beekeeping roots behind that way of thinking.",
-    image: beeFlowerImg,
+    image: "/bee-flower.png",
     imageAlt: "A rural family home with beehives in the background",
     author: { name: "Chris Glasser", date: "20 May 2026" },
     body: {
@@ -700,10 +699,3 @@ export const LEARN_ARTICLES: Article[] = [
   },
 ];
 
-const learn = createBlog(LEARN_ARTICLES);
-
-export const getLearnArticleBySlug = learn.getBySlug;
-export const getFeaturedLearnArticles = learn.getFeatured;
-export const getLatestLearnArticles = learn.getLatest;
-export const getRelatedLearnArticles = learn.getRelated;
-export const getPublishedLearnSlugs = learn.getPublishedSlugs;

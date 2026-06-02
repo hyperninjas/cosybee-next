@@ -10,3 +10,137 @@
 body {
   font-family: var(--font-sans);
 }
+
+/* Server-rendered article body (BlockNote -> HTML). Mirrors the prior
+   hand-built renderer's typography. */
+.article-body > * + * {
+  margin-top: 1rem;
+}
+.article-body p {
+  font-size: 1rem;
+  line-height: 1.625;
+}
+.article-body h1,
+.article-body h2,
+.article-body h3 {
+  color: #000;
+  font-weight: 700;
+  line-height: 1.25;
+  max-width: 36.875rem;
+  margin-top: 1.5rem;
+}
+.article-body h1 {
+  font-size: 1.75rem;
+}
+.article-body h2 {
+  font-size: 1.25rem;
+}
+.article-body h3 {
+  font-size: 1.125rem;
+}
+.article-body ul,
+.article-body ol {
+  padding-left: 1.5rem;
+}
+.article-body ul {
+  list-style: disc;
+}
+.article-body ol {
+  list-style: decimal;
+}
+.article-body li {
+  line-height: 1.625;
+  margin-top: 0.5rem;
+}
+.article-body li::marker {
+  color: #545454;
+}
+.article-body a {
+  color: #1b6ac9;
+  text-decoration: underline;
+  word-break: break-word;
+  transition: color 150ms;
+}
+.article-body a:hover {
+  color: #0b4ec9;
+}
+.article-body strong {
+  font-weight: 700;
+  color: #000;
+}
+.article-body img {
+  border-radius: 1.5rem;
+  margin-top: 1.5rem;
+}
+/* offset anchor jumps so headings clear the sticky navbar */
+.article-body h1,
+.article-body h2,
+.article-body h3 {
+  scroll-margin-top: 6rem;
+}
+.article-body blockquote {
+  margin-top: 1.5rem;
+  border-left: 3px solid #ff8a7a;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  font-size: 1.25rem;
+  font-style: italic;
+  color: #2a2a2a;
+}
+.article-body code {
+  background: #f3f4f6;
+  border-radius: 0.3rem;
+  padding: 0.12em 0.38em;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.article-body pre {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+  border-radius: 0.9rem;
+  background: #1b1f24;
+  color: #e6e6e6;
+  padding: 1.1rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.article-body pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+.article-body figure {
+  margin-top: 1.5rem;
+}
+.article-body figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #8a8a8a;
+}
+.article-body hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid #ececec;
+}
+
+/* --- Admin editor (Medium / dev.to feel) ------------------------- */
+.post-title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+@media (max-width: 640px) {
+  .post-title {
+    font-size: 2rem;
+  }
+}
+/* Let the BlockNote editor blend into the page like a document. */
+.post-editor .bn-editor {
+  padding-inline: 0;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+.post-editor .bn-container {
+  background: transparent;
+}

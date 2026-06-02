@@ -3,33 +3,36 @@ import { notFound } from "next/navigation";
 import {
   getArticleBySlug,
   getPublishedSlugs,
-  getRelatedArticles,
-} from "@/app/lib/hive-articles";
+  getRelated,
+} from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 
-/** Prerender every routable article at build time. Slugs without a
- *  body are intentionally excluded — they're card-only stubs. */
-export function generateStaticParams() {
-  return getPublishedSlugs().map((slug) => ({ slug }));
+/** Prerender published articles at build time. New posts created in
+ *  the admin render on demand (dynamicParams defaults to true). */
+export async function generateStaticParams() {
+  const slugs = await getPublishedSlugs("hive");
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/hive/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  if (!article?.body) return {};
+  const article = await getArticleBySlug("hive", slug);
+  if (!article) return {};
   const seoTitle = article.seoTitle ?? article.title;
+  const seoDescription = article.seoDescription ?? article.description;
   return {
     title: seoTitle,
-    description: article.description,
+    description: seoDescription,
+    keywords: article.tags.length ? article.tags : undefined,
     alternates: { canonical: `/hive/${article.slug}` },
     openGraph: {
       url: `/hive/${article.slug}`,
       title: `${seoTitle} — energiebee`,
-      description: article.description,
+      description: seoDescription,
       type: "article",
-      images: [{ url: article.image.src, alt: article.imageAlt }],
+      // og:image is supplied by the colocated opengraph-image.tsx.
     },
   };
 }
@@ -38,13 +41,15 @@ export default async function HiveArticlePage({
   params,
 }: PageProps<"/hive/[slug]">) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  if (!article?.body) notFound();
+  const article = await getArticleBySlug("hive", slug);
+  if (!article) notFound();
+
+  const related = await getRelated("hive", article.slug);
 
   return (
     <ArticleDetail
-      article={{ ...article, body: article.body }}
-      related={getRelatedArticles(article.slug)}
+      article={article}
+      related={related}
       basePath="/hive"
       backLabel="Back to Blog"
     />

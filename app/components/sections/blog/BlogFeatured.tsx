@@ -5,7 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../../ui/Avatar";
 import { CtaButton } from "../../ui/Cta";
-import { type Article } from "@/app/lib/articles";
+import { type Article } from "@/app/lib/article-types";
 import Dot from "../../ui/Dot";
 
 function ChevronLeft({ className }: { className?: string }) {
