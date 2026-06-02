@@ -8,7 +8,7 @@ import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
 
-const INITIAL_VISIBLE = 3;
+const INITIAL_VISIBLE = 12;
 const LOAD_STEP = 3;
 
 export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
