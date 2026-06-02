@@ -1,12 +1,14 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "../../ui/Hexagon";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import HiveHexCluster from "../../ui/HiveHexCluster";
 import {
   FeatureItem,
   SectionLead,
   SectionTitle,
 } from "../../ui/SectionContent";
-import sideImage from "@/public/energy-monitoring.png";
+import windTurbineImg from "@/public/wind-turbine.png";
+import beeFlowerImg from "@/public/bee-flower.png";
+import deviceImg from "@/public/device-snap-heating-why-energiebee.png";
+import Image from "next/image";
 
 const PROBLEMS = [
   "energy waste",
@@ -18,13 +20,29 @@ export default function WhyChoose() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
-        {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImage.src}
+        {/* 3-hex hive cluster — three distinct cells */}
+        <HiveHexCluster
           gap={5}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
+          cornerInset={4}
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
+          left={{ src: windTurbineImg, alt: "Wind turbines", color: "#7FA9C9" }}
+          topRight={{
+            src: beeFlowerImg,
+            alt: "Bee on a flower",
+            color: "#D4A017",
+          }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={deviceImg}
+                alt="energie bee app screen"
+                priority
+                fetchPriority="high"
+                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
+              />
+            ),
+          }}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
