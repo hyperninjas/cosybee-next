@@ -52,7 +52,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               Visit our website at{" "}
-              <a href="https://www.EnergieBee.com">www.EnergieBee.com</a>{" "}
+              <a href="https://www.energiebee.com">www.EnergieBee.com</a>{" "}
               (&ldquo;Website&rdquo;).
             </li>
             <li>Contact us for support or any other purpose.</li>

@@ -75,7 +75,7 @@ export default function CookiesPage() {
           </p>
           <p>
             This policy applies to our website at{" "}
-            <a href="https://www.EnergieBee.com">www.EnergieBee.com</a>{" "}
+            <a href="https://www.energiebee.com">www.EnergieBee.com</a>{" "}
             (&ldquo;Website&rdquo;). It should be read alongside our{" "}
             <a href="/privacy">Privacy Policy</a> and{" "}
             <a href="/terms">Terms &amp; Conditions</a>.
