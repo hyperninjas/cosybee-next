@@ -3,33 +3,33 @@ import { notFound } from "next/navigation";
 import {
   getArticleBySlug,
   getPublishedSlugs,
-  getRelatedArticles,
-} from "@/app/lib/hive-articles";
+  getRelated,
+} from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 
-/** Prerender every routable article at build time. Slugs without a
- *  body are intentionally excluded — they're card-only stubs. */
-export function generateStaticParams() {
-  return getPublishedSlugs().map((slug) => ({ slug }));
+/** Prerender every routable article at build time. */
+export async function generateStaticParams() {
+  const slugs = await getPublishedSlugs("hive");
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/hive/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  if (!article?.body) return {};
+  const article = await getArticleBySlug("hive", slug);
+  if (!article) return {};
   const seoTitle = article.seoTitle ?? article.title;
   return {
     title: seoTitle,
-    description: article.description,
+    description: article.seoDescription ?? article.description,
     alternates: { canonical: `/hive/${article.slug}` },
     openGraph: {
       url: `/hive/${article.slug}`,
       title: `${seoTitle} — EnergieBee`,
-      description: article.description,
+      description: article.seoDescription ?? article.description,
       type: "article",
-      images: [{ url: article.image.src, alt: article.imageAlt }],
+      images: [{ url: article.image, alt: article.imageAlt }],
     },
   };
 }
@@ -38,13 +38,15 @@ export default async function HiveArticlePage({
   params,
 }: PageProps<"/hive/[slug]">) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  if (!article?.body) notFound();
+  const article = await getArticleBySlug("hive", slug);
+  if (!article) notFound();
+
+  const related = await getRelated("hive", slug);
 
   return (
     <ArticleDetail
-      article={{ ...article, body: article.body }}
-      related={getRelatedArticles(article.slug)}
+      article={article}
+      related={related}
       basePath="/hive"
       backLabel="Back to Blog"
     />

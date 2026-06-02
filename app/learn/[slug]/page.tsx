@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  getLearnArticleBySlug,
-  getPublishedLearnSlugs,
-  getRelatedLearnArticles,
-} from "@/app/lib/learn-articles";
+  getArticleBySlug,
+  getPublishedSlugs,
+  getRelated,
+} from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 
-/** Prerender every routable article at build time. Slugs without a
- *  body are intentionally excluded — they're card-only stubs. */
-export function generateStaticParams() {
-  return getPublishedLearnSlugs().map((slug) => ({ slug }));
+/** Prerender every routable article at build time. */
+export async function generateStaticParams() {
+  const slugs = await getPublishedSlugs("learn");
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/learn/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const article = getLearnArticleBySlug(slug);
-  if (!article?.body) return {};
+  const article = await getArticleBySlug("learn", slug);
+  if (!article) return {};
   const seoTitle = article.seoTitle ?? article.title;
   return {
     title: seoTitle,
-    description: article.description,
+    description: article.seoDescription ?? article.description,
     alternates: { canonical: `/learn/${article.slug}` },
     openGraph: {
       url: `/learn/${article.slug}`,
       title: `${seoTitle} — EnergieBee`,
-      description: article.description,
+      description: article.seoDescription ?? article.description,
       type: "article",
-      images: [{ url: article.image.src, alt: article.imageAlt }],
+      images: [{ url: article.image, alt: article.imageAlt }],
     },
   };
 }
@@ -38,13 +38,15 @@ export default async function LearnArticlePage({
   params,
 }: PageProps<"/learn/[slug]">) {
   const { slug } = await params;
-  const article = getLearnArticleBySlug(slug);
-  if (!article?.body) notFound();
+  const article = await getArticleBySlug("learn", slug);
+  if (!article) notFound();
+
+  const related = await getRelated("learn", slug);
 
   return (
     <ArticleDetail
-      article={{ ...article, body: article.body }}
-      related={getRelatedLearnArticles(article.slug)}
+      article={article}
+      related={related}
       basePath="/learn"
       backLabel="Back to Learn"
     />
