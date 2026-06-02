@@ -37,7 +37,7 @@ export default function HeatingSolutions() {
             children: (
               <Image
                 src={deviceImg}
-                alt="EnergieBee app"
+                alt="EnergieBee app - Heating solutions"
                 sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
                 quality={50}
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"

@@ -57,14 +57,14 @@ export default function HomeEnergyManagement() {
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
           cornerInset={4}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          left={{ src: windTurbineImg.src, color: "#7FA9C9", alt: "" }}
+          topRight={{ src: beeFlowerImg.src, color: "#D4A017", alt: "" }}
           bottomRight={{
             color: "#E9E19E",
             children: (
               <Image
                 src={deviceImg}
-                alt="EnergieBee app"
+                alt="EnergieBee app - Energy management"
                 sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
                 quality={50}
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"

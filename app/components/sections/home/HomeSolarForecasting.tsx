@@ -66,6 +66,7 @@ export default function HomeSolarForecasting() {
         <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
+            cornerInset={4}
             gap={5}
             fallbackColor="#3a4a5c"
             className="w-full transform-[scaleX(-1)]"

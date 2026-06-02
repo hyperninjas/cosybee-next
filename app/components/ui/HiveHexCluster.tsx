@@ -79,12 +79,9 @@ export default function HiveHexCluster({
 
   const cellMask =
     cornerInset !== undefined
-      ? buildHexMaskDataUri(
-          100,
-          86.6,
-          [{ x: 0, y: 0, scale: 1 }],
-          { cornerInset },
-        )
+      ? buildHexMaskDataUri(100, 86.6, [{ x: 0, y: 0, scale: 1 }], {
+          cornerInset,
+        })
       : SINGLE_HEX_MASK;
 
   // Default sizes — small enough that responsive images stay tight.
