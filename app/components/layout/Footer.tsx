@@ -84,10 +84,10 @@ export default function Footer() {
           <h3 className="text-lg font-bold tracking-[0.08em]">SOCIAL MEDIA</h3>
           <SocialCluster
             className="mt-5 h-auto pb-1 w-46"
-            facebook="https://facebook.com"
-            instagram="https://instagram.com"
-            youtube="https://youtube.com"
-            linkedin="https://linkedin.com"
+            facebook="#"
+            instagram="#"
+            youtube="#"
+            linkedin="#"
           />
         </div>
       </div>
