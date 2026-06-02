@@ -8,7 +8,7 @@ export default function EnergyForecasting() {
     <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
       <SectionHeader
         title="Predictive Analytics"
-        description="Energiebee uses behavioral data and AI to predict your home's energy patterns, helping you optimize usage and maximize savings"
+        description="EnergieBee uses behavioral data and AI to predict your home's energy patterns, helping you optimize usage and maximize savings"
       />
 
       <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
@@ -50,7 +50,7 @@ export default function EnergyForecasting() {
           glyph="sun"
           glyphColor="#A3D055"
           title="Reduce Energy Bills by Up to 40%"
-          description="By using energiebee's smart forecasting and energy management recommendations."
+          description="By using EnergieBee's smart forecasting and energy management recommendations."
           buttonText="Start Monitoring"
           href="/start"
           titleClassName="!text-[25px] "

@@ -1,12 +1,16 @@
 import Hexagon from "../../ui/Hexagon";
-import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureCard,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/hero-device.svg";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 
-export default function WhyEnergiebeeSolar() {
+export default function WhyEnergieBeeSolar() {
   return (
     <section className="relative overflow-hidden bg-white py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
@@ -19,9 +23,9 @@ export default function WhyEnergiebeeSolar() {
         <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
           <SectionTitle>Battery + Solar Ready</SectionTitle>
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
-            Energiebee orchestrates your full energy stack — solar generation,
-            battery storage, EV charging, and grid imports — to minimize cost
-            at every hour.
+            EnergieBee orchestrates your full energy stack — solar generation,
+            battery storage, EV charging, and grid imports — to minimize cost at
+            every hour.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard

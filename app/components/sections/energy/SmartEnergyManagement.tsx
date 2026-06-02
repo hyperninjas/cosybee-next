@@ -19,7 +19,7 @@ export default function SmartEnergyManagement() {
           <div className="mt-8 space-y-8">
             <FeatureItem
               title="Dynamic Tariff Switching"
-              description="Plug into time-of-use tariffs and let energiebee shift loads to the cheapest windows automatically."
+              description="Plug into time-of-use tariffs and let EnergieBee shift loads to the cheapest windows automatically."
             />
             <FeatureItem
               title="Battery Arbitrage"

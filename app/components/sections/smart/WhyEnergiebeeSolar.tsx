@@ -1,12 +1,16 @@
 import Hexagon from "../../ui/Hexagon";
-import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureCard,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/hero-device.svg";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 
-export default function WhyEnergiebeeSolar() {
+export default function WhyEnergieBeeSolar() {
   return (
     <section className="relative overflow-hidden bg-white py-20 pb-10 text-black lg:py-25 lg:pb-12.5 ">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">

@@ -19,9 +19,9 @@ export default function WhyChoose() {
 
         {/* middle: title + lead + cards */}
         <div>
-          <SectionTitle>Why Choose energiebee Solar?</SectionTitle>
+          <SectionTitle>Why Choose EnergieBee Solar?</SectionTitle>
           <SectionLead>
-            Part of the energiebee app — everything you need to monitor and
+            Part of the EnergieBee app — everything you need to monitor and
             optimize your solar energy system.
           </SectionLead>
           <div className="mt-8 space-y-4">

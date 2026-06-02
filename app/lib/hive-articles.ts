@@ -59,7 +59,7 @@ export const HIVE_ARTICLES: Article[] = [
     title: "Energy, Without the Noise",
     seoTitle: "Energy, Without the Noise: Calm and Smart homes",
     description:
-      "Why calm coordination belongs at the heart of every home — and how the energiebee app brings that quiet to everyday life.",
+      "Why calm coordination belongs at the heart of every home — and how the EnergieBee app brings that quiet to everyday life.",
     image: beeFlowerImg,
     imageAlt: "Bees clustered on a honeycomb at rest",
     author: { name: "Chris Glasser", date: "12 Apr 2026" },
@@ -81,7 +81,7 @@ export const HIVE_ARTICLES: Article[] = [
             "Heating systems respond dynamically. Electricity prices vary across the day. Solar panels generate at different levels depending on sunlight and weather. Even small households now operate within a system that changes continuously.",
             "Over time, energy inside the home often feels like something we react to rather than something we understand.",
             "But what if we could, now and finally, be ahead of such inconveniences? What if we could understand better how we are using energy at home? Even producing it, if we have solar.",
-            "In that spirit, we created our energiebee app.",
+            "In that spirit, we created our EnergieBee app.",
             "We found that the technology to help us understand and be smart about our usage was already available.",
             "And that was a game changer.",
             "You can feel the difference in scenes that repeat through the year. When an affordable window approaches, you get a quiet nudge to pre-warm. No banners — just a gentle prompt that lets you move first and rest later. When someone comes home who likes the study a degree warmer, the app helps keep that room steady while the rest of the house remains sensible. Not everything needs to shine at once. Not everything should.",
@@ -98,7 +98,7 @@ export const HIVE_ARTICLES: Article[] = [
           ],
         },
       ],
-      cta: { label: "Try energiebee for free now" },
+      cta: { label: "Try EnergieBee for free now" },
     },
   },
   {
@@ -113,7 +113,8 @@ export const HIVE_ARTICLES: Article[] = [
     image: beeFlowerImg,
     imageAlt: "Bees moving over honeycomb in coordinated patterns",
     author: { name: "Elliot Smith", date: "18 Apr 2026" },
-    carouselIntro: "Energy shapes daily life in continuous and often invisible ways.",
+    carouselIntro:
+      "Energy shapes daily life in continuous and often invisible ways.",
     carouselBody:
       "It warms homes in the morning, powers kitchen appliances, supports communication devices, and sustains everyday routines across hours and seasons. Its presence is constant, integrated into the rhythm of home life.",
     body: {
@@ -323,9 +324,9 @@ export const HIVE_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee Helps",
+          heading: "How EnergieBee Helps",
           paragraphs: [
-            "energiebee makes heat visible. It reveals patterns connected to daily life.",
+            "EnergieBee makes heat visible. It reveals patterns connected to daily life.",
             "You begin to see: when rooms warm up, how long they stay that way, where heat is used — and where it is not.",
             "With that clarity, the system becomes easier to guide. Gently adjusted to reflect how the home lives.",
           ],
@@ -413,10 +414,10 @@ export const HIVE_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee Helps",
+          heading: "How EnergieBee Helps",
           blocks: [
-            "energiebee helps homeowners understand how energy flows through their home.",
-            "With energiebee, you can:",
+            "EnergieBee helps homeowners understand how energy flows through their home.",
+            "With EnergieBee, you can:",
             {
               items: [
                 "Monitor energy usage across different parts of the home",
@@ -441,7 +442,7 @@ export const HIVE_ARTICLES: Article[] = [
           ],
         },
       ],
-      cta: { label: "Try energiebee for free" },
+      cta: { label: "Try EnergieBee for free" },
     },
   },
   {
@@ -638,7 +639,7 @@ export const HIVE_ARTICLES: Article[] = [
     readTime: "8 min read",
     title: "Why a Bee? A View on Work, Community and Energy",
     description:
-      "What a bee reveals about work, community and distributed energy, and how these ideas shape how Energiebee designs and builds energy systems.",
+      "What a bee reveals about work, community and distributed energy, and how these ideas shape how EnergieBee designs and builds energy systems.",
     image: beeFlowerImg,
     imageAlt: "A worker bee resting on a wildflower",
     author: { name: "Chris Glasser", date: "22 May 2026" },
@@ -646,25 +647,25 @@ export const HIVE_ARTICLES: Article[] = [
       sections: [
         {
           paragraphs: [
-            "People often ask why we chose a bee as the symbol of Energiebee. For us, the answer is rooted in place, history and lived experience.",
-            "I come from a region in England where people have long referred to one another as \"bees\". It is more than a nickname. It reflects a shared understanding of work, responsibility and community. It speaks of people who look after one another, who value effort, and who live close to the rhythms of the natural world. There is pride in contributing, in being attentive, and in maintaining balance over time.",
+            "People often ask why we chose a bee as the symbol of EnergieBee. For us, the answer is rooted in place, history and lived experience.",
+            'I come from a region in England where people have long referred to one another as "bees". It is more than a nickname. It reflects a shared understanding of work, responsibility and community. It speaks of people who look after one another, who value effort, and who live close to the rhythms of the natural world. There is pride in contributing, in being attentive, and in maintaining balance over time.',
             "That way of thinking stays with you. It shapes how you understand systems. Nothing works alone. Every action has consequences beyond itself. In nature, resources circulate. What is used returns in another form. Waste is simply a sign of imbalance.",
-            "This philosophy sits at the heart of Energiebee.",
+            "This philosophy sits at the heart of EnergieBee.",
             "Our team shares similar roots. Many of us come from families of beekeepers, farmers and environmentalists. We have grown up observing living systems that rely on cooperation, restraint and continuity. Sustainability, for us, is not a slogan. It is a daily practice. It means using only what is needed, designing for longevity, and respecting the natural limits of energy and materials.",
             "A hive offers a powerful reference. It is distributed by design. Intelligence is shared. Energy flows where it is required, guided by local conditions and collective memory. The system adapts continuously while preserving stability.",
             "This is how we approach energy.",
             "At the centre of every Cosybee system is the Cosybee Hub, our home energy management system. It works locally, learning the daily rhythms of the home and responding in real time. By relying on ultra low power IoT devices and edge technology, the system reduces unnecessary data transfer and avoids constant dependence on energy intensive data centres. Artificial intelligence is used carefully and sparingly, supporting the system rather than consuming it.",
             "Energy efficiency and carbon responsibility are built through attention to detail. Our grandparents would have called it watching the pennies so that everything else falls into place. Small, consistent decisions accumulate into meaningful impact.",
             "This approach also shapes how and where we operate.",
-            "Energiebee devices are manufactured in Oldham. Our systems are hosted in Rochdale, home to the Rochdale Society of Equitable Pioneers and the birthplace of the cooperative movement. Our carbon neutral warehousing and technical support are based in Burnley, with deliveries handled through a carbon neutral service across the UK and Europe.",
+            "EnergieBee devices are manufactured in Oldham. Our systems are hosted in Rochdale, home to the Rochdale Society of Equitable Pioneers and the birthplace of the cooperative movement. Our carbon neutral warehousing and technical support are based in Burnley, with deliveries handled through a carbon neutral service across the UK and Europe.",
             "These places matter. Oldham, Rochdale, Manchester and Burnley were central to the Industrial Revolution. The worker bee became a symbol of this region, representing collective effort, skill and endurance. It still appears on the coat of arms of Burnley and remains an emblem of Manchester today.",
             "There is something fitting about the energy transition taking shape in these heartlands of innovation and work. The challenges are different now, but the values remain relevant. Community, cooperation and care are essential to building systems that last.",
-            "At Energiebee, the bee represents who we are and how we choose to work. Distributed energy, local intelligence, respect for natural rhythms and a commitment to balance. These are not abstract ideas for us. They are inherited, practiced and shared.",
+            "At EnergieBee, the bee represents who we are and how we choose to work. Distributed energy, local intelligence, respect for natural rhythms and a commitment to balance. These are not abstract ideas for us. They are inherited, practiced and shared.",
             "The energy revolution, like the hive, depends on many working together.",
             "This way of thinking also shapes how we build our team.",
-            "Energiebee grows through shared values and long term commitment. I choose to work with people who understand energy as part of everyday life and not as an abstract system. Many of us come from families connected to the land, to beekeeping, and to ecological practices. We care about balance because we have lived close to it.",
+            "EnergieBee grows through shared values and long term commitment. I choose to work with people who understand energy as part of everyday life and not as an abstract system. Many of us come from families connected to the land, to beekeeping, and to ecological practices. We care about balance because we have lived close to it.",
             "Our team is formed by people who respect nature, value careful work, and believe in systems that support communities. These affinities are not formal criteria. They emerge naturally through experience and shared attention.",
-            "Energiebee develops through people who see sustainability as a daily practice, who understand that in nature nothing is wasted, and that progress only has meaning when it protects the conditions of life.",
+            "EnergieBee develops through people who see sustainability as a daily practice, who understand that in nature nothing is wasted, and that progress only has meaning when it protects the conditions of life.",
           ],
         },
       ],
@@ -674,7 +675,8 @@ export const HIVE_ARTICLES: Article[] = [
     slug: "why-epc-ratings-are-not-enough",
     category: "Home & Living",
     readTime: "9 min read",
-    title: "Why EPC Ratings Are Not Enough to Understand Your Home's Energy Use",
+    title:
+      "Why EPC Ratings Are Not Enough to Understand Your Home's Energy Use",
     description:
       "And how real-time energy insight changes the way homes are understood.",
     image: beeFlowerImg,
@@ -779,7 +781,7 @@ export const HIVE_ARTICLES: Article[] = [
           blocks: [
             "Real-time energy systems introduce a different perspective.",
             "Instead of relying solely on estimates, they observe how energy behaves inside the home as conditions change.",
-            "The energiebee app health check is designed around this principle. It combines:",
+            "The EnergieBee app health check is designed around this principle. It combines:",
             {
               items: [
                 "EPC-based baseline information",
@@ -802,7 +804,7 @@ export const HIVE_ARTICLES: Article[] = [
           paragraphs: [
             "When EPC data is combined with real energy behavior, it becomes possible to see how a home is expected to perform, how it actually performs, and how environmental conditions influence the difference between the two.",
             "This layered understanding supports more informed energy decisions over time.",
-            "With energiebee app, you can have all the data in one place. One app. Total energy clarity.",
+            "With EnergieBee app, you can have all the data in one place. One app. Total energy clarity.",
           ],
         },
       ],
@@ -971,7 +973,7 @@ export const HIVE_ARTICLES: Article[] = [
         {
           heading: "Where EnergieBee fits in",
           paragraphs: [
-            "The energiebee app energy health check is designed to bridge this gap.",
+            "The EnergieBee app energy health check is designed to bridge this gap.",
             "It combines EPC-based information with real household energy patterns and local weather context.",
             "This creates a clearer view of how a home is actually performing, not just how it is expected to perform.",
           ],
@@ -984,7 +986,8 @@ export const HIVE_ARTICLES: Article[] = [
     slug: "understanding-solar-energy",
     category: "Eco Living",
     readTime: "10 min read",
-    title: "Understanding Solar Energy: Benefits and Applications for a Sustainable Future",
+    title:
+      "Understanding Solar Energy: Benefits and Applications for a Sustainable Future",
     description:
       "How sunlight becomes part of everyday energy systems — from photovoltaic panels to passive design and hybrid integrations.",
     image: beeFlowerImg,
@@ -1031,7 +1034,11 @@ export const HIVE_ARTICLES: Article[] = [
             "When sunlight hits these cells, it creates an electrical current that can be used in the home or sent to the grid.",
             "Their performance depends on environmental conditions such as:",
             {
-              items: ["sunlight intensity", "cloud coverage", "seasonal variation"],
+              items: [
+                "sunlight intensity",
+                "cloud coverage",
+                "seasonal variation",
+              ],
             },
             "Because of this, solar electricity production changes continuously throughout the day.",
           ],
@@ -1092,7 +1099,7 @@ export const HIVE_ARTICLES: Article[] = [
             "Energy supply is increasingly influenced by environmental conditions.",
             "Homes and buildings are becoming active parts of energy systems rather than passive endpoints.",
             "This shift changes how energy is understood at both technical and everyday levels.",
-            "At energiebee, we believe in the importance of finding smart solutions for balance and comfort. Solar energy is key to create a balanced, cosy future for all.",
+            "At EnergieBee, we believe in the importance of finding smart solutions for balance and comfort. Solar energy is key to create a balanced, cosy future for all.",
           ],
         },
       ],

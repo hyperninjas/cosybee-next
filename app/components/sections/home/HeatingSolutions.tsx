@@ -5,7 +5,7 @@ import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
 
 /**
- * "Heating Solutions" — same layout as WhyEnergiebeeSolar, with the
+ * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
  * positions flipped: hive cluster on the left, title + check-glyph
  * feature cards on the right, cream decorative hex bleeding in from
  * the top-right (instead of top-left).

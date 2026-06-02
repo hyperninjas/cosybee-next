@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/heating" },
   openGraph: {
     url: "/heating",
-    title: "Smart Heating Control — energiebee",
+    title: "Smart Heating Control — EnergieBee",
     description:
       "Heating that learns your routines and adapts in real time. Stay comfortable, cut your bill up to 35%.",
   },

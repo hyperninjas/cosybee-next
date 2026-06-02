@@ -10,14 +10,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "Everything you need to know before you begin: your rights, our responsibilities, and how energiebee works for you.",
+    "Everything you need to know before you begin: your rights, our responsibilities, and how EnergieBee works for you.",
   alternates: { canonical: "/terms" },
   robots: { index: true, follow: true },
   openGraph: {
     url: "/terms",
-    title: "Terms & Conditions — energiebee",
+    title: "Terms & Conditions — EnergieBee",
     description:
-      "Your rights, our responsibilities, and how energiebee works for you.",
+      "Your rights, our responsibilities, and how EnergieBee works for you.",
   },
 };
 
@@ -27,7 +27,7 @@ export default function TermsPage() {
       <LegalHero
         label="Terms & Conditions"
         title="Everything You Need to Know Before You Begin"
-        subtitle="Understand your rights, our responsibilities, and how energiebee works for you, clearly written, no hidden surprises."
+        subtitle="Understand your rights, our responsibilities, and how EnergieBee works for you, clearly written, no hidden surprises."
         illustration={
           <Image src={illustration} alt="" className="max-h-90 w-auto" />
         }
@@ -38,14 +38,14 @@ export default function TermsPage() {
           <p>
             These Terms and Conditions (&ldquo;Terms&rdquo;) govern your use of
             the products, services, mobile application, and website operated by
-            Energiebee Limited (&ldquo;Energiebee&rdquo;, &ldquo;we&rdquo;,
+            EnergieBee Limited (&ldquo;EnergieBee&rdquo;, &ldquo;we&rdquo;,
             &ldquo;us&rdquo;, or &ldquo;our&rdquo;), a company registered in
             England and Wales with its registered office at 6 Blackburn Road,
             Accrington, England, BB5 1HD.
           </p>
           <p>
-            By purchasing an Energiebee device, creating an account, or using
-            the Energiebee mobile application (&ldquo;App&rdquo;), you
+            By purchasing an EnergieBee device, creating an account, or using
+            the EnergieBee mobile application (&ldquo;App&rdquo;), you
             (&ldquo;Customer&rdquo;, &ldquo;you&rdquo;, or &ldquo;your&rdquo;)
             agree to be bound by these Terms in full. If you do not agree, you
             must not use our products or services.
@@ -61,18 +61,18 @@ export default function TermsPage() {
         <LegalSection title="Definitions">
           <ul>
             <li>
-              <strong>Device</strong> — Any Energiebee hardware product
+              <strong>Device</strong> — Any EnergieBee hardware product
               purchased from us, including home energy control units and
               associated components.
             </li>
             <li>
-              <strong>App</strong> — The Energiebee mobile application available
+              <strong>App</strong> — The EnergieBee mobile application available
               on iOS and Android platforms.
             </li>
             <li>
-              <strong>Energiebee</strong> — Energiebee Limited, our group,
+              <strong>EnergieBee</strong> — EnergieBee Limited, our group,
               dealer, software updates, and any related support services
-              provided by Energiebee.
+              provided by EnergieBee.
             </li>
             <li>
               <strong>Account</strong> — The registered user account you create
@@ -145,7 +145,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>3.2</strong> To exercise your right to cancel, contact us at{" "}
-            <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> with
+            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> with
             your order details.
           </p>
           <p>
@@ -224,7 +224,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>5.2</strong> You agree to notify us immediately at{" "}
-            <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> if
+            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> if
             you suspect any unauthorized access to your Account.
           </p>
           <p>
@@ -251,7 +251,7 @@ export default function TermsPage() {
           <p>
             <strong>6.1</strong> All intellectual property rights in the Device
             firmware, App, website, branding, content, and associated materials
-            are owned by or licensed to Energiebee Limited. Nothing in these
+            are owned by or licensed to EnergieBee Limited. Nothing in these
             Terms transfers any intellectual property rights to you.
           </p>
           <p>
@@ -319,7 +319,7 @@ export default function TermsPage() {
           </ul>
           <p>
             <strong>8.3</strong> To make a warranty claim, contact us at{" "}
-            <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> with
+            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> with
             proof of purchase and a description of the defect. We may, at our
             discretion, repair, replace, or refund the Device.
           </p>
@@ -334,7 +334,7 @@ export default function TermsPage() {
         <LegalSection title="Limitation of Liability">
           <p>
             <strong>9.1</strong> To the fullest extent permitted by applicable
-            law, Energiebee shall not be liable for:
+            law, EnergieBee shall not be liable for:
           </p>
           <ul>
             <li>
@@ -457,7 +457,7 @@ export default function TermsPage() {
             <strong>13.3 Alternative Dispute Resolution:</strong> We are
             committed to resolving disputes fairly. Before initiating legal
             proceedings, we encourage you to contact us directly at{" "}
-            <a href="mailto:hello@energiebee.com">hello@energiebee.com</a> to
+            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> to
             seek an amicable resolution. If we are unable to resolve a dispute,
             you may also have the right to use the Online Dispute Resolution
             (ODR) platform provided by the European Commission at{" "}

@@ -18,7 +18,7 @@ export default function HomeSolarForecasting() {
         <div className="absolute -top-17 left-0 hidden w-[365.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
-            alt="energiebee solar dashboard"
+            alt="EnergieBee solar dashboard"
             sizes="(min-width: 1024px) 365px, 280px"
             quality={50}
             className="h-auto w-full"
@@ -52,7 +52,7 @@ export default function HomeSolarForecasting() {
           <div className="w-[365.3px] -ml-3 min-[1200px]:hidden mt-4">
             <Image
               src={deviceImg}
-              alt="energiebee solar dashboard"
+              alt="EnergieBee solar dashboard"
               sizes="(min-width: 1024px) 365px, 280px"
               quality={50}
               className="h-auto w-full"

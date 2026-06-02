@@ -201,7 +201,7 @@ export function MediaCard({
   );
 }
 
-/** Large bold section heading (e.g. "Why Choose energiebee Solar?"). */
+/** Large bold section heading (e.g. "Why Choose EnergieBee Solar?"). */
 export function SectionTitle({
   children,
   className = "",

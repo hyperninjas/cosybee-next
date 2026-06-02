@@ -1,5 +1,9 @@
 import Hexagon from "../../ui/Hexagon";
-import { FeatureItem, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureItem,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import { CtaButton } from "../../ui/Cta";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";

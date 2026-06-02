@@ -10,12 +10,12 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://energiebee.com"
 ).replace(/\/$/, "");
 
-export const SITE_NAME = "energiebee";
+export const SITE_NAME = "EnergieBee";
 
 export const SITE_TAGLINE = "Smart home energy control that pays for itself";
 
 export const SITE_DESCRIPTION =
-  "Energiebee connects every device in your home to one intelligent app — solar forecasting, smart heating, energy analytics, and automated optimisation. Save up to £300/year vs tado.";
+  "EnergieBee connects every device in your home to one intelligent app — solar forecasting, smart heating, energy analytics, and automated optimisation. Save up to £300/year vs tado.";
 
 export const SITE_KEYWORDS = [
   "smart home energy",
@@ -30,7 +30,7 @@ export const SITE_KEYWORDS = [
   "UK smart home",
 ];
 
-export const ORG_LEGAL_NAME = "Energiebee Limited";
+export const ORG_LEGAL_NAME = "EnergieBee Limited";
 export const ORG_ADDRESS = {
   street: "4 Blackburn Road",
   city: "Accrington",
@@ -39,13 +39,13 @@ export const ORG_ADDRESS = {
   country: "GB",
 };
 
-export const ORG_CONTACT_EMAIL = "hello@energiebee.com";
+export const ORG_CONTACT_EMAIL = "hello@EnergieBee.com";
 
 export const SOCIAL = {
-  facebook: "https://facebook.com/energiebee",
-  instagram: "https://instagram.com/energiebee",
-  linkedin: "https://linkedin.com/company/energiebee",
-  youtube: "https://youtube.com/@energiebee",
+  facebook: "https://facebook.com/EnergieBee",
+  instagram: "https://instagram.com/EnergieBee",
+  linkedin: "https://linkedin.com/company/EnergieBee",
+  youtube: "https://youtube.com/@EnergieBee",
 } as const;
 
 /** All public routes — keep in sync with the page.tsx files under app/. Used by sitemap. */

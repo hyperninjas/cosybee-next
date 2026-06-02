@@ -10,16 +10,14 @@ import ReadyToReduce from "./components/sections/home/ReadyToReduce";
 export const metadata: Metadata = {
   // Use the layout's default title (no template) for the home page itself.
   title: {
-    absolute:
-      "energiebee — Smart home energy control that pays for itself",
+    absolute: "EnergieBee — Smart home energy control that pays for itself",
   },
   description:
     "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado — all from one app.",
   alternates: { canonical: "/" },
   openGraph: {
     url: "/",
-    title:
-      "energiebee — Smart home energy control that pays for itself",
+    title: "EnergieBee — Smart home energy control that pays for itself",
     description:
       "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado.",
   },

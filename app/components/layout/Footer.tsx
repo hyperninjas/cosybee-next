@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SocialCluster from "./SocialCluster";
-import energiebeeLogo from "@/public/energiebee-vertical-logo.svg";
+import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 
 const WHY_LINKS = [
   { label: "£0 Monthly Fees (vs tado £2.99/mo)", href: "#" },
@@ -32,8 +32,8 @@ export default function Footer() {
         {/* brand + tagline */}
         <div>
           <Image
-            src={energiebeeLogo}
-            alt="energiebee"
+            src={EnergieBeeLogo}
+            alt="EnergieBee"
             className="h-auto w-36"
             priority
           />
@@ -43,10 +43,10 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* why energiebee */}
+        {/* why EnergieBee */}
         <div>
           <h3 className="text-lg font-bold tracking-[0.08em]">
-            WHY ENERGIEBEE
+            WHY EnergieBee
           </h3>
           <ul className="mt-5 space-y-4.5">
             {WHY_LINKS.map((link) => (
@@ -96,7 +96,7 @@ export default function Footer() {
       <div className="border-t border-[#FFFFFF1A] ">
         <div className="mx-auto flex max-w-360 flex-col-reverse gap-4 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-10 lg:px-30">
           <p className="text-sm font-medium text-white md:mt-0 mt-2">
-            © 2026 Energiebee. All rights reserved.
+            © 2026 EnergieBee. All rights reserved.
           </p>
           <ul className="flex flex-wrap items-center gap-6">
             {LEGAL_LINKS.map((link) => (

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/hive" },
   openGraph: {
     url: "/hive",
-    title: "The Hive — energiebee",
+    title: "The Hive — EnergieBee",
     description:
       "Insights, stories, and expert advice on sustainable energy solutions for modern homes.",
   },

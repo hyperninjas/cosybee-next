@@ -27,7 +27,7 @@ const POINTS = [
 ];
 
 /**
- * "Why thousands choose Energiebee" — centered header followed by a
+ * "Why thousands choose EnergieBee" — centered header followed by a
  * 3-column grid of icon + title + short description.
  */
 export default function WhyThousands() {
@@ -41,7 +41,7 @@ export default function WhyThousands() {
         />
         <div className="relative z-9">
           <SectionHeader
-            title="Why thousands choose Energiebee"
+            title="Why thousands choose EnergieBee"
             description="Simple insights that help you save money from day one"
           />
           <div className="relative z-9 mx-auto min-[1000px]:mt-10 grid max-w-360 grid-cols-1 py-9 max-[1000px]:pb-0 min-[1000px]:grid-cols-3">

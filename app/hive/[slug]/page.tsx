@@ -26,7 +26,7 @@ export async function generateMetadata({
     alternates: { canonical: `/hive/${article.slug}` },
     openGraph: {
       url: `/hive/${article.slug}`,
-      title: `${seoTitle} — energiebee`,
+      title: `${seoTitle} — EnergieBee`,
       description: article.description,
       type: "article",
       images: [{ url: article.image.src, alt: article.imageAlt }],

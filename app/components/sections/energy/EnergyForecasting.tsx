@@ -8,7 +8,7 @@ export default function EnergyForecasting() {
     <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
       <SectionHeader
         title="Cost & Usage Forecasts"
-        description="Energiebee combines historical usage, weather, and tariff data to predict tomorrow's bill — and shifts usage to minimize it"
+        description="EnergieBee combines historical usage, weather, and tariff data to predict tomorrow's bill — and shifts usage to minimize it"
       />
 
       <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
@@ -50,7 +50,7 @@ export default function EnergyForecasting() {
           glyph="sun"
           glyphColor="#A3D055"
           title="Reduce Your Bill by Up to 40%"
-          description="By using energiebee's whole-home monitoring and tariff-aware recommendations."
+          description="By using EnergieBee's whole-home monitoring and tariff-aware recommendations."
           buttonText="Start Saving"
           href="/start"
           titleClassName="!text-[25px] "

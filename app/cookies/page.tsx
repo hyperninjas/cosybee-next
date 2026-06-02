@@ -10,12 +10,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Cookie Policy",
   description:
-    "Exactly which cookies energiebee places on your device, why we place them, and how to stay in control.",
+    "Exactly which cookies EnergieBee places on your device, why we place them, and how to stay in control.",
   alternates: { canonical: "/cookies" },
   robots: { index: true, follow: true },
   openGraph: {
     url: "/cookies",
-    title: "Cookie Policy — energiebee",
+    title: "Cookie Policy — EnergieBee",
     description:
       "Small files, big transparency — which cookies we place, why, and how to stay in control.",
   },
@@ -65,17 +65,17 @@ export default function CookiesPage() {
 
         <LegalSection title="Who We Are">
           <p>
-            This Cookie Policy is published by Energiebee Limited, a company
+            This Cookie Policy is published by EnergieBee Limited, a company
             registered in England and Wales, with its registered office at:
           </p>
           <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
           <p>
             For cookie-related enquiries:{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
+            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>
           </p>
           <p>
             This policy applies to our website at{" "}
-            <a href="https://www.energiebee.com">www.energiebee.com</a>{" "}
+            <a href="https://www.EnergieBee.com">www.EnergieBee.com</a>{" "}
             (&ldquo;Website&rdquo;). It should be read alongside our{" "}
             <a href="/privacy">Privacy Policy</a> and{" "}
             <a href="/terms">Terms &amp; Conditions</a>.
@@ -356,7 +356,7 @@ export default function CookiesPage() {
 
         <LegalSection title="Cookies & the App">
           <p>
-            Our Energiebee mobile application (&ldquo;App&rdquo;) does not use
+            Our EnergieBee mobile application (&ldquo;App&rdquo;) does not use
             browser cookies. However, the App does use similar technologies such
             as local storage and device identifiers to:
           </p>

@@ -10,12 +10,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How energiebee collects, uses, and protects your personal data — clearly written, with full control over your own information.",
+    "How EnergieBee collects, uses, and protects your personal data — clearly written, with full control over your own information.",
   alternates: { canonical: "/privacy" },
   robots: { index: true, follow: true },
   openGraph: {
     url: "/privacy",
-    title: "Privacy Policy — energiebee",
+    title: "Privacy Policy — EnergieBee",
     description:
       "How we handle your data, with full control over your own information.",
   },
@@ -36,35 +36,35 @@ export default function PrivacyPage() {
       <LegalContainer>
         <LegalSection title="Who We Are">
           <p>
-            This Privacy Policy explains how Energiebee Limited
-            (&ldquo;Energiebee&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or
+            This Privacy Policy explains how EnergieBee Limited
+            (&ldquo;EnergieBee&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or
             &ldquo;our&rdquo;) collects, uses, stores, and protects your
             personal data when you:
           </p>
           <ul>
             <li>
-              Purchase and use an Energiebee energy-saving device
+              Purchase and use an EnergieBee energy-saving device
               (&ldquo;Device&rdquo;).
             </li>
             <li>
-              Download and use the Energiebee mobile application
+              Download and use the EnergieBee mobile application
               (&ldquo;App&rdquo;).
             </li>
             <li>
               Visit our website at{" "}
-              <a href="https://www.energiebee.com">www.energiebee.com</a>{" "}
+              <a href="https://www.EnergieBee.com">www.EnergieBee.com</a>{" "}
               (&ldquo;Website&rdquo;).
             </li>
             <li>Contact us for support or any other purpose.</li>
           </ul>
           <p>
-            Energiebee Limited is the data controller responsible for your
+            EnergieBee Limited is the data controller responsible for your
             personal data. Our registered office is:
           </p>
           <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
           <p>
             For privacy-related enquiries:{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
+            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>
           </p>
           <p>
             This policy is governed by the UK General Data Protection Regulation
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
             <li>
               <strong>Account &amp; Identity Data</strong>: Your name, email
               address, password (encrypted), and any profile information you
-              provide when creating an Energiebee account.
+              provide when creating an EnergieBee account.
             </li>
             <li>
               <strong>Contact Data</strong>: Your billing address, delivery
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             <li>
               <strong>Device &amp; Energy Data</strong>: Energy consumption
               readings, usage patterns, appliance activity data, and device
-              status information transmitted from your Energiebee Device to the
+              status information transmitted from your EnergieBee Device to the
               App. This data is linked to your account and your home, but not to
               your wider identity unless you choose to provide it.
             </li>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Communications Data</strong>: Records of any
-              correspondence between you and Energiebee, including support
+              correspondence between you and EnergieBee, including support
               tickets, emails, and live chat messages.
             </li>
             <li>
@@ -183,7 +183,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             <strong>To send marketing communications</strong> — Sending you
-            news, offers, and updates about Energiebee products and services,
+            news, offers, and updates about EnergieBee products and services,
             where you have opted in or where we have a legitimate interest to do
             so. You can opt out at any time.
           </p>
@@ -233,7 +233,7 @@ export default function PrivacyPage() {
           <ul>
             <li>
               Your energy data is used only to provide you with insights through
-              the App and to improve Energiebee products;
+              the App and to improve EnergieBee products;
             </li>
             <li>
               We will never sell your individual energy data to third parties,
@@ -264,7 +264,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             <strong>Smart-home integrations</strong> — If you choose to connect
-            your Energiebee Device to third-party smart-home platforms (such as
+            your EnergieBee Device to third-party smart-home platforms (such as
             Amazon Alexa, Google Home, or Apple HomeKit), limited data will be
             shared with those platforms in accordance with your instructions and
             their own privacy policies.
@@ -272,7 +272,7 @@ export default function PrivacyPage() {
           <p>
             <strong>Legal and regulatory authorities</strong> — Where required
             by law, court order, or to protect the rights, property, or safety
-            of Energiebee, our customers, or others.
+            of EnergieBee, our customers, or others.
           </p>
           <p>
             <strong>Business transfers</strong> — In the event of a merger,
@@ -305,7 +305,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Energy &amp; device data</strong> — Retained for as long
-              as you are an Energiebee customer. You may request earlier
+              as you are an EnergieBee customer. You may request earlier
               deletion at any time.
             </li>
             <li>
@@ -395,7 +395,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             To exercise any of these rights, please contact us at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
+            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>.
             We will respond within 30 days. We may need to verify your identity
             before fulfilling a request.
           </p>
@@ -430,7 +430,7 @@ export default function PrivacyPage() {
             not knowingly collect personal data from anyone under 18. If you
             believe a child has provided us with personal data, please contact
             us at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>{" "}
+            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>{" "}
             and we will delete the information promptly.
           </p>
         </LegalSection>
@@ -459,7 +459,7 @@ export default function PrivacyPage() {
           <p>
             If you have concerns about how we handle your personal data, please
             contact us first at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
+            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>.
           </p>
           <p>
             If you remain unsatisfied, you have the right to lodge a complaint

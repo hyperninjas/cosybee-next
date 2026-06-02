@@ -65,10 +65,10 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           paragraphs: [
-            "energiebee helps you understand how your home interacts with natural energy flows and how a heat pump would integrate into that system.",
-            "By mapping insulation, heating patterns, and energy movement across your home, energiebee reveals how warmth circulates and where balance can be improved.",
+            "EnergieBee helps you understand how your home interacts with natural energy flows and how a heat pump would integrate into that system.",
+            "By mapping insulation, heating patterns, and energy movement across your home, EnergieBee reveals how warmth circulates and where balance can be improved.",
           ],
         },
         {
@@ -79,7 +79,7 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
       ],
-      cta: { label: "Check your home with energiebee" },
+      cta: { label: "Check your home with EnergieBee" },
     },
   },
   {
@@ -126,10 +126,10 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           paragraphs: [
-            "energiebee helps you see how heat moves through each part of your home and how TRVs influence that flow.",
-            "By bringing all radiator settings into one view, energiebee helps your home respond as a connected system, where every room plays a role in overall comfort and efficiency.",
+            "EnergieBee helps you see how heat moves through each part of your home and how TRVs influence that flow.",
+            "By bringing all radiator settings into one view, EnergieBee helps your home respond as a connected system, where every room plays a role in overall comfort and efficiency.",
             "This creates clarity in how energy is distributed and how each adjustment shapes the home's wider balance.",
           ],
         },
@@ -140,7 +140,7 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
       ],
-      cta: { label: "Explore energiebee" },
+      cta: { label: "Explore EnergieBee" },
     },
   },
   {
@@ -189,11 +189,11 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           paragraphs: [
-            "energiebee helps you connect your EPC rating with how your home actually behaves day to day.",
-            "Numbers can feel too static. Not easy to read. So energiebee was designed to help you understand what those numbers mean in real life: how your home uses energy, where it performs well, and where there's potential to improve.",
-            "With energiebee, your EPC becomes part of a living picture of your home's energy system, helping you make decisions that feel clearer and more grounded.",
+            "EnergieBee helps you connect your EPC rating with how your home actually behaves day to day.",
+            "Numbers can feel too static. Not easy to read. So EnergieBee was designed to help you understand what those numbers mean in real life: how your home uses energy, where it performs well, and where there's potential to improve.",
+            "With EnergieBee, your EPC becomes part of a living picture of your home's energy system, helping you make decisions that feel clearer and more grounded.",
           ],
         },
         {
@@ -287,10 +287,10 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           blocks: [
-            "energiebee helps your home identify where energy is being overused and how heating can become more balanced across rooms.",
-            "With energiebee you can:",
+            "EnergieBee helps your home identify where energy is being overused and how heating can become more balanced across rooms.",
+            "With EnergieBee you can:",
             {
               items: [
                 "Track room-level energy patterns",
@@ -308,7 +308,7 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
       ],
-      cta: { label: "Reduce waste with energiebee" },
+      cta: { label: "Reduce waste with EnergieBee" },
     },
   },
   {
@@ -412,9 +412,9 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           blocks: [
-            "Energiebee helps you understand your home as an energy-aware system.",
+            "EnergieBee helps you understand your home as an energy-aware system.",
             "Instead of guessing, you can:",
             {
               items: [
@@ -431,7 +431,7 @@ export const LEARN_ARTICLES: Article[] = [
           heading: "Key insight",
           paragraphs: [
             "Your home is already part of an energy system. Solar doesn't just add panels — it changes how your home participates in that system.",
-            "The real question is not only \"Can I install solar?\" It's \"How intelligently can my home generate and use its own energy?\"",
+            'The real question is not only "Can I install solar?" It\'s "How intelligently can my home generate and use its own energy?"',
           ],
         },
       ],
@@ -444,7 +444,7 @@ export const LEARN_ARTICLES: Article[] = [
     readTime: "7 min read",
     title: "Should I Upgrade My Boiler?",
     description:
-      "Find out if you should upgrade your boiler. Learn how boiler efficiency affects heating performance, energy usage, and home comfort — and how upgrading can improve your home's energy system with energiebee.",
+      "Find out if you should upgrade your boiler. Learn how boiler efficiency affects heating performance, energy usage, and home comfort — and how upgrading can improve your home's energy system with EnergieBee.",
     image: beeFlowerImg,
     imageAlt: "A modern home boiler unit",
     author: { name: "Mina Frost", date: "20 May 2026" },
@@ -522,9 +522,9 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           blocks: [
-            "energiebee helps you understand how your heating system behaves as part of your home's overall energy system.",
+            "EnergieBee helps you understand how your heating system behaves as part of your home's overall energy system.",
             "Instead of guessing, you can:",
             {
               items: [
@@ -534,7 +534,7 @@ export const LEARN_ARTICLES: Article[] = [
                 "Understand how a more modern system would improve your home's energy intelligence",
               ],
             },
-            "This turns a boiler upgrade into a clear optimisation decision. And energiebee can help you with that.",
+            "This turns a boiler upgrade into a clear optimisation decision. And EnergieBee can help you with that.",
           ],
         },
         {
@@ -553,7 +553,7 @@ export const LEARN_ARTICLES: Article[] = [
     readTime: "7 min read",
     title: "Am I on the Best Energy Tariff?",
     description:
-      "Find out if you are on the best energy tariff. Learn how tariff structures influence energy costs and how your home usage patterns affect savings with energiebee.",
+      "Find out if you are on the best energy tariff. Learn how tariff structures influence energy costs and how your home usage patterns affect savings with EnergieBee.",
     image: beeFlowerImg,
     imageAlt: "An energy bill and tariff comparison",
     author: { name: "Elliot Smith", date: "20 May 2026" },
@@ -635,10 +635,10 @@ export const LEARN_ARTICLES: Article[] = [
           ],
         },
         {
-          heading: "How energiebee helps",
+          heading: "How EnergieBee helps",
           blocks: [
-            "energiebee helps your home understand its energy usage patterns and how they align with different tariff structures.",
-            "With energiebee you can:",
+            "EnergieBee helps your home understand its energy usage patterns and how they align with different tariff structures.",
+            "With EnergieBee you can:",
             {
               items: [
                 "Track when and how your home consumes energy",
@@ -666,9 +666,9 @@ export const LEARN_ARTICLES: Article[] = [
     category: "Company",
     readTime: "4 min read",
     title: "About us",
-    seoTitle: "About energiebee",
+    seoTitle: "About EnergieBee",
     description:
-      "How energiebee brings solar, consumption, weather, and pricing into a single flow — and the beekeeping roots behind that way of thinking.",
+      "How EnergieBee brings solar, consumption, weather, and pricing into a single flow — and the beekeeping roots behind that way of thinking.",
     image: beeFlowerImg,
     imageAlt: "A rural family home with beehives in the background",
     author: { name: "Chris Glasser", date: "20 May 2026" },

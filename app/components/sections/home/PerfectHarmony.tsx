@@ -60,7 +60,7 @@ export default function PerfectHarmony() {
             children: (
               <Image
                 src={deviceImg}
-                alt="energiebee app"
+                alt="EnergieBee app"
                 sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
                 quality={50}
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"

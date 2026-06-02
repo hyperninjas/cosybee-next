@@ -70,8 +70,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    creator: "@energiebee",
-    site: "@energiebee",
+    creator: "@EnergieBee",
+    site: "@EnergieBee",
     images: ["/opengraph-image"],
   },
   robots: {
@@ -152,7 +152,9 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
         />
         <script
           type="application/ld+json"

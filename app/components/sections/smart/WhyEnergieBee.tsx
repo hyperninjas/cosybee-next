@@ -1,6 +1,10 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureCard, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureCard,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";
@@ -26,7 +30,7 @@ export default function WhyEnergieBee() {
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
           <SectionTitle>Works With Your Smart Home</SectionTitle>
           <SectionLead className="max-[1200px]:text-center">
-            Part of the energiebee app — everything you need to control,
+            Part of the EnergieBee app — everything you need to control,
             monitor, and optimize every device in your home.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}

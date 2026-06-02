@@ -3,7 +3,7 @@ import ComingSoon from "../components/layout/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "energiebee devices, bundles, and accessories.",
+  description: "EnergieBee devices, bundles, and accessories.",
   alternates: { canonical: "/shop" },
   robots: { index: false, follow: true },
 };

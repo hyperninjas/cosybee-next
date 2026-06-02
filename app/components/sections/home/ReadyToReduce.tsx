@@ -15,7 +15,7 @@ export default function ReadyToReduce() {
         <div className="shrink-0 absolute bottom-0 hidden lg:block">
           <Image
             src={deviceImg}
-            alt="energiebee app preview"
+            alt="EnergieBee app preview"
             sizes="(min-width: 1024px) 210px, 175px"
             quality={50}
             className="h-auto w-44 lg:w-52"
@@ -28,7 +28,7 @@ export default function ReadyToReduce() {
             Ready to reduce your energy costs?
           </h2>
           <p className="mt-1.5 text-base leading-relaxed text-[#545454] sm:text-lg">
-            Download the free Energiebee app and start taking control today
+            Download the free EnergieBee app and start taking control today
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
             <CtaButton href="/download" size="md" className="h-[58.66px]">

@@ -1,7 +1,11 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "../../ui/Hexagon";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureItem, SectionLead, SectionTitle } from "../../ui/SectionContent";
+import {
+  FeatureItem,
+  SectionLead,
+  SectionTitle,
+} from "../../ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
 
 const PROBLEMS = [
@@ -29,7 +33,7 @@ export default function WhyChoose() {
         />
         {/* text */}
         <div className="z-9 flex flex-col max-[1200px]:items-center min-[1200px]:max-w-163.5">
-          <SectionTitle>Why Choose energiebee?</SectionTitle>
+          <SectionTitle>Why Choose EnergieBee?</SectionTitle>
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>

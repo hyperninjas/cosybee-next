@@ -4,13 +4,13 @@ import ContactSection from "../components/sections/home/ContactSection";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with the energiebee team — we'd love to hear from you.",
+    "Get in touch with the EnergieBee team — we'd love to hear from you.",
   alternates: { canonical: "/contact" },
   openGraph: {
     url: "/contact",
-    title: "Contact — energiebee",
+    title: "Contact — EnergieBee",
     description:
-      "Get in touch with the energiebee team — we'd love to hear from you.",
+      "Get in touch with the EnergieBee team — we'd love to hear from you.",
   },
 };
 

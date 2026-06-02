@@ -59,14 +59,14 @@ const DEFAULT_CTA: ForecastingCta = {
   glyphColor: "#A3D055",
   title: "Reduce Energy Bills by Up to 40%",
   description:
-    "By using energiebee's smart forecasting and energy management recommendations.",
+    "By using EnergieBee's smart forecasting and energy management recommendations.",
   buttonText: "Start Monitoring",
   href: "/start",
 };
 
 export default function EnergyForecasting({
   title = "Intelligent Energy Forecasting",
-  description = "Energiebee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings",
+  description = "EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings",
   cards = DEFAULT_CARDS,
   cta = DEFAULT_CTA,
 }: EnergyForecastingProps = {}) {

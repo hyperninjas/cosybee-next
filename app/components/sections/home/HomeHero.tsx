@@ -34,7 +34,7 @@ export default function HomeHero() {
             Total energy clarity.
           </h1>
           <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7">
-            Energiebee reveals how your household spends energy day by day —
+            EnergieBee reveals how your household spends energy day by day —
             helping you reduce waste and improve efficiency. Create a home that
             feels lighter, smarter, and aligned with the way you live.
           </p>
