@@ -18,16 +18,16 @@ export default function SmartEnergyManagement() {
           <SectionTitle>Smart Home Integration</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="One-Tap Device Control"
-              description="Manage every smart light, thermostat, and outlet from a single interface — designed for daily use, not menus."
+              title="Battery Optimisation"
+              description="Get intelligent recommendations on when to store or use your solar energy to maximize savings and reduce grid dependency."
             />
             <FeatureItem
-              title="Voice Assistant Ready"
-              description="Works seamlessly with Alexa, Google Assistant, and Apple HomeKit out of the box. No bridges or adapters needed."
+              title="Smart Device Integration"
+              description="Connect to your smart home devices and optimize their energy usage based on your solar production patterns."
             />
             <FeatureItem
-              title="Custom Automations"
-              description="Build if-this-then-that rules for your home in minutes. No coding, no scripts — just clear, visual triggers."
+              title="ROI Tracking"
+              description="Track your return on investment with detailed financial calculations. See exactly how long until your solar panels pay for themselves."
             />
           </div>
         </div>

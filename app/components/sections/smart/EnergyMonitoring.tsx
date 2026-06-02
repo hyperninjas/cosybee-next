@@ -1,20 +1,47 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+// import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "../../ui/Hexagon";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+// import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
-import sideImage from "@/public/energy-monitoring.png";
-
+// import sideImage from "@/public/energy-monitoring.png";
+import HiveHexCluster from "../../ui/HiveHexCluster";
+import beeFlowerImg from "@/public/bee-flower.png";
+import deviceImg from "@/public/device-snap-ai-insights.png";
+import windTurbineImg from "@/public/wind-turbine.png";
+import Image from "next/image";
 export default function EnergyMonitoring() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImage.src}
-          gap={5}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
+
+        <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
+          gap={5}
+          cornerInset={4}
+          left={{
+            src: windTurbineImg,
+            alt: "Wind turbines",
+            color: "#7FA9C9",
+            priority: true,
+          }}
+          topRight={{
+            src: beeFlowerImg,
+            alt: "Bee on a flower",
+            color: "#D4A017",
+            priority: true,
+          }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={deviceImg}
+                alt="energie Bee app screen"
+                priority
+                fetchPriority="high"
+                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
+              />
+            ),
+          }}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
@@ -26,16 +53,16 @@ export default function EnergyMonitoring() {
           <SectionTitle>AI-Powered Insights</SectionTitle>
           <div className="mt-8 space-y-8">
             <FeatureItem
-              title="Real-Time Device Tracking"
-              description="See exactly what every connected appliance is doing right now, with instant updates on power draw and on/off status."
+              title="Live Solar Production Tracking"
+              description="Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates."
             />
             <FeatureItem
-              title="Predictive Scheduling"
-              description="AI learns your habits and pre-runs energy-hungry devices when grid rates are at their lowest."
+              title="Weather-Based Forecasts"
+              description="Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively."
             />
             <FeatureItem
-              title="Anomaly Alerts"
-              description="Get notified the moment a device draws unusual power — catch faulty hardware before it costs you a fortune."
+              title="Daily Energy Overview"
+              description="View comprehensive daily energy production with visual graphs showing peak generation times and total output."
             />
           </div>
         </div>

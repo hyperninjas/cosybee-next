@@ -21,7 +21,7 @@ function linkify(text: string) {
         <span key={i}>
           <a
             href={href}
-            target="_blank"
+            // target="_blank"
             rel="noopener noreferrer"
             className="break-all text-[#1b6ac9] underline transition-colors hover:text-[#0b4ec9]"
           >

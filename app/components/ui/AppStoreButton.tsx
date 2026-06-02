@@ -21,7 +21,7 @@ export default function AppStoreButton({
   return (
     <a
       href={href}
-      target="_blank"
+      // target="_blank"
       rel="noopener noreferrer"
       aria-label="Download on the App Store"
       className={`inline-block text-[#CCCCCC] transition-opacity hover:opacity-90 ${className}`}

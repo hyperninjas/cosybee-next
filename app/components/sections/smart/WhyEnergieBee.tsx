@@ -7,7 +7,7 @@ import {
 } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
-import deviceImg from "@/public/energy-saving-device.png";
+import deviceImg from "@/public/device-snap-smart-home.png";
 
 export default function WhyEnergieBee() {
   return (
@@ -30,8 +30,8 @@ export default function WhyEnergieBee() {
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
           <SectionTitle>Works With Your Smart Home</SectionTitle>
           <SectionLead className="max-[1200px]:text-center">
-            Part of the EnergieBee app — everything you need to control,
-            monitor, and optimize every device in your home.
+            Part of the energiebee app - everything you need to monitor and
+            optimize your solar energy system.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-[345.3px] min-[1200px]:hidden mt-8">
@@ -46,18 +46,18 @@ export default function WhyEnergieBee() {
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Comfort"
-              description="Keep your home perfectly conditioned without overusing energy — automations handle the balance for you."
+              title="Maximize Production"
+              description="Track real-time solar generation and get insights to optimize energy production."
             />
             <FeatureCard
               glyph="dollar"
               title="Track Savings"
-              description="See exactly how much money your smart automations save you each month with detailed analytics."
+              description="See exactly how much money you're saving with detailed analytics and historical comparisons."
             />
             <FeatureCard
               glyph="chart"
-              title="Smart Insights"
-              description="Get personalized insights on how each device contributes to your energy bill, and where to trim waste."
+              title="Smart Analytics"
+              description="Get detailed insights on production patterns, grid independence, and environmental impact."
             />
           </div>
         </div>
