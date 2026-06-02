@@ -85,7 +85,7 @@ export default function Hero() {
             children: (
               <Image
                 src={deviceImg}
-                alt="cosybee app screen"
+                alt="energie bee app screen"
                 priority
                 fetchPriority="high"
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"

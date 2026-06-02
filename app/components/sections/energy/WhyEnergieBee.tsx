@@ -7,7 +7,7 @@ import {
 } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
-import deviceImg from "@/public/energy-saving-device.png";
+import deviceImg from "@/public/device-snap-energy-why-energiebee.png";
 
 export default function WhyEnergieBee() {
   return (
