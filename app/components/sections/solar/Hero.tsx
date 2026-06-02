@@ -1,26 +1,26 @@
-import { PHOTOS } from "@/app/lib/photos";
-import EpcCard from "../../mockups/phone/EpcCard";
-import PhoneFrame from "../../mockups/phone/PhoneFrame";
-import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
-import PhoneTabs from "../../mockups/phone/PhoneTabs";
+// import { PHOTOS } from "@/app/lib/photos";
+// import EpcCard from "../../mockups/phone/EpcCard";
+// import PhoneFrame from "../../mockups/phone/PhoneFrame";
+// import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
+// import PhoneTabs from "../../mockups/phone/PhoneTabs";
 import { CtaButton } from "../../ui/Cta";
 import Hexagon from "../../ui/Hexagon";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-solar-hero.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import heroBgImg from "@/public/hero-bg.png";
 import Image from "next/image";
 
-function HeroPhone({ className = "" }: { className?: string }) {
-  return (
-    <PhoneFrame className={className}>
-      <PhoneGreeting />
-      <PhoneTabs />
-      <EpcCard />
-    </PhoneFrame>
-  );
-}
+// function HeroPhone({ className = "" }: { className?: string }) {
+//   return (
+//     <PhoneFrame className={className}>
+//       <PhoneGreeting />
+//       <PhoneTabs />
+//       <EpcCard />
+//     </PhoneFrame>
+//   );
+// }
 
 export default function Hero() {
   return (

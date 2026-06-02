@@ -1,8 +1,10 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "../../ui/Hexagon";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
-import sideImage from "@/public/energy-monitoring.png";
+import HiveHexCluster from "../../ui/HiveHexCluster";
+import beeFlowerImg from "@/public/bee-flower.png";
+import deviceImg from "@/public/device-snap-solar-energy-monitoring.png";
+import windTurbineImg from "@/public/wind-turbine.png";
+import Image, { StaticImageData } from "next/image";
 
 export type FeatureItemContent = {
   title: string;
@@ -13,7 +15,7 @@ export type EnergyMonitoringProps = {
   title?: string;
   features?: FeatureItemContent[];
   /** Side photo masked through the hex cluster. */
-  imageSrc?: string;
+  imageSrc?: StaticImageData;
 };
 
 const DEFAULT_FEATURES: FeatureItemContent[] = [
@@ -37,18 +39,41 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
 export default function EnergyMonitoring({
   title = "Real-Time Energy Monitoring",
   features = DEFAULT_FEATURES,
-  imageSrc = sideImage.src,
+  imageSrc = deviceImg,
 }: EnergyMonitoringProps = {}) {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-28">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={imageSrc}
-          gap={5}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
+
+        <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
+          gap={5}
+          cornerInset={4}
+          left={{
+            src: windTurbineImg,
+            alt: "Wind turbines",
+            color: "#7FA9C9",
+            priority: true,
+          }}
+          topRight={{
+            src: beeFlowerImg,
+            alt: "Bee on a flower",
+            color: "#D4A017",
+            priority: true,
+          }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={imageSrc}
+                alt="energie bee app screen"
+                priority
+                fetchPriority="high"
+                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
+              />
+            ),
+          }}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

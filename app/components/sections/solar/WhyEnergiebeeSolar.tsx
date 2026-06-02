@@ -6,7 +6,7 @@ import {
 } from "../../ui/SectionContent";
 import HiveHexCluster, { HexCell } from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/hero-device.svg";
+import deviceImg from "@/public/device-snap-solar-why-energiebee.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 import type { FeatureCardContent } from "./WhyEnergieBee";
