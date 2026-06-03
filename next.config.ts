@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: "standalone",
 
   // Generate unique build ID for each deployment to help with Server Action cache invalidation
   generateBuildId: async () => {

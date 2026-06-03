@@ -1,0 +1,32 @@
+# Rebuilt inside the image — never copy from host (avoids platform-mismatched
+# native binaries like sharp / next-swc).
+node_modules
+.next
+out
+
+# VCS / tooling
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Env & secrets — provide these at runtime, don't bake them into the image.
+.env
+.env.*
+
+# Local data / build artifacts
+prisma/dev.db
+prisma/*.db
+coverage
+.turbo
+*.log
+npm-debug.log*
+
+# Docker / docs (not needed in the build context)
+Dockerfile
+.dockerignore
+README*.md
+
+# OS cruft
+.DS_Store
