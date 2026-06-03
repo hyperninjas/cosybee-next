@@ -6,7 +6,7 @@ import {
 } from "../../ui/SectionContent";
 import HiveHexCluster, { HexCell } from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-solar-why-energiebee.png";
+import deviceImg from "@/public/solar/energiebee-app-solar-cycle.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 import type { FeatureCardContent } from "./WhyEnergieBee";
@@ -58,7 +58,7 @@ const DEFAULT_BOTTOM_RIGHT: HexCell = {
     <Image
       src={deviceImg}
       alt="cosy bee app"
-      className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+      className="absolute left-1/2 top-[16.8%] w-[65%] -translate-x-1/2"
     />
   ),
 };

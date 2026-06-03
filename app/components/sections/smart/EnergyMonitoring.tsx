@@ -5,7 +5,7 @@ import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 // import sideImage from "@/public/energy-monitoring.png";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-ai-insights.png";
+import deviceImg from "@/public/smart/energiebee-app-home-heating-spend-graph.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 export default function EnergyMonitoring() {

@@ -4,7 +4,7 @@ import { CtaButton } from "../../ui/Cta";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/energiebee-device-energy.png";
+import deviceImg from "@/public/homepage-images/energiebee-device-energy.png";
 import Hexagon from "../../ui/Hexagon";
 
 /**

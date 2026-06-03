@@ -3,7 +3,7 @@ import Hexagon from "../../ui/Hexagon";
 import Image from "next/image";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/energiebee-device-energy-management.png";
+import deviceImg from "@/public/homepage-images/energiebee-device-energy-management.png";
 import beeFlowerImg from "@/public/bee-flower.png";
 
 /**

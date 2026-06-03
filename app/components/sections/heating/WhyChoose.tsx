@@ -7,7 +7,7 @@ import {
 } from "../../ui/SectionContent";
 import windTurbineImg from "@/public/wind-turbine.png";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-heating-why-energiebee.png";
+import deviceImg from "@/public/heating/energiebee-app-heating-overview.png";
 import Image from "next/image";
 
 const PROBLEMS = [

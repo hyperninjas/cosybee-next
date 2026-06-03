@@ -1,7 +1,7 @@
 import Image from "next/image";
 import AppStoreButton from "../../ui/AppStoreButton";
 import { CtaButton } from "../../ui/Cta";
-import deviceImg from "@/public/energiebee-device-energy-download-app.png";
+import deviceImg from "@/public/homepage-images/energiebee-device-energy-download-app.png";
 
 /**
  * Final CTA — phone mockup on the left, headline + two download CTAs on

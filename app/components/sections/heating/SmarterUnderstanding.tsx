@@ -3,7 +3,7 @@ import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
-import deviceImg from "@/public/device-snap-heating-smart-understanding.png";
+import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";
 
 export default function SmarterUnderstanding() {
   return (

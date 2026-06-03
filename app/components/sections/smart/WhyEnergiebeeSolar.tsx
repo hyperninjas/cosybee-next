@@ -6,7 +6,7 @@ import {
 } from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-smart-optimisation.png";
+import deviceImg from "@/public/smart/energiebee-app-optimisation.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 

@@ -6,7 +6,7 @@ import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import Image from "next/image";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/energiebee-device-heating-solutions.png";
+import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";
 import beeFlowerImg from "@/public/bee-flower.png";
 
 /**

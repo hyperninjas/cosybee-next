@@ -7,7 +7,7 @@ import {
 } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image from "next/image";
-import deviceImg from "@/public/device-snap-energy-why-energiebee.png";
+import deviceImg from "@/public/energy/energiebee-app-weekly-energy-spend-graph.png";
 
 export default function WhyEnergieBee() {
   return (

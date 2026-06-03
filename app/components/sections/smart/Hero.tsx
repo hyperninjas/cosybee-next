@@ -7,7 +7,7 @@ import { CtaButton } from "../../ui/Cta";
 import Hexagon from "../../ui/Hexagon";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-hero.png";
+import deviceImg from "@/public/smart/energiebee-app-epc-rating-improvement.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import heroBgImg from "@/public/smart-hero-bg.png";
 import Image from "next/image";
@@ -41,7 +41,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 gap-12 items-center  px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
         {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
         <Hexagon
           color="#403A07"
@@ -84,7 +84,7 @@ export default function Hero() {
                 src={deviceImg}
                 alt="energie Bee app screen"
                 sizes="(min-width: 1024px) 200px, (min-width: 640px) 180px, 150px"
-                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[15.5%] w-[62%] -translate-x-1/2"
               />
             ),
           }}

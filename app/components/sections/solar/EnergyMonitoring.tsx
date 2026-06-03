@@ -2,7 +2,7 @@ import Hexagon from "../../ui/Hexagon";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-solar-energy-monitoring.png";
+import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image, { StaticImageData } from "next/image";
 

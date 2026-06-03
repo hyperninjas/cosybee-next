@@ -1,7 +1,7 @@
 import Image from "next/image";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
-import deviceImg from "@/public/energiebee-solar-forecasting.png";
+import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png";
 import sideImage from "@/public/energy-analytics-side.png";
 
 /**

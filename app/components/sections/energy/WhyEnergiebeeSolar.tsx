@@ -6,7 +6,7 @@ import {
 } from "../../ui/SectionContent";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-energy-why-solar.png";
+import deviceImg from "@/public/energy/energiebee-app-live-solar-energy-flow.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 
@@ -57,7 +57,7 @@ export default function WhyEnergieBeeSolar() {
               <Image
                 src={deviceImg}
                 alt="cosy bee app"
-                className="absolute left-1/2 top-[14%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[15.8%] w-[65%] -translate-x-1/2"
               />
             ),
           }}

@@ -7,7 +7,7 @@ import {
 import { CtaButton } from "../../ui/Cta";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/device-snap-heating-eco-system.png";
+import deviceImg from "@/public/heating/energiebee-app-smart-thermostat.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
 

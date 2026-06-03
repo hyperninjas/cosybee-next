@@ -1,8 +1,8 @@
 import { CtaCard } from "../../ui/Cta";
 import { MediaCard, SectionHeader } from "../../ui/SectionContent";
 import Image from "next/image";
-import deviceImg from "@/public/device-snap-usage-recommendation.png";
-import deviceWeatherImg from "@/public/device-snap-weather-forecast.png";
+import deviceImg from "@/public/smart/energiebee-energy-usage.png";
+import deviceWeatherImg from "@/public/smart/energiebee-weather-forecasts.png";
 
 export default function EnergyForecasting() {
   return (
