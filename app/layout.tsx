@@ -152,9 +152,44 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} h-full antialiased scroll-smooth`}
+      className={`${manrope.variable} h-full antialiased`}
     >
       <head>
+        {/* Manual scroll restoration. On reload we save the previous
+         *  scroll position to sessionStorage and restore it instantly
+         *  once the document is tall enough — avoids both the "jumps to
+         *  top" issue (browser can't restore past initial document
+         *  height) and the smooth-scroll-animates-restoration issue. We
+         *  then enable `scroll-smooth` for subsequent anchor clicks. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  if(!('scrollRestoration' in history))return;
+  var k='sy:'+location.pathname+location.search;
+  history.scrollRestoration='manual';
+  var save=function(){try{sessionStorage.setItem(k,String(window.scrollY));}catch(e){}};
+  addEventListener('pagehide',save);
+  addEventListener('beforeunload',save);
+  var raw;try{raw=sessionStorage.getItem(k);}catch(e){}
+  var enableSmooth=function(){document.documentElement.classList.add('scroll-smooth');};
+  if(raw===null){enableSmooth();return;}
+  var y=parseInt(raw,10);
+  if(!y||y<0){enableSmooth();return;}
+  var tries=0;
+  var step=function(){
+    var max=document.documentElement.scrollHeight-window.innerHeight;
+    if(max>=y){window.scrollTo({top:y,left:0,behavior:'instant'});enableSmooth();return;}
+    if(++tries>120){window.scrollTo({top:y,left:0,behavior:'instant'});enableSmooth();return;}
+    requestAnimationFrame(step);
+  };
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){requestAnimationFrame(step);});
+  }else{requestAnimationFrame(step);}
+})();
+`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -163,7 +198,6 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteSchema),
           }}
