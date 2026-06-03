@@ -9,7 +9,7 @@ import AppStoreButton from "../../ui/AppStoreButton";
  */
 export default function HomeHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white">
+    <section className="relative isolate overflow-hidden bg-black text-white min-h-[85vh]">
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -19,7 +19,7 @@ export default function HomeHero() {
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={65}
+          quality={50}
           placeholder="blur"
           className="object-cover object-center"
         />

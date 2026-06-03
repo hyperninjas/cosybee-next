@@ -17,7 +17,7 @@ type Props = {
  */
 export default function BlogHero({ title, description }: Props) {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white">
+    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
       {/* background photo + bottom-fade overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -27,7 +27,7 @@ export default function BlogHero({ title, description }: Props) {
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={65}
+          quality={50}
           placeholder="blur"
           className="object-cover object-center"
         />
@@ -46,7 +46,9 @@ export default function BlogHero({ title, description }: Props) {
           <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
             {title}
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">{description}</p>
+          <p className="mt-4 max-w-md text-lg text-neutral-300">
+            {description}
+          </p>
         </div>
 
         <SharedImageHexCluster

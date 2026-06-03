@@ -24,7 +24,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white">
+    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
       {/* background photo + gradients */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -34,7 +34,7 @@ export default function Hero() {
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={65}
+          quality={50}
           placeholder="blur"
           className="object-cover object-center"
         />
@@ -72,13 +72,11 @@ export default function Hero() {
             src: windTurbineImg,
             alt: "Wind turbines",
             color: "#7FA9C9",
-            priority: true,
           }}
           topRight={{
             src: beeFlowerImg,
             alt: "Bee on a flower",
             color: "#D4A017",
-            priority: true,
           }}
           bottomRight={{
             color: "#E9E19E",
@@ -86,8 +84,7 @@ export default function Hero() {
               <Image
                 src={deviceImg}
                 alt="energie bee app screen"
-                priority
-                fetchPriority="high"
+                sizes="(min-width: 1024px) 200px, (min-width: 640px) 180px, 150px"
                 className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
               />
             ),

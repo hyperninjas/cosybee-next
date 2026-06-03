@@ -4,7 +4,7 @@ import { CtaButton } from "../../ui/Cta";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/device-energy-rating.png";
+import deviceImg from "@/public/energiebee-device-energy.png";
 import Hexagon from "../../ui/Hexagon";
 
 /**
@@ -66,7 +66,7 @@ export default function PerfectHarmony() {
                 alt="EnergieBee app preview"
                 sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
                 quality={50}
-                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
               />
             ),
           }}

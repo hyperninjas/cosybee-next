@@ -3,7 +3,7 @@ import Hexagon from "../../ui/Hexagon";
 import Image from "next/image";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
-import deviceImg from "@/public/device-energy-rating.png";
+import deviceImg from "@/public/energiebee-device-energy-management.png";
 import beeFlowerImg from "@/public/bee-flower.png";
 
 /**
@@ -67,7 +67,7 @@ export default function HomeEnergyManagement() {
                 alt="EnergieBee app - Energy management"
                 sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
                 quality={50}
-                className="absolute left-1/2 top-[12%] w-[65%] -translate-x-1/2"
+                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
               />
             ),
           }}
