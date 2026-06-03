@@ -16,7 +16,7 @@
  * so a bump is only needed for strategy changes, not normal deploys.)
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const PRECACHE = `eb-precache-${CACHE_VERSION}`;
 const PAGE_CACHE = `eb-pages-${CACHE_VERSION}`;
 const ASSET_CACHE = `eb-assets-${CACHE_VERSION}`;
