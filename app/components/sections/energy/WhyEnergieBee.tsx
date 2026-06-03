@@ -21,7 +21,7 @@ export default function WhyEnergieBee() {
             src={deviceImg}
             alt="energy analytics dashboard"
             sizes="(min-width: 1024px) 350px, 280px"
-            quality={80}
+            quality={100}
             className="h-auto w-full"
           />
         </div>
@@ -39,7 +39,7 @@ export default function WhyEnergieBee() {
               src={deviceImg}
               alt="energy analytics dashboard"
               sizes="(min-width: 1024px) 350px, 280px"
-              quality={80}
+              quality={100}
               className="h-auto w-full"
             />
           </div>

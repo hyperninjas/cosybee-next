@@ -34,7 +34,7 @@ export default function Hero() {
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={80}
+          quality={100}
           placeholder="blur"
           className="object-cover object-center"
         />

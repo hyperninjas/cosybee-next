@@ -20,7 +20,7 @@ export default function HomeSolarForecasting() {
             src={deviceImg}
             alt="EnergieBee solar dashboard"
             sizes="(min-width: 1024px) 365px, 280px"
-            quality={80}
+            quality={100}
             className="h-auto w-full"
           />
         </div>
@@ -54,7 +54,7 @@ export default function HomeSolarForecasting() {
               src={deviceImg}
               alt="EnergieBee solar dashboard"
               sizes="(min-width: 1024px) 365px, 280px"
-              quality={80}
+              quality={100}
               className="h-auto w-full"
             />
           </div>
