@@ -55,7 +55,7 @@ export default function Hero() {
           </h1>
           <p className="mt-4 max-w-md text-lg text-white">
             Advanced AI-powered solar production predictions. Plan your energy
-            usage with confidence and maximize your solar investment with
+            usage with confidence and maximise your solar investment with
             industry-leading accuracy.
           </p>
           <CtaButton href="/get-started" size="md" className="mt-10">

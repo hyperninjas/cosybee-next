@@ -41,7 +41,7 @@ export default function EnergyAnalytics() {
             />
             <FeatureItem
               title="Carbon Footprint Impact"
-              description="Visualize your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet."
+              description="Visualise your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet."
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}

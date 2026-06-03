@@ -30,7 +30,7 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
   {
     title: "Carbon Footprint Impact",
     description:
-      "Visualize your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet.",
+      "Visualise your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet.",
   },
 ];
 

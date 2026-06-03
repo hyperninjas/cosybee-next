@@ -22,13 +22,13 @@ export default function WhyChoose() {
           <SectionTitle>Why Choose EnergieBee Solar?</SectionTitle>
           <SectionLead>
             Part of the EnergieBee app — everything you need to monitor and
-            optimize your solar energy system.
+            optimise your solar energy system.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="Maximise Production"
+              description="Track real-time solar generation and get insights to optimise energy production."
             />
             <FeatureCard
               glyph="dollar"

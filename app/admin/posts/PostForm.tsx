@@ -404,7 +404,7 @@ export default function PostForm({
                 <input
                   name="category"
                   defaultValue={post?.category}
-                  placeholder="Uncategorized"
+                  placeholder="Uncategorised"
                   list="category-options"
                   className={inputClass}
                 />

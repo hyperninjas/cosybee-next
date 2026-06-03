@@ -35,7 +35,7 @@ export default function HomeSolarForecasting() {
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
+              title="Maximise Production"
               description="See how your solar performs day by day."
             />
             <FeatureCard

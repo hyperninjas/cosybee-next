@@ -168,7 +168,7 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    category: str(formData, "category") || "Uncategorized",
+    category: str(formData, "category") || "Uncategorised",
     tags,
     readTime: readTimeMinutes,
     coverImage,

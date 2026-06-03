@@ -9,7 +9,7 @@ export default function EnergyForecasting() {
     <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
       <SectionHeader
         title="Predictive Analytics"
-        description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximize savings"
+        description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"
       />
 
       <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
@@ -38,11 +38,11 @@ export default function EnergyForecasting() {
             />
           }
           title="Smart Energy Usage Recommendations"
-          description="Get intelligent notifications on the best times to use high-energy appliances based on solar production forecasts, maximizing your energy independence and savings."
+          description="Get intelligent notifications on the best times to use high-energy appliances based on solar production forecasts, maximising your energy independence and savings."
           bullets={[
             "Optimal usage timing alerts",
             "Peak production windows",
-            "Battery charging optimization",
+            "Battery charging optimisation",
           ]}
         />
       </div>

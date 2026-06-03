@@ -24,13 +24,13 @@ export default function WhyEnergieBeeSolar() {
           <SectionTitle>Automated Optimisation</SectionTitle>
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
             Part of the energiebee app - everything you need to monitor and
-            optimize your solar energy system.
+            optimise your solar energy system.
           </SectionLead>
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="Maximise Production"
+              description="Track real-time solar generation and get insights to optimise energy production."
             />
             <FeatureCard
               glyph="dollar"

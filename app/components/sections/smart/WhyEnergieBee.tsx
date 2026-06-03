@@ -31,7 +31,7 @@ export default function WhyEnergieBee() {
           <SectionTitle>Works With Your Smart Home</SectionTitle>
           <SectionLead className="max-[1200px]:text-center">
             Part of the energiebee app - everything you need to monitor and
-            optimize your solar energy system.
+            optimise your solar energy system.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-[345.3px] min-[1200px]:hidden mt-8">
@@ -46,8 +46,8 @@ export default function WhyEnergieBee() {
           <div className="mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
-              title="Maximize Production"
-              description="Track real-time solar generation and get insights to optimize energy production."
+              title="Maximise Production"
+              description="Track real-time solar generation and get insights to optimise energy production."
             />
             <FeatureCard
               glyph="dollar"

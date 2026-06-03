@@ -16,12 +16,12 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
   {
     title: "Battery Optimisation",
     description:
-      "Get intelligent recommendations on when to store or use your solar energy to maximize savings and reduce grid dependency.",
+      "Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency.",
   },
   {
     title: "Smart Device Integration",
     description:
-      "Connect to your smart home devices and optimize their energy usage based on your solar production patterns.",
+      "Connect to your smart home devices and optimise their energy usage based on your solar production patterns.",
   },
   {
     title: "ROI Tracking",

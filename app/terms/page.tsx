@@ -115,7 +115,7 @@ export default function TermsPage() {
         <LegalSection title="Purchasing a Device">
           <p>
             <strong>2.1</strong> All orders placed through our website or
-            authorized retailers are subject to acceptance by us. We reserve the
+            authorised retailers are subject to acceptance by us. We reserve the
             right to refuse or cancel any order at our discretion.
           </p>
           <p>
@@ -189,7 +189,7 @@ export default function TermsPage() {
           <p>
             <strong>4.3</strong> Installation of the Device is your
             responsibility unless a professional installation service has been
-            purchased from us or an authorized partner. You must ensure that
+            purchased from us or an authorised partner. You must ensure that
             installation complies with all applicable UK electrical regulations,
             including BS 7671 (IET Wiring Regulations). We recommend
             installation by a qualified electrician.
@@ -225,7 +225,7 @@ export default function TermsPage() {
           <p>
             <strong>5.2</strong> You agree to notify us immediately at{" "}
             <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> if
-            you suspect any unauthorized access to your Account.
+            you suspect any unauthorised access to your Account.
           </p>
           <p>
             <strong>5.3</strong> We reserve the right to suspend or terminate
@@ -277,7 +277,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>7.2</strong> Your energy data is associated with your
-            Account and is not sold to third parties. We may use anonymized and
+            Account and is not sold to third parties. We may use anonymised and
             aggregated data for product development and research purposes.
           </p>
           <p>
@@ -288,7 +288,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>7.4</strong> We implement appropriate technical and
-            organizational measures to protect your data. However, no method of
+            organisational measures to protect your data. However, no method of
             transmission over the internet is completely secure, and we cannot
             guarantee absolute security.
           </p>
@@ -305,7 +305,7 @@ export default function TermsPage() {
           </p>
           <ul>
             <li>
-              Damage caused by accident, misuse, neglect, or unauthorized
+              Damage caused by accident, misuse, neglect, or unauthorised
               modification.
             </li>
             <li>
@@ -392,7 +392,7 @@ export default function TermsPage() {
           <ul>
             <li>Violate any applicable law or regulation.</li>
             <li>
-              Attempt to gain unauthorized access to any system, network, or
+              Attempt to gain unauthorised access to any system, network, or
               data.
             </li>
             <li>

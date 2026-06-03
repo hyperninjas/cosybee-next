@@ -19,11 +19,11 @@ export default function SmartEnergyManagement() {
           <div className="mt-8 space-y-8">
             <FeatureItem
               title="Battery Optimisation"
-              description="Get intelligent recommendations on when to store or use your solar energy to maximize savings and reduce grid dependency."
+              description="Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency."
             />
             <FeatureItem
               title="Smart Device Integration"
-              description="Connect to your smart home devices and optimize their energy usage based on your solar production patterns."
+              description="Connect to your smart home devices and optimise their energy usage based on your solar production patterns."
             />
             <FeatureItem
               title="ROI Tracking"
