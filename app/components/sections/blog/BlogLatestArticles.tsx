@@ -13,8 +13,8 @@ function isExternalUrl(url: string): boolean {
   return url.startsWith("http://") || url.startsWith("https://");
 }
 
-const INITIAL_VISIBLE = 3;
-const LOAD_STEP = 3;
+const INITIAL_VISIBLE = 12;
+const LOAD_STEP = 6;
 
 export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
   return (
@@ -134,7 +134,9 @@ export default function BlogLatestArticles({
     <section
       className={`mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 ${heading === "Latest Articles" ? "lg:pt-0" : ""} `}
     >
-      <h2 className="text-2xl font-bold text-black sm:text-[32px]">{heading}</h2>
+      <h2 className="text-2xl font-bold text-black sm:text-[32px]">
+        {heading}
+      </h2>
       {filtered.length === 0 ? (
         <p className="mt-8 text-base text-[#545454]">
           No articles match your search. Try a different keyword or category.
