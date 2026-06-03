@@ -70,6 +70,52 @@ const nextConfig: NextConfig = {
   // when debugging deployed errors via a remote SDK.
   productionBrowserSourceMaps: false,
   compress: true,
+
+  async headers() {
+    return [
+      {
+        // Baseline hardening for every route.
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      {
+        // Keep the admin panel (dashboard, create/edit/list) out of every
+        // search index. This HTTP-level directive backs up the `noindex`
+        // meta tag in app/admin/layout.tsx and applies to all response types,
+        // including redirects and non-HTML responses.
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
+        // `:path*` above doesn't match the bare /admin route — cover it too.
+        source: "/admin",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
+        // The service worker must never be HTTP-cached, otherwise browsers
+        // can keep serving a stale worker and updates won't roll out.
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

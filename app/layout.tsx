@@ -3,6 +3,8 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
+import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
+import InstallPrompt from "./components/InstallPrompt";
 import {
   ORG_ADDRESS,
   ORG_CONTACT_EMAIL,
@@ -168,6 +170,8 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <ServiceWorkerRegistration />
+        <InstallPrompt />
       </body>
     </html>
   );

@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { listPosts } from "./lib/queries";
 import PostsTable, { type Row } from "./PostsTable";
 import SavedToast from "./SavedToast";
 
 export default async function AdminDashboard() {
+  // Render per-request: stop prerendering before the live, no-store fetch in
+  // listPosts() so `next build` doesn't try to reach the backend while
+  // collecting page data (this route is dynamic anyway).
+  await connection();
   const posts = await listPosts();
   const rows: Row[] = posts.map((p) => ({
     id: p.id,

@@ -3,7 +3,9 @@ import { SITE_URL } from "./lib/site";
 
 /**
  * Generates /robots.txt at build time. Allows all crawlers everywhere
- * except internal Next.js paths, and points at the sitemap.
+ * except internal Next.js paths and the admin panel, and points at the
+ * sitemap. The admin routes are also marked noindex via metadata and an
+ * X-Robots-Tag header (see app/admin/layout.tsx and next.config.ts).
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -11,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/"],
+        disallow: ["/api/", "/admin"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
