@@ -110,6 +110,18 @@ const nextConfig: NextConfig = {
         destination: "/hive",
         permanent: true,
       },
+
+      // Second batch of legacy 404s (from the Semrush crawl). The
+      // monitoring/management/reporting/control pages map to the energy hub;
+      // the brand-story page goes to the blog.
+      { source: "/control-matters", destination: "/energy", permanent: true },
+      { source: "/energy-management", destination: "/energy", permanent: true },
+      { source: "/energy-monitoring-commercial", destination: "/energy", permanent: true },
+      { source: "/energy-monitoring-industrial", destination: "/energy", permanent: true },
+      { source: "/monitoring-matters", destination: "/energy", permanent: true },
+      { source: "/real-time-reporting-commercial", destination: "/energy", permanent: true },
+      { source: "/real-time-reporting-industrial", destination: "/energy", permanent: true },
+      { source: "/knocking-down-barriers", destination: "/hive", permanent: true },
     ];
   },
 
