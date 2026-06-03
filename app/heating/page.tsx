@@ -6,6 +6,8 @@ import TurnEnergyData from "../components/sections/heating/TurnEnergyData";
 import SmarterUnderstanding from "../components/sections/heating/SmarterUnderstanding";
 import ConnectedEcosystem from "../components/sections/heating/ConnectedEcosystem";
 import WhyChoose from "../components/sections/heating/WhyChoose";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Smart Heating Control",
@@ -32,6 +34,12 @@ export const metadata: Metadata = {
 export default function HeatingPage() {
   return (
     <main className="flex-1">
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Smart Heating Control", path: "/heating" },
+        ])}
+      />
       <Hero />
       <AccurateIntelligence />
       <UnderstandOptimise />

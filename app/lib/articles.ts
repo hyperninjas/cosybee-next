@@ -1,6 +1,7 @@
 import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
 import type { Article } from "./article-types";
+import { slugify } from "./slug";
 
 export type { Article } from "./article-types";
 export type { Blog } from "./api";
@@ -61,6 +62,9 @@ function toArticle(post: ApiPost): Article {
       name: post.authorName ?? "energiebee",
       date: formatAuthorDate(post.authorDate ?? ""),
     },
+    datePublished: post.publishedAt ?? post.authorDate ?? undefined,
+    dateModified:
+      post.updatedAt ?? post.publishedAt ?? post.authorDate ?? undefined,
     carouselIntro: post.carouselIntro ?? undefined,
     carouselBody: post.carouselBody ?? undefined,
     lede: post.lede ?? undefined,
@@ -117,4 +121,57 @@ export async function getRelated(
 export async function getPublishedSlugs(blog: Blog): Promise<string[]> {
   const response = await api.getSlugs(blog);
   return response.data;
+}
+
+/**
+ * Published article paths with their real last-modified dates — used by the
+ * sitemap so `<lastmod>` reflects when each post actually changed.
+ */
+/**
+ * Fetch every published post for a blog, paginating within the API's page-size
+ * limit. The API rejects large limits with a 400, so we walk pages instead.
+ */
+async function getAllPublishedPosts(blog: Blog): Promise<ApiPost[]> {
+  const PER_PAGE = 50; // API caps the limit (larger values 400)
+  const out: ApiPost[] = [];
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const res = await api.getPosts(blog, page, PER_PAGE);
+    out.push(...res.data);
+    totalPages = res.pagination?.totalPages ?? 1;
+    page++;
+  } while (page <= totalPages && page <= 100); // hard safety cap
+  return out;
+}
+
+/** Every published article for a blog (all pages) — for tag pages & search. */
+export async function getAllArticles(blog: Blog): Promise<Article[]> {
+  const posts = await getAllPublishedPosts(blog);
+  return posts.map(toArticle);
+}
+
+export async function getSitemapArticles(
+  blog: Blog,
+): Promise<{ path: string; lastModified: Date }[]> {
+  const posts = await getAllPublishedPosts(blog);
+  return posts.map((p) => ({
+    path: `/${blog}/${p.slug}`,
+    lastModified: new Date(
+      p.updatedAt || p.publishedAt || p.authorDate || Date.now(),
+    ),
+  }));
+}
+
+/** Unique slugified tags used by a blog's published articles (for tag pages). */
+export async function getTagSlugs(blog: Blog): Promise<string[]> {
+  const posts = await getAllPublishedPosts(blog);
+  const slugs = new Set<string>();
+  for (const p of posts) {
+    for (const t of p.tags ?? []) {
+      const s = slugify(t);
+      if (s) slugs.add(s);
+    }
+  }
+  return [...slugs];
 }

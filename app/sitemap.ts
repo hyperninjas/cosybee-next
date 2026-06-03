@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { ROUTES, SITE_URL } from "./lib/site";
-import { getPublishedSlugs } from "./lib/articles";
+import { getSitemapArticles, getTagSlugs } from "./lib/articles";
 
 /**
  * Generates /sitemap.xml.
@@ -20,20 +20,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority,
   }));
 
-  const [hiveSlugs, learnSlugs] = await Promise.all([
-    getPublishedSlugs("hive"),
-    getPublishedSlugs("learn"),
+  const [hiveArticles, learnArticles, hiveTags, learnTags] = await Promise.all([
+    getSitemapArticles("hive"),
+    getSitemapArticles("learn"),
+    getTagSlugs("hive"),
+    getTagSlugs("learn"),
   ]);
 
-  const articleRoutes = [
-    ...hiveSlugs.map((slug) => `/hive/${slug}`),
-    ...learnSlugs.map((slug) => `/learn/${slug}`),
-  ].map((path) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified,
+  const articleRoutes = [...hiveArticles, ...learnArticles].map((a) => ({
+    url: `${SITE_URL}${a.path}`,
+    lastModified: a.lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...articleRoutes];
+  const tagRoutes = [
+    ...hiveTags.map((t) => `/hive/tag/${t}`),
+    ...learnTags.map((t) => `/learn/tag/${t}`),
+  ].map((path) => ({
+    url: `${SITE_URL}${path}`,
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...articleRoutes, ...tagRoutes];
 }

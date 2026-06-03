@@ -1,0 +1,89 @@
+import type { Metadata } from "next";
+import { getAllArticles } from "../lib/articles";
+import type { Article } from "../lib/article-types";
+import { ArticleCard } from "../components/sections/blog/BlogLatestArticles";
+
+export const metadata: Metadata = {
+  title: "Search",
+  description: "Search EnergieBee guides, stories, and energy-saving advice.",
+  alternates: { canonical: "/search" },
+  // Internal search results shouldn't be indexed, but links should be followed.
+  robots: { index: false, follow: true },
+};
+
+export default async function SearchPage({
+  searchParams,
+}: PageProps<"/search">) {
+  const { q } = await searchParams;
+  const query = (typeof q === "string" ? q : "").trim();
+
+  let results: Article[] = [];
+  if (query) {
+    const [hive, learn] = await Promise.all([
+      getAllArticles("hive"),
+      getAllArticles("learn"),
+    ]);
+    const needle = query.toLowerCase();
+    results = [...hive, ...learn].filter((a) => {
+      const haystack = [
+        a.title,
+        a.description,
+        a.category,
+        ...a.tags,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(needle);
+    });
+  }
+
+  return (
+    <main className="flex-1">
+      <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-black sm:text-4xl">
+          Search
+        </h1>
+        <p className="mt-2 text-base text-neutral-600">
+          Find guides, stories, and energy-saving advice across the EnergieBee
+          blog.
+        </p>
+
+        <form action="/search" method="get" role="search" className="mt-6 flex gap-3">
+          <input
+            type="search"
+            name="q"
+            defaultValue={query}
+            placeholder="Search articles…"
+            aria-label="Search articles"
+            autoFocus
+            className="w-full max-w-md rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base text-black outline-none transition focus:border-[#EE3D1A] focus:ring-2 focus:ring-[#FF8B27]/30"
+          />
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-6 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+          >
+            Search
+          </button>
+        </form>
+
+        {query && (
+          <p className="mt-6 text-sm text-neutral-500">
+            {results.length === 0
+              ? `No results for “${query}”.`
+              : `${results.length} result${results.length === 1 ? "" : "s"} for “${query}”.`}
+          </p>
+        )}
+      </section>
+
+      {results.length > 0 && (
+        <section className="mx-auto w-full max-w-300 px-6 pb-20">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((a) => (
+              <ArticleCard key={`${a.blog}/${a.slug}`} a={a} basePath={`/${a.blog}`} />
+            ))}
+          </div>
+        </section>
+      )}
+    </main>
+  );
+}

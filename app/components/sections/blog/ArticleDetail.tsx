@@ -9,6 +9,9 @@ import Avatar from "../../ui/Avatar";
 import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
 import ArticleToc from "./ArticleToc";
+import JsonLd from "@/app/components/JsonLd";
+import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
+import { slugify } from "@/app/lib/slug";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {
@@ -53,9 +56,21 @@ export default function ArticleDetail({
   backLabel,
 }: Props) {
   const { html, items: toc } = buildToc(article.contentHtml ?? "");
+  const path = `${basePath}/${article.slug}`;
+  const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
 
   return (
     <main className="flex-1">
+      <JsonLd
+        data={[
+          blogPostingSchema(article, path),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: blogLabel, path: basePath },
+            { name: article.title, path },
+          ]),
+        ]}
+      />
       <ReadingProgress />
       <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
       <article className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20">
@@ -85,7 +100,7 @@ export default function ArticleDetail({
               {article.tags.map((tag) => (
                 <Link
                   key={tag}
-                  href={`${basePath}?tag=${encodeURIComponent(tag)}`}
+                  href={`${basePath}/tag/${slugify(tag)}`}
                   className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-[#545454] transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
                 >
                   {`#${tag}`}
@@ -101,9 +116,12 @@ export default function ArticleDetail({
                 <div className="font-bold text-lg text-black">
                   {article.author.name}
                 </div>
-                <div className="text-[#545454] text-[15px] mt-1 font-medium">
+                <time
+                  dateTime={article.datePublished}
+                  className="block text-[#545454] text-[15px] mt-1 font-medium"
+                >
                   {article.author.date}
-                </div>
+                </time>
               </div>
             </div>
             <ShareButton title={article.title} />

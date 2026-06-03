@@ -30,10 +30,11 @@ const nextConfig: NextConfig = {
   // Image pipeline — modern formats only, tighter size ladder than the
   // default (which goes up to 3840px and is overkill for our largest crop).
   images: {
-    // Disable optimization for external images (eb-api resolves to private IP
-    // which Next.js blocks for security). Images still load, just without
-    // server-side resizing.
-    unoptimized: true,
+    // Optimization is ON: local /public images (heroes, device shots — the LCP
+    // images) are resized and served as AVIF/WebP. Remote API images (eb-api)
+    // are rendered with the per-<Image unoptimized> prop where they appear,
+    // since that host can resolve to a private IP that Next blocks from
+    // server-side fetching.
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

@@ -7,6 +7,8 @@ import SmartEnergyManagement from "../components/sections/energy/SmartEnergyMana
 import WhyEnergieBee from "../components/sections/energy/WhyEnergieBee";
 import WhyEnergieBeeSolar from "../components/sections/energy/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "../components/sections/energy/WorksWithAnySystem";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Total Energy Control",
@@ -32,6 +34,12 @@ export const metadata: Metadata = {
 export default function EnergyPage() {
   return (
     <main className="flex-1">
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Total Energy Control", path: "/energy" },
+        ])}
+      />
       <Hero />
       <EnergyMonitoring />
       <EnergyAnalytics />

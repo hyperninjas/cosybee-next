@@ -22,6 +22,10 @@ export type Article = {
   image: string;
   imageAlt: string;
   author: { name: string; date: string };
+  /** ISO date the article was published — for structured data / OG tags. */
+  datePublished?: string;
+  /** ISO date the article was last modified — for structured data / OG tags. */
+  dateModified?: string;
   carouselIntro?: string;
   carouselBody?: string;
   /** Bold subtitle under the H1 (detail view). */
