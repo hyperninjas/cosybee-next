@@ -37,8 +37,6 @@ export default function WhyChoose() {
               <Image
                 src={deviceImg}
                 alt="energie bee app screen"
-                priority
-                fetchPriority="high"
                 className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
               />
             ),

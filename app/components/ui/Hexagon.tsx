@@ -25,7 +25,7 @@ type HexagonProps = {
   priority?: boolean;
   /** Responsive `sizes` hint. Tune per use site for best optimisation. */
   sizes?: string;
-  /** Image quality (0-100). Defaults to 100. */
+  /** Image quality (0-100). Defaults to 85. */
   quality?: number;
 };
 
@@ -38,7 +38,7 @@ export default function Hexagon({
   children,
   priority = false,
   sizes = "(min-width: 1024px) 320px, (min-width: 640px) 220px, 160px",
-  quality = 100,
+  quality = 85,
 }: HexagonProps) {
   // If the caller didn't supply a positioning class, default to `relative`
   // so the inner mask layer (absolute inset-0) can anchor itself. Tailwind

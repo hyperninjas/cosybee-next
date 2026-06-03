@@ -27,7 +27,7 @@ export type HexCell = {
   priority?: boolean;
   /** Responsive `sizes` hint for this cell's image. */
   sizes?: string;
-  /** Image quality (0-100). Defaults to 100 — masked-through-hex at small
+  /** Image quality (0-100). Defaults to 85 — masked-through-hex at small
    *  display sizes hides any visual loss vs. the 75 default. */
   quality?: number;
 };
@@ -121,7 +121,7 @@ export default function HiveHexCluster({
                 fill
                 priority={cell.priority}
                 sizes={cell.sizes ?? DEFAULT_CELL_SIZES}
-                quality={cell.quality ?? 100}
+                quality={cell.quality ?? 85}
                 className="object-cover object-center"
               />
             )}

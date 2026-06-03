@@ -32,7 +32,7 @@ export default function SharedImageHexCluster({
   gap,
   priority = false,
   sizes = "(min-width: 1024px) 500px, (min-width: 640px) 440px, 320px",
-  quality = 100,
+  quality = 85,
   cornerInset,
 }: {
   src: string | StaticImageData;
@@ -60,7 +60,7 @@ export default function SharedImageHexCluster({
   /** Responsive `sizes` hint. Tune per use site for best optimisation. */
   sizes?: string;
   /**
-   * Image quality (0-100). Default 100 — the image is masked through a hex
+   * Image quality (0-100). Default 85 — the image is masked through a hex
    * shape at small-to-medium viewport widths, so 50% AVIF/WebP is visually
    * indistinguishable from 75 at half the bytes.
    */

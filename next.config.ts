@@ -40,11 +40,11 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
-    // Allowed `quality` values. 100 = full quality for images that ask for it
-    // (heroes, device shots, content); 75 is Next's default, used by any
-    // <Image> without an explicit quality prop. Next still optimizes both —
-    // converting to AVIF/WebP and resizing per the size ladders above.
-    qualities: [75, 100],
+    // Allowed `quality` values. 85 = the sweet spot for photos (sharp, but
+    // far smaller than 100); 75 is Next's default, used by any <Image> without
+    // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
+    // size ladders above.
+    qualities: [75, 85],
     // Allow external images from the backend API
     remotePatterns: [
       {

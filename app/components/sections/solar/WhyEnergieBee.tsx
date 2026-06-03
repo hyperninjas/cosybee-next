@@ -67,7 +67,7 @@ export default function WhyEnergieBee({
             src={deviceSrc}
             alt={deviceAlt}
             sizes="(min-width: 1024px) 350px, 280px"
-            quality={100}
+            quality={85}
             className="h-auto w-full"
           />
         </div>
@@ -82,7 +82,7 @@ export default function WhyEnergieBee({
               src={deviceSrc}
               alt={deviceAlt}
               sizes="(min-width: 1024px) 350px, 280px"
-              quality={100}
+              quality={85}
               className="h-auto w-full"
             />
           </div>

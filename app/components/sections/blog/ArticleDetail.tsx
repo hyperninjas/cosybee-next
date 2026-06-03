@@ -61,6 +61,9 @@ export default function ArticleDetail({
 
   return (
     <main className="flex-1">
+      {/* Warm up the connection to the media host — article images load from
+          it cross-origin (React 19 hoists this to <head> and dedups it). */}
+      <link rel="preconnect" href="https://eb-api.technext.it" />
       <JsonLd
         data={[
           blogPostingSchema(article, path),

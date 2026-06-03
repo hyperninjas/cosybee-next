@@ -19,7 +19,7 @@ export default function HomeHero() {
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={100}
+          quality={85}
           placeholder="blur"
           className="object-cover object-center"
         />

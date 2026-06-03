@@ -18,8 +18,11 @@ const LOAD_STEP = 6;
 
 export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
   return (
-    <Link
-      href={`${basePath}/${a.slug}`}
+    <>
+      {/* Warm up the cross-origin media host (React 19 hoists + dedups this). */}
+      <link rel="preconnect" href="https://eb-api.technext.it" />
+      <Link
+        href={`${basePath}/${a.slug}`}
       className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="relative aspect-[1.39]">
@@ -73,7 +76,8 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
           </div>
         </div>
       </div>
-    </Link>
+      </Link>
+    </>
   );
 }
 

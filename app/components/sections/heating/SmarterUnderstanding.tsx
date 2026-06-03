@@ -15,7 +15,7 @@ export default function SmarterUnderstanding() {
             src={deviceImg}
             alt="energy dashboard"
             sizes="(min-width: 1024px) 350px, 280px"
-            quality={100}
+            quality={85}
             className="h-auto w-full"
           />
         </div>
@@ -29,7 +29,7 @@ export default function SmarterUnderstanding() {
               src={deviceImg}
               alt="energy dashboard"
               sizes="(min-width: 1024px) 350px, 280px"
-              quality={100}
+              quality={85}
               className="h-auto w-full"
             />
           </div>
