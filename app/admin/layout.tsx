@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isAuthenticated } from "./lib/auth";
+import { logoutAction } from "./login/actions";
 
 // Keep the admin panel out of search results.
 export const metadata: Metadata = {
@@ -7,11 +9,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const authed = await isAuthenticated();
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-black">
       <header className="border-b border-[#ECECEC] bg-white">
@@ -26,6 +30,16 @@ export default function AdminLayout({
             <Link href="/learn" className="text-[#545454] hover:text-black">
               View Learn
             </Link>
+            {authed && (
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="rounded-lg border border-neutral-300 px-3 py-1.5 text-[#545454] transition-colors hover:border-neutral-400 hover:text-black"
+                >
+                  Log out
+                </button>
+              </form>
+            )}
           </nav>
         </div>
       </header>
