@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    // The Host directive expects a bare domain, not a full URL.
+    host: SITE_URL.replace(/^https?:\/\//, ""),
   };
 }

@@ -152,7 +152,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${manrope.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Manual scroll restoration. On reload we save the previous

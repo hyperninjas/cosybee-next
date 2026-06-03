@@ -7,6 +7,8 @@ import SmartEnergyManagement from "../components/sections/smart/SmartEnergyManag
 import WhyEnergieBee from "../components/sections/smart/WhyEnergieBee";
 import WhyEnergieBeeSolar from "../components/sections/smart/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "../components/sections/smart/WorksWithAnySystem";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 
 export const metadata: Metadata = {
   title: "Smart Home Integration",
@@ -32,6 +34,12 @@ export const metadata: Metadata = {
 export default function SmartPage() {
   return (
     <main className="flex-1">
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Smart Home Integration", path: "/smart" },
+        ])}
+      />
       <Hero />
       <EnergyMonitoring />
       <EnergyAnalytics />

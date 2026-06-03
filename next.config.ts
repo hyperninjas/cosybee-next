@@ -30,10 +30,11 @@ const nextConfig: NextConfig = {
   // Image pipeline — modern formats only, tighter size ladder than the
   // default (which goes up to 3840px and is overkill for our largest crop).
   images: {
-    // Disable optimization for external images (eb-api resolves to private IP
-    // which Next.js blocks for security). Images still load, just without
-    // server-side resizing.
-    unoptimized: true,
+    // Optimization is ON: local /public images (heroes, device shots — the LCP
+    // images) are resized and served as AVIF/WebP. Remote API images (eb-api)
+    // are rendered with the per-<Image unoptimized> prop where they appear,
+    // since that host can resolve to a private IP that Next blocks from
+    // server-side fetching.
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -70,6 +71,42 @@ const nextConfig: NextConfig = {
   // when debugging deployed errors via a remote SDK.
   productionBrowserSourceMaps: false,
   compress: true,
+
+  async redirects() {
+    // Legacy URLs from the previous site that Google still has indexed and
+    // sends traffic to. `permanent: true` = 308 (the search-engine equivalent
+    // of a 301), so each old page's ranking signal transfers to the closest
+    // matching page here and the 404s clear.
+    return [
+      {
+        source: "/energy-monitoring-domestic",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/energy-management-domestic",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        // No commercial offering on the new site — point at the closest page.
+        source: "/energy-management-commercial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/online-home-hub-domestic",
+        destination: "/smart",
+        permanent: true,
+      },
+      {
+        // Old WordPress author archive — send to the blog.
+        source: "/author/admin",
+        destination: "/hive",
+        permanent: true,
+      },
+    ];
+  },
 
   async headers() {
     return [

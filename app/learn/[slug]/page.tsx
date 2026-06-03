@@ -29,7 +29,13 @@ export async function generateMetadata({
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      images: [{ url: article.image, alt: article.imageAlt }],
+      // og:image intentionally omitted: the branded per-article
+      // opengraph-image.tsx is auto-injected by Next at this route.
+      publishedTime: article.datePublished,
+      modifiedTime: article.dateModified,
+      authors: [article.author.name],
+      section: article.category,
+      tags: article.tags,
     },
   };
 }
