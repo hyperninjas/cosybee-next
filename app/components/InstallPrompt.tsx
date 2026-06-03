@@ -13,6 +13,11 @@ import Image from "next/image";
  *
  * The banner is dismissible and the choice is remembered for two weeks so it
  * never nags. It never appears once the app is already installed.
+ *
+ * Note: all helpers live *inside* the component as closures. They must not be
+ * module-level functions — with React Compiler `compilationMode: 'all'` those
+ * get instrumented with the memo-cache hook, and calling them from an effect
+ * or event handler (outside render) throws "invalid hook call".
  */
 
 interface BeforeInstallPromptEvent extends Event {
@@ -21,20 +26,10 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = "eb-install-dismissed";
-const DISMISS_DAYS = 14;
+const DISMISS_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 // iOS gives no install event, so reveal the instructions after a short delay
 // to avoid competing with the page's first paint.
 const IOS_REVEAL_DELAY = 4000;
-
-function wasRecentlyDismissed(): boolean {
-  try {
-    const ts = Number(localStorage.getItem(DISMISS_KEY));
-    if (!ts) return false;
-    return Date.now() - ts < DISMISS_DAYS * 24 * 60 * 60 * 1000;
-  } catch {
-    return false;
-  }
-}
 
 export default function InstallPrompt() {
   const pathname = usePathname();
@@ -55,7 +50,14 @@ export default function InstallPrompt() {
       (window.navigator as { standalone?: boolean }).standalone === true;
     if (standalone) return;
 
-    if (wasRecentlyDismissed()) return;
+    // Recently dismissed? Stay quiet.
+    let dismissedAt = 0;
+    try {
+      dismissedAt = Number(localStorage.getItem(DISMISS_KEY)) || 0;
+    } catch {
+      dismissedAt = 0;
+    }
+    if (dismissedAt && Date.now() - dismissedAt < DISMISS_MS) return;
 
     // iOS Safari: no beforeinstallprompt — show manual instructions.
     const ios =
@@ -88,27 +90,27 @@ export default function InstallPrompt() {
     };
   }, [pathname]);
 
-  function remember() {
+  const remember = () => {
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
       /* ignore quota / disabled storage */
     }
-  }
+  };
 
-  function dismiss() {
+  const dismiss = () => {
     setVisible(false);
     remember();
-  }
+  };
 
-  async function install() {
+  const install = async () => {
     if (!deferred) return;
     await deferred.prompt();
     await deferred.userChoice;
     setDeferred(null);
     setVisible(false);
     remember();
-  }
+  };
 
   if (!visible) return null;
 
