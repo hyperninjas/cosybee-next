@@ -72,6 +72,42 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   compress: true,
 
+  async redirects() {
+    // Legacy URLs from the previous site that Google still has indexed and
+    // sends traffic to. `permanent: true` = 308 (the search-engine equivalent
+    // of a 301), so each old page's ranking signal transfers to the closest
+    // matching page here and the 404s clear.
+    return [
+      {
+        source: "/energy-monitoring-domestic",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/energy-management-domestic",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        // No commercial offering on the new site — point at the closest page.
+        source: "/energy-management-commercial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/online-home-hub-domestic",
+        destination: "/smart",
+        permanent: true,
+      },
+      {
+        // Old WordPress author archive — send to the blog.
+        source: "/author/admin",
+        destination: "/hive",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
