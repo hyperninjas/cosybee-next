@@ -74,7 +74,7 @@ export default function EnergyAnalytics({
               src={deviceSrc}
               alt={deviceAlt}
               sizes="(min-width: 1024px) 300px, 280px"
-              quality={50}
+              quality={85}
               className="h-auto w-full"
             />
           </div>
@@ -87,7 +87,7 @@ export default function EnergyAnalytics({
             src={deviceSrc}
             alt={deviceAlt}
             sizes="(min-width: 1024px) 300px, 280px"
-            quality={50}
+            quality={85}
             className="h-auto w-full"
           />
         </div>

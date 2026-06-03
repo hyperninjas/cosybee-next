@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: "standalone",
 
   // Generate unique build ID for each deployment to help with Server Action cache invalidation
   generateBuildId: async () => {
@@ -39,7 +40,11 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
-    qualities: [50, 65, 75, 85],
+    // Allowed `quality` values. 85 = the sweet spot for photos (sharp, but
+    // far smaller than 100); 75 is Next's default, used by any <Image> without
+    // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
+    // size ladders above.
+    qualities: [75, 85],
     // Allow external images from the backend API
     remotePatterns: [
       {

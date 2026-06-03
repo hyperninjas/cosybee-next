@@ -54,13 +54,11 @@ export default function EnergyMonitoring({
             src: windTurbineImg,
             alt: "Wind turbines",
             color: "#7FA9C9",
-            priority: true,
           }}
           topRight={{
             src: beeFlowerImg,
             alt: "Bee on a flower",
             color: "#D4A017",
-            priority: true,
           }}
           bottomRight={{
             color: "#E9E19E",
@@ -68,8 +66,6 @@ export default function EnergyMonitoring({
               <Image
                 src={imageSrc}
                 alt="energie bee app screen"
-                priority
-                fetchPriority="high"
                 className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
               />
             ),
