@@ -16,12 +16,17 @@
  * so a bump is only needed for strategy changes, not normal deploys.)
  */
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const PRECACHE = `eb-precache-${CACHE_VERSION}`;
 const PAGE_CACHE = `eb-pages-${CACHE_VERSION}`;
 const ASSET_CACHE = `eb-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `eb-images-${CACHE_VERSION}`;
-const CURRENT_CACHES = new Set([PRECACHE, PAGE_CACHE, ASSET_CACHE, IMAGE_CACHE]);
+const CURRENT_CACHES = new Set([
+  PRECACHE,
+  PAGE_CACHE,
+  ASSET_CACHE,
+  IMAGE_CACHE,
+]);
 
 const OFFLINE_URL = "/offline";
 // Keep the precache list tiny so install never fails on a flaky asset.
