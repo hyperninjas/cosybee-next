@@ -25,12 +25,7 @@ export default async function SearchPage({
     ]);
     const needle = query.toLowerCase();
     results = [...hive, ...learn].filter((a) => {
-      const haystack = [
-        a.title,
-        a.description,
-        a.category,
-        ...a.tags,
-      ]
+      const haystack = [a.title, a.description, a.category, ...a.tags]
         .join(" ")
         .toLowerCase();
       return haystack.includes(needle);
@@ -48,7 +43,12 @@ export default async function SearchPage({
           blog.
         </p>
 
-        <form action="/search" method="get" role="search" className="mt-6 flex gap-3">
+        <form
+          action="/search"
+          method="get"
+          role="search"
+          className="mt-6 flex gap-3"
+        >
           <input
             type="search"
             name="q"
@@ -60,7 +60,7 @@ export default async function SearchPage({
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-6 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+            className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] px-6 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
           >
             Search
           </button>
@@ -79,7 +79,11 @@ export default async function SearchPage({
         <section className="mx-auto w-full max-w-300 px-6 pb-20">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((a) => (
-              <ArticleCard key={`${a.blog}/${a.slug}`} a={a} basePath={`/${a.blog}`} />
+              <ArticleCard
+                key={`${a.blog}/${a.slug}`}
+                a={a}
+                basePath={`/${a.blog}`}
+              />
             ))}
           </div>
         </section>
