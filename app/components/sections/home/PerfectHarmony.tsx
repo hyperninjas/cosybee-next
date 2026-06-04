@@ -37,19 +37,19 @@ export default function PerfectHarmony() {
             <FeatureCard
               glyph="connector"
               descClassName="whitespace-pre-line"
-              title="Smart Connections"
+              title="Smart connections"
               description="Energy insights help your home adapt to changing conditions."
             />
             <FeatureCard
               glyph="device"
               descClassName="whitespace-pre-line"
-              title="Simplified Information"
+              title="Simplified information"
               description="Understand what is happening and why it changes."
             />
           </div>
-          <CtaButton href="/try" size="md" className="mt-10 w-fit">
+          {/* <CtaButton href="/try" size="md" className="mt-10 w-fit">
             Experience the App
-          </CtaButton>
+          </CtaButton> */}
         </div>
         {/* cluster — right */}
         <HiveHexCluster
