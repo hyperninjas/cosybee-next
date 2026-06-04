@@ -116,9 +116,15 @@ export async function savePost(
   }
   if (!Array.isArray(blocks)) blocks = [];
 
-  // Backend expects raw array for contentJson, not wrapped in { blocks: [...] }
-  const contentJson = blocks;
-  const contentHtml = await contentJsonToHtml(blocks);
+  // Backend expects { blocks: [...] } format for contentJson
+  // If blocks are empty, don't send content - this preserves legacy content on metadata-only edits
+  const hasContent = blocks.length > 0;
+  const contentJson = hasContent ? { blocks } : undefined;
+  const contentHtml = hasContent ? await contentJsonToHtml(blocks) : undefined;
+
+  if (!hasContent && id) {
+    console.log("[savePost] No editor content - preserving original post content");
+  }
 
   // Cover: upload new file or keep existing
   const uploaded = await uploadToBackend(formData.get("coverFile") as File | null);
@@ -213,8 +219,9 @@ export async function savePost(
     carouselBody,
     featured,
     status,
-    contentJson,
-    contentHtml,
+    // Only include content if editor has blocks - preserves legacy content on metadata-only edits
+    ...(contentJson !== undefined && { contentJson }),
+    ...(contentHtml !== undefined && { contentHtml }),
   };
 
   try {

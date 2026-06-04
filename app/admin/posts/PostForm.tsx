@@ -308,13 +308,39 @@ export default function PostForm({
     if (!post?.contentJson) return [];
     try {
       const parsed = post.contentJson;
-      // Handle { blocks: [...] } format from backend
+      // Handle { blocks: [...] } format from backend (BlockNote format)
       if (parsed && typeof parsed === "object" && "blocks" in parsed && Array.isArray(parsed.blocks)) {
         return parsed.blocks as PartialBlock[];
       }
-      // Handle raw array format
+      // Handle raw array format (BlockNote format)
       if (Array.isArray(parsed)) {
         return parsed as PartialBlock[];
+      }
+      // Handle legacy format: { sections: [{ paragraphs: [...] }] }
+      if (parsed && typeof parsed === "object" && "sections" in parsed && Array.isArray(parsed.sections)) {
+        const blocks: PartialBlock[] = [];
+        for (const section of parsed.sections as Array<{ heading?: string; paragraphs?: string[] }>) {
+          // Add section heading if present
+          if (section.heading) {
+            blocks.push({
+              type: "heading",
+              props: { level: 2 },
+              content: [{ type: "text", text: section.heading, styles: {} }],
+            });
+          }
+          // Add paragraphs
+          if (section.paragraphs && Array.isArray(section.paragraphs)) {
+            for (const para of section.paragraphs) {
+              if (typeof para === "string" && para.trim()) {
+                blocks.push({
+                  type: "paragraph",
+                  content: [{ type: "text", text: para, styles: {} }],
+                });
+              }
+            }
+          }
+        }
+        return blocks;
       }
       return [];
     } catch {
@@ -682,7 +708,6 @@ export default function PostForm({
               {/* Excerpt */}
               <Labeled label="Excerpt" hint="Card blurb + meta description. Auto from the body if blank.">
                 <textarea
-                  name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
@@ -799,19 +824,14 @@ export default function PostForm({
                 <SectionHeader title="Call to Action" />
                 <Labeled label="Button label" hint="Leave blank for no CTA.">
                   <input
-                    name="ctaLabel"
-                    defaultValue={post?.ctaLabel ?? ""}
+                    value={ctaLabel}
+                    onChange={(e) => setCtaLabel(e.target.value)}
                     placeholder="Try energiebee for free"
                     className={inputClass}
                   />
                 </Labeled>
 
                 {/* internal / external toggle */}
-                <input
-                  type="hidden"
-                  name="ctaExternal"
-                  value={ctaExternal ? "on" : ""}
-                />
                 <div className="inline-flex rounded-lg border border-[#DBDBDB] p-0.5 text-sm">
                   <button
                     type="button"
@@ -839,7 +859,6 @@ export default function PostForm({
                     hint="Opens in a new tab. https:// is added if you omit it."
                   >
                     <input
-                      name="ctaHref"
                       type="url"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
@@ -853,7 +872,6 @@ export default function PostForm({
                     hint="Search an existing page. Opens in the same tab."
                   >
                     <input
-                      name="ctaHref"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="/start"
