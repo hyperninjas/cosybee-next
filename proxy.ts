@@ -8,7 +8,7 @@ const publicAdminRoutes = [
   "/admin/reset-password",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip public admin routes
