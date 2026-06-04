@@ -13,7 +13,13 @@ out
 
 # Env & secrets — provide these at runtime, don't bake them into the image.
 .env
-.env.*
+.env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+.env.test
+.env.test.local
 
 # Local data / build artifacts
 prisma/dev.db

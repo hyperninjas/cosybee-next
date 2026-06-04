@@ -25,6 +25,9 @@ ENV NODE_ENV=production
 # Override at build: `docker build --build-arg NEXT_PUBLIC_SITE_URL=...`.
 ARG NEXT_PUBLIC_SITE_URL=https://energiebee.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+# Better Auth backend URL for client-side auth requests.
+ARG NEXT_PUBLIC_AUTH_URL=https://api.energiebee.com
+ENV NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL
 # Backend API used during prerender (generateStaticParams / sitemap). If
 # unreachable at build time the app falls back gracefully and renders those
 # pages on demand at runtime instead.
