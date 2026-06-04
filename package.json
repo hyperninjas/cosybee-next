@@ -13,6 +13,7 @@
     "@blocknote/mantine": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/server-util": "^0.51.4",
+    "better-auth": "^1.6.14",
     "critters": "^0.0.23",
     "embla-carousel-react": "^9.0.0-rc02",
     "next": "16.2.7",

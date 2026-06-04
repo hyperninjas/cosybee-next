@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import { AdminHeader } from "./AdminHeader";
 
-// Keep the admin panel out of search results.
 export const metadata: Metadata = {
   title: "Admin — energiebee",
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-black">
-      <AdminHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      {children}
     </div>
   );
 }
