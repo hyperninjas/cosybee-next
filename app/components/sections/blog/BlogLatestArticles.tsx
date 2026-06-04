@@ -3,10 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { type Article, formatReadTime } from "@/app/lib/article-types";
+import {
+  type Article,
+  formatReadTime,
+  ARTICLES_PER_PAGE,
+} from "@/app/lib/article-types";
 import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
+import Pagination from "../../ui/Pagination";
 
 /** Format ISO date string to display format. */
 function formatDate(isoDate: string): string {
@@ -27,7 +32,6 @@ function isExternalUrl(url: string): boolean {
   return url.startsWith("http://") || url.startsWith("https://");
 }
 
-const INITIAL_VISIBLE = 12;
 const LOAD_STEP = 6;
 
 export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
@@ -103,19 +107,26 @@ function matchesArticle(a: Article, q: string) {
 }
 
 type Props = {
+  /** The full article set; filtering/pagination happens here on the client. */
   articles: Article[];
   basePath: string;
   query?: string;
   category?: string;
   tag?: string;
+  /** Current browse page (1-based). Only used when no filter is active. */
+  page?: number;
 };
 
 /**
- * "Latest Articles" — heading + 3-column responsive grid of article
- * cards. Starts with INITIAL_VISIBLE articles and reveals LOAD_STEP
- * more on each click of Load More. When the parent provides a query
- * or non-"All" category, the list is filtered and the heading reflects
- * the active filter.
+ * "Latest Articles" — heading + 3-column responsive grid of article cards.
+ *
+ * Two mutually-exclusive modes:
+ * - **Browse** (no query/category/tag): shows page `page` of all articles with
+ *   crawlable numbered <Pagination> (real ?page=N links → every article is
+ *   reachable by search engines).
+ * - **Filter/search**: filters the full set client-side and reveals results
+ *   with Load More. This view is shareable (URL synced by the parent) but
+ *   noindex, so pagination crawlability doesn't matter here.
  */
 export default function BlogLatestArticles({
   articles,
@@ -123,8 +134,19 @@ export default function BlogLatestArticles({
   query = "",
   category = "All",
   tag = "",
+  page = 1,
 }: Props) {
-  const [visible, setVisible] = useState(INITIAL_VISIBLE);
+  const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
+  const [visible, setVisible] = useState(ARTICLES_PER_PAGE);
+
+  // Reset the Load-More reveal whenever the active filter changes — React's
+  // "adjust state during render" pattern (no effect, no extra render pass).
+  const filterKey = `${query}|${category}|${tag}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
+    setVisible(ARTICLES_PER_PAGE);
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -136,8 +158,12 @@ export default function BlogLatestArticles({
     );
   }, [articles, query, category, tag]);
 
-  const shown = filtered.slice(0, visible);
-  const canLoadMore = visible < filtered.length;
+  // Browse mode → slice to the current page; filter mode → Load-More reveal.
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ARTICLES_PER_PAGE));
+  const shown = isFiltered
+    ? filtered.slice(0, visible)
+    : filtered.slice((page - 1) * ARTICLES_PER_PAGE, page * ARTICLES_PER_PAGE);
+  const canLoadMore = isFiltered && visible < filtered.length;
 
   const q = query.trim();
   const heading = q
@@ -177,6 +203,11 @@ export default function BlogLatestArticles({
           >
             Load More
           </button>
+        </div>
+      )}
+      {!isFiltered && (
+        <div className="mt-12">
+          <Pagination basePath={basePath} page={page} totalPages={totalPages} />
         </div>
       )}
     </section>

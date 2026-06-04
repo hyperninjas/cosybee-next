@@ -16,5 +16,6 @@ export default async function Image({
     title: article?.title ?? "Learn",
     category: article?.category?.name ?? "energiebee",
     blog: "learn",
+    coverImage: article?.coverImage,
   });
 }

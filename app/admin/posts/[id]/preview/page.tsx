@@ -32,7 +32,6 @@ export default async function PreviewPage({
         article={article}
         related={[]}
         basePath={`/${article.blog}`}
-        backLabel="Back to Blog"
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import Image, { type StaticImageData } from "next/image";
+import Breadcrumbs from "../../ui/Breadcrumbs";
 // import Hexagon from "../../ui/Hexagon";
 // import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 // import sideImage from "@/public/bee-hive.png";
@@ -8,6 +9,8 @@ type Props = {
   title: string;
   description: string;
   bgImage: StaticImageData;
+  /** Optional breadcrumb trail rendered above the title (dark-tone). */
+  crumbs?: { name: string; path: string }[];
 };
 
 /**
@@ -15,7 +18,12 @@ type Props = {
  * left, and a 3-hex cluster on the right. Copy is passed in so each
  * blog (hive, learn, …) supplies its own title + description.
  */
-export default function BlogHero({ title, description, bgImage }: Props) {
+export default function BlogHero({
+  title,
+  description,
+  bgImage,
+  crumbs,
+}: Props) {
   return (
     <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
       {/* background photo */}
@@ -43,6 +51,9 @@ export default function BlogHero({ title, description, bgImage }: Props) {
 
         {/* text */}
         <div className="relative z-10 ">
+          {crumbs && crumbs.length > 0 && (
+            <Breadcrumbs items={crumbs} tone="dark" className="mb-5" />
+          )}
           <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
             {title}
           </h1>

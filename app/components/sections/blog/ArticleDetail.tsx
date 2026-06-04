@@ -10,6 +10,7 @@ import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
 import ArticleToc from "./ArticleToc";
 import JsonLd from "@/app/components/JsonLd";
+import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
@@ -31,33 +32,16 @@ function formatDate(isoDate: string): string {
   }
 }
 
-function BackArrow() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="h-4 w-4"
-    >
-      <line x1="19" y1="12" x2="5" y2="12" />
-      <polyline points="12 19 5 12 12 5" />
-    </svg>
-  );
-}
-
 type Props = {
   /** Published article with rendered body HTML (caller handles notFound). */
   article: Article;
   related: Article[];
   /** Link base, e.g. "/hive" or "/learn". */
   basePath: string;
-  /** Back-link label, e.g. "Back to Blog". */
-  backLabel: string;
 };
 
 /**
- * Renders a full blog article — back link, header/meta, hero image,
+ * Renders a full blog article — breadcrumb trail, header/meta, hero image,
  * lede, block body (paragraphs + lists, with auto-linked URLs),
  * optional inline image and end-of-article CTA, plus a related rail.
  * Shared by /hive and /learn article routes.
@@ -66,11 +50,15 @@ export default function ArticleDetail({
   article,
   related,
   basePath,
-  backLabel,
 }: Props) {
   const { html, items: toc } = buildToc(article.contentHtml ?? "");
   const path = `${basePath}/${article.slug}`;
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
+  const crumbs = [
+    { name: "Home", path: "/" },
+    { name: blogLabel, path: basePath },
+    { name: article.title, path },
+  ];
 
   return (
     <main className="flex-1">
@@ -78,26 +66,13 @@ export default function ArticleDetail({
           it cross-origin (React 19 hoists this to <head> and dedups it). */}
       <link rel="preconnect" href="https://eb-api.technext.it" />
       <JsonLd
-        data={[
-          blogPostingSchema(article, path),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: blogLabel, path: basePath },
-            { name: article.title, path },
-          ]),
-        ]}
+        data={[blogPostingSchema(article, path), breadcrumbSchema(crumbs)]}
       />
       <ReadingProgress />
       <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
       <article className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20">
-        {/* back link */}
-        <Link
-          href={basePath}
-          className="inline-flex items-center gap-2 rounded-lg border border-[#FF8A7A] px-4 py-2 text-sm font-medium text-[#FF8A7A] transition-colors hover:bg-[#FFF5F2]"
-        >
-          <BackArrow />
-          {backLabel}
-        </Link>
+        {/* breadcrumb trail (replaces the old "Back to Blog" button) */}
+        <Breadcrumbs items={crumbs} />
 
         {/* title + meta */}
         <header className="mt-10">
@@ -129,9 +104,18 @@ export default function ArticleDetail({
             <div className="flex items-center gap-3">
               <Avatar name={article.author?.name ?? "energiebee"} avatarUrl={article.author?.avatarUrl} />
               <div className="text-sm">
-                <div className="font-bold text-lg text-black">
-                  {article.author?.name ?? "energiebee"}
-                </div>
+                {article.author?.slug ? (
+                  <Link
+                    href={`/author/${article.author.slug}`}
+                    className="font-bold text-lg text-black transition-colors hover:text-[#FF8A7A]"
+                  >
+                    {article.author.name}
+                  </Link>
+                ) : (
+                  <div className="font-bold text-lg text-black">
+                    {article.author?.name ?? "energiebee"}
+                  </div>
+                )}
                 <time
                   dateTime={article.publishedAt ?? article.authorDate}
                   className="block text-[#545454] text-[15px] mt-1 font-medium"

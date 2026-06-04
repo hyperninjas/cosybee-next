@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { ROUTES, SITE_URL } from "./lib/site";
-import { getSitemapArticles, getTagSlugs } from "./lib/articles";
+import { getSitemapArticles, getTagSlugs, getAuthorSlugs } from "./lib/articles";
 
 /**
  * Generates /sitemap.xml.
@@ -20,12 +20,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority,
   }));
 
-  const [hiveArticles, learnArticles, hiveTags, learnTags] = await Promise.all([
-    getSitemapArticles("hive"),
-    getSitemapArticles("learn"),
-    getTagSlugs("hive"),
-    getTagSlugs("learn"),
-  ]);
+  const [hiveArticles, learnArticles, hiveTags, learnTags, authorSlugs] =
+    await Promise.all([
+      getSitemapArticles("hive"),
+      getSitemapArticles("learn"),
+      getTagSlugs("hive"),
+      getTagSlugs("learn"),
+      getAuthorSlugs(),
+    ]);
 
   const articleRoutes = [...hiveArticles, ...learnArticles].map((a) => ({
     url: `${SITE_URL}${a.path}`,
@@ -44,5 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...articleRoutes, ...tagRoutes];
+  const authorRoutes = authorSlugs.map((slug) => ({
+    url: `${SITE_URL}/author/${slug}`,
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.4,
+  }));
+
+  return [...staticRoutes, ...articleRoutes, ...tagRoutes, ...authorRoutes];
 }

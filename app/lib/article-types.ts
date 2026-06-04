@@ -89,3 +89,10 @@ export type Article = {
 export function formatReadTime(minutes: number): string {
   return `${minutes} min read`;
 }
+
+/**
+ * Articles per page on the blog hubs. Used by both the server (to compute
+ * total pages / rel prev-next for crawlable browse pagination) and the client
+ * grid (to slice the current page / Load-More step). Client-safe.
+ */
+export const ARTICLES_PER_PAGE = 12;

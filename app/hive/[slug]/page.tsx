@@ -54,7 +54,6 @@ export default async function HiveArticlePage({
       article={article}
       related={related}
       basePath="/hive"
-      backLabel="Back to Blog"
     />
   );
 }
