@@ -45,12 +45,17 @@ const nextConfig: NextConfig = {
     // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
     // size ladders above.
     qualities: [75, 85],
-    // Allow external images from the backend API
+    // Allow external images from the backend API and S3
     remotePatterns: [
       {
         protocol: "https",
         hostname: "eb-api.technext.it",
         pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "energiebee.s3.eu-west-2.amazonaws.com",
+        pathname: "/**",
       },
     ],
   },

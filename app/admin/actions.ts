@@ -138,7 +138,7 @@ export async function savePost(
   const slug = await uniqueSlug(blog, base, id);
   const readTimeMinutes = parseInt(str(formData, "readTime")) ||
     Math.max(1, Math.round(countWordsFromJson(contentJsonStr) / 200));
-  const description = str(formData, "description") || excerptFromJson(contentJsonStr);
+  const description = str(formData, "description") || excerptFromJson(contentJsonStr) || title || "No description";
   const tags = parseTags(formData);
   const featured = formData.get("featured") === "on";
 
@@ -164,6 +164,7 @@ export async function savePost(
   // Author handling - use authorId if provided, otherwise authorName for auto-create
   const authorId = optStr(formData, "authorId");
   const authorName = str(formData, "authorName") || "energiebee";
+  const authorAvatarUrl = optStr(formData, "authorAvatarUrl");
 
   // Category handling - use categoryId if provided, otherwise category name for auto-create
   const categoryId = optStr(formData, "categoryId");
@@ -176,8 +177,8 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    // Taxonomy - send ID if available, otherwise name for auto-create
-    ...(authorId ? { authorId } : { authorName }),
+    // Taxonomy - send ID if available, otherwise name + avatar for auto-create
+    ...(authorId ? { authorId } : { authorName, authorAvatarUrl }),
     ...(categoryId ? { categoryId } : { category }),
     tags, // string[] of tag names (backend auto-creates)
     readTime: readTimeMinutes,

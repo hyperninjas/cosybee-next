@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import type { Author, Category, Tag } from "@/app/lib/article-types";
 
 const API_BASE = process.env.API_URL || "http://localhost:3000";
@@ -78,6 +79,7 @@ export interface PostInput {
   // Taxonomy - use IDs or names (backend auto-creates if name provided)
   authorId?: string;
   authorName?: string;
+  authorAvatarUrl?: string | null;
   categoryId?: string;
   category?: string; // category name for auto-create
   tags?: string[]; // tag names (backend auto-creates)
@@ -108,17 +110,28 @@ export interface PostInput {
   contentHtml?: string;
 }
 
-/** Make request to backend API. */
+/** Make request to backend API with auth cookies forwarded. */
 async function fetchApi<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const url = `${API_BASE}${path}`;
+
+  // Forward cookies from the incoming request for auth
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...(cookieHeader && { Cookie: cookieHeader }),
     ...(options.headers as Record<string, string>),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  console.log(`[adminApi] Fetching: ${url}`);
+
+  const res = await fetch(url, {
     ...options,
     headers,
     cache: "no-store",
@@ -126,10 +139,13 @@ async function fetchApi<T>(
 
   if (!res.ok) {
     const error = await res.text();
+    console.error(`[adminApi] Error ${res.status}: ${error}`);
     throw new Error(`API error ${res.status}: ${error}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  console.log(`[adminApi] Response from ${path}:`, JSON.stringify(json).slice(0, 200));
+  return json;
 }
 
 /** Make multipart request for file uploads. */
@@ -244,12 +260,18 @@ export const adminApi = {
   /** Get all categories (full objects). */
   async getAllCategories(): Promise<Category[]> {
     try {
+      // Try admin endpoint first, fall back to public
       const [hive, learn] = await Promise.all([
-        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=hive"),
-        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=learn"),
+        fetchApi<{ data: Category[] }>("/api/admin/posts/categories?blog=hive").catch(() =>
+          fetchApi<{ data: Category[] }>("/api/posts/categories?blog=hive")
+        ),
+        fetchApi<{ data: Category[] }>("/api/admin/posts/categories?blog=learn").catch(() =>
+          fetchApi<{ data: Category[] }>("/api/posts/categories?blog=learn")
+        ),
       ]);
-      return [...hive.data, ...learn.data];
-    } catch {
+      return [...(hive.data || []), ...(learn.data || [])];
+    } catch (e) {
+      console.error("getAllCategories error:", e);
       return [];
     }
   },
@@ -269,15 +291,21 @@ export const adminApi = {
   /** Get all tags (full objects). */
   async getAllTags(): Promise<Tag[]> {
     try {
+      // Try admin endpoint first, fall back to public
       const [hive, learn] = await Promise.all([
-        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive"),
-        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn"),
+        fetchApi<{ data: Tag[] }>("/api/admin/posts/tags?blog=hive").catch(() =>
+          fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive")
+        ),
+        fetchApi<{ data: Tag[] }>("/api/admin/posts/tags?blog=learn").catch(() =>
+          fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn")
+        ),
       ]);
       // Dedupe by id
       const tagMap = new Map<string, Tag>();
-      [...hive.data, ...learn.data].forEach((t) => tagMap.set(t.id, t));
+      [...(hive.data || []), ...(learn.data || [])].forEach((t) => tagMap.set(t.id, t));
       return Array.from(tagMap.values());
-    } catch {
+    } catch (e) {
+      console.error("getAllTags error:", e);
       return [];
     }
   },
@@ -297,9 +325,14 @@ export const adminApi = {
   /** Get all authors. */
   async getAuthors(): Promise<Author[]> {
     try {
-      const response = await fetchApi<{ data: Author[] }>("/api/posts/authors");
-      return response.data;
-    } catch {
+      // Try admin endpoint first, fall back to public
+      const response = await fetchApi<{ data: Author[] }>("/api/admin/posts/authors").catch(() =>
+        fetchApi<{ data: Author[] }>("/api/posts/authors")
+      );
+      console.log("getAuthors response:", response);
+      return response.data || [];
+    } catch (e) {
+      console.error("getAuthors error:", e);
       return [];
     }
   },
