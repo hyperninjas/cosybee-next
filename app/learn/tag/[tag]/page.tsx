@@ -14,7 +14,7 @@ export async function generateStaticParams() {
   const slugs = new Set<string>();
   for (const a of articles) {
     for (const t of a.tags) {
-      const s = slugify(t);
+      const s = slugify(t.name);
       if (s) slugs.add(s);
     }
   }
@@ -26,10 +26,11 @@ export async function generateMetadata({
 }: PageProps<"/learn/tag/[tag]">): Promise<Metadata> {
   const { tag } = await params;
   const articles = await getAllArticles(BLOG);
-  const label = articles
+  const tagObj = articles
     .flatMap((a) => a.tags)
-    .find((t) => slugify(t) === tag);
-  if (!label) return { title: "Tag", robots: { index: false, follow: true } };
+    .find((t) => slugify(t.name) === tag);
+  if (!tagObj) return { title: "Tag", robots: { index: false, follow: true } };
+  const label = tagObj.name;
   return {
     title: `${label} — ${LABEL}`,
     description: `Articles about ${label} on ${LABEL} — EnergieBee.`,
@@ -47,10 +48,10 @@ export default async function LearnTagPage({
 }: PageProps<"/learn/tag/[tag]">) {
   const { tag } = await params;
   const articles = await getAllArticles(BLOG);
-  const matches = articles.filter((a) => a.tags.some((t) => slugify(t) === tag));
+  const matches = articles.filter((a) => a.tags.some((t) => slugify(t.name) === tag));
   if (matches.length === 0) notFound();
-  const label =
-    matches[0].tags.find((t) => slugify(t) === tag) ?? tag.replace(/-/g, " ");
+  const tagObj = matches[0].tags.find((t) => slugify(t.name) === tag);
+  const label = tagObj?.name ?? tag.replace(/-/g, " ");
 
   return (
     <TaggedArticles

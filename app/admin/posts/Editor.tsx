@@ -5,7 +5,7 @@ import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import type { PartialBlock } from "@blocknote/core";
-import { uploadImage } from "../actions";
+import { uploadFile, validate } from "@/app/lib/storage";
 
 type Props = {
   /** Initial document (parsed from Post.contentJson). */
@@ -17,16 +17,21 @@ type Props = {
 /**
  * The BlockNote (Mantine) WYSIWYG editor. Loaded client-only via
  * next/dynamic (BlockNote relies on browser APIs and can't SSR).
- * Images dropped/added inside the article upload to /public/uploads
- * via the `uploadImage` Server Action.
+ * Images dropped/added inside the article upload directly to S3
+ * via the storage module's presigned URL flow.
  */
 export default function Editor({ initialContent, onChange }: Props) {
   const editor = useCreateBlockNote({
     initialContent: initialContent?.length ? initialContent : undefined,
     uploadFile: async (file: File) => {
-      const fd = new FormData();
-      fd.set("file", file);
-      return uploadImage(fd);
+      // Validate before upload
+      const error = validate(file, "blog-content-image");
+      if (error) throw new Error(error);
+
+      // Upload to S3 and return the public URL
+      const result = await uploadFile(file, "blog-content-image");
+      if (!result.fileUrl) throw new Error("Upload failed - no URL returned");
+      return result.fileUrl;
     },
   });
 

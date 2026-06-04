@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -11,6 +12,8 @@ import { initialSaveState } from "../lib/form-state";
 import { slugify } from "@/app/lib/slug";
 import { estimateReadTime } from "@/app/lib/read-time";
 import TagInput from "./TagInput";
+import type { Author, Category, Tag } from "@/app/lib/article-types";
+import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -21,37 +24,53 @@ const Editor = dynamic(() => import("./Editor"), {
 
 export type FormPost = {
   id: string;
-  blog: string;
+  blog: "hive" | "learn";
   slug: string;
   title: string;
-  seoTitle: string;
-  seoDescription: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
   description: string;
-  tags: string[];
-  category: string;
-  readTime: string;
+  lede: string | null;
+
+  // Taxonomy (full objects from backend)
+  author: Author;
+  category: Category;
+  tags: Tag[];
+
+  // Media
   coverImage: string;
   coverImageAlt: string;
-  lede: string;
-  ctaLabel: string;
-  ctaHref: string;
-  ctaExternal: boolean;
-  authorName: string;
+
+  // Display
+  readTime: number;
   authorDate: string;
-  carouselIntro: string;
-  carouselBody: string;
+
+  // Featured/Carousel
   featured: boolean;
-  status: string;
-  contentJson: string;
+  carouselIntro: string | null;
+  carouselBody: string | null;
+
+  // CTA
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  ctaExternal: boolean;
+
+  // Status
+  status: "DRAFT" | "PUBLISHED";
+
+  // Content
+  contentJson: Record<string, unknown> | null;
 };
 
 type Props = {
   post?: FormPost;
   defaultBlog?: string;
-  /** Existing categories for autocomplete. */
-  categorySuggestions?: string[];
+  /** Existing categories for dropdown. */
+  categories?: Category[];
   /** Existing tags for autocomplete. */
   tagSuggestions?: string[];
+  /** Existing authors for dropdown. */
+  authors?: Author[];
   /** Internal site paths for the CTA link picker. */
   internalRoutes?: string[];
 };
@@ -84,6 +103,112 @@ function Labeled({
         <span className="mt-1 block text-xs text-[#9A9A9A]">{hint}</span>
       ) : null}
     </div>
+  );
+}
+
+/** Section header with optional action */
+function SectionHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-semibold text-[#333]">{title}</span>
+      {action}
+    </div>
+  );
+}
+
+/** Derive initials from a name */
+function initialsFrom(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  const first = parts[0][0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+/** Author selection card */
+function AuthorCard({
+  author,
+  selected,
+  onSelect,
+}: {
+  author: Author;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all ${
+        selected
+          ? "border-[#FF8A7A] bg-[#FFF5F4] ring-1 ring-[#FF8A7A]"
+          : "border-[#ECECEC] bg-white hover:border-[#DBDBDB] hover:bg-[#FAFAFA]"
+      }`}
+    >
+      {author.avatarUrl ? (
+        <Image
+          src={author.avatarUrl}
+          alt={author.name}
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFE4E1] text-sm font-semibold text-[#C0362C]">
+          {initialsFrom(author.name)}
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium text-[#333]">{author.name}</div>
+        {author.role && (
+          <div className="truncate text-xs text-[#9A9A9A]">{author.role}</div>
+        )}
+      </div>
+      {selected && (
+        <svg
+          className="h-5 w-5 shrink-0 text-[#FF8A7A]"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clipRule="evenodd"
+          />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+/** Category selection pill */
+function CategoryPill({
+  category,
+  selected,
+  onSelect,
+}: {
+  category: Category;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all ${
+        selected
+          ? "border-[#FF8A7A] bg-[#FF8A7A] text-white"
+          : "border-[#DBDBDB] bg-white text-[#545454] hover:border-[#FF8A7A] hover:text-[#FF8A7A]"
+      }`}
+    >
+      {category.name}
+    </button>
   );
 }
 
@@ -171,8 +296,9 @@ function ActionBar({
 export default function PostForm({
   post,
   defaultBlog,
-  categorySuggestions = [],
+  categories = [],
   tagSuggestions = [],
+  authors = [],
   internalRoutes = [],
 }: Props) {
   const [state, formAction] = useActionState(savePost, initialSaveState);
@@ -181,14 +307,40 @@ export default function PostForm({
   const initialBlocks: PartialBlock[] = (() => {
     if (!post?.contentJson) return [];
     try {
-      const parsed = JSON.parse(post.contentJson);
-      // Handle { blocks: [...] } format from backend
+      const parsed = post.contentJson;
+      // Handle { blocks: [...] } format from backend (BlockNote format)
       if (parsed && typeof parsed === "object" && "blocks" in parsed && Array.isArray(parsed.blocks)) {
         return parsed.blocks as PartialBlock[];
       }
-      // Handle raw array format
+      // Handle raw array format (BlockNote format)
       if (Array.isArray(parsed)) {
         return parsed as PartialBlock[];
+      }
+      // Handle legacy format: { sections: [{ paragraphs: [...] }] }
+      if (parsed && typeof parsed === "object" && "sections" in parsed && Array.isArray(parsed.sections)) {
+        const blocks: PartialBlock[] = [];
+        for (const section of parsed.sections as Array<{ heading?: string; paragraphs?: string[] }>) {
+          // Add section heading if present
+          if (section.heading) {
+            blocks.push({
+              type: "heading",
+              props: { level: 2 },
+              content: [{ type: "text", text: section.heading, styles: {} }],
+            });
+          }
+          // Add paragraphs
+          if (section.paragraphs && Array.isArray(section.paragraphs)) {
+            for (const para of section.paragraphs) {
+              if (typeof para === "string" && para.trim()) {
+                blocks.push({
+                  type: "paragraph",
+                  content: [{ type: "text", text: para, styles: {} }],
+                });
+              }
+            }
+          }
+        }
+        return blocks;
       }
       return [];
     } catch {
@@ -197,7 +349,6 @@ export default function PostForm({
   })();
 
   const statusRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const [blocks, setBlocks] = useState<PartialBlock[]>(initialBlocks);
   const [blog, setBlog] = useState(post?.blog ?? defaultBlog ?? "hive");
@@ -210,51 +361,115 @@ export default function PostForm({
   const [status, setStatus] = useState(post?.status ?? "DRAFT");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Cover: existing path + an optional newly-picked preview.
-  const [coverPath, setCoverPath] = useState(post?.coverImage ?? "");
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  // Author handling - track selected ID, name, and avatar
+  const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
+  const [authorName, setAuthorName] = useState(post?.author?.name ?? "");
+  const [authorAvatarUrl, setAuthorAvatarUrl] = useState(post?.author?.avatarUrl ?? "");
+
+  // Category handling - track selected ID or custom name
+  const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
+  const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
+
+  // Cover image URL (from S3)
+  const [coverUrl, setCoverUrl] = useState(post?.coverImage ?? "");
 
   // CTA link.
   const [ctaHref, setCtaHref] = useState(post?.ctaHref ?? "");
   const [ctaExternal, setCtaExternal] = useState(post?.ctaExternal ?? false);
+
+  // Author date - needs state because the input is in the conditionally rendered drawer
+  const [authorDate, setAuthorDate] = useState(() => {
+    if (post?.authorDate) {
+      return new Date(post.authorDate).toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0]; // Default to today
+  });
+
+  // Other drawer fields - need state so they're submitted even when drawer is closed
+  const [coverImageAlt, setCoverImageAlt] = useState(post?.coverImageAlt ?? "");
+  const [lede, setLede] = useState(post?.lede ?? "");
+  const [featured, setFeatured] = useState(post?.featured ?? false);
+  const [carouselIntro, setCarouselIntro] = useState(post?.carouselIntro ?? "");
+  const [carouselBody, setCarouselBody] = useState(post?.carouselBody ?? "");
+  const [ctaLabel, setCtaLabel] = useState(post?.ctaLabel ?? "");
 
   const effectiveSlug = slugTouched ? slug : slugify(title);
   const readTime = estimateReadTime(blocks);
   const metaTitle = (seoTitle || title || "Untitled").trim();
   const metaDesc = (seoDescription || description).trim();
   const isPublished = status === "PUBLISHED";
-  const shownCover = coverPreview ?? (coverPath || null);
   const liveHref =
     post && post.status === "PUBLISHED" ? `/${post.blog}/${post.slug}` : undefined;
 
-  function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) setCoverPreview(URL.createObjectURL(file));
-  }
+  // Filter categories by selected blog
+  const blogCategories = categories.filter((c) => c.blog === blog);
 
   function setStatusForSubmit(s: string) {
-    setStatus(s);
+    setStatus(s as "DRAFT" | "PUBLISHED");
     if (statusRef.current) statusRef.current.value = s;
   }
+
+  // Handle author selection - either ID or custom name
+  function handleAuthorChange(value: string) {
+    const selectedAuthor = authors.find((a) => a.id === value || a.name === value);
+    if (selectedAuthor) {
+      setAuthorId(selectedAuthor.id);
+      setAuthorName(selectedAuthor.name);
+      setAuthorAvatarUrl(selectedAuthor.avatarUrl ?? "");
+    } else {
+      // Custom name entered
+      setAuthorId("");
+      setAuthorName(value);
+      // Keep avatar if user is just changing the name
+    }
+  }
+
+  // Handle category selection
+  function handleCategoryChange(value: string) {
+    const selectedCategory = blogCategories.find((c) => c.id === value);
+    if (selectedCategory) {
+      setCategoryId(selectedCategory.id);
+      setCategoryName(selectedCategory.name);
+    } else {
+      // Custom name entered
+      setCategoryId("");
+      setCategoryName(value);
+    }
+  }
+
+  // Extract tag names for TagInput
+  const initialTagNames = post?.tags?.map((t) => t.name) ?? [];
 
   return (
     <form action={formAction}>
       {post && <input type="hidden" name="id" value={post.id} />}
-      <input type="hidden" name="coverImage" value={coverPath} />
+      <input type="hidden" name="coverImage" value={coverUrl} />
       <input type="hidden" name="contentJson" value={JSON.stringify(blocks)} />
       <input type="hidden" name="slug" value={effectiveSlug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
       <input ref={statusRef} type="hidden" name="status" defaultValue={status} />
-      {/* hidden cover file input, triggered from the cover zone */}
-      <input
-        ref={fileRef}
-        type="file"
-        name="coverFile"
-        accept="image/*"
-        onChange={pickCover}
-        className="sr-only"
-      />
+      {/* Author - send ID if available, otherwise name + avatar */}
+      {authorId && <input type="hidden" name="authorId" value={authorId} />}
+      <input type="hidden" name="authorName" value={authorName || "energiebee"} />
+      <input type="hidden" name="authorAvatarUrl" value={authorAvatarUrl} />
+      {/* Category - send ID if available, otherwise name */}
+      {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
+      <input type="hidden" name="category" value={categoryName || "Uncategorised"} />
+      {/* Author date - hidden input ensures it's always submitted even when drawer is closed */}
+      <input type="hidden" name="authorDate" value={authorDate} />
+      {/* Other drawer fields - hidden inputs ensure submission when drawer is closed */}
+      <input type="hidden" name="description" value={description} />
+      <input type="hidden" name="coverImageAlt" value={coverImageAlt} />
+      <input type="hidden" name="lede" value={lede} />
+      <input type="hidden" name="seoTitle" value={seoTitle} />
+      <input type="hidden" name="seoDescription" value={seoDescription} />
+      <input type="hidden" name="featured" value={featured ? "on" : ""} />
+      <input type="hidden" name="carouselIntro" value={carouselIntro} />
+      <input type="hidden" name="carouselBody" value={carouselBody} />
+      <input type="hidden" name="ctaLabel" value={ctaLabel} />
+      <input type="hidden" name="ctaHref" value={ctaHref} />
+      <input type="hidden" name="ctaExternal" value={ctaExternal ? "on" : ""} />
 
       <ActionBar
         editing={Boolean(post)}
@@ -274,41 +489,14 @@ export default function PostForm({
 
       {/* Writing canvas */}
       <div className="mx-auto max-w-2xl">
-        {/* cover */}
-        {shownCover ? (
-          <div className="group relative mb-6 overflow-hidden rounded-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={shownCover} alt="" className="max-h-80 w-full object-cover" />
-            <div className="absolute right-3 top-3 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="rounded-md bg-black/70 px-3 py-1.5 text-xs font-medium text-white"
-              >
-                Change
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCoverPreview(null);
-                  setCoverPath("");
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-                className="rounded-md bg-black/70 px-3 py-1.5 text-xs font-medium text-white"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="mb-6 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#DBDBDB] py-8 text-sm font-medium text-[#777] hover:border-[#FF8A7A] hover:text-[#FF8A7A]"
-          >
-            <span className="text-lg">＋</span> Add a cover image
-          </button>
-        )}
+        {/* cover - S3 upload */}
+        <div className="mb-6">
+          <PublicImageUpload
+            context="blog-cover"
+            value={coverUrl || null}
+            onChange={(url) => setCoverUrl(url ?? "")}
+          />
+        </div>
 
         {/* title */}
         <textarea
@@ -341,7 +529,7 @@ export default function PostForm({
         <div className="mb-6">
           <TagInput
             name="tags"
-            initial={post?.tags ?? []}
+            initial={initialTagNames}
             suggestions={tagSuggestions}
           />
         </div>
@@ -360,7 +548,7 @@ export default function PostForm({
             onClick={() => setSettingsOpen(false)}
           />
           <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4 shadow-sm">
               <h2 className="text-lg font-bold">Post settings</h2>
               <button
                 type="button"
@@ -372,9 +560,154 @@ export default function PostForm({
             </div>
 
             <div className="space-y-5 p-5">
+              {/* Cover Image - FIRST */}
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader title="Cover Image" />
+                <PublicImageUpload
+                  context="blog-cover"
+                  value={coverUrl || null}
+                  onChange={(url) => setCoverUrl(url ?? "")}
+                />
+                <Labeled label="Alt text" hint="Describes the image for accessibility. Defaults to the title.">
+                  <input
+                    value={coverImageAlt}
+                    onChange={(e) => setCoverImageAlt(e.target.value)}
+                    placeholder={title || "Enter alt text…"}
+                    className={inputClass}
+                  />
+                </Labeled>
+              </div>
+
+              {/* Author section - SECOND */}
+              <div className="space-y-4 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader
+                  title="Author"
+                  action={
+                    <span className="text-xs text-[#9A9A9A]">
+                      {authors.length} author{authors.length !== 1 ? "s" : ""}
+                    </span>
+                  }
+                />
+
+                {/* Existing authors list */}
+                {authors.length > 0 && (
+                  <div className="max-h-48 space-y-2 overflow-y-auto">
+                    {authors.map((a) => (
+                      <AuthorCard
+                        key={a.id}
+                        author={a}
+                        selected={authorId === a.id}
+                        onSelect={() => {
+                          setAuthorId(a.id);
+                          setAuthorName(a.name);
+                          setAuthorAvatarUrl(a.avatarUrl ?? "");
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#ECECEC]" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-2 text-xs text-[#9A9A9A]">or create new</span>
+                  </div>
+                </div>
+
+                {/* New author input */}
+                <div className="space-y-3">
+                  <Labeled label="Name" hint="Type a new author name.">
+                    <input
+                      value={authorId ? "" : authorName}
+                      onChange={(e) => {
+                        setAuthorId("");
+                        setAuthorName(e.target.value);
+                      }}
+                      placeholder="New author name…"
+                      className={inputClass}
+                    />
+                  </Labeled>
+                  <Labeled label="Avatar" hint="Profile picture for new author (max 2MB).">
+                    <PublicImageUpload
+                      context="user-avatar"
+                      value={authorId ? null : (authorAvatarUrl || null)}
+                      onChange={(url) => {
+                        if (!authorId) {
+                          setAuthorAvatarUrl(url ?? "");
+                        }
+                      }}
+                    />
+                  </Labeled>
+                </div>
+
+                {/* Selected author preview */}
+                {(authorId || authorName) && (
+                  <div className="rounded-lg bg-[#F8F8F8] p-3">
+                    <span className="mb-2 block text-xs font-medium text-[#9A9A9A]">Selected</span>
+                    <div className="flex items-center gap-3">
+                      {authorAvatarUrl ? (
+                        <Image
+                          src={authorAvatarUrl}
+                          alt={authorName}
+                          width={32}
+                          height={32}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFE4E1] text-xs font-semibold text-[#C0362C]">
+                          {initialsFrom(authorName || "?")}
+                        </div>
+                      )}
+                      <span className="text-sm font-medium">{authorName || "Unknown"}</span>
+                      {authorId && (
+                        <span className="ml-auto rounded bg-[#E6F4EA] px-1.5 py-0.5 text-xs text-[#1E7B34]">
+                          Existing
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Category section - THIRD */}
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader
+                  title="Category"
+                  action={
+                    <span className="text-xs text-[#9A9A9A]">
+                      {blogCategories.length} in {blog}
+                    </span>
+                  }
+                />
+                {blogCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {blogCategories.map((c) => (
+                      <CategoryPill
+                        key={c.id}
+                        category={c}
+                        selected={categoryId === c.id}
+                        onSelect={() => {
+                          setCategoryId(c.id);
+                          setCategoryName(c.name);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+                <input
+                  value={categoryName}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  placeholder={blogCategories.length > 0 ? "Or type a new category…" : "Enter category name…"}
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Excerpt */}
               <Labeled label="Excerpt" hint="Card blurb + meta description. Auto from the body if blank.">
                 <textarea
-                  name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
@@ -382,6 +715,7 @@ export default function PostForm({
                 />
               </Labeled>
 
+              {/* Slug */}
               <Labeled
                 label="Slug"
                 error={errors.slug}
@@ -400,28 +734,28 @@ export default function PostForm({
                 </span>
               </Labeled>
 
-              <Labeled label="Category" hint="Pick an existing one or type a new category.">
+              {/* Author date */}
+              <Labeled label="Author date" hint="Defaults to today.">
                 <input
-                  name="category"
-                  defaultValue={post?.category}
-                  placeholder="Uncategorised"
-                  list="category-options"
+                  value={authorDate}
+                  onChange={(e) => setAuthorDate(e.target.value)}
+                  type="date"
                   className={inputClass}
                 />
-                <datalist id="category-options">
-                  {categorySuggestions.map((c) => (
-                    <option key={c} value={c} />
-                  ))}
-                </datalist>
               </Labeled>
 
+              {/* Lede */}
               <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <input name="lede" defaultValue={post?.lede} className={inputClass} />
+                <input
+                  value={lede}
+                  onChange={(e) => setLede(e.target.value)}
+                  className={inputClass}
+                />
               </Labeled>
 
               {/* SEO */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-3">
-                <span className="text-sm font-semibold">Search preview</span>
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader title="SEO & Search" />
                 <div className="rounded-md border border-[#EEE] p-2.5">
                   <div className="text-xs text-[#1a6b2f]">
                     energiebee.com › {blog} › {effectiveSlug || "…"}
@@ -435,7 +769,6 @@ export default function PostForm({
                 </div>
                 <Labeled label="SEO title" hint="Defaults to the title.">
                   <input
-                    name="seoTitle"
                     value={seoTitle}
                     onChange={(e) => setSeoTitle(e.target.value)}
                     placeholder={title || "Defaults to title"}
@@ -444,7 +777,6 @@ export default function PostForm({
                 </Labeled>
                 <Labeled label="SEO description" hint="Defaults to the excerpt.">
                   <textarea
-                    name="seoDescription"
                     value={seoDescription}
                     onChange={(e) => setSeoDescription(e.target.value)}
                     rows={2}
@@ -454,63 +786,52 @@ export default function PostForm({
                 </Labeled>
               </div>
 
-              <Labeled label="Author name" hint="Defaults to energiebee.">
-                <input name="authorName" defaultValue={post?.authorName} className={inputClass} />
-              </Labeled>
-              <Labeled label="Author date" hint="Defaults to today.">
-                <input
-                  name="authorDate"
-                  defaultValue={post?.authorDate}
-                  placeholder="e.g. 1 Jun 2026"
-                  className={inputClass}
-                />
-              </Labeled>
-
-              {/* featured */}
-              <label className="flex items-center gap-2 text-sm font-semibold">
-                <input
-                  type="checkbox"
-                  name="featured"
-                  defaultChecked={post?.featured}
-                  className="h-4 w-4"
-                />
-                Feature in the carousel
-              </label>
-              <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
-                <textarea
-                  name="carouselIntro"
-                  defaultValue={post?.carouselIntro}
-                  rows={2}
-                  className={inputClass}
-                />
-              </Labeled>
-              <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
-                <textarea
-                  name="carouselBody"
-                  defaultValue={post?.carouselBody}
-                  rows={3}
-                  className={inputClass}
-                />
-              </Labeled>
+              {/* Featured / Carousel */}
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader title="Featured Carousel" />
+                <label className="flex items-center gap-3 rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
+                  <input
+                    type="checkbox"
+                    checked={featured}
+                    onChange={(e) => setFeatured(e.target.checked)}
+                    className="h-5 w-5 rounded border-[#DBDBDB] text-[#FF8A7A] focus:ring-[#FF8A7A]"
+                  />
+                  <div>
+                    <span className="block text-sm font-medium">Feature in carousel</span>
+                    <span className="block text-xs text-[#9A9A9A]">Show this post in the homepage carousel</span>
+                  </div>
+                </label>
+                <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
+                  <textarea
+                    value={carouselIntro}
+                    onChange={(e) => setCarouselIntro(e.target.value)}
+                    rows={2}
+                    className={inputClass}
+                  />
+                </Labeled>
+                <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
+                  <textarea
+                    value={carouselBody}
+                    onChange={(e) => setCarouselBody(e.target.value)}
+                    rows={3}
+                    className={inputClass}
+                  />
+                </Labeled>
+              </div>
 
               {/* Call to action */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-3">
-                <span className="text-sm font-semibold">Call to action</span>
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
+                <SectionHeader title="Call to Action" />
                 <Labeled label="Button label" hint="Leave blank for no CTA.">
                   <input
-                    name="ctaLabel"
-                    defaultValue={post?.ctaLabel}
+                    value={ctaLabel}
+                    onChange={(e) => setCtaLabel(e.target.value)}
                     placeholder="Try energiebee for free"
                     className={inputClass}
                   />
                 </Labeled>
 
                 {/* internal / external toggle */}
-                <input
-                  type="hidden"
-                  name="ctaExternal"
-                  value={ctaExternal ? "on" : ""}
-                />
                 <div className="inline-flex rounded-lg border border-[#DBDBDB] p-0.5 text-sm">
                   <button
                     type="button"
@@ -538,7 +859,6 @@ export default function PostForm({
                     hint="Opens in a new tab. https:// is added if you omit it."
                   >
                     <input
-                      name="ctaHref"
                       type="url"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
@@ -552,7 +872,6 @@ export default function PostForm({
                     hint="Search an existing page. Opens in the same tab."
                   >
                     <input
-                      name="ctaHref"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="/start"
@@ -568,13 +887,6 @@ export default function PostForm({
                 )}
               </div>
 
-              <Labeled label="Cover image alt" hint="Defaults to the title.">
-                <input
-                  name="coverImageAlt"
-                  defaultValue={post?.coverImageAlt}
-                  className={inputClass}
-                />
-              </Labeled>
             </div>
           </aside>
         </>

@@ -100,9 +100,9 @@ export async function savePost(
 
   const id = optStr(formData, "id");
   const rawBlog = str(formData, "blog");
-  const blog = BLOGS.has(rawBlog) ? rawBlog : "hive";
+  const blog = BLOGS.has(rawBlog) ? (rawBlog as "hive" | "learn") : "hive";
   const rawStatus = str(formData, "status");
-  const status = STATUSES.has(rawStatus) ? rawStatus : "DRAFT";
+  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
   const title = str(formData, "title");
   const contentJsonStr = str(formData, "contentJson") || "[]";
 
@@ -116,8 +116,15 @@ export async function savePost(
   }
   if (!Array.isArray(blocks)) blocks = [];
 
-  const contentJson = { blocks };
-  const contentHtml = await contentJsonToHtml(blocks);
+  // Backend expects { blocks: [...] } format for contentJson
+  // If blocks are empty, don't send content - this preserves legacy content on metadata-only edits
+  const hasContent = blocks.length > 0;
+  const contentJson = hasContent ? { blocks } : undefined;
+  const contentHtml = hasContent ? await contentJsonToHtml(blocks) : undefined;
+
+  if (!hasContent && id) {
+    console.log("[savePost] No editor content - preserving original post content");
+  }
 
   // Cover: upload new file or keep existing
   const uploaded = await uploadToBackend(formData.get("coverFile") as File | null);
@@ -131,14 +138,14 @@ export async function savePost(
   if (title && !base) fieldErrors.slug = "Could not derive a slug from the title.";
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { ok: false, error: "Please fix the highlighted fields.", fieldErrors };
+    return { ok: false, error: "Add a title to save your post.", fieldErrors };
   }
 
   // Derived values
   const slug = await uniqueSlug(blog, base, id);
   const readTimeMinutes = parseInt(str(formData, "readTime")) ||
     Math.max(1, Math.round(countWordsFromJson(contentJsonStr) / 200));
-  const description = str(formData, "description") || excerptFromJson(contentJsonStr);
+  const description = str(formData, "description") || excerptFromJson(contentJsonStr) || title || "No description";
   const tags = parseTags(formData);
   const featured = formData.get("featured") === "on";
 
@@ -161,6 +168,15 @@ export async function savePost(
   const carouselIntro = optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
   const carouselBody = optStr(formData, "carouselBody") ?? (featured ? description : null);
 
+  // Author handling - use authorId if provided, otherwise authorName for auto-create
+  const authorId = optStr(formData, "authorId");
+  const authorName = str(formData, "authorName") || "energiebee";
+  const authorAvatarUrl = optStr(formData, "authorAvatarUrl");
+
+  // Category handling - use categoryId if provided, otherwise category name for auto-create
+  const categoryId = optStr(formData, "categoryId");
+  const category = str(formData, "category") || "Uncategorised";
+
   const data = {
     blog,
     slug,
@@ -168,8 +184,10 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    category: str(formData, "category") || "Uncategorised",
-    tags,
+    // Taxonomy - send ID if available, otherwise name + avatar for auto-create
+    ...(authorId ? { authorId } : { authorName, authorAvatarUrl }),
+    ...(categoryId ? { categoryId } : { category }),
+    tags, // string[] of tag names (backend auto-creates)
     readTime: readTimeMinutes,
     coverImage,
     coverImageAlt: str(formData, "coverImageAlt") || title,
@@ -177,14 +195,33 @@ export async function savePost(
     ctaLabel,
     ctaHref,
     ctaExternal: ctaHref ? ctaExternal : false,
-    authorName: str(formData, "authorName") || "energiebee",
-    authorDate: str(formData, "authorDate") || new Date().toISOString(),
+    // Backend expects "YYYY-MM-DD" format for authorDate
+    authorDate: (() => {
+      const dateStr = str(formData, "authorDate");
+      console.log("[savePost] authorDate from form:", dateStr);
+      if (!dateStr) {
+        // Default to today in YYYY-MM-DD format
+        const today = new Date().toISOString().split("T")[0];
+        console.log("[savePost] No date provided, defaulting to today:", today);
+        return today;
+      }
+      // Validate it's a valid date, return as-is if valid YYYY-MM-DD
+      const parsed = new Date(dateStr);
+      if (isNaN(parsed.getTime())) {
+        const today = new Date().toISOString().split("T")[0];
+        console.log("[savePost] Invalid date, defaulting to today:", today);
+        return today;
+      }
+      console.log("[savePost] authorDate valid:", dateStr);
+      return dateStr; // Already YYYY-MM-DD from date input
+    })(),
     carouselIntro,
     carouselBody,
     featured,
     status,
-    contentJson,
-    contentHtml,
+    // Only include content if editor has blocks - preserves legacy content on metadata-only edits
+    ...(contentJson !== undefined && { contentJson }),
+    ...(contentHtml !== undefined && { contentHtml }),
   };
 
   try {
@@ -209,8 +246,9 @@ export async function setStatus(formData: FormData): Promise<void> {
   const id = str(formData, "id");
   const blog = str(formData, "blog");
   const slug = str(formData, "slug");
-  const status = str(formData, "status");
-  if (!id || !blog || !slug || !STATUSES.has(status)) return;
+  const rawStatus = str(formData, "status");
+  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
+  if (!id || !blog || !slug) return;
 
   try {
     await adminApi.setStatus(id, status);

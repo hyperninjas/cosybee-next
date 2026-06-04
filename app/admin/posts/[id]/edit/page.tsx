@@ -4,18 +4,9 @@ import {
   getPost,
   getAllCategories,
   getAllTags,
+  getAuthors,
   getInternalRoutes,
 } from "@/app/admin/lib/queries";
-
-function ensureTagsArray(tags: string[] | string): string[] {
-  if (Array.isArray(tags)) return tags;
-  try {
-    const v = JSON.parse(tags);
-    return Array.isArray(v) ? v.filter((t) => typeof t === "string") : [];
-  } catch {
-    return [];
-  }
-}
 
 export default async function EditPostPage({
   params,
@@ -23,47 +14,65 @@ export default async function EditPostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [post, categories, tags, routes] = await Promise.all([
+  const [post, categories, tags, authors, routes] = await Promise.all([
     getPost(id),
     getAllCategories(),
     getAllTags(),
+    getAuthors(),
     getInternalRoutes(),
   ]);
   if (!post) notFound();
 
+  // Extract tag names for autocomplete suggestions
+  const tagSuggestions = tags.map((t) => t.name);
+
+  // Map backend post to form shape
   const formPost: FormPost = {
     id: post.id,
     blog: post.blog,
     slug: post.slug,
     title: post.title,
-    seoTitle: post.seoTitle ?? "",
-    seoDescription: post.seoDescription ?? "",
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
     description: post.description,
-    tags: ensureTagsArray(post.tags),
+    lede: post.lede,
+
+    // Taxonomy (full objects)
+    author: post.author,
     category: post.category,
-    readTime: typeof post.readTime === "number" ? `${post.readTime} min read` : post.readTime,
+    tags: post.tags ?? [],
+
+    // Media
     coverImage: post.coverImage,
     coverImageAlt: post.coverImageAlt,
-    lede: post.lede ?? "",
-    ctaLabel: post.ctaLabel ?? "",
-    ctaHref: post.ctaHref ?? "",
-    ctaExternal: post.ctaExternal,
-    authorName: post.authorName,
+
+    // Display
+    readTime: post.readTime,
     authorDate: post.authorDate,
-    carouselIntro: post.carouselIntro ?? "",
-    carouselBody: post.carouselBody ?? "",
+
+    // Featured/Carousel
     featured: post.featured,
+    carouselIntro: post.carouselIntro,
+    carouselBody: post.carouselBody,
+
+    // CTA
+    ctaLabel: post.ctaLabel,
+    ctaHref: post.ctaHref,
+    ctaExternal: post.ctaExternal,
+
+    // Status
     status: post.status,
-    contentJson: typeof post.contentJson === "string"
-      ? post.contentJson
-      : JSON.stringify(post.contentJson),
+
+    // Content
+    contentJson: post.contentJson,
   };
 
   return (
     <PostForm
       post={formPost}
-      categorySuggestions={categories}
-      tagSuggestions={tags}
+      categories={categories}
+      tagSuggestions={tagSuggestions}
+      authors={authors}
       internalRoutes={routes}
     />
   );

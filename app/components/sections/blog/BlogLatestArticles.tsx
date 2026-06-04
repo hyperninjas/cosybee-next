@@ -3,10 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { type Article } from "@/app/lib/article-types";
+import { type Article, formatReadTime } from "@/app/lib/article-types";
 import Avatar from "../../ui/Avatar";
 import Divider from "../../ui/Divider";
 import Dot from "../../ui/Dot";
+
+/** Format ISO date string to display format. */
+function formatDate(isoDate: string): string {
+  try {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
+}
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {
@@ -27,25 +41,25 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
     >
       <div className="relative aspect-[1.39]">
         <Image
-          src={a.image}
-          alt=""
+          src={a.coverImage}
+          alt={a.coverImageAlt}
           fill
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
           className="object-cover"
-          unoptimized={isExternalUrl(a.image)}
+          unoptimized={isExternalUrl(a.coverImage)}
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
         <div className="flex flex-wrap  justify-between items-center gap-2 text-[15px] font-medium text-[#545454]">
           <div className="flex flex-wrap items-center gap-2 text-[15px] max-h-8 font-medium text-[#545454]">
             {" "}
-            <span>{a.readTime}</span>
+            <span>{formatReadTime(a.readTime)}</span>
             <Dot />
-            <span>{a.author.date}</span>
+            <span>{formatDate(a.authorDate)}</span>
           </div>
 
           <p className=" h-8 rounded-full border border-[#E6E6E6] bg-[#FAFAFA] px-3 py-1 font-semibold tracking-normal text-[#DE3B24] max-w-32.5 text-nowrap text-ellipsis overflow-hidden">
-            {a.category}
+            {a.category?.name ?? "Uncategorised"}
           </p>
         </div>
         <h3 className="mt-3 text-xl font-bold leading-snug text-black">
@@ -58,10 +72,10 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
           <div className="mt-3 flex flex-wrap gap-1.5">
             {a.tags.slice(0, 3).map((t) => (
               <span
-                key={t}
+                key={t.id}
                 className="rounded-md bg-[#F3F3F3] px-2 py-0.5 text-xs font-medium text-[#666]"
               >
-                #{t}
+                #{t.name}
               </span>
             ))}
           </div>
@@ -69,9 +83,9 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         <div className="mt-auto pt-4">
           <Divider />
           <div className="mt-4 flex items-center gap-5">
-            <Avatar name={a.author.name} className="h-11 w-11" />
+            <Avatar name={a.author?.name ?? "energiebee"} avatarUrl={a.author?.avatarUrl} className="h-11 w-11" />
             <span className="text-[15px] font-bold text-black">
-              {a.author.name}
+              {a.author?.name ?? "energiebee"}
             </span>
           </div>
         </div>
@@ -84,7 +98,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
 function matchesArticle(a: Article, q: string) {
   if (!q) return true;
   const haystack =
-    `${a.title} ${a.description} ${a.author.name} ${a.category} ${a.tags.join(" ")}`.toLowerCase();
+    `${a.title} ${a.description} ${a.author?.name ?? ""} ${a.category?.name ?? ""} ${a.tags.map((t) => t.name).join(" ")}`.toLowerCase();
   return haystack.includes(q);
 }
 
@@ -116,8 +130,8 @@ export default function BlogLatestArticles({
     const q = query.trim().toLowerCase();
     return articles.filter(
       (a) =>
-        (category === "All" || a.category === category) &&
-        (!tag || a.tags.includes(tag)) &&
+        (category === "All" || a.category?.name === category) &&
+        (!tag || a.tags.some((t) => t.name === tag)) &&
         matchesArticle(a, q),
     );
   }, [articles, query, category, tag]);

@@ -8,7 +8,7 @@
 // Framework-agnostic — safe to call from any client component.
 
 const API =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export type UploadContext =
   | "blog-cover"

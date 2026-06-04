@@ -1,29 +1,10 @@
 import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
-import type { Article } from "./article-types";
-import { slugify } from "./slug";
+import type { Article, Author, Category, Tag } from "./article-types";
 
-export type { Article } from "./article-types";
+export type { Article, Author, Category, Tag } from "./article-types";
+export { formatReadTime } from "./article-types";
 export type { Blog } from "./api";
-
-/** Format minutes as "N min read" string for display. */
-function formatReadTime(minutes: number): string {
-  return `${minutes} min read`;
-}
-
-/** Format ISO date string to display format (e.g., "Jan 15, 2025"). */
-function formatAuthorDate(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return isoDate;
-  }
-}
 
 /** Default placeholder image for posts without valid cover images. */
 const PLACEHOLDER_IMAGE = "/bee-flower.png";
@@ -43,39 +24,113 @@ function getValidImageUrl(coverImage: string | null | undefined): string {
   return coverImage;
 }
 
+/** Normalize category - handles both old (string) and new (object) formats. */
+function normalizeCategory(
+  category: string | Category | undefined,
+  blog: "hive" | "learn",
+): Category {
+  if (!category) {
+    return { id: "", blog, name: "Uncategorised", slug: "uncategorised", description: null };
+  }
+  if (typeof category === "string") {
+    // Old format: category is just a string name
+    return {
+      id: "",
+      blog,
+      name: category,
+      slug: category.toLowerCase().replace(/\s+/g, "-"),
+      description: null,
+    };
+  }
+  // New format: already a Category object
+  return category;
+}
+
+/** Normalize tags - handles both old (string[]) and new (Tag[]) formats. */
+function normalizeTags(tags: (string | Tag)[] | undefined): Tag[] {
+  if (!tags || tags.length === 0) return [];
+  return tags.map((t) => {
+    if (typeof t === "string") {
+      // Old format: tag is just a string
+      return {
+        id: "",
+        name: t,
+        slug: t.toLowerCase().replace(/\s+/g, "-"),
+      };
+    }
+    // New format: already a Tag object
+    return t;
+  });
+}
+
+/** Normalize author - handles both old (authorName string) and new (object) formats. */
+function normalizeAuthor(
+  author: Author | undefined,
+  authorName: string | undefined,
+): Author {
+  if (author && typeof author === "object" && author.name) {
+    return author;
+  }
+  // Old format: use authorName field
+  const name = authorName ?? "energiebee";
+  return {
+    id: "",
+    name,
+    slug: name.toLowerCase().replace(/\s+/g, "-"),
+    avatarUrl: null,
+    bio: null,
+    role: null,
+  };
+}
+
 /** Transform API post to frontend Article shape. */
 function toArticle(post: ApiPost): Article {
   return {
     id: post.id,
     blog: post.blog,
     slug: post.slug,
-    category: post.category ?? "",
-    readTime: formatReadTime(post.readTime ?? 1),
     title: post.title,
-    seoTitle: post.seoTitle ?? undefined,
-    seoDescription: post.seoDescription ?? undefined,
     description: post.description ?? "",
-    tags: Array.isArray(post.tags) ? post.tags : [],
-    image: getValidImageUrl(post.coverImage),
-    imageAlt: post.coverImageAlt ?? "",
-    author: {
-      name: post.authorName ?? "energiebee",
-      date: formatAuthorDate(post.authorDate ?? ""),
-    },
-    datePublished: post.publishedAt ?? post.authorDate ?? undefined,
-    dateModified:
-      post.updatedAt ?? post.publishedAt ?? post.authorDate ?? undefined,
-    carouselIntro: post.carouselIntro ?? undefined,
-    carouselBody: post.carouselBody ?? undefined,
-    lede: post.lede ?? undefined,
-    cta: post.ctaLabel
-      ? {
-          label: post.ctaLabel,
-          href: post.ctaHref ?? undefined,
-          external: post.ctaExternal ?? false,
-        }
-      : undefined,
-    contentHtml: post.contentHtml ?? "",
+    lede: post.lede,
+
+    // SEO
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+
+    // Taxonomy (normalized from backend - handles both old and new formats)
+    author: normalizeAuthor(post.author, post.authorName),
+    category: normalizeCategory(post.category, post.blog),
+    tags: normalizeTags(post.tags),
+
+    // Media
+    coverImage: getValidImageUrl(post.coverImage),
+    coverImageAlt: post.coverImageAlt ?? "",
+
+    // Display
+    readTime: post.readTime ?? 1,
+    authorDate: post.authorDate ?? "",
+
+    // Featured/Carousel
+    featured: post.featured ?? false,
+    carouselIntro: post.carouselIntro,
+    carouselBody: post.carouselBody,
+
+    // CTA (flattened)
+    ctaLabel: post.ctaLabel,
+    ctaHref: post.ctaHref,
+    ctaExternal: post.ctaExternal ?? false,
+
+    // Status
+    status: post.status ?? "DRAFT",
+    publishedAt: post.publishedAt,
+
+    // Content
+    contentJson: post.contentJson ?? null,
+    contentHtml: post.contentHtml ?? null,
+
+    // Timestamps
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
   };
 }
 
@@ -91,10 +146,22 @@ export async function getFeatured(blog: Blog): Promise<Article[]> {
   return response.data.map(toArticle);
 }
 
-/** Distinct categories for a blog's filter bar, prefixed with "All". */
-export async function getCategories(blog: Blog): Promise<string[]> {
+/** Distinct categories for a blog's filter bar (full Category objects). */
+export async function getCategories(blog: Blog): Promise<Category[]> {
   const response = await api.getCategories(blog);
-  return ["All", ...response.data];
+  return response.data;
+}
+
+/** Category names for a blog's filter bar, prefixed with "All". */
+export async function getCategoryNames(blog: Blog): Promise<string[]> {
+  const response = await api.getCategories(blog);
+  return ["All", ...response.data.map((c) => c.name)];
+}
+
+/** All tags for a blog. */
+export async function getTags(blog: Blog): Promise<Tag[]> {
+  const response = await api.getTags(blog);
+  return response.data;
 }
 
 /** A single published article with rendered body HTML. */
@@ -123,10 +190,6 @@ export async function getPublishedSlugs(blog: Blog): Promise<string[]> {
   return response.data;
 }
 
-/**
- * Published article paths with their real last-modified dates — used by the
- * sitemap so `<lastmod>` reflects when each post actually changed.
- */
 /**
  * Fetch every published post for a blog, paginating within the API's page-size
  * limit. The API rejects large limits with a 400, so we walk pages instead.
@@ -163,14 +226,17 @@ export async function getSitemapArticles(
   }));
 }
 
-/** Unique slugified tags used by a blog's published articles (for tag pages). */
+/** Unique tag slugs used by a blog's published articles (for tag pages). */
 export async function getTagSlugs(blog: Blog): Promise<string[]> {
   const posts = await getAllPublishedPosts(blog);
   const slugs = new Set<string>();
   for (const p of posts) {
     for (const t of p.tags ?? []) {
-      const s = slugify(t);
-      if (s) slugs.add(s);
+      // Handle both old (string) and new (Tag object) formats
+      const slug = typeof t === "string"
+        ? t.toLowerCase().replace(/\s+/g, "-")
+        : t.slug;
+      if (slug) slugs.add(slug);
     }
   }
   return [...slugs];

@@ -14,7 +14,7 @@ export default async function Image({
   const article = await getArticleBySlug("hive", slug);
   return renderArticleOg({
     title: article?.title ?? "The Hive",
-    category: article?.category ?? "energiebee",
+    category: article?.category?.name ?? "energiebee",
     blog: "hive",
   });
 }

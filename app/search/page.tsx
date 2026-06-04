@@ -25,7 +25,7 @@ export default async function SearchPage({
     ]);
     const needle = query.toLowerCase();
     results = [...hive, ...learn].filter((a) => {
-      const haystack = [a.title, a.description, a.category, ...a.tags]
+      const haystack = [a.title, a.description, a.category?.name ?? "", ...a.tags.map((t) => t.name)]
         .join(" ")
         .toLowerCase();
       return haystack.includes(needle);

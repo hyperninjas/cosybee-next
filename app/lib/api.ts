@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { Author, Category, Tag } from "./article-types";
+
 const API_BASE = process.env.API_URL || "http://localhost:3000";
 
 export type Blog = "hive" | "learn";
@@ -7,32 +9,49 @@ export type Blog = "hive" | "learn";
 /** Post shape returned by the backend API. */
 export interface ApiPost {
   id: string;
-  blog: string;
+  blog: "hive" | "learn";
   slug: string;
   title: string;
   description: string;
   lede: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
-  category: string;
-  tags: string[];
-  /** Minutes (integer) — format as "N min read" on display. */
-  readTime: number;
+
+  // Taxonomy - supports both old format (strings) and new format (objects)
+  author?: Author;
+  authorName?: string; // Old format fallback
+  category?: Category | string; // Can be string (old) or Category object (new)
+  tags: (Tag | string)[];
+
+  // Media
   coverImage: string;
   coverImageAlt: string;
+
+  // Display
+  /** Minutes (integer) — format as "N min read" on display. */
+  readTime: number;
+  /** ISO date string from backend DateTime. */
+  authorDate: string;
+
+  // Featured/Carousel
+  featured: boolean;
+  carouselIntro: string | null;
+  carouselBody: string | null;
+
+  // CTA
   ctaLabel: string | null;
   ctaHref: string | null;
   ctaExternal: boolean;
-  authorName: string;
-  /** ISO date string from backend DateTime. */
-  authorDate: string;
-  carouselIntro: string | null;
-  carouselBody: string | null;
-  featured: boolean;
-  status: string;
+
+  // Status
+  status: "DRAFT" | "PUBLISHED";
   publishedAt: string | null;
+
+  // Content
   contentJson?: Record<string, unknown>;
   contentHtml?: string;
+
+  // Timestamps
   createdAt: string;
   updatedAt: string;
 }
@@ -107,9 +126,19 @@ export const api = {
     return fetchJson(`/api/posts/featured?blog=${blog}`, { data: [] });
   },
 
-  /** Distinct categories for filter bar. */
-  async getCategories(blog: Blog): Promise<DataResponse<string[]>> {
+  /** Distinct categories for filter bar (now returns full Category objects). */
+  async getCategories(blog: Blog): Promise<DataResponse<Category[]>> {
     return fetchJson(`/api/posts/categories?blog=${blog}`, { data: [] });
+  },
+
+  /** All tags for a blog. */
+  async getTags(blog: Blog): Promise<DataResponse<Tag[]>> {
+    return fetchJson(`/api/posts/tags?blog=${blog}`, { data: [] });
+  },
+
+  /** All authors. */
+  async getAuthors(): Promise<DataResponse<Author[]>> {
+    return fetchJson(`/api/posts/authors`, { data: [] });
   },
 
   /** Single article by slug (includes contentHtml). */

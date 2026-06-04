@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import BlogHero from "../components/sections/blog/BlogHero";
 import BlogBrowse from "../components/sections/blog/BlogBrowse";
-import { getArticles, getFeatured, getCategories } from "../lib/articles";
+import { getArticles, getFeatured, getCategoryNames } from "../lib/articles";
 import JsonLd from "../components/JsonLd";
 import { breadcrumbSchema } from "../lib/structured-data";
 
@@ -25,7 +25,7 @@ export default async function LearnPage({
   const [articles, featured, categories] = await Promise.all([
     getArticles("learn"),
     getFeatured("learn"),
-    getCategories("learn"),
+    getCategoryNames("learn"),
   ]);
 
   return (

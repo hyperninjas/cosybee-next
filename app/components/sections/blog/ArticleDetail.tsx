@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type Article } from "@/app/lib/article-types";
+import { type Article, formatReadTime } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { ArticleCard } from "./BlogLatestArticles";
 import { CtaButton } from "../../ui/Cta";
@@ -11,11 +11,24 @@ import ReadingProgress from "./ReadingProgress";
 import ArticleToc from "./ArticleToc";
 import JsonLd from "@/app/components/JsonLd";
 import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
-import { slugify } from "@/app/lib/slug";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {
   return url.startsWith("http://") || url.startsWith("https://");
+}
+
+/** Format ISO date string to display format. */
+function formatDate(isoDate: string): string {
+  try {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
 }
 
 function BackArrow() {
@@ -93,20 +106,20 @@ export default function ArticleDetail({
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
             <span className="inline-flex items-center rounded-full border border-[#DBE6EB] bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
-              {article.category}
+              {article.category?.name ?? "Uncategorised"}
             </span>
             <Dot />
-            <span className="text-[#545454]">{article.readTime}</span>
+            <span className="text-[#545454]">{formatReadTime(article.readTime)}</span>
           </div>
           {article.tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {article.tags.map((tag) => (
                 <Link
-                  key={tag}
-                  href={`${basePath}/tag/${slugify(tag)}`}
+                  key={tag.id}
+                  href={`${basePath}/tag/${tag.slug}`}
                   className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-[#545454] transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
                 >
-                  {`#${tag}`}
+                  {`#${tag.name}`}
                 </Link>
               ))}
             </div>
@@ -114,16 +127,16 @@ export default function ArticleDetail({
 
           <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar name={article.author.name} />
+              <Avatar name={article.author?.name ?? "energiebee"} avatarUrl={article.author?.avatarUrl} />
               <div className="text-sm">
                 <div className="font-bold text-lg text-black">
-                  {article.author.name}
+                  {article.author?.name ?? "energiebee"}
                 </div>
                 <time
-                  dateTime={article.datePublished}
+                  dateTime={article.publishedAt ?? article.authorDate}
                   className="block text-[#545454] text-[15px] mt-1 font-medium"
                 >
-                  {article.author.date}
+                  {formatDate(article.authorDate)}
                 </time>
               </div>
             </div>
@@ -134,13 +147,13 @@ export default function ArticleDetail({
         {/* hero image */}
         <div className="relative mt-10 aspect-4/3 overflow-hidden rounded-3xl sm:aspect-16/10">
           <Image
-            src={article.image}
-            alt={article.imageAlt}
+            src={article.coverImage}
+            alt={article.coverImageAlt}
             fill
             priority
             sizes="(min-width: 800px) 800px, 100vw"
             className="object-cover"
-            unoptimized={isExternalUrl(article.image)}
+            unoptimized={isExternalUrl(article.coverImage)}
           />
         </div>
 
@@ -158,15 +171,15 @@ export default function ArticleDetail({
         />
 
         {/* end-of-article CTA */}
-        {article.cta && (
+        {article.ctaLabel && article.ctaHref && (
           <div className="mt-12 flex justify-center px-10 lg:px-20">
             <CtaButton
-              href={article.cta.href ?? "#"}
-              external={article.cta.external}
+              href={article.ctaHref}
+              external={article.ctaExternal}
               size="md"
               className="text-lg!"
             >
-              {article.cta.label}
+              {article.ctaLabel}
             </CtaButton>
           </div>
         )}
