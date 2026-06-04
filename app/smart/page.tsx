@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Hero from "../components/sections/smart/Hero";
 import EnergyMonitoring from "../components/sections/smart/EnergyMonitoring";
-import EnergyForecasting from "../components/sections/smart/EnergyForecasting";
+// import EnergyForecasting from "../components/sections/smart/EnergyForecasting";
 import EnergyAnalytics from "../components/sections/smart/EnergyAnalytics";
 import SmartEnergyManagement from "../components/sections/smart/SmartEnergyManagement";
 import WhyEnergieBee from "../components/sections/smart/WhyEnergieBee";
@@ -47,7 +47,7 @@ export default function SmartPage() {
       <WhyEnergieBee />
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
-      <EnergyForecasting />
+      {/* <EnergyForecasting /> */}
     </main>
   );
 }

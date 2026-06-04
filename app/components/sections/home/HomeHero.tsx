@@ -9,7 +9,7 @@ import AppStoreButton from "../../ui/AppStoreButton";
  */
 export default function HomeHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white min-h-[85vh]">
+    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -26,7 +26,7 @@ export default function HomeHero() {
         <div className="absolute inset-0 bg-[linear-gradient(112.98deg,rgba(0,0,0,0.8)_5.9%,rgba(0,0,0,0)_76.63%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-360 px-6 sm:px-10 lg:px-30 py-48.5">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
           <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
             One app.

@@ -4,12 +4,12 @@
 // import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
 // import PhoneTabs from "../../mockups/phone/PhoneTabs";
 import { CtaButton } from "../../ui/Cta";
-import Hexagon from "../../ui/Hexagon";
-import HiveHexCluster from "../../ui/HiveHexCluster";
-import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/solar/energiebee-app-solar-potential-epc-rating.png";
-import windTurbineImg from "@/public/wind-turbine.png";
-import heroBgImg from "@/public/hero-bg.png";
+// import Hexagon from "../../ui/Hexagon";
+// import HiveHexCluster from "../../ui/HiveHexCluster";
+// import beeFlowerImg from "@/public/bee-flower.png";
+// import deviceImg from "@/public/solar/energiebee-app-solar-potential-epc-rating.png";
+// import windTurbineImg from "@/public/wind-turbine.png";
+import heroBgImg from "@/public/Cover/energiebee-solar-cover.png";
 import Image from "next/image";
 
 // function HeroPhone({ className = "" }: { className?: string }) {
@@ -38,23 +38,23 @@ export default function Hero() {
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>
 
-      <div className="relative mx-auto grid max-w-360 grid-cols-1  gap-12 items-center  px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
-        <Hexagon
+        {/* <Hexagon
           color="#403A07"
           className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[403.73px] h-[374.5px]"
-        />
+        /> */}
         {/* text */}
-        <div className="relative z-10 max-w-xl">
-          <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
+        <div className="relative z-10 ">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
             Solar Forecasting <span className="text-[#EFDF18]">95%</span>
             <br />
             <span className="text-[#EFDF18]">Accurate</span> Next Day
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">
+          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-neutral-300">
             Advanced AI-powered solar production predictions. Plan your energy
             usage with confidence and maximise your solar investment with
             industry-leading accuracy.
@@ -65,7 +65,7 @@ export default function Hero() {
         </div>
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
-        <HiveHexCluster
+        {/* <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-140"
           gap={5}
           left={{
@@ -89,7 +89,7 @@ export default function Hero() {
               />
             ),
           }}
-        />
+        /> */}
       </div>
     </section>
   );

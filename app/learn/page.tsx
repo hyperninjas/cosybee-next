@@ -4,6 +4,7 @@ import BlogBrowse from "../components/sections/blog/BlogBrowse";
 import { getArticles, getFeatured, getCategoryNames } from "../lib/articles";
 import JsonLd from "../components/JsonLd";
 import { breadcrumbSchema } from "../lib/structured-data";
+import learnCover from "@/public/Cover/energiebee-learn-cover.png";
 
 export const metadata: Metadata = {
   title: "Learn",
@@ -39,6 +40,7 @@ export default async function LearnPage({
       <BlogHero
         title="Learn"
         description="Guides, tutorials, and energy-saving tips from the EnergieBee team."
+        bgImage={learnCover}
       />
       <BlogBrowse
         articles={articles}

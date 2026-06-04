@@ -8,7 +8,7 @@ export default function EnergyForecasting() {
   return (
     <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
       <SectionHeader
-        title="Predictive Analytics"
+        title="Intelligent Energy Forecasting"
         description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"
       />
 
@@ -16,17 +16,17 @@ export default function EnergyForecasting() {
         <MediaCard
           media={
             <Image
-              alt="Weather-Based Bloom Forecasts"
+              alt="Simulated Solar Forecasts"
               src={deviceWeatherImg}
               className="w-45 sm:w-47.5 lg:w-64"
             />
           }
-          title="Weather-Based Bloom Forecasts"
-          description="Our intelligent forecasting system uses real-time weather data combined with your garden's historical performance to predict sunflower blooms and bee activity with remarkable accuracy."
+          title="Simulated Solar Forecasts"
+          description="Our advanced simulation engine analyses real-time weather data, historical solar patterns, and your system's specific characteristics to deliver highly accurate solar production forecasts for your home."
           bullets={[
-            "7-day solar production forecasts",
+            "AI-powered 7-day solar simulations",
             "Hourly generation predictions",
-            "Weather impact analysis",
+            "Cloud cover and weather impact analysis",
           ]}
         />
         <MediaCard
@@ -51,7 +51,7 @@ export default function EnergyForecasting() {
           glyph="sun"
           glyphColor="#A3D055"
           title="Reduce Energy Bills by Up to 40%"
-          description="By using EnergieBee's smart forecasting and energy management recommendations."
+          description="By using EnergieBee's smart forecasting and energy management recommendations, typical households can reduce their energy bills by 30-40%, maximising the value of their solar investment."
           buttonText="Start Monitoring"
           href="/start"
           titleClassName="!text-[25px] "

@@ -1,13 +1,13 @@
-import Image from "next/image";
-import Hexagon from "../../ui/Hexagon";
-import heroBgImg from "@/public/hero-bg.png";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import sideImage from "@/public/bee-hive.png";
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+import Image, { type StaticImageData } from "next/image";
+// import Hexagon from "../../ui/Hexagon";
+// import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+// import sideImage from "@/public/bee-hive.png";
+// import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 
 type Props = {
   title: string;
   description: string;
+  bgImage: StaticImageData;
 };
 
 /**
@@ -15,13 +15,13 @@ type Props = {
  * left, and a 3-hex cluster on the right. Copy is passed in so each
  * blog (hive, learn, …) supplies its own title + description.
  */
-export default function BlogHero({ title, description }: Props) {
+export default function BlogHero({ title, description, bgImage }: Props) {
   return (
     <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
-      {/* background photo + bottom-fade overlay */}
+      {/* background photo */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
-          src={heroBgImg}
+          src={bgImage}
           alt=""
           fill
           priority
@@ -31,33 +31,33 @@ export default function BlogHero({ title, description }: Props) {
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>
 
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         {/* decorative olive hexagon — bleeds in from the left edge */}
-        <Hexagon
+        {/* <Hexagon
           color="#403A07"
           className="pointer-events-none absolute -left-32 top-1/2 -z-10 w-104 -translate-y-1/2 sm:-left-36 sm:w-lg lg:-left-33 lg:w-[403.73px] h-[374.5px]"
-        />
+        /> */}
 
         {/* text */}
-        <div className="relative z-10 max-w-xl">
-          <h1 className="text-4xl font-extrabold leading-[120%] tracking-tight xl:text-[2.5rem]">
+        <div className="relative z-10 ">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
             {title}
           </h1>
-          <p className="mt-4 max-w-md text-lg text-neutral-300">
+          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-neutral-300">
             {description}
           </p>
         </div>
 
-        <SharedImageHexCluster
+        {/* <SharedImageHexCluster
           src={sideImage.src}
           viewBox={HIVE_3_VIEWBOX}
           placements={HIVE_3_PLACEMENTS}
           fallbackColor="#3a4a5c"
           className="w-full"
-        />
+        /> */}
       </div>
     </section>
   );
