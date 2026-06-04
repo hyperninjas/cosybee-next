@@ -351,6 +351,22 @@ export default function PostForm({
   const [ctaHref, setCtaHref] = useState(post?.ctaHref ?? "");
   const [ctaExternal, setCtaExternal] = useState(post?.ctaExternal ?? false);
 
+  // Author date - needs state because the input is in the conditionally rendered drawer
+  const [authorDate, setAuthorDate] = useState(() => {
+    if (post?.authorDate) {
+      return new Date(post.authorDate).toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0]; // Default to today
+  });
+
+  // Other drawer fields - need state so they're submitted even when drawer is closed
+  const [coverImageAlt, setCoverImageAlt] = useState(post?.coverImageAlt ?? "");
+  const [lede, setLede] = useState(post?.lede ?? "");
+  const [featured, setFeatured] = useState(post?.featured ?? false);
+  const [carouselIntro, setCarouselIntro] = useState(post?.carouselIntro ?? "");
+  const [carouselBody, setCarouselBody] = useState(post?.carouselBody ?? "");
+  const [ctaLabel, setCtaLabel] = useState(post?.ctaLabel ?? "");
+
   const effectiveSlug = slugTouched ? slug : slugify(title);
   const readTime = estimateReadTime(blocks);
   const metaTitle = (seoTitle || title || "Untitled").trim();
@@ -414,6 +430,20 @@ export default function PostForm({
       {/* Category - send ID if available, otherwise name */}
       {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
       <input type="hidden" name="category" value={categoryName || "Uncategorised"} />
+      {/* Author date - hidden input ensures it's always submitted even when drawer is closed */}
+      <input type="hidden" name="authorDate" value={authorDate} />
+      {/* Other drawer fields - hidden inputs ensure submission when drawer is closed */}
+      <input type="hidden" name="description" value={description} />
+      <input type="hidden" name="coverImageAlt" value={coverImageAlt} />
+      <input type="hidden" name="lede" value={lede} />
+      <input type="hidden" name="seoTitle" value={seoTitle} />
+      <input type="hidden" name="seoDescription" value={seoDescription} />
+      <input type="hidden" name="featured" value={featured ? "on" : ""} />
+      <input type="hidden" name="carouselIntro" value={carouselIntro} />
+      <input type="hidden" name="carouselBody" value={carouselBody} />
+      <input type="hidden" name="ctaLabel" value={ctaLabel} />
+      <input type="hidden" name="ctaHref" value={ctaHref} />
+      <input type="hidden" name="ctaExternal" value={ctaExternal ? "on" : ""} />
 
       <ActionBar
         editing={Boolean(post)}
@@ -492,7 +522,7 @@ export default function PostForm({
             onClick={() => setSettingsOpen(false)}
           />
           <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white shadow-xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4 shadow-sm">
               <h2 className="text-lg font-bold">Post settings</h2>
               <button
                 type="button"
@@ -514,8 +544,8 @@ export default function PostForm({
                 />
                 <Labeled label="Alt text" hint="Describes the image for accessibility. Defaults to the title.">
                   <input
-                    name="coverImageAlt"
-                    defaultValue={post?.coverImageAlt ?? ""}
+                    value={coverImageAlt}
+                    onChange={(e) => setCoverImageAlt(e.target.value)}
                     placeholder={title || "Enter alt text…"}
                     className={inputClass}
                   />
@@ -682,9 +712,8 @@ export default function PostForm({
               {/* Author date */}
               <Labeled label="Author date" hint="Defaults to today.">
                 <input
-                  name="authorDate"
-                  defaultValue={post?.authorDate ?? ""}
-                  placeholder="e.g. 2026-06-01"
+                  value={authorDate}
+                  onChange={(e) => setAuthorDate(e.target.value)}
                   type="date"
                   className={inputClass}
                 />
@@ -692,7 +721,11 @@ export default function PostForm({
 
               {/* Lede */}
               <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <input name="lede" defaultValue={post?.lede ?? ""} className={inputClass} />
+                <input
+                  value={lede}
+                  onChange={(e) => setLede(e.target.value)}
+                  className={inputClass}
+                />
               </Labeled>
 
               {/* SEO */}
@@ -711,7 +744,6 @@ export default function PostForm({
                 </div>
                 <Labeled label="SEO title" hint="Defaults to the title.">
                   <input
-                    name="seoTitle"
                     value={seoTitle}
                     onChange={(e) => setSeoTitle(e.target.value)}
                     placeholder={title || "Defaults to title"}
@@ -720,7 +752,6 @@ export default function PostForm({
                 </Labeled>
                 <Labeled label="SEO description" hint="Defaults to the excerpt.">
                   <textarea
-                    name="seoDescription"
                     value={seoDescription}
                     onChange={(e) => setSeoDescription(e.target.value)}
                     rows={2}
@@ -736,8 +767,8 @@ export default function PostForm({
                 <label className="flex items-center gap-3 rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
                   <input
                     type="checkbox"
-                    name="featured"
-                    defaultChecked={post?.featured}
+                    checked={featured}
+                    onChange={(e) => setFeatured(e.target.checked)}
                     className="h-5 w-5 rounded border-[#DBDBDB] text-[#FF8A7A] focus:ring-[#FF8A7A]"
                   />
                   <div>
@@ -747,16 +778,16 @@ export default function PostForm({
                 </label>
                 <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
                   <textarea
-                    name="carouselIntro"
-                    defaultValue={post?.carouselIntro ?? ""}
+                    value={carouselIntro}
+                    onChange={(e) => setCarouselIntro(e.target.value)}
                     rows={2}
                     className={inputClass}
                   />
                 </Labeled>
                 <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
                   <textarea
-                    name="carouselBody"
-                    defaultValue={post?.carouselBody ?? ""}
+                    value={carouselBody}
+                    onChange={(e) => setCarouselBody(e.target.value)}
                     rows={3}
                     className={inputClass}
                   />

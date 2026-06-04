@@ -116,7 +116,8 @@ export async function savePost(
   }
   if (!Array.isArray(blocks)) blocks = [];
 
-  const contentJson = { blocks };
+  // Backend expects raw array for contentJson, not wrapped in { blocks: [...] }
+  const contentJson = blocks;
   const contentHtml = await contentJsonToHtml(blocks);
 
   // Cover: upload new file or keep existing
@@ -131,7 +132,7 @@ export async function savePost(
   if (title && !base) fieldErrors.slug = "Could not derive a slug from the title.";
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { ok: false, error: "Please fix the highlighted fields.", fieldErrors };
+    return { ok: false, error: "Add a title to save your post.", fieldErrors };
   }
 
   // Derived values
@@ -188,7 +189,26 @@ export async function savePost(
     ctaLabel,
     ctaHref,
     ctaExternal: ctaHref ? ctaExternal : false,
-    authorDate: str(formData, "authorDate") || new Date().toISOString(),
+    // Backend expects "YYYY-MM-DD" format for authorDate
+    authorDate: (() => {
+      const dateStr = str(formData, "authorDate");
+      console.log("[savePost] authorDate from form:", dateStr);
+      if (!dateStr) {
+        // Default to today in YYYY-MM-DD format
+        const today = new Date().toISOString().split("T")[0];
+        console.log("[savePost] No date provided, defaulting to today:", today);
+        return today;
+      }
+      // Validate it's a valid date, return as-is if valid YYYY-MM-DD
+      const parsed = new Date(dateStr);
+      if (isNaN(parsed.getTime())) {
+        const today = new Date().toISOString().split("T")[0];
+        console.log("[savePost] Invalid date, defaulting to today:", today);
+        return today;
+      }
+      console.log("[savePost] authorDate valid:", dateStr);
+      return dateStr; // Already YYYY-MM-DD from date input
+    })(),
     carouselIntro,
     carouselBody,
     featured,

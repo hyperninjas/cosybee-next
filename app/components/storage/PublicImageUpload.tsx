@@ -1,13 +1,14 @@
 "use client";
+"use no memo";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useUpload } from "@/app/hooks/useUpload";
-import { validate } from "@/app/lib/storage";
+import { validate, LIMITS } from "@/app/lib/storage";
 
 /**
- * Public image upload (cover / avatar). Shows an instant local preview via
- * URL.createObjectURL, then swaps to the real `fileUrl` after confirm. Reports
- * the final public URL up to the parent via onChange.
+ * Modern image upload with drag-and-drop support.
+ * Shows instant local preview, then swaps to the real URL after upload.
  */
 export function PublicImageUpload({
   context,
@@ -21,8 +22,10 @@ export function PublicImageUpload({
   const { upload, status, progress, error, reset } = useUpload(context);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // revoke the object URL when it changes/unmounts to avoid leaks
+  // Revoke object URL on cleanup
   useEffect(
     () => () => {
       if (localPreview) URL.revokeObjectURL(localPreview);
@@ -30,64 +33,218 @@ export function PublicImageUpload({
     [localPreview],
   );
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFile = useCallback(
+    async (file: File) => {
+      const problem = validate(file, context);
+      if (problem) {
+        setClientError(problem);
+        return;
+      }
+      setClientError(null);
+      setLocalPreview(URL.createObjectURL(file));
+      try {
+        const { fileUrl } = await upload(file);
+        onChange(fileUrl);
+      } catch {
+        setLocalPreview(null);
+      }
+    },
+    [context, upload, onChange],
+  );
 
-    const problem = validate(file, context);
-    if (problem) {
-      setClientError(problem);
-      return;
-    }
-    setClientError(null);
-    setLocalPreview(URL.createObjectURL(file)); // optimistic preview
-    try {
-      const { fileUrl } = await upload(file);
-      onChange(fileUrl); // <- store this on your record
-    } catch {
-      setLocalPreview(null); // error already surfaced by hook
-    }
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile],
+  );
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleRemove = () => {
+    onChange(null);
+    setLocalPreview(null);
+    reset();
+    if (inputRef.current) inputRef.current.value = "";
+  };
 
   const shown = localPreview ?? value;
+  const isUploading = status === "uploading";
+  const maxMB = LIMITS[context].maxBytes / 1024 / 1024;
+  const isAvatar = context === "user-avatar";
 
+  // If we have an image, show the preview
+  if (shown) {
+    return (
+      <div className="space-y-2">
+        <div className={`relative overflow-hidden rounded-lg border border-[#ECECEC] ${isAvatar ? "w-24" : "w-full"}`}>
+          {isAvatar ? (
+            <Image
+              src={shown}
+              alt="Preview"
+              width={96}
+              height={96}
+              className="h-24 w-24 object-cover"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={shown}
+              alt="Preview"
+              className="h-40 w-full object-cover"
+            />
+          )}
+
+          {/* Overlay with actions */}
+          {!isUploading && (
+            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all hover:bg-black/50 hover:opacity-100">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-[#333] shadow-sm hover:bg-[#F5F5F5]"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-[#B4332A] shadow-sm hover:bg-[#FEF2F2]"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          {/* Upload progress overlay */}
+          {isUploading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60">
+              <div className="mb-2 text-sm font-medium text-white">
+                Uploading... {progress}%
+              </div>
+              <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-white/30">
+                <div
+                  className="h-full rounded-full bg-white transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleInputChange}
+          className="hidden"
+        />
+
+        {(clientError || error) && (
+          <p className="text-xs font-medium text-[#B4332A]">{clientError ?? error}</p>
+        )}
+      </div>
+    );
+  }
+
+  // Empty state - dropzone
   return (
     <div className="space-y-2">
-      {shown && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={shown} alt="" className="h-40 w-full rounded object-cover" />
-      )}
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onClick={() => !isUploading && inputRef.current?.click()}
+        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
+          isDragging
+            ? "border-[#FF8A7A] bg-[#FFF5F4]"
+            : "border-[#DBDBDB] bg-[#FAFAFA] hover:border-[#FF8A7A] hover:bg-[#FFF5F4]"
+        } ${isUploading ? "pointer-events-none opacity-60" : ""}`}
+      >
+        {isUploading ? (
+          <>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center">
+              <svg
+                className="h-6 w-6 animate-spin text-[#FF8A7A]"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-[#333]">Uploading... {progress}%</p>
+            <div className="mt-2 h-1.5 w-32 overflow-hidden rounded-full bg-[#ECECEC]">
+              <div
+                className="h-full rounded-full bg-[#FF8A7A] transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#FFE4E1]">
+              <svg
+                className="h-5 w-5 text-[#FF8A7A]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-[#333]">
+              {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
+            </p>
+            <p className="mt-1 text-xs text-[#9A9A9A]">
+              PNG, JPG, WebP or AVIF (max {maxMB}MB)
+            </p>
+          </>
+        )}
+      </div>
 
       <input
+        ref={inputRef}
         type="file"
         accept="image/*"
-        onChange={handleFile}
-        disabled={status === "uploading"}
+        onChange={handleInputChange}
+        className="hidden"
+        disabled={isUploading}
       />
 
-      {status === "uploading" && (
-        <div className="h-2 w-full rounded bg-gray-200">
-          <div
-            className="h-2 rounded bg-blue-500 transition-all"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
       {(clientError || error) && (
-        <p className="text-sm text-red-600">{clientError ?? error}</p>
-      )}
-      {value && status !== "uploading" && (
-        <button
-          type="button"
-          className="text-sm text-gray-600 underline"
-          onClick={() => {
-            onChange(null);
-            setLocalPreview(null);
-            reset();
-          }}
-        >
-          Remove
-        </button>
+        <p className="text-xs font-medium text-[#B4332A]">{clientError ?? error}</p>
       )}
     </div>
   );
