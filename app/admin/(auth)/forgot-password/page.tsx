@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/app/lib/auth-client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -14,21 +15,13 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/email-otp/send-verification-email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            type: "forget-password",
-          }),
-        }
-      );
+      const { error } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "forget-password",
+      });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || "Failed to send reset code");
+      if (error) {
+        setError(error.message || "Failed to send reset code");
         setLoading(false);
         return;
       }

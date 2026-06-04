@@ -2,6 +2,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { authClient } from "@/app/lib/auth-client";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -30,22 +31,14 @@ function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/email-otp/reset-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            otp,
-            newPassword,
-          }),
-        }
-      );
+      const { error } = await authClient.emailOtp.resetPassword({
+        email,
+        otp,
+        password: newPassword,
+      });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || "Failed to reset password");
+      if (error) {
+        setError(error.message || "Failed to reset password");
         setLoading(false);
         return;
       }

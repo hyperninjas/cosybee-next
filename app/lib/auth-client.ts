@@ -6,10 +6,11 @@ import {
   emailOTPClient,
 } from "better-auth/client/plugins";
 
-// Direct connection to backend API for production
-// Backend has CORS configured for https://energiebee.com
+// Use NEXT_PUBLIC_AUTH_URL for the backend API
+// Local: http://localhost:3000
+// Production: https://api.energiebee.com
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_AUTH_URL || "https://eb-api.technext.it",
+  baseURL: process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000",
   plugins: [
     adminClient(),
     organizationClient(),
