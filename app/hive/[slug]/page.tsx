@@ -31,11 +31,11 @@ export async function generateMetadata({
       type: "article",
       // og:image intentionally omitted: the branded per-article
       // opengraph-image.tsx is auto-injected by Next at this route.
-      publishedTime: article.datePublished,
-      modifiedTime: article.dateModified,
-      authors: [article.author.name],
-      section: article.category,
-      tags: article.tags,
+      publishedTime: article.publishedAt ?? undefined,
+      modifiedTime: article.updatedAt ?? undefined,
+      authors: [article.author?.name ?? "energiebee"],
+      section: article.category?.name ?? undefined,
+      tags: article.tags.map((t) => t.name),
     },
   };
 }

@@ -11,6 +11,7 @@ import { initialSaveState } from "../lib/form-state";
 import { slugify } from "@/app/lib/slug";
 import { estimateReadTime } from "@/app/lib/read-time";
 import TagInput from "./TagInput";
+import type { Author, Category, Tag } from "@/app/lib/article-types";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -21,37 +22,53 @@ const Editor = dynamic(() => import("./Editor"), {
 
 export type FormPost = {
   id: string;
-  blog: string;
+  blog: "hive" | "learn";
   slug: string;
   title: string;
-  seoTitle: string;
-  seoDescription: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
   description: string;
-  tags: string[];
-  category: string;
-  readTime: string;
+  lede: string | null;
+
+  // Taxonomy (full objects from backend)
+  author: Author;
+  category: Category;
+  tags: Tag[];
+
+  // Media
   coverImage: string;
   coverImageAlt: string;
-  lede: string;
-  ctaLabel: string;
-  ctaHref: string;
-  ctaExternal: boolean;
-  authorName: string;
+
+  // Display
+  readTime: number;
   authorDate: string;
-  carouselIntro: string;
-  carouselBody: string;
+
+  // Featured/Carousel
   featured: boolean;
-  status: string;
-  contentJson: string;
+  carouselIntro: string | null;
+  carouselBody: string | null;
+
+  // CTA
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  ctaExternal: boolean;
+
+  // Status
+  status: "DRAFT" | "PUBLISHED";
+
+  // Content
+  contentJson: Record<string, unknown> | null;
 };
 
 type Props = {
   post?: FormPost;
   defaultBlog?: string;
-  /** Existing categories for autocomplete. */
-  categorySuggestions?: string[];
+  /** Existing categories for dropdown. */
+  categories?: Category[];
   /** Existing tags for autocomplete. */
   tagSuggestions?: string[];
+  /** Existing authors for dropdown. */
+  authors?: Author[];
   /** Internal site paths for the CTA link picker. */
   internalRoutes?: string[];
 };
@@ -171,8 +188,9 @@ function ActionBar({
 export default function PostForm({
   post,
   defaultBlog,
-  categorySuggestions = [],
+  categories = [],
   tagSuggestions = [],
+  authors = [],
   internalRoutes = [],
 }: Props) {
   const [state, formAction] = useActionState(savePost, initialSaveState);
@@ -181,7 +199,7 @@ export default function PostForm({
   const initialBlocks: PartialBlock[] = (() => {
     if (!post?.contentJson) return [];
     try {
-      const parsed = JSON.parse(post.contentJson);
+      const parsed = post.contentJson;
       // Handle { blocks: [...] } format from backend
       if (parsed && typeof parsed === "object" && "blocks" in parsed && Array.isArray(parsed.blocks)) {
         return parsed.blocks as PartialBlock[];
@@ -210,6 +228,14 @@ export default function PostForm({
   const [status, setStatus] = useState(post?.status ?? "DRAFT");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // Author handling - track selected ID or custom name
+  const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
+  const [authorName, setAuthorName] = useState(post?.author?.name ?? "");
+
+  // Category handling - track selected ID or custom name
+  const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
+  const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
+
   // Cover: existing path + an optional newly-picked preview.
   const [coverPath, setCoverPath] = useState(post?.coverImage ?? "");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -227,15 +253,47 @@ export default function PostForm({
   const liveHref =
     post && post.status === "PUBLISHED" ? `/${post.blog}/${post.slug}` : undefined;
 
+  // Filter categories by selected blog
+  const blogCategories = categories.filter((c) => c.blog === blog);
+
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) setCoverPreview(URL.createObjectURL(file));
   }
 
   function setStatusForSubmit(s: string) {
-    setStatus(s);
+    setStatus(s as "DRAFT" | "PUBLISHED");
     if (statusRef.current) statusRef.current.value = s;
   }
+
+  // Handle author selection - either ID or custom name
+  function handleAuthorChange(value: string) {
+    const selectedAuthor = authors.find((a) => a.id === value);
+    if (selectedAuthor) {
+      setAuthorId(selectedAuthor.id);
+      setAuthorName(selectedAuthor.name);
+    } else {
+      // Custom name entered
+      setAuthorId("");
+      setAuthorName(value);
+    }
+  }
+
+  // Handle category selection
+  function handleCategoryChange(value: string) {
+    const selectedCategory = blogCategories.find((c) => c.id === value);
+    if (selectedCategory) {
+      setCategoryId(selectedCategory.id);
+      setCategoryName(selectedCategory.name);
+    } else {
+      // Custom name entered
+      setCategoryId("");
+      setCategoryName(value);
+    }
+  }
+
+  // Extract tag names for TagInput
+  const initialTagNames = post?.tags?.map((t) => t.name) ?? [];
 
   return (
     <form action={formAction}>
@@ -246,6 +304,12 @@ export default function PostForm({
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
       <input ref={statusRef} type="hidden" name="status" defaultValue={status} />
+      {/* Author - send ID if available, otherwise name */}
+      {authorId && <input type="hidden" name="authorId" value={authorId} />}
+      <input type="hidden" name="authorName" value={authorName || "energiebee"} />
+      {/* Category - send ID if available, otherwise name */}
+      {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
+      <input type="hidden" name="category" value={categoryName || "Uncategorised"} />
       {/* hidden cover file input, triggered from the cover zone */}
       <input
         ref={fileRef}
@@ -341,7 +405,7 @@ export default function PostForm({
         <div className="mb-6">
           <TagInput
             name="tags"
-            initial={post?.tags ?? []}
+            initial={initialTagNames}
             suggestions={tagSuggestions}
           />
         </div>
@@ -402,21 +466,21 @@ export default function PostForm({
 
               <Labeled label="Category" hint="Pick an existing one or type a new category.">
                 <input
-                  name="category"
-                  defaultValue={post?.category}
+                  value={categoryName}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   placeholder="Uncategorised"
                   list="category-options"
                   className={inputClass}
                 />
                 <datalist id="category-options">
-                  {categorySuggestions.map((c) => (
-                    <option key={c} value={c} />
+                  {blogCategories.map((c) => (
+                    <option key={c.id} value={c.name} />
                   ))}
                 </datalist>
               </Labeled>
 
               <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <input name="lede" defaultValue={post?.lede} className={inputClass} />
+                <input name="lede" defaultValue={post?.lede ?? ""} className={inputClass} />
               </Labeled>
 
               {/* SEO */}
@@ -454,14 +518,26 @@ export default function PostForm({
                 </Labeled>
               </div>
 
-              <Labeled label="Author name" hint="Defaults to energiebee.">
-                <input name="authorName" defaultValue={post?.authorName} className={inputClass} />
+              <Labeled label="Author" hint="Select an existing author or type a new name.">
+                <input
+                  value={authorName}
+                  onChange={(e) => handleAuthorChange(e.target.value)}
+                  placeholder="energiebee"
+                  list="author-options"
+                  className={inputClass}
+                />
+                <datalist id="author-options">
+                  {authors.map((a) => (
+                    <option key={a.id} value={a.name} />
+                  ))}
+                </datalist>
               </Labeled>
               <Labeled label="Author date" hint="Defaults to today.">
                 <input
                   name="authorDate"
-                  defaultValue={post?.authorDate}
-                  placeholder="e.g. 1 Jun 2026"
+                  defaultValue={post?.authorDate ?? ""}
+                  placeholder="e.g. 2026-06-01"
+                  type="date"
                   className={inputClass}
                 />
               </Labeled>
@@ -479,7 +555,7 @@ export default function PostForm({
               <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
                 <textarea
                   name="carouselIntro"
-                  defaultValue={post?.carouselIntro}
+                  defaultValue={post?.carouselIntro ?? ""}
                   rows={2}
                   className={inputClass}
                 />
@@ -487,7 +563,7 @@ export default function PostForm({
               <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
                 <textarea
                   name="carouselBody"
-                  defaultValue={post?.carouselBody}
+                  defaultValue={post?.carouselBody ?? ""}
                   rows={3}
                   className={inputClass}
                 />
@@ -499,7 +575,7 @@ export default function PostForm({
                 <Labeled label="Button label" hint="Leave blank for no CTA.">
                   <input
                     name="ctaLabel"
-                    defaultValue={post?.ctaLabel}
+                    defaultValue={post?.ctaLabel ?? ""}
                     placeholder="Try energiebee for free"
                     className={inputClass}
                   />
@@ -571,7 +647,7 @@ export default function PostForm({
               <Labeled label="Cover image alt" hint="Defaults to the title.">
                 <input
                   name="coverImageAlt"
-                  defaultValue={post?.coverImageAlt}
+                  defaultValue={post?.coverImageAlt ?? ""}
                   className={inputClass}
                 />
               </Labeled>

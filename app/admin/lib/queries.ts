@@ -1,6 +1,6 @@
 import "server-only";
 import { ROUTES } from "@/app/lib/site";
-import type { Article } from "@/app/lib/article-types";
+import type { Article, Author, Category, Tag } from "@/app/lib/article-types";
 import { adminApi, type AdminPost, type AdminPostRow } from "./api";
 
 export type { AdminPostRow } from "./api";
@@ -27,51 +27,74 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     id: row.id,
     blog: row.blog,
     slug: row.slug,
-    category: row.category,
-    readTime: `${row.readTime} min read`,
     title: row.title,
-    seoTitle: row.seoTitle ?? undefined,
-    seoDescription: row.seoDescription ?? undefined,
     description: row.description,
+    lede: row.lede,
+
+    // SEO
+    seoTitle: row.seoTitle,
+    seoDescription: row.seoDescription,
+
+    // Taxonomy (full objects)
+    author: row.author,
+    category: row.category,
     tags: row.tags ?? [],
-    image: row.coverImage,
-    imageAlt: row.coverImageAlt,
-    author: {
-      name: row.authorName,
-      date: formatDate(row.authorDate),
-    },
-    carouselIntro: row.carouselIntro ?? undefined,
-    carouselBody: row.carouselBody ?? undefined,
-    lede: row.lede ?? undefined,
-    cta: row.ctaLabel
-      ? { label: row.ctaLabel, href: row.ctaHref ?? undefined, external: row.ctaExternal }
-      : undefined,
-    contentHtml: row.contentHtml ?? "",
+
+    // Media
+    coverImage: row.coverImage,
+    coverImageAlt: row.coverImageAlt,
+
+    // Display
+    readTime: row.readTime,
+    authorDate: row.authorDate,
+
+    // Featured/Carousel
+    featured: row.featured,
+    carouselIntro: row.carouselIntro,
+    carouselBody: row.carouselBody,
+
+    // CTA (flattened)
+    ctaLabel: row.ctaLabel,
+    ctaHref: row.ctaHref,
+    ctaExternal: row.ctaExternal,
+
+    // Status
+    status: row.status,
+    publishedAt: row.publishedAt,
+
+    // Content
+    contentJson: row.contentJson,
+    contentHtml: row.contentHtml,
+
+    // Timestamps
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
-/** Format ISO date to display format. */
-function formatDate(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return isoDate;
-  }
-}
-
 /** Distinct categories across all posts (admin autocomplete). */
-export async function getAllCategories(): Promise<string[]> {
+export async function getAllCategories(): Promise<Category[]> {
   return adminApi.getAllCategories();
 }
 
-/** All tags used across posts, flattened + deduped + sorted. */
-export async function getAllTags(): Promise<string[]> {
+/** Get categories for a specific blog. */
+export async function getCategories(blog: "hive" | "learn"): Promise<Category[]> {
+  return adminApi.getCategories(blog);
+}
+
+/** All tags used across posts. */
+export async function getAllTags(): Promise<Tag[]> {
   return adminApi.getAllTags();
+}
+
+/** Get tags for a specific blog. */
+export async function getTags(blog: "hive" | "learn"): Promise<Tag[]> {
+  return adminApi.getTags(blog);
+}
+
+/** All authors. */
+export async function getAuthors(): Promise<Author[]> {
+  return adminApi.getAuthors();
 }
 
 /**

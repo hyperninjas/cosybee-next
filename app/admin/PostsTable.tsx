@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { deletePost, setStatus } from "./actions";
+import type { Category } from "@/app/lib/article-types";
 
 /** Simple spinner for loading states. */
 function Spinner({ className = "" }: { className?: string }) {
@@ -49,7 +50,7 @@ export type Row = {
   blog: string;
   slug: string;
   title: string;
-  category: string;
+  category: Category;
   status: string;
   featured: boolean;
   coverImage: string;
@@ -219,7 +220,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
     return rows.filter((r) => {
       if (tab !== "ALL" && r.status !== tab) return false;
       if (blog !== "all" && r.blog !== blog) return false;
-      if (q && !`${r.title} ${r.slug} ${r.category}`.toLowerCase().includes(q))
+      if (q && !`${r.title} ${r.slug} ${r.category?.name ?? ""}`.toLowerCase().includes(q))
         return false;
       return true;
     });
@@ -306,7 +307,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#9A9A9A]">
                   <span className="font-mono">/{r.blog}/{r.slug}</span>
                   <span>·</span>
-                  <span>{r.category}</span>
+                  <span>{r.category?.name ?? "Uncategorised"}</span>
                   <span>·</span>
                   <span>updated {relativeTime(r.updatedAt)}</span>
                 </div>

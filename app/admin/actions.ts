@@ -100,9 +100,9 @@ export async function savePost(
 
   const id = optStr(formData, "id");
   const rawBlog = str(formData, "blog");
-  const blog = BLOGS.has(rawBlog) ? rawBlog : "hive";
+  const blog = BLOGS.has(rawBlog) ? (rawBlog as "hive" | "learn") : "hive";
   const rawStatus = str(formData, "status");
-  const status = STATUSES.has(rawStatus) ? rawStatus : "DRAFT";
+  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
   const title = str(formData, "title");
   const contentJsonStr = str(formData, "contentJson") || "[]";
 
@@ -161,6 +161,14 @@ export async function savePost(
   const carouselIntro = optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
   const carouselBody = optStr(formData, "carouselBody") ?? (featured ? description : null);
 
+  // Author handling - use authorId if provided, otherwise authorName for auto-create
+  const authorId = optStr(formData, "authorId");
+  const authorName = str(formData, "authorName") || "energiebee";
+
+  // Category handling - use categoryId if provided, otherwise category name for auto-create
+  const categoryId = optStr(formData, "categoryId");
+  const category = str(formData, "category") || "Uncategorised";
+
   const data = {
     blog,
     slug,
@@ -168,8 +176,10 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    category: str(formData, "category") || "Uncategorised",
-    tags,
+    // Taxonomy - send ID if available, otherwise name for auto-create
+    ...(authorId ? { authorId } : { authorName }),
+    ...(categoryId ? { categoryId } : { category }),
+    tags, // string[] of tag names (backend auto-creates)
     readTime: readTimeMinutes,
     coverImage,
     coverImageAlt: str(formData, "coverImageAlt") || title,
@@ -177,7 +187,6 @@ export async function savePost(
     ctaLabel,
     ctaHref,
     ctaExternal: ctaHref ? ctaExternal : false,
-    authorName: str(formData, "authorName") || "energiebee",
     authorDate: str(formData, "authorDate") || new Date().toISOString(),
     carouselIntro,
     carouselBody,
@@ -209,8 +218,9 @@ export async function setStatus(formData: FormData): Promise<void> {
   const id = str(formData, "id");
   const blog = str(formData, "blog");
   const slug = str(formData, "slug");
-  const status = str(formData, "status");
-  if (!id || !blog || !slug || !STATUSES.has(status)) return;
+  const rawStatus = str(formData, "status");
+  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
+  if (!id || !blog || !slug) return;
 
   try {
     await adminApi.setStatus(id, status);

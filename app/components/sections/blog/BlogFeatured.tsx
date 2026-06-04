@@ -5,12 +5,26 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../../ui/Avatar";
 import { CtaButton } from "../../ui/Cta";
-import { type Article } from "@/app/lib/article-types";
+import { type Article, formatReadTime } from "@/app/lib/article-types";
 import Dot from "../../ui/Dot";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {
   return url.startsWith("http://") || url.startsWith("https://");
+}
+
+/** Format ISO date string to display format. */
+function formatDate(isoDate: string): string {
+  try {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
 }
 
 function ChevronLeft({ className }: { className?: string }) {
@@ -53,21 +67,21 @@ function Slide({
     <article className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[1fr_1fr]">
       <div className="relative aspect-4/3 lg:aspect-auto lg:h-full">
         <Image
-          src={slide.image}
-          alt={slide.imageAlt}
+          src={slide.coverImage}
+          alt={slide.coverImageAlt}
           fill
           sizes="(min-width: 1024px) 600px, 100vw"
           className="object-cover"
           priority={priority}
-          unoptimized={isExternalUrl(slide.image)}
+          unoptimized={isExternalUrl(slide.coverImage)}
         />
       </div>
       <div className="flex flex-col h-full p-8 sm:p-10">
         <div className="flex items-center gap-4 text-base">
-          <span className="font-semibold text-[#EE3D1A]">{slide.category}</span>
+          <span className="font-semibold text-[#EE3D1A]">{slide.category?.name ?? "Uncategorised"}</span>
           <Dot />
           <span className="text-[#545454] text-[15px] font-medium">
-            {slide.readTime}
+            {formatReadTime(slide.readTime)}
           </span>
         </div>
         <h2
@@ -85,13 +99,13 @@ function Slide({
           </p>
         )}
         <div className="flex items-center gap-3 mt-4">
-          <Avatar name={slide.author.name} />
+          <Avatar name={slide.author?.name ?? "energiebee"} avatarUrl={slide.author?.avatarUrl} />
           <div className="text-base">
             <div className="font-bold text-black text-lg">
-              {slide.author.name}
+              {slide.author?.name ?? "energiebee"}
             </div>
             <div className="text-[#545454] mt-1 font-medium text-[15px]">
-              {slide.author.date}
+              {formatDate(slide.authorDate)}
             </div>
           </div>
         </div>

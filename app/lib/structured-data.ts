@@ -45,17 +45,14 @@ export function blogPostingSchema(article: Article, path: string) {
     "@type": "BlogPosting",
     headline: article.seoTitle ?? article.title,
     description: article.seoDescription ?? article.description,
-    image: [absolute(article.image)],
-    ...(article.datePublished
-      ? { datePublished: article.datePublished }
-      : {}),
-    dateModified:
-      article.dateModified ?? article.datePublished ?? undefined,
+    image: [absolute(article.coverImage)],
+    ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+    dateModified: article.updatedAt ?? article.publishedAt ?? undefined,
     // Person author (not Organization) — individual authorship is a stronger
     // E-E-A-T signal. Publisher stays the Organization below.
     author: {
       "@type": "Person",
-      name: article.author.name || SITE_NAME,
+      name: article.author?.name || SITE_NAME,
     },
     publisher: {
       "@type": "Organization",
@@ -63,8 +60,10 @@ export function blogPostingSchema(article: Article, path: string) {
       logo: { "@type": "ImageObject", url: publisherLogo },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": absolute(path) },
-    ...(article.tags.length ? { keywords: article.tags.join(", ") } : {}),
-    articleSection: article.category || undefined,
+    ...(article.tags.length
+      ? { keywords: article.tags.map((t) => t.name).join(", ") }
+      : {}),
+    articleSection: article.category?.name || undefined,
     url: absolute(path),
   };
 }

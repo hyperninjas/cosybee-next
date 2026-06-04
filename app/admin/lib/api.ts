@@ -1,38 +1,57 @@
 import "server-only";
 
+import type { Author, Category, Tag } from "@/app/lib/article-types";
+
 const API_BASE = process.env.API_URL || "http://localhost:3000";
 
 /** Post shape from the backend API. */
 export interface AdminPost {
   id: string;
-  blog: string;
+  blog: "hive" | "learn";
   slug: string;
   title: string;
   description: string;
   lede: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
-  category: string;
-  tags: string[];
-  readTime: number;
+
+  // Taxonomy (full objects)
+  author: Author;
+  category: Category;
+  tags: Tag[];
+
+  // Media
   coverImage: string;
   coverImageAlt: string;
+
+  // Display
+  readTime: number;
+  authorDate: string;
+
+  // Featured/Carousel
+  featured: boolean;
+  carouselIntro: string | null;
+  carouselBody: string | null;
+
+  // CTA
   ctaLabel: string | null;
   ctaHref: string | null;
   ctaExternal: boolean;
-  authorName: string;
-  authorDate: string;
-  carouselIntro: string | null;
-  carouselBody: string | null;
-  featured: boolean;
-  status: string;
+
+  // Status
+  status: "DRAFT" | "PUBLISHED";
   publishedAt: string | null;
-  contentJson: object | string;
-  contentHtml: string;
+
+  // Content
+  contentJson: Record<string, unknown> | null;
+  contentHtml: string | null;
+
+  // Timestamps
   createdAt: string;
   updatedAt: string;
 }
 
+/** Row data for admin posts table. */
 export type AdminPostRow = Pick<
   AdminPost,
   | "id"
@@ -46,7 +65,50 @@ export type AdminPostRow = Pick<
   | "updatedAt"
 >;
 
-/** Make request to backend API (no auth required for now). */
+/** Input for creating/updating a post. */
+export interface PostInput {
+  blog: "hive" | "learn";
+  slug: string;
+  title: string;
+  description: string;
+  lede?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+
+  // Taxonomy - use IDs or names (backend auto-creates if name provided)
+  authorId?: string;
+  authorName?: string;
+  categoryId?: string;
+  category?: string; // category name for auto-create
+  tags?: string[]; // tag names (backend auto-creates)
+
+  // Media
+  coverImage?: string;
+  coverImageAlt?: string;
+
+  // Display
+  readTime?: number;
+  authorDate?: string;
+
+  // Featured/Carousel
+  featured?: boolean;
+  carouselIntro?: string | null;
+  carouselBody?: string | null;
+
+  // CTA
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  ctaExternal?: boolean;
+
+  // Status
+  status?: "DRAFT" | "PUBLISHED";
+
+  // Content
+  contentJson?: Record<string, unknown>;
+  contentHtml?: string;
+}
+
+/** Make request to backend API. */
 async function fetchApi<T>(
   path: string,
   options: RequestInit = {},
@@ -70,7 +132,7 @@ async function fetchApi<T>(
   return res.json();
 }
 
-/** Make multipart request for file uploads (no auth required for now). */
+/** Make multipart request for file uploads. */
 async function fetchApiMultipart<T>(
   path: string,
   formData: FormData,
@@ -137,7 +199,7 @@ export const adminApi = {
   },
 
   /** Create a new post. */
-  async createPost(data: Partial<AdminPost>): Promise<AdminPost> {
+  async createPost(data: PostInput): Promise<AdminPost> {
     return fetchApi<AdminPost>("/api/posts", {
       method: "POST",
       body: JSON.stringify(data),
@@ -145,7 +207,7 @@ export const adminApi = {
   },
 
   /** Update an existing post. */
-  async updatePost(id: string, data: Partial<AdminPost>): Promise<AdminPost> {
+  async updatePost(id: string, data: Partial<PostInput>): Promise<AdminPost> {
     return fetchApi<AdminPost>(`/api/posts/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
@@ -158,7 +220,7 @@ export const adminApi = {
   },
 
   /** Update post status (publish/unpublish). */
-  async setStatus(id: string, status: string): Promise<AdminPost> {
+  async setStatus(id: string, status: "DRAFT" | "PUBLISHED"): Promise<AdminPost> {
     return fetchApi<AdminPost>(`/api/posts/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
@@ -173,32 +235,73 @@ export const adminApi = {
       "/api/media",
       formData,
     );
-    // Construct URL from returned ID
     return {
       id: result.id,
       url: `${API_BASE}/api/media/${result.id}`,
     };
   },
 
-  /** Get all categories across posts. */
-  async getAllCategories(): Promise<string[]> {
+  /** Get all categories (full objects). */
+  async getAllCategories(): Promise<Category[]> {
     try {
-      const hive = await fetchApi<{ data: string[] }>(
-        "/api/posts/categories?blog=hive",
-      );
-      const learn = await fetchApi<{ data: string[] }>(
-        "/api/posts/categories?blog=learn",
-      );
-      return [...new Set([...hive.data, ...learn.data])].sort();
+      const [hive, learn] = await Promise.all([
+        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=hive"),
+        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=learn"),
+      ]);
+      return [...hive.data, ...learn.data];
     } catch {
       return [];
     }
   },
 
-  /** Get all tags across posts. */
-  async getAllTags(): Promise<string[]> {
-    // Backend might not have a tags endpoint, return empty for now
-    return [];
+  /** Get categories for a specific blog. */
+  async getCategories(blog: "hive" | "learn"): Promise<Category[]> {
+    try {
+      const response = await fetchApi<{ data: Category[] }>(
+        `/api/posts/categories?blog=${blog}`,
+      );
+      return response.data;
+    } catch {
+      return [];
+    }
+  },
+
+  /** Get all tags (full objects). */
+  async getAllTags(): Promise<Tag[]> {
+    try {
+      const [hive, learn] = await Promise.all([
+        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive"),
+        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn"),
+      ]);
+      // Dedupe by id
+      const tagMap = new Map<string, Tag>();
+      [...hive.data, ...learn.data].forEach((t) => tagMap.set(t.id, t));
+      return Array.from(tagMap.values());
+    } catch {
+      return [];
+    }
+  },
+
+  /** Get tags for a specific blog. */
+  async getTags(blog: "hive" | "learn"): Promise<Tag[]> {
+    try {
+      const response = await fetchApi<{ data: Tag[] }>(
+        `/api/posts/tags?blog=${blog}`,
+      );
+      return response.data;
+    } catch {
+      return [];
+    }
+  },
+
+  /** Get all authors. */
+  async getAuthors(): Promise<Author[]> {
+    try {
+      const response = await fetchApi<{ data: Author[] }>("/api/posts/authors");
+      return response.data;
+    } catch {
+      return [];
+    }
   },
 
   /** Check if slug exists (for uniqueness). */

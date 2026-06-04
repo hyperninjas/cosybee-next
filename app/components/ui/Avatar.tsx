@@ -41,20 +41,24 @@ function tintFor(name: string): string {
  */
 export default function Avatar({
   src,
+  avatarUrl,
   name,
   className = "h-13.5 w-13.5",
 }: {
   /** Optional photo. When omitted, initials are rendered instead. */
   src?: StaticImageData | string;
+  /** Optional avatar URL (alias for src, used when passing author objects). */
+  avatarUrl?: string | null;
   /** Author name — used for the alt text AND the initials fallback. */
   name: string;
   /** Tailwind sizing classes (height, width). Default `h-10 w-10`. */
   className?: string;
 }) {
-  if (src) {
+  const imageSrc = src ?? avatarUrl;
+  if (imageSrc) {
     return (
       <Image
-        src={src}
+        src={imageSrc}
         alt={name}
         width={54}
         height={54}
