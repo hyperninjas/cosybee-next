@@ -189,6 +189,15 @@ export const LIMITS: Record<
   },
 };
 
+/** Derive the storage key from a public fileUrl by stripping the host/origin. */
+export function keyFromUrl(url: string): string {
+  try {
+    return new URL(url).pathname.replace(/^\/+/, "");
+  } catch {
+    return url;
+  }
+}
+
 export function validate(file: File, ctx: UploadContext): string | null {
   const l = LIMITS[ctx];
   if (!l.types.includes(file.type))

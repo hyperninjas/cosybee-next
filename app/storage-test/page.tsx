@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { PublicFileUpload } from "@/app/components/storage/PublicFileUpload";
-import { deleteObject } from "@/app/lib/storage";
+import { deleteObject, keyFromUrl } from "@/app/lib/storage";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -31,18 +31,6 @@ export default function StorageTestPage() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [log, setLog] = useState<string[]>([]);
-
-  // Inline closure (not a module-level helper): the React Compiler runs in
-  // compilationMode 'all', which instruments every top-level function with a
-  // memo-cache hook — calling such a helper from an event handler throws
-  // "Invalid hook call". Keeping it inside the component avoids that.
-  function keyFromUrl(url: string): string {
-    try {
-      return new URL(url).pathname.replace(/^\/+/, "");
-    } catch {
-      return url;
-    }
-  }
 
   function note(msg: string) {
     setLog((prev) => [msg, ...prev].slice(0, 20));
