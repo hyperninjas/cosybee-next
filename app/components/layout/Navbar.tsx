@@ -47,50 +47,56 @@ function Logo({ className }: { className?: string }) {
   );
 }
 
-function SearchIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
+// function SearchIcon() {
+//   return (
+//     <svg
+//       width="20"
+//       height="20"
+//       viewBox="0 0 24 24"
+//       fill="none"
+//       stroke="currentColor"
+//       strokeWidth="1.5"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       aria-hidden="true"
+//     >
+//       <circle cx="11" cy="11" r="7" />
+//       <path d="m20 20-3.5-3.5" />
+//     </svg>
+//   );
+// }
 
-function UserIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4.418 3.582-7 8-7s8 2.582 8 7" />
-    </svg>
-  );
-}
+// function UserIcon() {
+//   return (
+//     <svg
+//       width="20"
+//       height="20"
+//       viewBox="0 0 24 24"
+//       fill="none"
+//       stroke="currentColor"
+//       strokeWidth="1.5"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       aria-hidden="true"
+//     >
+//       <circle cx="12" cy="8" r="4" />
+//       <path d="M4 21c0-4.418 3.582-7 8-7s8 2.582 8 7" />
+//     </svg>
+//   );
+// }
 
 /**
  * Hamburger that morphs into an X when `open`. Both states share the same
  * three <line>s so the transition is a pure transform — no layout reads,
  * GPU-cheap, and motion-reduce-friendly.
  */
-function MenuToggleIcon({ open }: { open: boolean }) {
+function MenuToggleIcon({
+  open,
+  className,
+}: {
+  open: boolean;
+  className?: string;
+}) {
   return (
     <svg
       width="20"
@@ -99,17 +105,18 @@ function MenuToggleIcon({ open }: { open: boolean }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      className={className}
     >
       <line
         x1="4"
         y1="4"
         x2="16"
         y2="4"
-        stroke="#D7C638"
+        stroke="#C7B734"
         strokeWidth="1.4"
         strokeLinecap="round"
         className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
-          open ? "translate-y-[6px] rotate-45" : ""
+          open ? "translate-y-1.5 rotate-45" : ""
         }`}
         style={{ transformBox: "fill-box" }}
       />
@@ -118,7 +125,7 @@ function MenuToggleIcon({ open }: { open: boolean }) {
         y1="10"
         x2="19"
         y2="10"
-        stroke="#D7C638"
+        stroke="#C7B734"
         strokeWidth="1.4"
         strokeLinecap="round"
         className={`origin-center transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
@@ -131,11 +138,11 @@ function MenuToggleIcon({ open }: { open: boolean }) {
         y1="16"
         x2="16"
         y2="16"
-        stroke="#D7C638"
+        stroke="#C7B734"
         strokeWidth="1.4"
         strokeLinecap="round"
         className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
-          open ? "-translate-y-[6px] -rotate-45" : ""
+          open ? "-translate-y-1.5 -rotate-45" : ""
         }`}
         style={{ transformBox: "fill-box" }}
       />
@@ -175,7 +182,7 @@ export default function Navbar({
     <header className="sticky top-0 z-50 bg-black text-white">
       <nav className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30">
         <Link href="/" aria-label="Cosybee home" className="shrink-0">
-          <Logo className="h-8 w-auto lg:h-10" />
+          <Logo className="h-12 w-auto lg:h-14" />
         </Link>
 
         <ul className="hidden items-center gap-8 lg:flex xl:gap-12">
@@ -217,9 +224,9 @@ export default function Navbar({
             aria-expanded={open}
             aria-controls={MENU_ID}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-white/5 lg:hidden"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-md transition-colors hover:bg-white/5 lg:hidden"
           >
-            <MenuToggleIcon open={open} />
+            <MenuToggleIcon open={open} className="h-9 w-7" />
           </button>
         </div>
 
