@@ -4,6 +4,7 @@ import BlogBrowse from "../components/sections/blog/BlogBrowse";
 import { getArticles, getFeatured, getCategories } from "../lib/articles";
 import JsonLd from "../components/JsonLd";
 import { breadcrumbSchema } from "../lib/structured-data";
+import hiveCover from "@/public/Cover/energiebee-hive-cover.png";
 
 export const metadata: Metadata = {
   title: "The Hive",
@@ -39,6 +40,7 @@ export default async function HivePage({
       <BlogHero
         title="The Hive"
         description="Insights, stories, and expert advice on sustainable energy solutions for modern homes."
+        bgImage={hiveCover}
       />
       <BlogBrowse
         articles={articles}

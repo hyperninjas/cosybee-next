@@ -9,7 +9,7 @@ import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/smart/energiebee-app-epc-rating-improvement.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import heroBgImg from "@/public/smart-hero-bg.png";
+import heroBgImg from "@/public/Cover/energiebee-smart-cover.png";
 import Image from "next/image";
 
 // function HeroPhone({ className = "" }: { className?: string }) {
@@ -38,7 +38,7 @@ export default function Hero() {
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-black via-black/30 to-black/0 h-[20%]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>
 
       <div className="relative mx-auto grid max-w-360 grid-cols-1 gap-12 items-center  px-6 pt-16 pb-24 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:px-30 lg:pl-71.5 lg:pt-15 lg:pb-11">
