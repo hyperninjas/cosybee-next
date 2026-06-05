@@ -316,10 +316,13 @@ export default function PostForm({
       if (Array.isArray(parsed)) {
         return parsed as PartialBlock[];
       }
-      // Handle legacy format: { sections: [{ paragraphs: [...] }] }
+      // Handle legacy format: { sections: [{ heading, paragraphs, blocks }] }
       if (parsed && typeof parsed === "object" && "sections" in parsed && Array.isArray(parsed.sections)) {
         const blocks: PartialBlock[] = [];
-        for (const section of parsed.sections as Array<{ heading?: string; paragraphs?: string[] }>) {
+        type LegacyBlock = string | { items: string[] };
+        type LegacySection = { heading?: string; paragraphs?: string[]; blocks?: LegacyBlock[] };
+
+        for (const section of parsed.sections as LegacySection[]) {
           // Add section heading if present
           if (section.heading) {
             blocks.push({
@@ -328,7 +331,7 @@ export default function PostForm({
               content: [{ type: "text", text: section.heading, styles: {} }],
             });
           }
-          // Add paragraphs
+          // Add paragraphs (legacy format)
           if (section.paragraphs && Array.isArray(section.paragraphs)) {
             for (const para of section.paragraphs) {
               if (typeof para === "string" && para.trim()) {
@@ -336,6 +339,31 @@ export default function PostForm({
                   type: "paragraph",
                   content: [{ type: "text", text: para, styles: {} }],
                 });
+              }
+            }
+          }
+          // Add blocks (can be strings or objects with items)
+          if (section.blocks && Array.isArray(section.blocks)) {
+            for (const block of section.blocks) {
+              if (typeof block === "string" && block.trim()) {
+                // Plain text block
+                blocks.push({
+                  type: "paragraph",
+                  content: [{ type: "text", text: block, styles: {} }],
+                });
+              } else if (block && typeof block === "object" && "items" in block) {
+                // Bullet list
+                const items = (block as { items: string[] }).items;
+                if (Array.isArray(items)) {
+                  for (const item of items) {
+                    if (typeof item === "string" && item.trim()) {
+                      blocks.push({
+                        type: "bulletListItem",
+                        content: [{ type: "text", text: item, styles: {} }],
+                      });
+                    }
+                  }
+                }
               }
             }
           }

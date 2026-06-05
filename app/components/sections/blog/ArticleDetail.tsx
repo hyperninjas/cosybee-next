@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type Article, formatReadTime } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
+import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
 import { ArticleCard } from "./BlogLatestArticles";
 import { CtaButton } from "../../ui/Cta";
 import Dot from "../../ui/Dot";
@@ -51,7 +52,20 @@ export default function ArticleDetail({
   related,
   basePath,
 }: Props) {
-  const { html, items: toc } = buildToc(article.contentHtml ?? "");
+  // Use contentHtml if available, otherwise render legacy contentJson
+  let rawHtml = article.contentHtml ?? "";
+  if ((!rawHtml || rawHtml.trim() === "") && isLegacyContent(article.contentJson)) {
+    rawHtml = renderLegacyContent(article.contentJson) ?? "";
+  }
+  // Also use legacy renderer if contentJson has sections with blocks that weren't rendered
+  if (isLegacyContent(article.contentJson)) {
+    const legacyHtml = renderLegacyContent(article.contentJson);
+    // If legacy HTML is longer, it likely has more content (blocks/items)
+    if (legacyHtml && legacyHtml.length > rawHtml.length) {
+      rawHtml = legacyHtml;
+    }
+  }
+  const { html, items: toc } = buildToc(rawHtml);
   const path = `${basePath}/${article.slug}`;
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
   const crumbs = [
