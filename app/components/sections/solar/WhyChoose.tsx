@@ -10,7 +10,7 @@ import {
 
 export default function WhyChoose() {
   return (
-    <section className="relative overflow-hidden bg-neutral-50 py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-neutral-50 py-12 sm:py-16 lg:py-20">
       <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[1fr_1.2fr_1fr] lg:gap-10 lg:px-12">
         {/* left: phone */}
         <div className="flex justify-center lg:justify-start">

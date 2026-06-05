@@ -41,39 +41,35 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
       <link rel="preconnect" href="https://eb-api.technext.it" />
       <Link
         href={`${basePath}/${a.slug}`}
-      className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)] transition-shadow hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)]"
+      className="flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)]"
     >
-      <div className="relative aspect-[1.39]">
+      <div className="relative h-48">
         <Image
           src={a.coverImage}
           alt={a.coverImageAlt}
           fill
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-          className="object-cover"
+          className="object-cover hover:scale-105 transition-transform duration-300"
           unoptimized={isExternalUrl(a.coverImage)}
         />
+        <span className="absolute left-4 top-4 rounded-full bg-[#FAFAFA] px-3 py-1 text-xs font-semibold text-[#DE3B24]">
+          {a.category?.name ?? "Uncategorised"}
+        </span>
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <div className="flex flex-wrap  justify-between items-center gap-2 text-[15px] font-medium text-[#545454]">
-          <div className="flex flex-wrap items-center gap-2 text-[15px] max-h-8 font-medium text-[#545454]">
-            {" "}
-            <span>{formatReadTime(a.readTime)}</span>
-            <Dot />
-            <span>{formatDate(a.authorDate)}</span>
-          </div>
-
-          <p className=" h-8 rounded-full border border-[#E6E6E6] bg-[#FAFAFA] px-3 py-1 font-semibold tracking-normal text-[#DE3B24] max-w-32.5 text-nowrap text-ellipsis overflow-hidden">
-            {a.category?.name ?? "Uncategorised"}
-          </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
+          <span>{formatReadTime(a.readTime)}</span>
+          <Dot />
+          <span>{formatDate(a.authorDate)}</span>
         </div>
-        <h3 className="mt-3 text-xl font-bold leading-snug text-black">
+        <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-black">
           {a.title}
         </h3>
-        <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-[#545454]">
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#545454]">
           {a.description}
         </p>
         {a.tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-4 flex flex-wrap gap-1.5">
             {a.tags.slice(0, 3).map((t) => (
               <span
                 key={t.id}
@@ -86,9 +82,9 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         )}
         <div className="mt-auto pt-4">
           <Divider />
-          <div className="mt-4 flex items-center gap-5">
-            <Avatar name={a.author?.name ?? "energiebee"} avatarUrl={a.author?.avatarUrl} className="h-11 w-11" />
-            <span className="text-[15px] font-bold text-black">
+          <div className="mt-4 flex items-center gap-3">
+            <Avatar name={a.author?.name ?? "energiebee"} avatarUrl={a.author?.avatarUrl} className="h-10 w-10" />
+            <span className="text-sm font-semibold text-black">
               {a.author?.name ?? "energiebee"}
             </span>
           </div>
@@ -186,7 +182,7 @@ export default function BlogLatestArticles({
           No articles match your search. Try a different keyword or category.
         </p>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 lg:gap-8">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 lg:gap-6">
           {shown.map((a) => (
             <ArticleCard key={a.slug} a={a} basePath={basePath} />
           ))}
