@@ -49,6 +49,21 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    // Let feed readers and crawlers discover the blog RSS feed.
+    types: {
+      "application/rss+xml": [{ url: "/feed.xml", title: `${SITE_NAME} — Blog` }],
+    },
+  },
+  // Search-engine site verification. Tokens are read from server env so they
+  // can differ per environment and aren't committed. Undefined values are
+  // omitted by Next, so this is a no-op until the tokens are set.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } }
+      : {}),
   },
   openGraph: {
     type: "website",

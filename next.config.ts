@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+// Serve the site on ONE hostname only. Both www and non-www resolving splits
+// ranking signals (duplicate content), so we 301 www → non-www to match the
+// canonical URLs (SITE_URL = https://energiebee.com in app/lib/site.ts).
+// To make www the canonical host instead, swap these two values.
+const CANONICAL_HOST = "energiebee.com";
+const REDIRECT_FROM_HOST = `www.${CANONICAL_HOST}`;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
@@ -88,6 +95,15 @@ const nextConfig: NextConfig = {
     // of a 301), so each old page's ranking signal transfers to the closest
     // matching page here and the 404s clear.
     return [
+      // Host canonicalisation: 301 every www request to the bare domain so
+      // www and non-www don't serve duplicate content. Runs before the legacy
+      // path redirects below.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: REDIRECT_FROM_HOST }],
+        destination: `https://${CANONICAL_HOST}/:path*`,
+        permanent: true,
+      },
       {
         source: "/energy-monitoring-domestic",
         destination: "/energy",

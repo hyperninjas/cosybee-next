@@ -54,7 +54,6 @@ export default async function LearnArticlePage({
       article={article}
       related={related}
       basePath="/learn"
-      backLabel="Back to Learn"
     />
   );
 }

@@ -90,6 +90,43 @@ export function softwareApplicationSchema() {
   };
 }
 
+/**
+ * FAQPage for a marketing page's FAQ section. Google requires the same Q&A
+ * to be VISIBLE on the page — always render this alongside a visible <Faq>,
+ * never on its own, or it risks a structured-data penalty.
+ */
+export function faqPageSchema(items: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((it) => ({
+      "@type": "Question",
+      name: it.question,
+      acceptedAnswer: { "@type": "Answer", text: it.answer },
+    })),
+  };
+}
+
+/** Person schema for an author profile page (E-E-A-T). */
+export function personSchema(author: {
+  name: string;
+  slug: string;
+  role: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: author.name,
+    url: absolute(`/author/${author.slug}`),
+    ...(author.role ? { jobTitle: author.role } : {}),
+    ...(author.bio ? { description: author.bio } : {}),
+    ...(author.avatarUrl ? { image: absolute(author.avatarUrl) } : {}),
+    worksFor: { "@type": "Organization", name: ORG_LEGAL_NAME, url: SITE_URL },
+  };
+}
+
 /** CollectionPage for a blog listing / tag page. */
 export function collectionPageSchema(opts: {
   name: string;

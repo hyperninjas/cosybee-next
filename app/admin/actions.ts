@@ -220,8 +220,8 @@ export async function savePost(
     featured,
     status,
     // Only include content if editor has blocks - preserves legacy content on metadata-only edits
-    ...(contentJson !== undefined && { contentJson }),
-    ...(contentHtml !== undefined && { contentHtml }),
+    ...(contentJson !== undefined ? { contentJson } : {}),
+    ...(contentHtml !== undefined ? { contentHtml } : {}),
   };
 
   try {

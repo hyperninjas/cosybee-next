@@ -7,7 +7,9 @@ import SmarterUnderstanding from "../components/sections/heating/SmarterUndersta
 import ConnectedEcosystem from "../components/sections/heating/ConnectedEcosystem";
 import WhyChoose from "../components/sections/heating/WhyChoose";
 import JsonLd from "../components/JsonLd";
+import Faq from "../components/sections/Faq";
 import { breadcrumbSchema } from "../lib/structured-data";
+import { HEATING_FAQ } from "../lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Smart Heating Control",
@@ -47,6 +49,7 @@ export default function HeatingPage() {
       <SmarterUnderstanding />
       <ConnectedEcosystem />
       <WhyChoose />
+      <Faq items={HEATING_FAQ} />
     </main>
   );
 }

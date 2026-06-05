@@ -214,6 +214,54 @@ export async function getAllArticles(blog: Blog): Promise<Article[]> {
   return posts.map(toArticle);
 }
 
+/** Does an author object carry any profile detail worth a page header? */
+function hasAuthorDetail(a: Author): boolean {
+  return Boolean(a.bio || a.avatarUrl || a.role);
+}
+
+/** Unique author slugs across both blogs — for author-page static params + sitemap. */
+export async function getAuthorSlugs(): Promise<string[]> {
+  const [hive, learn] = await Promise.all([
+    getAllArticles("hive"),
+    getAllArticles("learn"),
+  ]);
+  const slugs = new Set<string>();
+  for (const a of [...hive, ...learn]) {
+    if (a.author?.slug) slugs.add(a.author.slug);
+  }
+  return [...slugs];
+}
+
+/**
+ * An author's profile + their published articles (newest first, both blogs).
+ * Returns null if the slug matches no author. Picks the richest author object
+ * seen (one with a bio/avatar/role) so the header isn't empty when only some
+ * posts carry full author detail.
+ */
+export async function getAuthorProfile(
+  slug: string,
+): Promise<{ author: Author; articles: Article[] } | null> {
+  const [hive, learn] = await Promise.all([
+    getAllArticles("hive"),
+    getAllArticles("learn"),
+  ]);
+  const mine = [...hive, ...learn].filter((a) => a.author?.slug === slug);
+  if (mine.length === 0) return null;
+
+  const author = mine
+    .map((a) => a.author)
+    .reduce((best, cur) =>
+      hasAuthorDetail(cur) && !hasAuthorDetail(best) ? cur : best,
+    );
+
+  const articles = mine.sort(
+    (a, b) =>
+      new Date(b.publishedAt ?? b.authorDate ?? 0).getTime() -
+      new Date(a.publishedAt ?? a.authorDate ?? 0).getTime(),
+  );
+  return { author, articles };
+}
+
 export async function getSitemapArticles(
   blog: Blog,
 ): Promise<{ path: string; lastModified: Date }[]> {

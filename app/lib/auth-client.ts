@@ -6,11 +6,10 @@ import {
   emailOTPClient,
 } from "better-auth/client/plugins";
 
-// Use NEXT_PUBLIC_AUTH_URL for the backend API
-// Local: http://localhost:3000
-// Production: https://api.energiebee.com
+// Use same-origin proxy to avoid cross-origin cookie issues
+// The /api/auth/* routes proxy to the backend API
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000",
+  baseURL: "",  // Same-origin - proxied through /api/auth/*
   plugins: [
     adminClient(),
     organizationClient(),

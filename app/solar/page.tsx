@@ -8,7 +8,9 @@ import SmartEnergyManagement from "../components/sections/solar/SmartEnergyManag
 import WhyEnergieBeeSolar from "../components/sections/solar/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "../components/sections/solar/WorksWithAnySystem";
 import JsonLd from "../components/JsonLd";
+import Faq from "../components/sections/Faq";
 import { breadcrumbSchema } from "../lib/structured-data";
+import { SOLAR_FAQ } from "../lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Solar Forecasting & Optimisation",
@@ -47,6 +49,7 @@ export default function Home() {
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
       <EnergyForecasting />
+      <Faq items={SOLAR_FAQ} />
     </main>
   );
 }
