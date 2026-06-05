@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/layout/Footer";
@@ -220,6 +221,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
+        {/* Consently cookie-consent banner. As a consent manager it must run
+         *  before any tracking scripts hydrate, so it uses the
+         *  `beforeInteractive` strategy (Next injects it into <head>). */}
+        <Script
+          src="https://app.consently.net/consently.js"
+          data-bannerid="6a229f9186e4ca8d56f54ed0"
+          strategy="beforeInteractive"
+        />
         <Navbar />
         {children}
         <Footer />
