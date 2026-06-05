@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { CtaButton } from "../../ui/Cta";
-import heroBgImg from "@/public/energibee-hero-image.png";
+import heroBgImg from "@/public/energibee-hero-image.jpg";
+import heroDeviceImg from "@/public/energibee-hero-device.png";
 import AppStoreButton from "../../ui/AppStoreButton";
 
 /**
@@ -23,7 +24,20 @@ export default function HomeHero() {
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(112.98deg,rgba(0,0,0,0.8)_5.9%,rgba(0,0,0,0)_76.63%)]" />
+        {/* device mockup — pinned to the right edge of the 1440px content rail, fills section height */}
+        <div className="pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-360 -translate-x-1/2">
+          <Image
+            src={heroDeviceImg}
+            alt="energiebee app preview"
+            aria-hidden
+            priority
+            fetchPriority="high"
+            quality={90}
+            placeholder="blur"
+            className="absolute right-0 bottom-0 h-full hidden md:block w-auto"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_78.19%)]" />
       </div>
 
       <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">

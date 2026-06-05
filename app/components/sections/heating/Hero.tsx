@@ -53,11 +53,11 @@ export default function Hero() {
             {"Home Heating \n"}
             <span className="text-[#EFDF18]">Intelligence</span>
           </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-[#ffffff]">
+          <p className="mt-5 max-w-165 text-base sm:text-[22px] leading-7 text-[#ffffff]">
             Predictive energy intelligence that helps you understand, optimise,
             and reduce your home heating consumption.
           </p>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-[#ffffff]">
+          <p className="mt-5 max-w-165 text-base sm:text-[22px] leading-7 text-[#ffffff]">
             Powered by high-accuracy forecasting models, real-time energy data,
             and climate-aware intelligence that reduces waste, cost, and carbon
             impact.
