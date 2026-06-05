@@ -7,7 +7,7 @@ import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";
 
 export default function SmarterUnderstanding() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 sm:py-20 lg:py-25 px-6 lg:px-0">
+    <section className="relative overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 lg:py-20 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone mockup */}
         <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">

@@ -6,7 +6,7 @@ import deviceWeatherImg from "@/public/smart/energiebee-weather-forecasts.png";
 
 export default function EnergyForecasting() {
   return (
-    <section className="bg-white py-20 sm:py-20 lg:py-25 max-w-225 mx-auto  px-4 lg:px-0">
+    <section className="bg-white py-16 sm:py-16 lg:py-20 max-w-225 mx-auto px-4 lg:px-0">
       <SectionHeader
         title="Intelligent Energy Forecasting"
         description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"
