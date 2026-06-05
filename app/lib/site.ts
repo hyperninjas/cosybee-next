@@ -42,10 +42,9 @@ export const ORG_ADDRESS = {
 export const ORG_CONTACT_EMAIL = "hello@EnergieBee.com";
 
 export const SOCIAL = {
-  facebook: "https://facebook.com/EnergieBee",
-  instagram: "https://instagram.com/EnergieBee",
-  linkedin: "https://linkedin.com/company/EnergieBee",
-  youtube: "https://youtube.com/@EnergieBee",
+  facebook: "https://www.facebook.com/EnergieBeeLtd/",
+  instagram: "https://www.instagram.com/energiebee/",
+  linkedin: "https://www.linkedin.com/company/energiebeeltd/",
 } as const;
 
 /** All public routes — keep in sync with the page.tsx files under app/. Used by sitemap. */

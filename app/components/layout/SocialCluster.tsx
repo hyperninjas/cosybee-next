@@ -53,7 +53,7 @@ export default function SocialCluster({
       {/* Facebook — middle-left hex */}
       <a
         href={facebook}
-        // target="_blank"
+        target="_blank"
         rel="noopener noreferrer"
         aria-label="Facebook"
         className="group"
@@ -77,7 +77,7 @@ export default function SocialCluster({
       {/* Instagram — top hex */}
       <a
         href={instagram}
-        // target="_blank"
+        target="_blank"
         rel="noopener noreferrer"
         aria-label="Instagram"
         className="group"
@@ -118,7 +118,7 @@ export default function SocialCluster({
       {/* LinkedIn — bottom hex */}
       <a
         href={linkedin}
-        // target="_blank"
+        target="_blank"
         rel="noopener noreferrer"
         aria-label="LinkedIn"
         className="group"

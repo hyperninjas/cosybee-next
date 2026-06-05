@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SocialCluster from "./SocialCluster";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
+import { SOCIAL } from "@/app/lib/site";
 
 const WHY_LINKS = [
   { label: "A Warm Hive, a Cosy Home", href: "/hive/a-warm-hive-a-cosy-home" },
@@ -96,10 +97,7 @@ export default function Footer() {
             </h3>
             <SocialCluster
               className="mt-5 h-auto pb-1 w-46"
-              facebook="#"
-              instagram="#"
-              youtube="#"
-              linkedin="#"
+              {...SOCIAL}
             />
           </div>
         </div>
