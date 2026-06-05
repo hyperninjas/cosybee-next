@@ -12,7 +12,7 @@ export default function EnergyForecasting() {
         description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"
       />
 
-      <div className=" grid justify-center mt-6 gap-6 sm:grid-cols-2 lg:gap-8">
+      <div className=" grid justify-center mt-6 gap-6 min-[870px]:grid-cols-2 lg:gap-8">
         <MediaCard
           media={
             <Image

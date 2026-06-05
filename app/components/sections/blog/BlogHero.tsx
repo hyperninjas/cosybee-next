@@ -25,7 +25,7 @@ export default function BlogHero({
   crumbs,
 }: Props) {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center md:min-h-[85vh]">
+    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
       {/* background photo */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
