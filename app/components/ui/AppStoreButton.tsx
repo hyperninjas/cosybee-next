@@ -26,7 +26,7 @@ export default function AppStoreButton({
       aria-label="Download on the App Store"
       className={`inline-block text-[#CCCCCC] transition-opacity hover:opacity-90 ${className}`}
     >
-      <AppStoreBadge color={color} className="h-auto w-44" />
+      <AppStoreBadge color={color} className="h-12 lg:h-[58.66px] w-auto" />
     </a>
   );
 }

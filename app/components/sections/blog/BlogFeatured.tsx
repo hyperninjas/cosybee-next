@@ -112,7 +112,7 @@ function Slide({
         <CtaButton
           href={`${basePath}/${slide.slug}`}
           size="md"
-          className="mt-8 w-full font-semibold text-lg! h-13.25!"
+          className="mt-8 w-full text-lg! h-13.25!"
         >
           Read Article
         </CtaButton>

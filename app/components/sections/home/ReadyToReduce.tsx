@@ -35,7 +35,7 @@ export default function ReadyToReduce() {
             More time for what matters.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 min-[1200px]:justify-start">
-            <CtaButton href="/download" size="md" className="h-[58.66px]">
+            <CtaButton href="/download" size="md">
               Download Free App
             </CtaButton>
             <AppStoreButton color="#545454" />

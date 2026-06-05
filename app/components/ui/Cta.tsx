@@ -4,7 +4,7 @@ import { HexBadge, type InlineGlyphName } from "./SectionContent";
 type CtaSize = "md" | "lg";
 
 const SIZE_CLASSES: Record<CtaSize, string> = {
-  md: "px-6 py-3.5 text-base sm:text-lg lg:text-[22px] leading-[135%]",
+  md: "h-12 lg:h-[58.66px] px-6 text-base lg:text-lg leading-[135%]",
   lg: "px-10 py-4 text-lg sm:px-12 sm:text-xl",
 };
 
@@ -30,7 +30,7 @@ export function CtaButton({
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`inline-flex shrink-0 font-semibold text-[22px] items-center justify-center rounded-lg bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-lg bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>
@@ -116,7 +116,7 @@ export function CtaCard({
 }) {
   return (
     <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 lg:flex-row lg:items-center lg:gap-5 lg:p-12 ${className}`}
+      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
     >
       {glyph && (
         <HexBadge

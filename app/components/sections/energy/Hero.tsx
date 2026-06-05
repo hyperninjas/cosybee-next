@@ -24,7 +24,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[85vh]">
+    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center md:min-h-[85vh]">
       {/* background photo + gradients */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -41,7 +41,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 lg:px-30 lg:pt-15 lg:pb-11">
         {/* (1/4) decorative olive hexagon — bleeds in from the left edge */}
         {/* <Hexagon
           color="#403A07"

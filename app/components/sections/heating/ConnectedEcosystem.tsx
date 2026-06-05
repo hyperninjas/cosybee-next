@@ -66,8 +66,8 @@ export default function ConnectedEcosystem() {
 
       {/* early-access launch banner */}
       <div className="mx-auto mt-12 max-w-360 px-6 sm:px-10 lg:px-30">
-        <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
-          <div>
+        <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
+          <div className="">
             <h3 className="text-xl font-extrabold leading-tight text-black sm:text-[36px] whitespace-pre-line">
               {"Launching August 2026 \n Early Access Available."}
             </h3>
@@ -78,11 +78,11 @@ export default function ConnectedEcosystem() {
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="/get-started"
-              className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#DAE7ED] bg-white px-6 py-3 text-base font-semibold text-black transition-colors hover:bg-neutral-50"
+              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-[#DAE7ED] bg-white px-6 text-base lg:text-lg leading-[135%] font-semibold text-black transition-colors hover:bg-neutral-50"
             >
               Pre-order access
             </a>
-            <CtaButton href="/get-started" size="md" className="text-base!">
+            <CtaButton href="/get-started" size="md">
               Register interest
             </CtaButton>
           </div>
