@@ -1,6 +1,6 @@
 import Image from "next/image";
 import HiveHexCluster from "../../ui/HiveHexCluster";
-import { CtaButton } from "../../ui/Cta";
+// import { CtaButton } from "../../ui/Cta";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";

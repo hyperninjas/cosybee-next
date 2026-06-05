@@ -285,7 +285,7 @@ export function FeatureCard({
   descClassName?: string;
 }) {
   return (
-    <div className="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
       <Image
         src={GLYPH_SVGS[glyph]}
         alt=""

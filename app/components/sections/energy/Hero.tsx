@@ -49,10 +49,10 @@ export default function Hero() {
         /> */}
         {/* text */}
         <div className="relative z-10 ">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px]">
             Total <span className="text-[#EFDF18]">Energy Control</span>
           </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-neutral-300">
+          <p className="mt-5 max-w-129.5 text-base sm:text-[18px] md:text-[22px] leading-7">
             Track every watt your home uses — across grid, solar, battery, and
             individual devices. One dashboard, one source of truth, real
             savings.

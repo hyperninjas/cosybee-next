@@ -39,7 +39,7 @@ const LEGAL_LINKS = [
 export default function Footer() {
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 lg:grid-cols-[1.5fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
         <div>
           <Image
@@ -52,57 +52,62 @@ export default function Footer() {
             vs tado.
           </p> */}
         </div>
+        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.3fr_1fr_1fr] lg:gap-8">
+          {/* why EnergieBee */}
+          <div>
+            <h3 className="text-lg font-bold tracking-[0.08em]">
+              LATEST BLOGS
+            </h3>
+            <ul className="mt-5 space-y-4.5">
+              {WHY_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* why EnergieBee */}
-        <div>
-          <h3 className="text-lg font-bold tracking-[0.08em]">LATEST BLOGS</h3>
-          <ul className="mt-5 space-y-4.5">
-            {WHY_LINKS.map((link) => (
-              <li key={link.label}>
-                <Link
-                  href={link.href}
-                  className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* get started */}
+          <div>
+            <h3 className="text-lg font-bold tracking-[0.08em]">GET STARTED</h3>
+            <ul className="mt-5 space-y-4.5">
+              {GET_STARTED_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* get started */}
-        <div>
-          <h3 className="text-lg font-bold tracking-[0.08em]">GET STARTED</h3>
-          <ul className="mt-5 space-y-4.5">
-            {GET_STARTED_LINKS.map((link) => (
-              <li key={link.label}>
-                <Link
-                  href={link.href}
-                  className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* social — hex hive cluster */}
-        <div>
-          <h3 className="text-lg font-bold tracking-[0.08em]">SOCIAL MEDIA</h3>
-          <SocialCluster
-            className="mt-5 h-auto pb-1 w-46"
-            facebook="#"
-            instagram="#"
-            youtube="#"
-            linkedin="#"
-          />
+          {/* social — hex hive cluster */}
+          <div className="w-fit md:justify-self-end">
+            <h3 className="text-lg font-bold tracking-[0.08em]">
+              SOCIAL MEDIA
+            </h3>
+            <SocialCluster
+              className="mt-5 h-auto pb-1 w-46"
+              facebook="#"
+              instagram="#"
+              youtube="#"
+              linkedin="#"
+            />
+          </div>
         </div>
       </div>
 
       {/* bottom strip */}
       <div className="border-t border-[#FFFFFF1A] ">
-        <div className="mx-auto flex max-w-360 flex-col-reverse gap-4 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-10 lg:px-30">
+        <div className="mx-auto flex max-w-360 flex-col-reverse sm:flex-col sm:justify-center sm:items-center gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between md:px-10 lg:px-30">
           <p className="text-sm font-medium text-white md:mt-0 mt-2">
             © 2026 EnergieBee. All rights reserved.
           </p>

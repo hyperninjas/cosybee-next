@@ -34,20 +34,20 @@ export default function HomeHero() {
             fetchPriority="high"
             quality={90}
             placeholder="blur"
-            className="absolute right-0 bottom-0 h-full hidden md:block w-auto"
+            className="absolute -right-10 bottom-0 h-full hidden md:block w-auto z-9"
           />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_78.19%)]" />
+        <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-4 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px]">
             One app.
             <br />
             Total energy clarity.
           </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7">
+          <p className="mt-5 max-w-129.5 text-base sm:text-[18px] md:text-[22px] leading-7">
             <strong>EnergieBee</strong> shows how your home uses energy day by
             day. Understand heating, solar and energy balance in one place.
           </p>

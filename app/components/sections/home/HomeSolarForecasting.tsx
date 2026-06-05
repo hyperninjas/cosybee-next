@@ -49,7 +49,7 @@ export default function HomeSolarForecasting() {
               description="Understand patterns across your home energy."
             />
           </div>
-          <div className="w-[365.3px] -ml-3 min-[1200px]:hidden mt-4">
+          <div className="w-[335.3px] -ml-3 min-[1200px]:hidden mt-4">
             <Image
               src={deviceImg}
               alt="EnergieBee solar dashboard"

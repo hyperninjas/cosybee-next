@@ -13,7 +13,7 @@ import beeFlowerImg from "@/public/bee-flower.png";
 export default function HomeEnergyManagement() {
   return (
     <section className="relative overflow-hidden py-20 text-white lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-2 lg:gap-16 lg:px-30">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"

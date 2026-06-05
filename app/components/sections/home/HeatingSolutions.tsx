@@ -18,7 +18,7 @@ import beeFlowerImg from "@/public/bee-flower.png";
 export default function HeatingSolutions() {
   return (
     <section className="relative overflow-hidden bg-white py-20 text-black lg:py-25">
-      <div className="relative mx-auto max-w-360 gap-12 px-6 sm:px-10  lg:gap-16 lg:px-30 flex flex-col lg:flex-row items-center">
+      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-6 lg:px-30">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#F7F2E1"
@@ -27,7 +27,7 @@ export default function HeatingSolutions() {
         {/* cluster — left */}
 
         <HiveHexCluster
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
+          className="order-2 min-[1200px]:order-1 mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
           cornerInset={4}
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
@@ -46,7 +46,7 @@ export default function HeatingSolutions() {
           }}
         />
         {/* text — right */}
-        <div className="min-[1200px]:max-w-163.5 md:max-w-153.5  z-9">
+        <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-163.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto max-[1200px]:items-center z-9">
           <SectionTitle>Heating Solutions</SectionTitle>
           <div className="mt-8 space-y-4">
             <FeatureCard

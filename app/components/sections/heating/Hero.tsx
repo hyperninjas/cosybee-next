@@ -49,15 +49,15 @@ export default function Hero() {
         /> */}
         {/* text */}
         <div className="relative z-10 ">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px] whitespace-pre-line">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px] whitespace-pre-line">
             {"Home Heating \n"}
             <span className="text-[#EFDF18]">Intelligence</span>
           </h1>
-          <p className="mt-5 max-w-165 text-base sm:text-[22px] leading-7 text-[#ffffff]">
+          <p className="mt-5 max-w-165 text-base sm:text-[18px] md:text-[22px] leading-7">
             Predictive energy intelligence that helps you understand, optimise,
             and reduce your home heating consumption.
           </p>
-          <p className="mt-5 max-w-165 text-base sm:text-[22px] leading-7 text-[#ffffff]">
+          <p className="mt-5 max-w-165 text-base sm:text-[18px] md:text-[22px] leading-7">
             Powered by high-accuracy forecasting models, real-time energy data,
             and climate-aware intelligence that reduces waste, cost, and carbon
             impact.

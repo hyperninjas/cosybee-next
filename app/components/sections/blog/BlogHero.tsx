@@ -54,10 +54,10 @@ export default function BlogHero({
           {crumbs && crumbs.length > 0 && (
             <Breadcrumbs items={crumbs} tone="dark" className="mb-5" />
           )}
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-5xl lg:text-[75px]">
+          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px] ">
             {title}
           </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[22px] leading-7 text-neutral-300">
+          <p className="mt-5 max-w-129.5 text-base sm:text-[18px] md:text-[22px] leading-7">
             {description}
           </p>
         </div>
