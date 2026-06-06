@@ -41,7 +41,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
       <link rel="preconnect" href="https://eb-api.technext.it" />
       <Link
         href={`${basePath}/${a.slug}`}
-      className="flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)]"
+      className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)]"
     >
       <div className="relative h-48">
         <Image
@@ -52,20 +52,20 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
           className="object-cover hover:scale-105 transition-transform duration-300"
           unoptimized={isExternalUrl(a.coverImage)}
         />
-        <span className="absolute left-4 top-4 rounded-full bg-[#FAFAFA] px-3 py-1 text-xs font-semibold text-[#DE3B24]">
+        <span className="absolute left-4 top-4 rounded-full bg-background px-3 py-1 text-xs font-semibold text-accent">
           {a.category?.name ?? "Uncategorised"}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
           <span>{formatReadTime(a.readTime)}</span>
           <Dot />
           <span>{formatDate(a.authorDate)}</span>
         </div>
-        <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-black">
+        <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-foreground">
           {a.title}
         </h3>
-        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#545454]">
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">
           {a.description}
         </p>
         {a.tags.length > 0 && (
@@ -73,7 +73,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
             {a.tags.slice(0, 3).map((t) => (
               <span
                 key={t.id}
-                className="rounded-md bg-[#F3F3F3] px-2 py-0.5 text-xs font-medium text-[#666]"
+                className="rounded-md bg-background px-2 py-0.5 text-xs font-medium text-muted"
               >
                 #{t.name}
               </span>
@@ -84,7 +84,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
           <Divider />
           <div className="mt-4 flex items-center gap-3">
             <Avatar name={a.author?.name ?? "energiebee"} avatarUrl={a.author?.avatarUrl} className="h-10 w-10" />
-            <span className="text-sm font-semibold text-black">
+            <span className="text-sm font-semibold text-foreground">
               {a.author?.name ?? "energiebee"}
             </span>
           </div>
@@ -174,11 +174,11 @@ export default function BlogLatestArticles({
     <section
       className={`mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 ${heading === "Latest Articles" ? "lg:pt-0" : ""} `}
     >
-      <h2 className="text-2xl font-bold text-black sm:text-[32px]">
+      <h2 className="text-2xl font-bold text-foreground sm:text-[32px]">
         {heading}
       </h2>
       {filtered.length === 0 ? (
-        <p className="mt-8 text-base text-[#545454]">
+        <p className="mt-8 text-base text-muted">
           No articles match your search. Try a different keyword or category.
         </p>
       ) : (
@@ -195,7 +195,7 @@ export default function BlogLatestArticles({
             onClick={() =>
               setVisible((v) => Math.min(v + LOAD_STEP, filtered.length))
             }
-            className="rounded-[9px] bg-[#F2F4F7] px-8 py-3 text-lg font-bold text-[#1F1F1F] transition-colors hover:bg-neutral-200"
+            className="rounded-[9px] bg-[#F2F4F7] px-8 py-3 text-lg font-bold text-foreground transition-colors hover:bg-surface-secondary"
           >
             Load More
           </button>

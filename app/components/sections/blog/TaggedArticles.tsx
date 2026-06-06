@@ -50,19 +50,19 @@ export default function TaggedArticles({
       />
 
       <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-6">
-        <nav className="mb-4 text-sm text-neutral-500" aria-label="Breadcrumb">
-          <Link href={basePath} className="hover:text-black">
+        <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
+          <Link href={basePath} className="hover:text-foreground">
             {blogLabel}
           </Link>
           <span className="px-2">/</span>
-          <span className="text-black">#{label}</span>
+          <span className="text-foreground">#{label}</span>
         </nav>
-        <h1 className="text-3xl font-extrabold tracking-tight text-black sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           #{label}
         </h1>
-        <p className="mt-2 text-base text-neutral-600">
+        <p className="mt-2 text-base text-muted">
           {articles.length} article{articles.length === 1 ? "" : "s"} tagged{" "}
-          <span className="font-medium text-black">{label}</span>.
+          <span className="font-medium text-foreground">{label}</span>.
         </p>
       </section>
 

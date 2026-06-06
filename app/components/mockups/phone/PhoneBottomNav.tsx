@@ -8,7 +8,7 @@ const ITEMS = [
 /** Bottom tab bar with active state. */
 export default function PhoneBottomNav() {
   return (
-    <div className="mt-3 flex items-center justify-around border-t border-neutral-200 pt-1.5 pb-1 text-[7px]">
+    <div className="mt-3 flex items-center justify-around border-t border-border pt-1.5 pb-1 text-[7px]">
       {ITEMS.map((it) => (
         <div
           key={it.label}

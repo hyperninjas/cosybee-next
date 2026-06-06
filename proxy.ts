@@ -1,31 +1,51 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Public admin routes that don't require authentication
-const publicAdminRoutes = [
-  "/admin/login",
-  "/admin/forgot-password",
-  "/admin/reset-password",
-];
+/**
+ * Optimistic auth gate (Next.js 16 "Proxy", formerly Middleware).
+ *
+ * This only inspects the *presence* of a better-auth session cookie — it never
+ * validates the session or checks roles (that would mean a network/DB call on
+ * every prefetch). Secure identity/role checks live in the Data Access Layer
+ * (`app/lib/server-session.ts`) and run inside the protected layouts and
+ * Server Actions. See the Next.js auth guide: optimistic here, secure there.
+ */
+
+// Areas that require *some* authenticated session.
+const protectedPrefixes = ["/admin", "/account"];
+
+// Public auth screens — a logged-in user shouldn't see these.
+const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
+
+function hasSessionCookie(request: NextRequest): boolean {
+  // In production the cookie is prefixed with `__Secure-`.
+  return Boolean(
+    request.cookies.get("__Secure-better-auth.session_token")?.value ||
+      request.cookies.get("better-auth.session_token")?.value,
+  );
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const authed = hasSessionCookie(request);
 
-  // Skip public admin routes
-  if (publicAdminRoutes.some((route) => pathname.startsWith(route))) {
+  // Already signed in → bounce away from login/register/etc.
+  if (
+    authRoutes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    )
+  ) {
+    if (authed) {
+      return NextResponse.redirect(new URL("/account", request.url));
+    }
     return NextResponse.next();
   }
 
-  // Protect all other /admin routes
-  if (pathname.startsWith("/admin")) {
-    // Check for Better Auth session cookie
-    // In production with secure cookies, the name is prefixed with __Secure-
-    const sessionCookie =
-      request.cookies.get("__Secure-better-auth.session_token") ||
-      request.cookies.get("better-auth.session_token");
-
-    if (!sessionCookie?.value) {
-      const loginUrl = new URL("/admin/login", request.url);
+  // Protected areas → require a session cookie, else send to login with a
+  // sanitised return path.
+  if (protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
+    if (!authed) {
+      const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -35,5 +55,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/account/:path*",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ],
 };

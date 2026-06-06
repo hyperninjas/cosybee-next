@@ -25,28 +25,28 @@ export default function Faq({
       <JsonLd data={faqPageSchema(items)} />
       <h2
         id="faq-heading"
-        className="text-2xl font-extrabold text-black sm:text-3xl"
+        className="text-2xl font-extrabold text-foreground sm:text-3xl"
       >
         {title}
       </h2>
-      <div className="mt-8 divide-y divide-[#ECECEC] border-t border-[#ECECEC]">
+      <div className="mt-8 divide-y divide-border border-t border-border">
         {items.map((item) => (
           <details key={item.question} className="group py-4">
-            <summary className="flex cursor-pointer items-center justify-between gap-4 text-left text-base font-semibold text-black marker:content-none [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between gap-4 text-left text-base font-semibold text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
               {item.question}
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="h-5 w-5 shrink-0 text-[#FF8A7A] transition-transform group-open:rotate-45"
+                className="h-5 w-5 shrink-0 text-accent transition-transform group-open:rotate-45"
                 aria-hidden
               >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </summary>
-            <p className="mt-3 text-[15px] leading-relaxed text-[#545454]">
+            <p className="mt-3 text-[15px] leading-relaxed text-muted">
               {item.answer}
             </p>
           </details>

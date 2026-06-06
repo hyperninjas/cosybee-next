@@ -13,7 +13,7 @@ import Hexagon from "../../ui/Hexagon";
  */
 export default function PerfectHarmony() {
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] py-20 text-black lg:py-25">
+    <section className="relative overflow-hidden bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] py-20 text-foreground lg:py-25">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
@@ -23,7 +23,7 @@ export default function PerfectHarmony() {
         {/* text — left */}
         <div className="min-[1200px]:max-w-170.5 flex flex-col max-[1200px]:items-center z-9">
           <SectionTitle>Everything connected in one place</SectionTitle>
-          <p className="mt-3 max-w-xl text-base max-[1200px]:text-center leading-relaxed text-[#545454]">
+          <p className="mt-3 max-w-xl text-base max-[1200px]:text-center leading-relaxed text-muted">
             A single app to see how your home performs in real conditions and
             understand your energy balance.
           </p>

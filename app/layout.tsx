@@ -52,7 +52,9 @@ export const metadata: Metadata = {
     canonical: "/",
     // Let feed readers and crawlers discover the blog RSS feed.
     types: {
-      "application/rss+xml": [{ url: "/feed.xml", title: `${SITE_NAME} — Blog` }],
+      "application/rss+xml": [
+        { url: "/feed.xml", title: `${SITE_NAME} — Blog` },
+      ],
     },
   },
   // Search-engine site verification. Tokens are read from server env so they
@@ -220,15 +222,17 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Consently cookie-consent banner. As a consent manager it must run
          *  before any tracking scripts hydrate, so it uses the
          *  `beforeInteractive` strategy (Next injects it into <head>). */}
-        <Script
-          src="https://app.consently.net/consently.js"
-          data-bannerid="6a229f9186e4ca8d56f54ed0"
-          strategy="beforeInteractive"
-        />
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            src="https://app.consently.net/consently.js"
+            data-bannerid="6a229f9186e4ca8d56f54ed0"
+            strategy="beforeInteractive"
+          />
+        )}
         <Navbar />
         {children}
         <Footer />

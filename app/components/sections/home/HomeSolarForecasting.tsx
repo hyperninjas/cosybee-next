@@ -10,7 +10,7 @@ import sideImage from "@/public/energy-analytics-side.png";
  */
 export default function HomeSolarForecasting() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-10 text-black min-[1200px]:py-25">
+    <section className="relative overflow-hidden bg-background py-10 text-foreground min-[1200px]:py-25">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12  lg:gap-10">
         {/* left: phone — wrapper has explicit width, image fills it via
             w-full h-auto so it scales proportionally instead of rendering
@@ -28,7 +28,7 @@ export default function HomeSolarForecasting() {
         {/* middle: title + feature cards */}
         <div className="min-[1200px]:max-w-113.75 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center px-6 sm:px-10 lg:px-0">
           <SectionTitle>Solar Forecasting</SectionTitle>
-          {/* <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-[#545454]">
+          {/* <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-muted">
             A complete view of solar production, weather, and usage across the
             day.
           </p> */}

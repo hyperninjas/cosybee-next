@@ -18,7 +18,7 @@ const PROBLEMS = [
 
 export default function WhyChoose() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 text-black lg:py-20">
+    <section className="relative overflow-hidden bg-surface py-16 text-foreground lg:py-20">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* 3-hex hive cluster — three distinct cells */}
         <HiveHexCluster
@@ -53,15 +53,15 @@ export default function WhyChoose() {
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>
-          <p className="mt-4 text-base leading-relaxed text-[#545454] max-[1200px]:text-center">
+          <p className="mt-4 text-base leading-relaxed text-muted max-[1200px]:text-center">
             EnergieBee is designed to solve three problems at once:
           </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-[#545454] marker:text-[#545454]">
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-muted marker:text-muted">
             {PROBLEMS.map((p) => (
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-126 leading-relaxed text-[#545454] max-[1200px]:text-center">
+          <p className="mt-4 text-base max-w-126 leading-relaxed text-muted max-[1200px]:text-center">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>

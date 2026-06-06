@@ -46,11 +46,11 @@ export default function ShareButton({ title }: { title: string }) {
       type="button"
       onClick={share}
       aria-label="Share article"
-      className="relative flex h-16 w-16 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black transition-colors hover:bg-neutral-50"
+      className="relative flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-surface text-foreground transition-colors hover:bg-background"
     >
       <ShareIcon />
       {copied && (
-        <span className="absolute -top-8 right-0 whitespace-nowrap rounded-md bg-[#1b1b1b] px-2 py-1 text-xs font-medium text-white">
+        <span className="absolute -top-8 right-0 whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs font-medium text-white">
           Link copied!
         </span>
       )}

@@ -64,7 +64,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
+                    className="text-[15px] font-medium text-muted transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -81,7 +81,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-[15px] font-medium text-neutral-300 transition-colors hover:text-white"
+                    className="text-[15px] font-medium text-muted transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -114,7 +114,7 @@ export default function Footer() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="text-sm font-medium text-neutral-300 transition-colors hover:text-white"
+                  className="text-sm font-medium text-muted transition-colors hover:text-white"
                 >
                   {link.label}
                 </Link>

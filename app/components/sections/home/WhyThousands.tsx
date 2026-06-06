@@ -56,10 +56,10 @@ export default function WhyThousands() {
                   aria-hidden
                   className="mx-auto h-12.5 w-auto"
                 />
-                <h3 className="mt-4 text-[22px] font-semibold text-black">
+                <h3 className="mt-4 text-[22px] font-semibold text-foreground">
                   {p.title}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-[#545454]">
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">
                   {p.description}
                 </p>
               </div>

@@ -12,7 +12,7 @@ import Image from "next/image";
 
 export default function WhyEnergieBeeSolar() {
   return (
-    <section className="relative overflow-hidden bg-white py-12 pb-8 text-black lg:py-12 lg:pb-10">
+    <section className="relative overflow-hidden bg-surface py-12 pb-8 text-foreground lg:py-12 lg:pb-10">
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon

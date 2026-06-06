@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import Hero from "../components/sections/smart/Hero";
-import EnergyMonitoring from "../components/sections/smart/EnergyMonitoring";
-// import EnergyForecasting from "../components/sections/smart/EnergyForecasting";
-import EnergyAnalytics from "../components/sections/smart/EnergyAnalytics";
-import SmartEnergyManagement from "../components/sections/smart/SmartEnergyManagement";
-import WhyEnergieBee from "../components/sections/smart/WhyEnergieBee";
-import WhyEnergieBeeSolar from "../components/sections/smart/WhyEnergiebeeSolar";
-import WorksWithAnySystem from "../components/sections/smart/WorksWithAnySystem";
-import JsonLd from "../components/JsonLd";
-import Faq from "../components/sections/Faq";
-import { breadcrumbSchema } from "../lib/structured-data";
-import { SMART_FAQ } from "../lib/faq-data";
+import Hero from "@/app/components/sections/smart/Hero";
+import EnergyMonitoring from "@/app/components/sections/smart/EnergyMonitoring";
+// import EnergyForecasting from "@/app/components/sections/smart/EnergyForecasting";
+import EnergyAnalytics from "@/app/components/sections/smart/EnergyAnalytics";
+import SmartEnergyManagement from "@/app/components/sections/smart/SmartEnergyManagement";
+import WhyEnergieBee from "@/app/components/sections/smart/WhyEnergieBee";
+import WhyEnergieBeeSolar from "@/app/components/sections/smart/WhyEnergiebeeSolar";
+import WorksWithAnySystem from "@/app/components/sections/smart/WorksWithAnySystem";
+import JsonLd from "@/app/components/JsonLd";
+import Faq from "@/app/components/sections/Faq";
+import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { SMART_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Smart Home Integration",

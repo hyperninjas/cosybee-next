@@ -40,11 +40,11 @@ export default function Pagination({
   if (totalPages <= 1) return null;
 
   const linkCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#ECECEC] px-3 text-sm font-medium text-[#545454] transition-colors hover:border-[#FF8A7A] hover:text-[#FF8A7A]";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-accent";
   const currentCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#FF8A7A] bg-[#FFF5F2] px-3 text-sm font-bold text-[#FF8A7A]";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-accent bg-[#FFF5F2] px-3 text-sm font-bold text-accent";
   const disabledCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#F2F2F2] px-3 text-sm font-medium text-[#C4C4C4]";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted";
 
   return (
     <nav
@@ -63,7 +63,7 @@ export default function Pagination({
 
       {pageList(page, totalPages).map((p, i) =>
         p === "…" ? (
-          <span key={`gap-${i}`} className="px-1 text-sm text-[#C4C4C4]">
+          <span key={`gap-${i}`} className="px-1 text-sm text-muted">
             …
           </span>
         ) : p === page ? (

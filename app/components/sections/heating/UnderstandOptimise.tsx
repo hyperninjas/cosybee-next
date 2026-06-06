@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function UnderstandOptimise() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 min-[1200px]:py-32 px-6 lg:px-0">
+    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster */}
         <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">

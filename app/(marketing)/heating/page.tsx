@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import Hero from "../components/sections/heating/Hero";
-import AccurateIntelligence from "../components/sections/heating/AccurateIntelligence";
-import UnderstandOptimise from "../components/sections/heating/UnderstandOptimise";
-import TurnEnergyData from "../components/sections/heating/TurnEnergyData";
-import SmarterUnderstanding from "../components/sections/heating/SmarterUnderstanding";
-import ConnectedEcosystem from "../components/sections/heating/ConnectedEcosystem";
-import WhyChoose from "../components/sections/heating/WhyChoose";
-import JsonLd from "../components/JsonLd";
-import Faq from "../components/sections/Faq";
-import { breadcrumbSchema } from "../lib/structured-data";
-import { HEATING_FAQ } from "../lib/faq-data";
+import Hero from "@/app/components/sections/heating/Hero";
+import AccurateIntelligence from "@/app/components/sections/heating/AccurateIntelligence";
+import UnderstandOptimise from "@/app/components/sections/heating/UnderstandOptimise";
+import TurnEnergyData from "@/app/components/sections/heating/TurnEnergyData";
+import SmarterUnderstanding from "@/app/components/sections/heating/SmarterUnderstanding";
+import ConnectedEcosystem from "@/app/components/sections/heating/ConnectedEcosystem";
+import WhyChoose from "@/app/components/sections/heating/WhyChoose";
+import JsonLd from "@/app/components/JsonLd";
+import Faq from "@/app/components/sections/Faq";
+import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { HEATING_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Smart Heating Control",

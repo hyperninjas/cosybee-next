@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import BlogHero from "../components/sections/blog/BlogHero";
-import BlogBrowse from "../components/sections/blog/BlogBrowse";
-import { getAllArticles, getFeatured, getCategoryNames } from "../lib/articles";
-import { ARTICLES_PER_PAGE } from "../lib/article-types";
-import JsonLd from "../components/JsonLd";
-import { breadcrumbSchema } from "../lib/structured-data";
-import { url } from "../lib/site";
+import BlogHero from "@/app/components/sections/blog/BlogHero";
+import BlogBrowse from "@/app/components/sections/blog/BlogBrowse";
+import { getAllArticles, getFeatured, getCategoryNames } from "@/app/lib/articles";
+import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
+import JsonLd from "@/app/components/JsonLd";
+import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { url } from "@/app/lib/site";
 import learnCover from "@/public/Cover/energiebee-learn-cover.png";
 
 const LEARN_DESCRIPTION =

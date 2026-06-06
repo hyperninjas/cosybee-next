@@ -30,7 +30,7 @@ export function CtaButton({
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`inline-flex shrink-0 items-center justify-center rounded-lg bg-linear-[93.03deg] from-[#E52D2D] via-[#D25116] to-[#D86813] font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-lg bg-accent font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>
@@ -68,15 +68,15 @@ export function CtaBanner({
   return (
     <section className="px-6 py-12 sm:px-10 lg:px-30 lg:py-16">
       <div
-        className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-white px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-30 lg:py-14"
+        className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-surface px-8 py-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] sm:px-12 lg:px-30 lg:py-14"
         style={HEX_PATTERN_BG}
       >
         <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
           <div>
-            <h2 className="text-2xl font-extrabold leading-tight text-black sm:text-3xl lg:text-4xl">
+            <h2 className="text-2xl font-extrabold leading-tight text-foreground sm:text-3xl lg:text-4xl">
               {title}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-600 sm:text-base">
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
               {description}
             </p>
           </div>
@@ -116,7 +116,7 @@ export function CtaCard({
 }) {
   return (
     <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
+      className={`flex flex-col items-start gap-5 rounded-3xl border border-border bg-surface-secondary ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
     >
       {glyph && (
         <HexBadge
@@ -127,13 +127,13 @@ export function CtaCard({
       )}
       <div className="flex-1">
         <h3
-          className={`text-xl  font-extrabold leading-tight text-black sm:text-2xl lg:text-[40px] 
+          className={`text-xl  font-extrabold leading-tight text-foreground sm:text-2xl lg:text-[40px] 
             ${titleClassName}`}
         >
           {title}
         </h3>
         <p
-          className={`mt-2 text-sm max-w-188.25 leading-relaxed text-neutral-600 sm:text-base ${descClassName}`}
+          className={`mt-2 text-sm max-w-188.25 leading-relaxed text-muted sm:text-base ${descClassName}`}
         >
           {description}
         </p>

@@ -118,13 +118,13 @@ export default function InstallPrompt() {
     <div
       role="dialog"
       aria-label="Install EnergieBee"
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-2xl border border-black/10 bg-white p-4 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-4"
+      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-2xl border border-black/10 bg-surface p-4 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-4"
     >
       <button
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+        className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full text-muted transition hover:bg-surface-secondary hover:text-muted"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
@@ -145,18 +145,18 @@ export default function InstallPrompt() {
           className="h-10 w-10 shrink-0 rounded-xl"
         />
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-black">Install EnergieBee</p>
+          <p className="text-sm font-semibold text-foreground">Install EnergieBee</p>
           {isIOS ? (
-            <p className="mt-1 text-sm leading-snug text-neutral-600">
+            <p className="mt-1 text-sm leading-snug text-muted">
               Tap the Share button{" "}
               <span aria-hidden="true">⎋</span> then{" "}
-              <span className="font-medium text-neutral-800">
+              <span className="font-medium text-foreground">
                 &ldquo;Add to Home Screen&rdquo;
               </span>{" "}
               for instant, app-like access.
             </p>
           ) : (
-            <p className="mt-1 text-sm leading-snug text-neutral-600">
+            <p className="mt-1 text-sm leading-snug text-muted">
               Add it to your home screen for faster, app-like access — even
               offline.
             </p>
@@ -167,14 +167,14 @@ export default function InstallPrompt() {
               <button
                 type="button"
                 onClick={install}
-                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-4 py-2 text-sm font-medium text-white shadow-[0_12px_24px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+                className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white shadow-[0_12px_24px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
               >
                 Install app
               </button>
               <button
                 type="button"
                 onClick={dismiss}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-neutral-500 transition hover:text-neutral-800"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:text-foreground"
               >
                 Not now
               </button>

@@ -1,7 +1,7 @@
-import LegalContainer from "../components/legal/LegalContainer";
-import LegalHero from "../components/legal/LegalHero";
-// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
-import LegalSection from "../components/legal/LegalSection";
+import LegalContainer from "@/app/components/legal/LegalContainer";
+import LegalHero from "@/app/components/legal/LegalHero";
+// import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
+import LegalSection from "@/app/components/legal/LegalSection";
 import illustration from "@/public/illustration-cookies.svg";
 import Image from "next/image";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function DataSecurityPage() {
   return (
-    <main className="flex-1 bg-white text-black">
+    <main className="flex-1 bg-surface text-foreground">
       <LegalHero
         label="Data Security"
         title="Your Data Is Safe With Us"
@@ -351,7 +351,7 @@ export default function DataSecurityPage() {
             by the Open Web Application Security Project (OWASP) Top 10,
             addressing the most critical web application security risks.
           </p>
-          <p className="mt-8 text-sm text-neutral-500">
+          <p className="mt-8 text-sm text-muted">
             This Data Security page was last reviewed and updated on 15 May
             2026. EnergieBee Limited is a company registered in England and
             Wales.

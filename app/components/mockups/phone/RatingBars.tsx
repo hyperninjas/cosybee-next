@@ -47,7 +47,7 @@ export default function RatingBars() {
           key={r.letter}
           className="grid grid-cols-[12px_1fr_44px] items-center gap-2"
         >
-          <span className="text-[9px] font-bold text-black">{r.letter}</span>
+          <span className="text-[9px] font-bold text-foreground">{r.letter}</span>
           <div className="relative h-3.5">
             <div
               className="flex h-full items-center rounded-sm pl-1.5 text-[7px] font-bold text-white"
@@ -59,7 +59,7 @@ export default function RatingBars() {
           <div className="flex flex-col items-end leading-none">
             {r.badge && (
               <>
-                <span className="text-[5px] font-bold tracking-wide text-neutral-500">
+                <span className="text-[5px] font-bold tracking-wide text-muted">
                   {r.badge.label}
                 </span>
                 <span

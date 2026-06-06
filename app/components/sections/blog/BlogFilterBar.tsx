@@ -45,7 +45,7 @@ export default function BlogFilterBar({
       <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* search */}
         <label className="relative flex w-full max-w-90.5 items-center">
-          <span className="absolute left-4 text-neutral-400">
+          <span className="absolute left-4 text-muted">
             <SearchIcon />
           </span>
           <input
@@ -53,7 +53,7 @@ export default function BlogFilterBar({
             placeholder="Search articles..."
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            className="w-full rounded-full border border-neutral-200 bg-white py-3.25 pl-12 pr-4 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/40"
+            className="w-full rounded-full border border-border bg-surface py-3.25 pl-12 pr-4 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/40"
           />
         </label>
 
@@ -68,8 +68,8 @@ export default function BlogFilterBar({
                 onClick={() => onCategoryChange(cat)}
                 className={`rounded-full px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
-                    ? "bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] text-white "
-                    : "bg-[#F3F3F3] text-[#545454] hover:bg-neutral-200"
+                    ? "bg-accent text-white "
+                    : "bg-background text-muted hover:bg-surface-secondary"
                 }`}
               >
                 {cat}

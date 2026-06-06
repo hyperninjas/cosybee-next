@@ -17,8 +17,8 @@ export default function AnalyticsPhone({
       <PhoneTabs />
       <EpcCard />
       <RatingBars />
-      <div className="mx-3 mt-3 border-t border-neutral-200 pt-2">
-        <p className="text-[10px] font-bold text-black">Tariff &amp; provider</p>
+      <div className="mx-3 mt-3 border-t border-border pt-2">
+        <p className="text-[10px] font-bold text-foreground">Tariff &amp; provider</p>
       </div>
       <PhoneBottomNav />
     </PhoneFrame>

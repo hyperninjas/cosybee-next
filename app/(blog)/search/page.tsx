@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getAllArticles } from "../lib/articles";
-import type { Article } from "../lib/article-types";
-import { ArticleCard } from "../components/sections/blog/BlogLatestArticles";
+import { getAllArticles } from "@/app/lib/articles";
+import type { Article } from "@/app/lib/article-types";
+import { ArticleCard } from "@/app/components/sections/blog/BlogLatestArticles";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -35,10 +35,10 @@ export default async function SearchPage({
   return (
     <main className="flex-1">
       <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-10">
-        <h1 className="text-3xl font-extrabold tracking-tight text-black sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           Search
         </h1>
-        <p className="mt-2 text-base text-neutral-600">
+        <p className="mt-2 text-base text-muted">
           Find guides, stories, and energy-saving advice across the EnergieBee
           blog.
         </p>
@@ -56,18 +56,18 @@ export default async function SearchPage({
             placeholder="Search articles…"
             aria-label="Search articles"
             autoFocus
-            className="w-full max-w-md rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base text-black outline-none transition focus:border-[#EE3D1A] focus:ring-2 focus:ring-[#FF8B27]/30"
+            className="w-full max-w-md rounded-xl border border-border bg-surface px-4 py-3 text-base text-foreground outline-none transition focus:border-[#EE3D1A] focus:ring-2 focus:ring-accent/30"
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-[#FF8B27] to-[#EE3D1A] px-6 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+            className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
           >
             Search
           </button>
         </form>
 
         {query && (
-          <p className="mt-6 text-sm text-neutral-500">
+          <p className="mt-6 text-sm text-muted">
             {results.length === 0
               ? `No results for “${query}”.`
               : `${results.length} result${results.length === 1 ? "" : "s"} for “${query}”.`}

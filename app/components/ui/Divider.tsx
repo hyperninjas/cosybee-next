@@ -13,7 +13,7 @@ export default function Divider({
   className?: string;
 }) {
   const base = vertical
-    ? "h-full w-px border-l border-[#E9E8E8]"
-    : "w-full border-b border-[#E9E8E8]";
+    ? "h-full w-px border-l border-border"
+    : "w-full border-b border-border";
   return <div role="separator" className={`${base} ${className}`} />;
 }

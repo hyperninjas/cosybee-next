@@ -23,7 +23,7 @@ export default function HomeEnergyManagement() {
         <div className=" flex flex-col max-[1200px]:items-center  z-9">
           <div className="max-w-163.5">
             <SectionTitle>Energy Management</SectionTitle>
-            {/* <p className="mt-3 max-w-xl text-base leading-relaxed text-[#545454]">
+            {/* <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
               A clear view of how energy is used, timed, and distributed across
               your home.
             </p> */}

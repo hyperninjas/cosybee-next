@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { UserMenu } from "./UserMenu";
 
 const NAV_LINKS = [
   { label: "smart", href: "/smart" },
@@ -193,7 +194,7 @@ export default function Navbar({
                 <Link
                   href={link.href}
                   className={`text-[15px] font-medium tracking-wide transition-colors hover:text-white ${
-                    isActive ? "text-white" : "text-[#B3B3B3]"
+                    isActive ? "text-white" : "text-muted"
                   }`}
                 >
                   {link.label}
@@ -203,18 +204,19 @@ export default function Navbar({
           })}
         </ul>
 
-        <div className="flex items-center gap-4 text-neutral-200 sm:gap-6">
+        <div className="flex items-center gap-3 text-muted sm:gap-5">
+          <UserMenu />
           {/* <button
             type="button"
             aria-label="Search"
-            className="hidden text-neutral-200 transition-colors hover:text-white sm:inline-flex"
+            className="hidden text-muted transition-colors hover:text-white sm:inline-flex"
           >
             <SearchIcon />
           </button>
           <button
             type="button"
             aria-label="Account"
-            className="hidden text-neutral-200 transition-colors hover:text-white sm:inline-flex"
+            className="hidden text-muted transition-colors hover:text-white sm:inline-flex"
           >
             <UserIcon />
           </button> */}
@@ -224,7 +226,7 @@ export default function Navbar({
             aria-expanded={open}
             aria-controls={MENU_ID}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-md transition-colors hover:bg-white/5 lg:hidden"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-md transition-colors hover:bg-surface/5 lg:hidden"
           >
             <MenuToggleIcon open={open} className="h-9 w-7" />
           </button>
@@ -256,8 +258,8 @@ export default function Navbar({
                     href={link.href}
                     onClick={() => setOpen(false)}
                     tabIndex={open ? 0 : -1}
-                    className={`block rounded-md px-2 py-2 text-base font-medium tracking-wide transition-colors hover:bg-white/5 hover:text-white ${
-                      isActive ? "text-white" : "text-[#B3B3B3]"
+                    className={`block rounded-md px-2 py-2 text-base font-medium tracking-wide transition-colors hover:bg-surface/5 hover:text-white ${
+                      isActive ? "text-white" : "text-muted"
                     }`}
                   >
                     {link.label}
@@ -270,7 +272,7 @@ export default function Navbar({
                 type="button"
                 aria-label="Search"
                 tabIndex={open ? 0 : -1}
-                className="text-neutral-200 transition-colors hover:text-white"
+                className="text-muted transition-colors hover:text-white"
               >
                 <SearchIcon />
               </button>
@@ -278,7 +280,7 @@ export default function Navbar({
                 type="button"
                 aria-label="Account"
                 tabIndex={open ? 0 : -1}
-                className="text-neutral-200 transition-colors hover:text-white"
+                className="text-muted transition-colors hover:text-white"
               >
                 <UserIcon />
               </button>

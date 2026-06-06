@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import Hero from "../components/sections/solar/Hero";
-import EnergyMonitoring from "../components/sections/solar/EnergyMonitoring";
-import EnergyForecasting from "../components/sections/solar/EnergyForecasting";
-import EnergyAnalytics from "../components/sections/solar/EnergyAnalytics";
-import SmartEnergyManagement from "../components/sections/solar/SmartEnergyManagement";
-// import WhyEnergieBee from "../components/sections/solar/WhyEnergieBee";
-import WhyEnergieBeeSolar from "../components/sections/solar/WhyEnergiebeeSolar";
-import WorksWithAnySystem from "../components/sections/solar/WorksWithAnySystem";
-import JsonLd from "../components/JsonLd";
-import Faq from "../components/sections/Faq";
-import { breadcrumbSchema } from "../lib/structured-data";
-import { SOLAR_FAQ } from "../lib/faq-data";
+import Hero from "@/app/components/sections/solar/Hero";
+import EnergyMonitoring from "@/app/components/sections/solar/EnergyMonitoring";
+import EnergyForecasting from "@/app/components/sections/solar/EnergyForecasting";
+import EnergyAnalytics from "@/app/components/sections/solar/EnergyAnalytics";
+import SmartEnergyManagement from "@/app/components/sections/solar/SmartEnergyManagement";
+// import WhyEnergieBee from "@/app/components/sections/solar/WhyEnergieBee";
+import WhyEnergieBeeSolar from "@/app/components/sections/solar/WhyEnergiebeeSolar";
+import WorksWithAnySystem from "@/app/components/sections/solar/WorksWithAnySystem";
+import JsonLd from "@/app/components/JsonLd";
+import Faq from "@/app/components/sections/Faq";
+import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { SOLAR_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Solar Forecasting & Optimisation",

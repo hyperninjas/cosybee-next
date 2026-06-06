@@ -1,7 +1,7 @@
-import LegalContainer from "../components/legal/LegalContainer";
-import LegalHero from "../components/legal/LegalHero";
-// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
-import LegalSection from "../components/legal/LegalSection";
+import LegalContainer from "@/app/components/legal/LegalContainer";
+import LegalHero from "@/app/components/legal/LegalHero";
+// import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
+import LegalSection from "@/app/components/legal/LegalSection";
 import illustration from "@/public/illustration-cookies.svg";
 import Image from "next/image";
 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 /** Inline monospace token used for cookie names like `session_id`. */
 function Cookie({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[13px] text-[#EE3D1A]">
+    <code className="rounded bg-surface-secondary px-1.5 py-0.5 font-mono text-[13px] text-accent">
       {children}
     </code>
   );
@@ -32,7 +32,7 @@ function Cookie({ children }: { children: React.ReactNode }) {
 
 export default function CookiesPage() {
   return (
-    <main className="flex-1 bg-white text-black">
+    <main className="flex-1 bg-surface text-foreground">
       <LegalHero
         label="Cookie Policy"
         title="How We Use Cookies on Our Website"
@@ -396,7 +396,7 @@ export default function CookiesPage() {
             We encourage you to review this policy periodically to stay informed
             about how we use cookies.
           </p>
-          <p className="mt-8 text-sm text-neutral-500">
+          <p className="mt-8 text-sm text-muted">
             Last updated: May 2026
           </p>
         </LegalSection>

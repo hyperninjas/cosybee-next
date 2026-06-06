@@ -19,13 +19,13 @@ export default function LegalHero({
 }) {
   return (
     <header className="mx-auto max-w-3xl px-6 pt-12 pb-6 text-center sm:px-10 sm:pt-16 lg:pt-20">
-      <span className="block text-base font-semibold tracking-wide text-[#EE3D1A] sm:text-lg">
+      <span className="block text-base font-semibold tracking-wide text-accent sm:text-lg">
         {label}
       </span>
-      <h1 className="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-5xl">
+      <h1 className="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
         {title}
       </h1>
-      <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">
+      <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
         {subtitle}
       </p>
       {illustration && (

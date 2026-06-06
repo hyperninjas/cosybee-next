@@ -48,7 +48,7 @@ export function PublicFileUpload({
       />
       {status === "uploading" && <progress value={progress} max={100} />}
       {(clientError || error) && (
-        <p className="text-sm text-red-600">{clientError ?? error}</p>
+        <p className="text-sm text-danger">{clientError ?? error}</p>
       )}
       {value && (
         <div className="space-y-2">

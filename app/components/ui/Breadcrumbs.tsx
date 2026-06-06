@@ -18,10 +18,10 @@ export default function Breadcrumbs({
   if (items.length === 0) return null;
 
   const isDark = tone === "dark";
-  const base = isDark ? "text-white/70" : "text-[#787878]";
-  const current = isDark ? "text-white" : "text-[#545454]";
-  const sep = isDark ? "text-white/40" : "text-[#C4C4C4]";
-  const hover = isDark ? "hover:text-white" : "hover:text-[#FF8A7A]";
+  const base = isDark ? "text-white/70" : "text-muted";
+  const current = isDark ? "text-white" : "text-muted";
+  const sep = isDark ? "text-white/40" : "text-muted";
+  const hover = isDark ? "hover:text-white" : "hover:text-accent";
 
   return (
     <nav aria-label="Breadcrumb" className={className}>

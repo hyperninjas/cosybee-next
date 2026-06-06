@@ -93,7 +93,7 @@ export function PublicImageUpload({
   if (shown) {
     return (
       <div className="space-y-2">
-        <div className={`relative overflow-hidden rounded-lg border border-[#ECECEC] ${isAvatar ? "w-24" : "w-full"}`}>
+        <div className={`relative overflow-hidden rounded-lg border border-border ${isAvatar ? "w-24" : "w-full"}`}>
           {isAvatar ? (
             <Image
               src={shown}
@@ -117,14 +117,14 @@ export function PublicImageUpload({
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-[#333] shadow-sm hover:bg-[#F5F5F5]"
+                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5]"
               >
                 Replace
               </button>
               <button
                 type="button"
                 onClick={handleRemove}
-                className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-[#B4332A] shadow-sm hover:bg-[#FEF2F2]"
+                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-accent shadow-sm hover:bg-[#FEF2F2]"
               >
                 Remove
               </button>
@@ -137,9 +137,9 @@ export function PublicImageUpload({
               <div className="mb-2 text-sm font-medium text-white">
                 Uploading... {progress}%
               </div>
-              <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-white/30">
+              <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-surface/30">
                 <div
-                  className="h-full rounded-full bg-white transition-all duration-300"
+                  className="h-full rounded-full bg-surface transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -156,7 +156,7 @@ export function PublicImageUpload({
         />
 
         {(clientError || error) && (
-          <p className="text-xs font-medium text-[#B4332A]">{clientError ?? error}</p>
+          <p className="text-xs font-medium text-accent">{clientError ?? error}</p>
         )}
       </div>
     );
@@ -172,15 +172,15 @@ export function PublicImageUpload({
         onClick={() => !isUploading && inputRef.current?.click()}
         className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
           isDragging
-            ? "border-[#FF8A7A] bg-[#FFF5F4]"
-            : "border-[#DBDBDB] bg-[#FAFAFA] hover:border-[#FF8A7A] hover:bg-[#FFF5F4]"
+            ? "border-accent bg-danger-soft"
+            : "border-border bg-background hover:border-accent hover:bg-danger-soft"
         } ${isUploading ? "pointer-events-none opacity-60" : ""}`}
       >
         {isUploading ? (
           <>
             <div className="mb-3 flex h-10 w-10 items-center justify-center">
               <svg
-                className="h-6 w-6 animate-spin text-[#FF8A7A]"
+                className="h-6 w-6 animate-spin text-accent"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -199,19 +199,19 @@ export function PublicImageUpload({
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-[#333]">Uploading... {progress}%</p>
-            <div className="mt-2 h-1.5 w-32 overflow-hidden rounded-full bg-[#ECECEC]">
+            <p className="text-sm font-medium text-foreground">Uploading... {progress}%</p>
+            <div className="mt-2 h-1.5 w-32 overflow-hidden rounded-full bg-surface-secondary">
               <div
-                className="h-full rounded-full bg-[#FF8A7A] transition-all duration-300"
+                className="h-full rounded-full bg-accent transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </>
         ) : (
           <>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#FFE4E1]">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-danger-soft">
               <svg
-                className="h-5 w-5 text-[#FF8A7A]"
+                className="h-5 w-5 text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -224,10 +224,10 @@ export function PublicImageUpload({
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-[#333]">
+            <p className="text-sm font-medium text-foreground">
               {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
             </p>
-            <p className="mt-1 text-xs text-[#9A9A9A]">
+            <p className="mt-1 text-xs text-muted">
               PNG, JPG, WebP or AVIF (max {maxMB}MB)
             </p>
           </>
@@ -244,7 +244,7 @@ export function PublicImageUpload({
       />
 
       {(clientError || error) && (
-        <p className="text-xs font-medium text-[#B4332A]">{clientError ?? error}</p>
+        <p className="text-xs font-medium text-accent">{clientError ?? error}</p>
       )}
     </div>
   );

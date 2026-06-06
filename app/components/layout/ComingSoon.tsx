@@ -31,18 +31,18 @@ export default function ComingSoon({
           fill="#EFDF18"
         />
       </svg>
-      <p className="text-sm font-semibold uppercase tracking-wide text-[#EE3D1A]">
+      <p className="text-sm font-semibold uppercase tracking-wide text-accent">
         {eyebrow}
       </p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
+      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
         {title}
       </h1>
-      <p className="mt-4 max-w-md text-base leading-relaxed text-neutral-600 sm:text-lg">
+      <p className="mt-4 max-w-md text-base leading-relaxed text-muted sm:text-lg">
         {description}
       </p>
       <Link
         href={cta.href}
-        className="mt-8 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+        className="mt-8 inline-flex items-center justify-center rounded-xl bg-accent px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
       >
         {cta.label}
       </Link>

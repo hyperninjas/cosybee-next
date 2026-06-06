@@ -63,7 +63,7 @@ export default function ContactSection() {
           <h2 className="text-6xl font-extrabold tracking-tight sm:text-7xl lg:text-[96px]">
             contact
           </h2>
-          <p className="mt-2 text-base text-neutral-200 sm:text-lg">
+          <p className="mt-2 text-base text-muted sm:text-lg">
             we&rsquo;d love to hear from you!
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function ContactSection() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-full bg-white px-7 py-5 text-base text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
+            className="w-full rounded-full bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
           />
           <input
             type="email"
@@ -105,7 +105,7 @@ export default function ContactSection() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-full bg-white px-7 py-5 text-base text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
+            className="w-full rounded-full bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
           />
           <textarea
             placeholder="Message"
@@ -113,7 +113,7 @@ export default function ContactSection() {
             onChange={(e) => setMessage(e.target.value)}
             required
             rows={4}
-            className="w-full resize-none rounded-3xl bg-white px-7 py-5 text-base text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
+            className="w-full resize-none rounded-3xl bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
           />
           <button
             type="submit"

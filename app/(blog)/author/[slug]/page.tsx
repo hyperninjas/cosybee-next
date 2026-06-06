@@ -84,16 +84,16 @@ export default async function AuthorPage({
             className="h-20 w-20 text-2xl"
           />
           <div>
-            <h1 className="text-2xl font-extrabold text-black sm:text-3xl">
+            <h1 className="text-2xl font-extrabold text-foreground sm:text-3xl">
               {author.name}
             </h1>
             {author.role && (
-              <p className="mt-1 text-sm font-semibold text-[#FF8A7A]">
+              <p className="mt-1 text-sm font-semibold text-accent">
                 {author.role}
               </p>
             )}
             {author.bio && (
-              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[#545454]">
+              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">
                 {author.bio}
               </p>
             )}
@@ -102,7 +102,7 @@ export default async function AuthorPage({
 
         {/* articles by this author */}
         <section className="mt-12">
-          <h2 className="text-xl font-bold text-black">
+          <h2 className="text-xl font-bold text-foreground">
             {articles.length === 1
               ? "1 article"
               : `${articles.length} articles`}

@@ -25,19 +25,19 @@ export default function ErrorBoundary({
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-      <p className="text-sm font-semibold uppercase tracking-wide text-[#EE3D1A]">
+      <p className="text-sm font-semibold uppercase tracking-wide text-accent">
         Something went wrong
       </p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
+      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
         We hit a snag
       </h1>
-      <p className="mt-4 max-w-md text-base text-neutral-600">
+      <p className="mt-4 max-w-md text-base text-muted">
         An unexpected error occurred while loading this page. The team has
         been notified. Try again, or head back to the homepage.
       </p>
 
       {error.digest && (
-        <p className="mt-3 text-xs text-neutral-500">
+        <p className="mt-3 text-xs text-muted">
           Reference: <code className="font-mono">{error.digest}</code>
         </p>
       )}
@@ -46,13 +46,13 @@ export default function ErrorBoundary({
         <button
           type="button"
           onClick={() => reset()}
-          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#FF8B27] to-[#EE3D1A] px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+          className="inline-flex items-center justify-center rounded-xl bg-accent px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
         >
           Try again
         </button>
         <Link
           href="/"
-          className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-8 py-3 text-base font-medium text-black transition hover:bg-neutral-50"
+          className="inline-flex items-center justify-center rounded-xl border border-border bg-surface px-8 py-3 text-base font-medium text-foreground transition hover:bg-background"
         >
           Back to home
         </Link>

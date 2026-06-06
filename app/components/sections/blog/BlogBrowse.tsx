@@ -95,10 +95,10 @@ export default function BlogBrowse({
           <button
             type="button"
             onClick={() => setTag("")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#EBF2F5] px-3 py-1.5 text-sm font-semibold text-[#1b4a5e] hover:bg-[#dce8ed]"
+            className="inline-flex items-center gap-2 rounded-full bg-surface-secondary px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-[#dce8ed]"
           >
             Filtering by #{tag}
-            <span aria-hidden className="text-[#1b4a5e]/60">
+            <span aria-hidden className="text-foreground/60">
               ✕
             </span>
           </button>

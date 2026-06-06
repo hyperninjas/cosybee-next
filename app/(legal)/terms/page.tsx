@@ -1,7 +1,7 @@
-import LegalContainer from "../components/legal/LegalContainer";
-import LegalHero from "../components/legal/LegalHero";
-// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
-import LegalSection from "../components/legal/LegalSection";
+import LegalContainer from "@/app/components/legal/LegalContainer";
+import LegalHero from "@/app/components/legal/LegalHero";
+// import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
+import LegalSection from "@/app/components/legal/LegalSection";
 import illustration from "@/public/illustration-terms-conditions.svg";
 import Image from "next/image";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <main className="flex-1 bg-white text-black">
+    <main className="flex-1 bg-surface text-foreground">
       <LegalHero
         label="Terms & Conditions"
         title="Everything You Need to Know Before You Begin"
@@ -470,7 +470,7 @@ export default function TermsPage() {
             </a>
             .
           </p>
-          <p className="mt-8 text-sm text-neutral-500">
+          <p className="mt-8 text-sm text-muted">
             Last updated: May 2026
           </p>
         </LegalSection>

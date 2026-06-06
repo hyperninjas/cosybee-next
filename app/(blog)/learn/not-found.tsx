@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import BlogNotFound from "../components/sections/blog/BlogNotFound";
+import BlogNotFound from "@/app/components/sections/blog/BlogNotFound";
 
 export const metadata: Metadata = {
   title: "Article not found",

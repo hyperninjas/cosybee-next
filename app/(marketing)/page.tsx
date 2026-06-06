@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import HomeHero from "./components/sections/home/HomeHero";
-import PerfectHarmony from "./components/sections/home/PerfectHarmony";
-import HeatingSolutions from "./components/sections/home/HeatingSolutions";
-import HomeSolarForecasting from "./components/sections/home/HomeSolarForecasting";
-import HomeEnergyManagement from "./components/sections/home/HomeEnergyManagement";
-// import WhyThousands from "./components/sections/home/WhyThousands";
-import ReadyToReduce from "./components/sections/home/ReadyToReduce";
-import JsonLd from "./components/JsonLd";
-import { softwareApplicationSchema } from "./lib/structured-data";
+import HomeHero from "@/app/components/sections/home/HomeHero";
+import PerfectHarmony from "@/app/components/sections/home/PerfectHarmony";
+import HeatingSolutions from "@/app/components/sections/home/HeatingSolutions";
+import HomeSolarForecasting from "@/app/components/sections/home/HomeSolarForecasting";
+import HomeEnergyManagement from "@/app/components/sections/home/HomeEnergyManagement";
+// import WhyThousands from "@/app/components/sections/home/WhyThousands";
+import ReadyToReduce from "@/app/components/sections/home/ReadyToReduce";
+import JsonLd from "@/app/components/JsonLd";
+import { softwareApplicationSchema } from "@/app/lib/structured-data";
 
 export const metadata: Metadata = {
   // Use the layout's default title (no template) for the home page itself.

@@ -17,8 +17,8 @@ function initialsFrom(name: string): string {
  * lands on the same color. Curated to read on white-bg cards.
  */
 const PALETTE = [
-  "bg-[#FEF6C7] text-[#B45309]", // amber
-  "bg-[#FFE4E1] text-[#C0362C]", // peach
+  "bg-warning-soft text-[#B45309]", // amber
+  "bg-danger-soft text-danger", // peach
   "bg-[#E5F2F6] text-[#1F5773]", // sky
   "bg-[#E9F4E2] text-[#3C6A2A]", // moss
   "bg-[#F1E9FC] text-[#5B2EAA]", // lilac
