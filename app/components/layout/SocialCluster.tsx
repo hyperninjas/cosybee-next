@@ -29,7 +29,7 @@ export default function SocialCluster({
       {/* YouTube — middle-right hex */}
       <a
         href={youtube}
-        // target="_blank"
+        target="_blank"
         rel="noopener noreferrer"
         aria-label="YouTube"
         className="group"
