@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 
 /**
  * Offline fallback. Precached by the service worker (public/sw.js) and shown

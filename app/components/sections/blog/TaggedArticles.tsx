@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { ArticleCard } from "./BlogLatestArticles";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";

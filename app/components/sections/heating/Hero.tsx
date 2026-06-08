@@ -10,7 +10,7 @@ import { CtaButton } from "../../ui/Cta";
 // import deviceImg from "@/public/heating/energiebee-app-epc-heating-potential.png";
 // import windTurbineImg from "@/public/wind-turbine.png";
 import heroBgImg from "@/public/Cover/energiebee-heating-cover.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 // function HeroPhone({ className = "" }: { className?: string }) {
 //   return (

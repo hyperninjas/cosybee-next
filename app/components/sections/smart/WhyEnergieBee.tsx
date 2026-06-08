@@ -6,7 +6,7 @@ import {
   SectionTitle,
 } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/smart/energiebee-app-energy-at-a-glance.png";
 
 export default function WhyEnergieBee() {

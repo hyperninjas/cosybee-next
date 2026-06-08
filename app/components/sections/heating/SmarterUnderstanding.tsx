@@ -2,7 +2,7 @@ import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";
 
 export default function SmarterUnderstanding() {

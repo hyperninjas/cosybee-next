@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
   Alert,
   Button,
@@ -122,7 +122,7 @@ function LoginForm() {
             <form onSubmit={onCredentials} className="flex flex-col gap-4">
               <TextField name="email" type="email" isRequired>
                 <Label>Email</Label>
-                <Input placeholder="you@example.com" autoComplete="email" />
+                <Input variant="secondary" placeholder="you@example.com" autoComplete="email" />
               </TextField>
               <TextField name="password" type="password" isRequired>
                 <div className="flex items-center justify-between">
@@ -134,7 +134,7 @@ function LoginForm() {
                     Forgot password?
                   </Link>
                 </div>
-                <Input placeholder="••••••••" autoComplete="current-password" />
+                <Input variant="secondary" placeholder="••••••••" autoComplete="current-password" />
               </TextField>
 
               {error && (
@@ -164,12 +164,12 @@ function LoginForm() {
                 onChange={setBackupCode}
               >
                 <Label>Backup code</Label>
-                <Input placeholder="xxxxxxxx" autoComplete="one-time-code" />
+                <Input variant="secondary" placeholder="xxxxxxxx" autoComplete="one-time-code" />
               </TextField>
             ) : (
               <div className="flex flex-col gap-2">
                 <Label>Authentication code</Label>
-                <InputOTP
+                <InputOTP variant="secondary"
                   maxLength={6}
                   value={code}
                   onChange={setCode}

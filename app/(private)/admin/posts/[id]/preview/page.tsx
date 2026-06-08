@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { notFound } from "next/navigation";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 import { getPostArticle } from "@/app/(private)/admin/lib/queries";

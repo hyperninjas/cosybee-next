@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 
 /** Build the href for a page — page 1 is the bare hub URL (clean canonical). */
 function hrefFor(basePath: string, page: number): string {

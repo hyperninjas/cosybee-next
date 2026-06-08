@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png";

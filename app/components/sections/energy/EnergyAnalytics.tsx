@@ -3,7 +3,7 @@ import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/energy/energiebee-octopus-energy-tariff-dashboard.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 export default function EnergyAnalytics() {
   return (

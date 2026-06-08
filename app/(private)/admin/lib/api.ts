@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { parseApiError } from "@/app/lib/api-error";
 import type { Author, Category, Tag } from "@/app/lib/article-types";
 
 const API_BASE = process.env.API_URL || "http://localhost:3000";
@@ -136,9 +137,10 @@ async function fetchApi<T>(
   });
 
   if (!res.ok) {
-    const error = await res.text();
-    console.error(`[adminApi] Error ${res.status}: ${error}`);
-    throw new Error(`API error ${res.status}: ${error}`);
+    // Typed error carrying the backend `code` (EMAIL_NOT_VERIFIED,
+    // ACCOUNT_BANNED, FORBIDDEN, …) for callers to branch on.
+    const err = await parseApiError(res);
+    throw Object.assign(new Error(err.message), err);
   }
 
   const json = await res.json();

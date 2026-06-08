@@ -3,7 +3,7 @@ import Hexagon from "../../ui/Hexagon";
 // import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
 // import sideImage from "@/public/energy-monitoring.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import HiveHexCluster from "../../ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";

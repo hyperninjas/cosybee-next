@@ -1,5 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { type Article, formatReadTime } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";

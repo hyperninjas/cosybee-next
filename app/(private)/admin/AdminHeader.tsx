@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { LogoutButton } from "./LogoutButton";
 
 export function AdminHeader() {

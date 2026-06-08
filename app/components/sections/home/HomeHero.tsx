@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { CtaButton } from "../../ui/Cta";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import heroDeviceImg from "@/public/energibee-hero-device.png";

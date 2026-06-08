@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 /**
  * Custom "Add to Home Screen" prompt for the PWA.

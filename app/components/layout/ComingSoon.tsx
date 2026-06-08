@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 
 /**
  * Reusable "Coming soon" placeholder for routes that exist in nav/footer

@@ -10,12 +10,15 @@ import {
   TextField,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
+import { isFreshSessionError } from "@/app/lib/api-error";
+import { ReauthNotice } from "@/app/components/account/ReauthNotice";
 
 export function ChangePasswordCard() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
+  const [reauth, setReauth] = useState(false);
   const [status, setStatus] = useState<
     { kind: "ok" | "error"; message: string } | null
   >(null);
@@ -23,6 +26,7 @@ export function ChangePasswordCard() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus(null);
+    setReauth(false);
 
     if (next.length < 8) {
       setStatus({ kind: "error", message: "New password must be at least 8 characters." });
@@ -41,7 +45,11 @@ export function ChangePasswordCard() {
     });
 
     if (error) {
-      setStatus({ kind: "error", message: error.message || "Could not change password." });
+      if (isFreshSessionError(error)) {
+        setReauth(true);
+      } else {
+        setStatus({ kind: "error", message: error.message || "Could not change password." });
+      }
     } else {
       setStatus({
         kind: "ok",
@@ -72,7 +80,7 @@ export function ChangePasswordCard() {
             onChange={setCurrent}
           >
             <Label>Current password</Label>
-            <Input autoComplete="current-password" />
+            <Input variant="secondary" autoComplete="current-password" />
           </TextField>
           <TextField
             name="next"
@@ -82,7 +90,7 @@ export function ChangePasswordCard() {
             onChange={setNext}
           >
             <Label>New password</Label>
-            <Input autoComplete="new-password" placeholder="At least 8 characters" />
+            <Input variant="secondary" autoComplete="new-password" placeholder="At least 8 characters" />
           </TextField>
           <TextField
             name="confirm"
@@ -92,9 +100,10 @@ export function ChangePasswordCard() {
             onChange={setConfirm}
           >
             <Label>Confirm new password</Label>
-            <Input autoComplete="new-password" />
+            <Input variant="secondary" autoComplete="new-password" />
           </TextField>
 
+          {reauth && <ReauthNotice />}
           {status && (
             <Alert status={status.kind === "ok" ? "success" : "danger"}>
               <Alert.Indicator />

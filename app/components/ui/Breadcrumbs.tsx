@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 
 /**
  * Visible breadcrumb trail. Pair it with `breadcrumbSchema(items)` JSON-LD

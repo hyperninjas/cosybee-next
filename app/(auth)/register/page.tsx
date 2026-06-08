@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
   Alert,
   Button,
@@ -56,10 +56,12 @@ function RegisterForm() {
       return;
     }
 
-    // Depending on the backend's email-verification policy the user may or may
-    // not be signed in immediately. Either way, send them onward; protected
-    // areas re-check on the server.
-    router.push(redirectTo);
+    // Sign-up sends a 6-digit verification OTP, and writes require a verified
+    // email — so send new users to verify-email next (carrying the intended
+    // destination).
+    router.push(
+      `/verify-email?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirectTo)}`,
+    );
     router.refresh();
   }
 
@@ -75,19 +77,19 @@ function RegisterForm() {
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <TextField name="name" type="text" isRequired>
             <Label>Full name</Label>
-            <Input placeholder="Jane Doe" autoComplete="name" />
+            <Input variant="secondary" placeholder="Jane Doe" autoComplete="name" />
           </TextField>
           <TextField name="email" type="email" isRequired>
             <Label>Email</Label>
-            <Input placeholder="you@example.com" autoComplete="email" />
+            <Input variant="secondary" placeholder="you@example.com" autoComplete="email" />
           </TextField>
           <TextField name="password" type="password" isRequired>
             <Label>Password</Label>
-            <Input placeholder="At least 8 characters" autoComplete="new-password" />
+            <Input variant="secondary" placeholder="At least 8 characters" autoComplete="new-password" />
           </TextField>
           <TextField name="confirm" type="password" isRequired>
             <Label>Confirm password</Label>
-            <Input placeholder="Re-enter your password" autoComplete="new-password" />
+            <Input variant="secondary" placeholder="Re-enter your password" autoComplete="new-password" />
           </TextField>
 
           {error && (

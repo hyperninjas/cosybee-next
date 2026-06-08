@@ -8,7 +8,7 @@ import HiveHexCluster, { HexCell } from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-cycle.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import type { FeatureCardContent } from "./WhyEnergieBee";
 
 export type WhyEnergieBeeSolarProps = {

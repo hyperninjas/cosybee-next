@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import type { PartialBlock } from "@blocknote/core";

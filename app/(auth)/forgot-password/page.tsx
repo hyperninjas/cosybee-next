@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
   Alert,
   Button,
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <TextField name="email" type="email" isRequired>
             <Label>Email</Label>
-            <Input
+            <Input variant="secondary"
               placeholder="you@example.com"
               autoComplete="email"
               value={email}

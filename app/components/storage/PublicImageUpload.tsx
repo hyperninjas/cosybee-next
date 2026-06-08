@@ -2,7 +2,6 @@
 "use no memo";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { useUpload } from "@/app/hooks/useUpload";
 import { validate, LIMITS } from "@/app/lib/storage";
 
@@ -14,10 +13,13 @@ export function PublicImageUpload({
   context,
   value,
   onChange,
+  disabled = false,
 }: {
   context: "blog-cover" | "blog-content-image" | "user-avatar";
   value: string | null;
   onChange: (url: string | null) => void;
+  /** Block uploads (e.g. unverified email — the backend would 403 anyway). */
+  disabled?: boolean;
 }) {
   const { upload, status, progress, error, reset } = useUpload(context);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -93,31 +95,29 @@ export function PublicImageUpload({
   if (shown) {
     return (
       <div className="space-y-2">
-        <div className={`relative overflow-hidden rounded-lg border border-border ${isAvatar ? "w-24" : "w-full"}`}>
-          {isAvatar ? (
-            <Image
-              src={shown}
-              alt="Preview"
-              width={96}
-              height={96}
-              className="h-24 w-24 object-cover"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={shown}
-              alt="Preview"
-              className="h-40 w-full object-cover"
-            />
-          )}
+        <div className={`relative overflow-hidden rounded-lg border border-border ${isAvatar ? "h-24 w-24" : "w-full"}`}>
+          {/* Plain <img> on purpose: `shown` is often a `blob:` local-preview
+              URL (and otherwise an ephemeral uploaded URL) which next/image
+              cannot optimize — sending those through it breaks sizing. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={shown}
+            alt="Preview"
+            className={
+              isAvatar
+                ? "absolute inset-0 h-full w-full object-cover"
+                : "h-40 w-full object-cover"
+            }
+          />
 
           {/* Overlay with actions */}
           {!isUploading && (
             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all hover:bg-black/50 hover:opacity-100">
               <button
                 type="button"
+                disabled={disabled}
                 onClick={() => inputRef.current?.click()}
-                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5]"
+                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Replace
               </button>
@@ -166,11 +166,14 @@ export function PublicImageUpload({
   return (
     <div className="space-y-2">
       <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => !isUploading && inputRef.current?.click()}
+        onDrop={disabled ? undefined : handleDrop}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onClick={() => !disabled && !isUploading && inputRef.current?.click()}
+        aria-disabled={disabled}
         className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
+          disabled ? "pointer-events-none opacity-50" : ""
+        } ${
           isDragging
             ? "border-accent bg-danger-soft"
             : "border-border bg-background hover:border-accent hover:bg-danger-soft"

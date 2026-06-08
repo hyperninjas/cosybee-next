@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { SectionHeader } from "../../ui/SectionContent";
 import hexaChart from "@/public/hexa-wand-icon.svg";
 import hexaSun from "@/public/hexa-connector-icon.svg";

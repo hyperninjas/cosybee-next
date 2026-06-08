@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { listPosts } from "./lib/queries";

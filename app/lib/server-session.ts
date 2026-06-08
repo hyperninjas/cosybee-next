@@ -86,6 +86,7 @@ export async function requireUser(redirectTo?: string): Promise<ServerSession> {
         : "/login",
     );
   }
+  if (session.user.banned) redirect("/banned");
   return session;
 }
 
@@ -96,6 +97,7 @@ export async function requireUser(redirectTo?: string): Promise<ServerSession> {
 export async function requireAdmin(): Promise<ServerSession> {
   const session = await getServerSession();
   if (!session) redirect("/login?redirect=/admin");
+  if (session.user.banned) redirect("/banned");
   if (session.user.role !== "admin") redirect("/");
   return session;
 }

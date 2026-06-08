@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserMenu } from "./UserMenu";

@@ -5,13 +5,6 @@
    We deliberately do NOT add `bg-background text-foreground` to <body>, so
    HeroUI's neutral background never overrides the site's own white canvas. */
 @import "@heroui/styles";
-/*  */
-/* @theme { */
-/*  */
-  /* --font-sans: var(--font-manrope), system-ui, -apple-system, "Segoe UI", */
-    /* sans-serif; */
-/*  */
-/* } */
 /*
  * HeroUI Theme Customization
  * Add this to your global.css after importing @heroui/styles
@@ -25,7 +18,7 @@
 [data-theme="light"],
 [data-theme="default"] {
   /* Theme Colors (Light Mode) */
-  --accent: oklch(64.10% 0.1638 49.85);
+  --accent: oklch(64.11% 0.1638 49.85);
   --accent-foreground: oklch(99.11% 0 0);
   --background: oklch(97.02% 0.0015 49.85);
   --border: oklch(90.00% 0.0015 49.85);
@@ -37,7 +30,7 @@
   --field-border: transparent;
   --field-foreground: oklch(21.03% 0.0015 49.85);
   --field-placeholder: oklch(55.17% 0.0030 49.85);
-  --focus: oklch(64.10% 0.1638 49.85);
+  --focus: oklch(64.11% 0.1638 49.85);
   --foreground: oklch(21.03% 0.0015 49.85);
   --muted: oklch(55.17% 0.0030 49.85);
   --overlay: oklch(100.00% 0.0004 49.85);
@@ -58,8 +51,8 @@
   --warning-foreground: oklch(21.03% 0.0059 47.85);
 
   /* Border Radius */
-  --radius: 0.25rem;
-  --field-radius: 0.25rem;
+  --radius: 0.5rem;
+  --field-radius: 0.5rem;
 
   /* Font Family */
   /* Make sure to load Manrope font in your app */
@@ -70,7 +63,7 @@
 [data-theme="dark"] {
   color-scheme: dark;
   /* Theme Colors (Dark Mode) */
-  --accent: oklch(64.10% 0.1638 49.85);
+  --accent: oklch(64.11% 0.1638 49.85);
   --accent-foreground: oklch(99.11% 0 0);
   --background: oklch(12.00% 0.0015 49.85);
   --border: oklch(28.00% 0.0015 49.85);
@@ -82,7 +75,7 @@
   --field-border: transparent;
   --field-foreground: oklch(99.11% 0.0015 49.85);
   --field-placeholder: oklch(70.50% 0.0030 49.85);
-  --focus: oklch(64.10% 0.1638 49.85);
+  --focus: oklch(64.11% 0.1638 49.85);
   --foreground: oklch(99.11% 0.0015 49.85);
   --muted: oklch(70.50% 0.0030 49.85);
   --overlay: oklch(21.03% 0.0030 49.85);

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { useMemo, useState } from "react";
 import {
   type Article,

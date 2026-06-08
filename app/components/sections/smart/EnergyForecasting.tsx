@@ -1,6 +1,6 @@
 import { CtaCard } from "../../ui/Cta";
 import { MediaCard, SectionHeader } from "../../ui/SectionContent";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/smart/energiebee-energy-usage.png";
 import deviceWeatherImg from "@/public/smart/energiebee-weather-forecasts.png";
 

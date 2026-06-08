@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
   Alert,
   Button,
@@ -70,7 +70,7 @@ function ResetPasswordForm() {
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <TextField name="email" type="email" isRequired>
             <Label>Email</Label>
-            <Input
+            <Input variant="secondary"
               placeholder="you@example.com"
               autoComplete="email"
               value={email}
@@ -80,7 +80,7 @@ function ResetPasswordForm() {
 
           <div className="flex flex-col gap-2">
             <Label>6-digit code</Label>
-            <InputOTP
+            <InputOTP variant="secondary"
               maxLength={6}
               value={otp}
               onChange={setOtp}
@@ -102,7 +102,7 @@ function ResetPasswordForm() {
 
           <TextField name="password" type="password" isRequired>
             <Label>New password</Label>
-            <Input
+            <Input variant="secondary"
               placeholder="At least 8 characters"
               autoComplete="new-password"
               value={password}
@@ -111,7 +111,7 @@ function ResetPasswordForm() {
           </TextField>
           <TextField name="confirm" type="password" isRequired>
             <Label>Confirm new password</Label>
-            <Input
+            <Input variant="secondary"
               placeholder="Re-enter your password"
               autoComplete="new-password"
               value={confirm}

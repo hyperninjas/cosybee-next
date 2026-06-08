@@ -1,5 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 import { SOCIAL } from "@/app/lib/site";

@@ -8,7 +8,7 @@ import {
 import windTurbineImg from "@/public/wind-turbine.png";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/heating/energiebee-app-heating-overview.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 const PROBLEMS = [
   "energy waste",

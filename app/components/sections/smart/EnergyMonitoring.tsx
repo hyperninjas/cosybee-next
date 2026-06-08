@@ -7,7 +7,7 @@ import HiveHexCluster from "../../ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/smart/energiebee-app-home-heating-spend-graph.png";
 import windTurbineImg from "@/public/wind-turbine.png";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 export default function EnergyMonitoring() {
   return (
     <section className="relative overflow-hidden bg-surface py-12 text-foreground lg:py-16">

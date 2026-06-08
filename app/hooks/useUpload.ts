@@ -3,9 +3,11 @@
 import { useCallback, useRef, useState } from "react";
 import {
   uploadFile,
+  StorageError,
   type ConfirmResponse,
   type UploadContext,
 } from "@/app/lib/storage";
+import { handleAuthError } from "@/app/lib/api-error";
 
 type Status = "idle" | "uploading" | "done" | "error";
 
@@ -30,7 +32,12 @@ export function useUpload(context: UploadContext) {
         return result;
       } catch (e) {
         setStatus("error");
-        setError(e instanceof Error ? e.message : "Upload failed");
+        // Route cross-cutting codes (e.g. EMAIL_NOT_VERIFIED → verify-email,
+        // ACCOUNT_BANNED → banned). Only show an inline message otherwise.
+        const code = e instanceof StorageError ? e.code : undefined;
+        if (!(await handleAuthError(code))) {
+          setError(e instanceof Error ? e.message : "Upload failed");
+        }
         throw e;
       }
     },

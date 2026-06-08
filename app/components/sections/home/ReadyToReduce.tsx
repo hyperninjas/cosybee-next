@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import AppStoreButton from "../../ui/AppStoreButton";
 import { CtaButton } from "../../ui/Cta";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy-download-app.png";

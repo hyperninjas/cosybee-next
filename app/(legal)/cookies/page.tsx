@@ -3,7 +3,7 @@ import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "@/app/components/legal/LegalSection";
 import illustration from "@/public/illustration-cookies.svg";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 import type { Metadata } from "next";
 

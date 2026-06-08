@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import LegalContainer from "@/app/components/legal/LegalContainer";
 import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";

@@ -1,17 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { useRouter } from "next/navigation";
-import { Avatar, Dropdown, Label, Separator } from "@heroui/react";
+import { Dropdown, Label, Separator } from "@heroui/react";
+import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { authClient } from "@/app/lib/auth-client";
-
-function initialsFrom(name?: string | null, email?: string | null): string {
-  const source = (name || email || "").trim();
-  if (!source) return "?";
-  const parts = source.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 /**
  * Navbar auth control. Shows Log in / Sign up when signed out, and an avatar
@@ -64,12 +57,12 @@ export function UserMenu() {
         aria-label="Account menu"
         className="rounded-full outline-none transition focus-visible:ring-2 focus-visible:ring-white/50"
       >
-        <Avatar size="sm">
-          {user.image ? (
-            <Avatar.Image src={user.image} alt={user.name || "Account"} />
-          ) : null}
-          <Avatar.Fallback>{initialsFrom(user.name, user.email)}</Avatar.Fallback>
-        </Avatar>
+        <AppAvatar
+          src={user.image}
+          name={user.name || user.email}
+          alt={user.name || "Account"}
+          size="sm"
+        />
       </Dropdown.Trigger>
       <Dropdown.Popover className="min-w-56">
         <div className="border-b border-border px-3 py-2">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 
 type Props = {
   /** Link target for the back button, e.g. "/hive" or "/learn". */

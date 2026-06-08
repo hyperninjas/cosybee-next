@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { deletePost, setStatus } from "./actions";
 import type { Category } from "@/app/lib/article-types";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import QRCode from "qrcode";
 import {
   Alert,
@@ -15,6 +15,8 @@ import {
   TextField,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
+import { isFreshSessionError } from "@/app/lib/api-error";
+import { ReauthNotice } from "@/app/components/account/ReauthNotice";
 
 type Mode = "view" | "enable-password" | "enable-verify" | "disable";
 
@@ -27,6 +29,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [reauth, setReauth] = useState(false);
 
   function reset() {
     setMode("view");
@@ -35,6 +38,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
     setQr(null);
     setBackupCodes([]);
     setError("");
+    setReauth(false);
     setBusy(false);
   }
 
@@ -93,7 +97,8 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
     setBusy(true);
     const { error } = await authClient.twoFactor.disable({ password });
     if (error) {
-      setError(error.message || "Could not disable two-factor.");
+      if (isFreshSessionError(error)) setReauth(true);
+      else setError(error.message || "Could not disable two-factor.");
       setBusy(false);
       return;
     }
@@ -115,6 +120,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
         </Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-col gap-4">
+        {reauth && <ReauthNotice />}
         {error && (
           <Alert status="danger">
             <Alert.Indicator />
@@ -150,7 +156,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
               onChange={setPassword}
             >
               <Label>Confirm your password</Label>
-              <Input autoComplete="current-password" />
+              <Input variant="secondary" autoComplete="current-password" />
             </TextField>
             <div className="flex gap-2">
               <Button type="submit" isPending={busy}>
@@ -200,7 +206,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
 
             <div className="flex flex-col gap-2">
               <Label>Verification code</Label>
-              <InputOTP
+              <InputOTP variant="secondary"
                 maxLength={6}
                 value={code}
                 onChange={setCode}
@@ -242,7 +248,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
               onChange={setPassword}
             >
               <Label>Confirm your password to disable</Label>
-              <Input autoComplete="current-password" />
+              <Input variant="secondary" autoComplete="current-password" />
             </TextField>
             <div className="flex gap-2">
               <Button type="submit" variant="danger" isPending={busy}>

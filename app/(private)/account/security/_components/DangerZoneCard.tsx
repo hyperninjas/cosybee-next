@@ -12,6 +12,8 @@ import {
   TextField,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
+import { isFreshSessionError } from "@/app/lib/api-error";
+import { ReauthNotice } from "@/app/components/account/ReauthNotice";
 
 export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
   const router = useRouter();
@@ -24,22 +26,26 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
 
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  // Both actions are "sensitive" → may need a fresh sign-in.
+  const [reauth, setReauth] = useState(false);
 
   async function changeEmail(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setEmailStatus(null);
+    setReauth(false);
     setEmailBusy(true);
     const { error } = await authClient.changeEmail({
       newEmail: newEmail.trim(),
-      callbackURL: "/account/security",
+      callbackURL: "/account/email-changed",
     });
     if (error) {
-      setEmailStatus({ kind: "error", message: error.message || "Could not change email." });
+      if (isFreshSessionError(error)) setReauth(true);
+      else setEmailStatus({ kind: "error", message: error.message || "Could not change email." });
     } else {
       setEmailStatus({
         kind: "ok",
         message:
-          "Check your inbox to confirm the change. Your email updates once verified.",
+          "Check your current inbox and click the link to confirm — your email updates once you do.",
       });
       setNewEmail("");
     }
@@ -48,16 +54,17 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
 
   async function deleteAccount() {
     setDeleteError("");
+    setReauth(false);
     setDeleteBusy(true);
     const { error } = await authClient.deleteUser({ callbackURL: "/" });
     if (error) {
-      setDeleteError(error.message || "Could not delete account.");
+      if (isFreshSessionError(error)) setReauth(true);
+      else setDeleteError(error.message || "Could not delete account.");
       setDeleteBusy(false);
       return;
     }
-    // Either deleted immediately or a confirmation email was sent; in both
-    // cases send the user home.
-    router.push("/");
+    // Account deleted (a goodbye email is sent automatically) → goodbye screen.
+    router.push("/goodbye");
     router.refresh();
   }
 
@@ -68,6 +75,7 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
         <Card.Description>Change your email or delete your account.</Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-col gap-8">
+        {reauth && <ReauthNotice />}
         {/* Change email */}
         <form onSubmit={changeEmail} className="flex max-w-md flex-col gap-3">
           <TextField
@@ -78,7 +86,7 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
             onChange={setNewEmail}
           >
             <Label>Change email</Label>
-            <Input placeholder={currentEmail} autoComplete="email" />
+            <Input variant="secondary" placeholder={currentEmail} autoComplete="email" />
           </TextField>
           {emailStatus && (
             <Alert status={emailStatus.kind === "ok" ? "success" : "danger"}>
@@ -103,7 +111,14 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
             be undone.
           </p>
           {deleteError && (
-            <p className="mb-3 text-sm text-danger">{deleteError}</p>
+            <div className="mb-3">
+              <Alert status="danger">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>{deleteError}</Alert.Title>
+                </Alert.Content>
+              </Alert>
+            </div>
           )}
           <AlertDialog>
             <Button variant="danger">Delete account</Button>

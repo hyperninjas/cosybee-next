@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/app/lib/server-session";
 import { AccountNav } from "./AccountNav";
+import { VerifyEmailBanner } from "@/app/components/account/VerifyEmailBanner";
 
 // Member area — not for search engines.
 export const metadata: Metadata = {
@@ -26,7 +27,10 @@ export default async function AccountLayout({
           </p>
         </header>
         <AccountNav />
-        <div className="mt-6 flex flex-col gap-6">{children}</div>
+        <div className="mt-6 flex flex-col gap-6">
+          <VerifyEmailBanner />
+          {children}
+        </div>
       </div>
     </main>
   );

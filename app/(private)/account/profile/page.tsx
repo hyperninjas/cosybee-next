@@ -35,6 +35,7 @@ export default function ProfilePage() {
       initialName={user.name ?? ""}
       initialImage={user.image ?? null}
       email={user.email}
+      canWrite={user.emailVerified ?? false}
     />
   );
 }
@@ -43,10 +44,12 @@ function ProfileForm({
   initialName,
   initialImage,
   email,
+  canWrite,
 }: {
   initialName: string;
   initialImage: string | null;
   email: string;
+  canWrite: boolean;
 }) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
@@ -112,6 +115,7 @@ function ProfileForm({
                 context="user-avatar"
                 value={image}
                 onChange={handleImageChange}
+                disabled={!canWrite}
               />
             </div>
           </div>
@@ -124,12 +128,12 @@ function ProfileForm({
             onChange={setName}
           >
             <Label>Full name</Label>
-            <Input placeholder="Your name" autoComplete="name" />
+            <Input variant="secondary" placeholder="Your name" autoComplete="name" />
           </TextField>
 
           <TextField name="email" type="email" isDisabled value={email}>
             <Label>Email</Label>
-            <Input />
+            <Input variant="secondary" />
           </TextField>
 
           {status && (
