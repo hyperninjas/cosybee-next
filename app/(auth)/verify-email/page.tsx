@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
@@ -26,6 +26,21 @@ function VerifyEmailForm() {
   const [notice, setNotice] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
+  const hasSentInitial = useRef(false);
+
+  // Automatically send OTP when page loads (if email is available)
+  useEffect(() => {
+    if (!email || hasSentInitial.current) return;
+    hasSentInitial.current = true;
+
+    authClient.emailOtp
+      .sendVerificationOtp({ email, type: "email-verification" })
+      .then(({ error }) => {
+        if (error) {
+          setError(error.message || "Couldn't send verification code.");
+        }
+      });
+  }, [email]);
 
   async function onVerify(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
