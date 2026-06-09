@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowUpRightFromSquare } from "@gravity-ui/icons";
 import { Dropdown, Label, Separator } from "@heroui/react";
+import { buttonVariants } from "@heroui/styles";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
@@ -42,15 +43,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
           </span>
         </Link>
 
-        {/* Desktop nav (md+) */}
+        {/* Desktop nav (md+) — real anchors styled with HeroUI's button
+            variants so their radius/size match the Sign out Button. */}
         <nav className="hidden items-center gap-1 text-sm font-medium md:flex">
           <Link
             href="/admin/manage-users"
-            className={`rounded-md px-3 py-1.5 transition-colors ${
-              onUsers
-                ? "bg-background text-foreground"
-                : "text-muted hover:bg-background hover:text-foreground"
-            }`}
+            className={buttonVariants({
+              variant: onUsers ? "secondary" : "ghost",
+              size: "sm",
+            })}
           >
             Users
           </Link>
@@ -60,7 +61,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
           <Link
             href="/hive"
             external
-            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-background hover:text-foreground"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             View Hive
             <ArrowUpRightFromSquare className="size-3.5 opacity-70" />
@@ -68,7 +69,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
           <Link
             href="/learn"
             external
-            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-background hover:text-foreground"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             View Learn
             <ArrowUpRightFromSquare className="size-3.5 opacity-70" />

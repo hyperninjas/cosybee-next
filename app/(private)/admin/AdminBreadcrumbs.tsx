@@ -15,7 +15,7 @@ export function AdminBreadcrumbs() {
   if (!pathname || pathname === "/admin") return null;
 
   return (
-    <Breadcrumbs className="mb-6">
+    <Breadcrumbs className="mb-4 sm:mb-6">
       <Breadcrumbs.Item href="/admin">Admin</Breadcrumbs.Item>
       <Breadcrumbs.Item>{currentLabel(pathname)}</Breadcrumbs.Item>
     </Breadcrumbs>

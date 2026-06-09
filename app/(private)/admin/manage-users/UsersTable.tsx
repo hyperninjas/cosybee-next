@@ -189,7 +189,7 @@ export function UsersTable({
 
       {total > 0 && (
         <Table.Footer>
-          <Pagination size="sm" className="w-full">
+          <Pagination size="sm" className="w-full flex-wrap gap-2">
             <Pagination.Summary>
               Showing {rangeStart}–{rangeEnd} of {total} users
             </Pagination.Summary>
@@ -206,7 +206,7 @@ export function UsersTable({
 
               {showNumberedPages &&
                 Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Pagination.Item key={p}>
+                  <Pagination.Item key={p} className="hidden sm:flex">
                     <Pagination.Link
                       isActive={p === page}
                       onPress={() => onPageChange(p)}

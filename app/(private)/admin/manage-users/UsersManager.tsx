@@ -31,36 +31,41 @@ export default function UsersManager() {
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await authClient.admin.listUsers({
-        query: {
-          limit: LIMIT,
-          offset: (page - 1) * LIMIT,
-          sortBy: String(sort.column),
-          sortDirection: sort.direction === "ascending" ? "asc" : "desc",
-          ...(search && {
-            searchValue: search,
-            searchField: "email",
-            searchOperator: "contains",
-          }),
-        },
-      });
+  // `silent` refreshes the data without flipping the skeleton — used after a
+  // create so the table updates in place instead of flashing a full reload.
+  const fetchUsers = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!opts?.silent) setLoading(true);
+      try {
+        const { data, error } = await authClient.admin.listUsers({
+          query: {
+            limit: LIMIT,
+            offset: (page - 1) * LIMIT,
+            sortBy: String(sort.column),
+            sortDirection: sort.direction === "ascending" ? "asc" : "desc",
+            ...(search && {
+              searchValue: search,
+              searchField: "email",
+              searchOperator: "contains",
+            }),
+          },
+        });
 
-      if (error) {
-        toast.danger(error.message || "Failed to load users");
-        return;
+        if (error) {
+          toast.danger(error.message || "Failed to load users");
+          return;
+        }
+
+        setUsers((data?.users as User[]) || []);
+        setTotal(data?.total || 0);
+      } catch {
+        toast.danger("Something went wrong loading users");
+      } finally {
+        if (!opts?.silent) setLoading(false);
       }
-
-      setUsers((data?.users as User[]) || []);
-      setTotal(data?.total || 0);
-    } catch {
-      toast.danger("Something went wrong loading users");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search, sort]);
+    },
+    [page, search, sort],
+  );
 
   // Server-side sorting: apply the new descriptor and snap back to page 1.
   function handleSortChange(descriptor: SortDescriptor) {
@@ -101,60 +106,81 @@ export default function UsersManager() {
     }
     setShowCreate(false);
     toast.success("User created");
-    await fetchUsers();
+    // Background refresh (no skeleton) so the new user appears in place.
+    await fetchUsers({ silent: true });
+  }
+
+  // Patch a single user in place — the basis for optimistic row updates.
+  function patchUser(userId: string, patch: Partial<User>) {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, ...patch } : u)),
+    );
   }
 
   async function handleSetRole(userId: string, role: Role) {
+    let prevRole: string | undefined;
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id !== userId) return u;
+        prevRole = u.role;
+        return { ...u, role };
+      }),
+    );
     const { error } = await authClient.admin.setRole({ userId, role });
     if (error) {
+      patchUser(userId, { role: prevRole }); // revert
       toast.danger(error.message || "Couldn't update role");
       throw error;
     }
     toast.success("Role updated");
-    await fetchUsers();
   }
 
   async function handleBan(userId: string) {
+    patchUser(userId, { banned: true }); // optimistic
     const { error } = await authClient.admin.banUser({
       userId,
       banReason: "Banned by admin",
     });
     if (error) {
+      patchUser(userId, { banned: false }); // revert
       toast.danger(error.message || "Couldn't ban user");
       throw error;
     }
     toast.success("User banned");
-    await fetchUsers();
   }
 
   async function handleUnban(userId: string) {
+    patchUser(userId, { banned: false }); // optimistic
     const { error } = await authClient.admin.unbanUser({ userId });
     if (error) {
+      patchUser(userId, { banned: true }); // revert
       toast.danger(error.message || "Couldn't unban user");
       throw error;
     }
     toast.success("User unbanned");
-    await fetchUsers();
   }
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-foreground">
+      <h1 className="mb-4 text-xl font-bold text-foreground sm:mb-6 sm:text-2xl">
         User Management
       </h1>
 
-      {/* Toolbar: search (left) and create (right) on one row */}
-      <div className="mb-6 flex items-center justify-between gap-3">
+      {/* Toolbar: stacks on mobile, search + create side-by-side from sm up. */}
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <TextField
           aria-label="Search users by email"
-          className="w-full max-w-sm"
+          className="w-full sm:max-w-sm"
           value={query}
           onChange={setQuery}
         >
           <Label className="sr-only">Search users</Label>
           <Input variant="secondary" placeholder="Search by email…" />
         </TextField>
-        <Button className="shrink-0" onPress={() => setShowCreate(true)}>
+        <Button
+          className="w-full shrink-0 sm:w-auto"
+          onPress={() => setShowCreate(true)}
+        >
           <span aria-hidden className="text-base leading-none">
             +
           </span>
