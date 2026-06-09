@@ -1,10 +1,27 @@
+/* Lock the cascade-layer order up front so Tailwind's `utilities` always wins
+   over HeroUI's `components`/`base`, regardless of how Turbopack splits the
+   imported CSS into chunks. */
+@layer theme, base, components, utilities;
+
 @import "tailwindcss";
+@import "@heroui/styles";
 
 @theme {
 
   --font-sans: var(--font-manrope), system-ui, -apple-system, "Segoe UI",
     sans-serif;
 
+}
+
+/* Brand the HeroUI semantic palette. v3 drives its "primary"/accent role off
+   `--accent`; the default is a blue, so we remap it to the energiebee red and
+   point `--danger` at the existing destructive red. Declared unlayered so it
+   wins over HeroUI's `@layer base` token defaults. */
+:root {
+  --accent: #e63b2e;
+  --accent-foreground: #ffffff;
+  --danger: #b4332a;
+  --danger-foreground: #ffffff;
 }
 
 body {

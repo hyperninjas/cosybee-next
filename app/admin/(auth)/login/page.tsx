@@ -1,6 +1,7 @@
 "use client";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Alert, Button, Input, Spinner } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import Link from "next/link";
 
@@ -57,66 +58,58 @@ function LoginForm() {
       </div>
 
       {resetSuccess && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-          Password reset successful. Please sign in with your new password.
-        </div>
+        <Alert status="success">
+          <Alert.Description>
+            Password reset successful. Please sign in with your new password.
+          </Alert.Description>
+        </Alert>
       )}
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-[#333]">
             Email
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="admin@example.com"
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8A7A] focus:border-transparent outline-none transition-all"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="mb-1 block text-sm font-medium text-[#333]">
             Password
           </label>
-          <input
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8A7A] focus:border-transparent outline-none transition-all"
           />
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
-        </div>
+        <Alert status="danger">
+          <Alert.Description>{error}</Alert.Description>
+        </Alert>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full p-3 bg-[#1b1b1b] text-white font-semibold rounded-lg hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-      >
+      <Button type="submit" variant="secondary" fullWidth isDisabled={loading}>
         {loading ? (
           <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            Signing in...
+            <Spinner size="sm" /> Signing in…
           </span>
         ) : (
           "Sign In"
         )}
-      </button>
+      </Button>
 
       <div className="text-center">
         <Link

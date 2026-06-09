@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 
 export function LogoutButton() {
@@ -19,12 +20,8 @@ export function LogoutButton() {
   }
 
   return (
-    <button
-      onClick={handleLogout}
-      disabled={loading}
-      className="text-sm font-medium text-[#545454] hover:text-red-600 transition-colors disabled:opacity-50"
-    >
-      {loading ? "Signing out..." : "Logout"}
-    </button>
+    <Button variant="ghost" size="sm" onPress={handleLogout} isDisabled={loading}>
+      {loading ? "Signing out…" : "Logout"}
+    </Button>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { Alert, Button, buttonVariants, Input, Spinner } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 
 export default function ForgotPasswordPage() {
@@ -49,7 +50,7 @@ export default function ForgotPasswordPage() {
           <p className="text-sm text-gray-500">Code expires in 5 minutes</p>
           <Link
             href={`/admin/reset-password?email=${encodeURIComponent(email)}`}
-            className="inline-block mt-4 px-6 py-3 bg-[#1b1b1b] text-white font-semibold rounded-lg hover:bg-[#333] transition-colors"
+            className={`mt-4 ${buttonVariants({ variant: "secondary" })}`}
           >
             Enter Code
           </Link>
@@ -77,40 +78,31 @@ export default function ForgotPasswordPage() {
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8A7A] focus:border-transparent outline-none transition-all"
           />
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
+          <Alert status="danger">
+            <Alert.Description>{error}</Alert.Description>
+          </Alert>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full p-3 bg-[#1b1b1b] text-white font-semibold rounded-lg hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
+        <Button type="submit" variant="secondary" fullWidth isDisabled={loading}>
           {loading ? (
             <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Sending...
+              <Spinner size="sm" /> Sending…
             </span>
           ) : (
             "Send Reset Code"
           )}
-        </button>
+        </Button>
 
         <div className="text-center">
           <Link href="/admin/login" className="text-sm text-[#FF8A7A] hover:underline">

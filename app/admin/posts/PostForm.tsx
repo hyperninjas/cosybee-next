@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { Alert, Button, Chip, Input, ListBox, ListBoxItem, Select, Switch, TextArea } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "../actions";
 import { initialSaveState } from "../lib/form-state";
@@ -74,9 +75,6 @@ type Props = {
   /** Internal site paths for the CTA link picker. */
   internalRoutes?: string[];
 };
-
-const inputClass =
-  "w-full rounded-lg border border-[#DBDBDB] px-3 py-2 text-sm focus:border-[#FF8A7A] focus:outline-none";
 
 function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
@@ -237,22 +235,29 @@ function ActionBar({
         <Link href="/admin" className="text-sm text-[#545454] hover:text-black">
           ← Posts
         </Link>
-        <select
-          value={blog}
-          onChange={(e) => setBlog(e.target.value)}
-          className="rounded-md border border-[#DBDBDB] bg-white px-2 py-1 text-sm"
+        <Select
           aria-label="Blog"
+          selectedKey={blog}
+          onSelectionChange={(k) => setBlog(String(k))}
         >
-          <option value="hive">Hive</option>
-          <option value="learn">Learn</option>
-        </select>
-        <span
-          className={`hidden rounded-full px-2 py-0.5 text-xs font-semibold sm:inline ${
-            isPublished ? "bg-[#E6F4EA] text-[#1E7B34]" : "bg-[#F2F2F2] text-[#777]"
-          }`}
+          <Select.Trigger className="w-28">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              <ListBoxItem id="hive">Hive</ListBoxItem>
+              <ListBoxItem id="learn">Learn</ListBoxItem>
+            </ListBox>
+          </Select.Popover>
+        </Select>
+        <Chip
+          color={isPublished ? "success" : "default"}
+          size="sm"
+          variant="soft"
+          className="hidden sm:inline-flex"
         >
           {isPublished ? "Published" : "Draft"}
-        </span>
+        </Chip>
       </div>
 
       <div className="flex items-center gap-2">
@@ -265,29 +270,27 @@ function ActionBar({
             View live ↗
           </Link>
         )}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="rounded-lg border border-[#DBDBDB] bg-white px-3 py-1.5 text-sm font-medium hover:bg-[#F2F2F2]"
-        >
+        <Button type="button" variant="outline" size="sm" onPress={onOpenSettings}>
           Settings
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          onClick={() => onSetStatus("DRAFT")}
-          disabled={pending}
-          className="rounded-lg border border-[#DBDBDB] bg-white px-3 py-1.5 text-sm font-medium hover:bg-[#F2F2F2] disabled:opacity-60"
+          variant="outline"
+          size="sm"
+          onPress={() => onSetStatus("DRAFT")}
+          isDisabled={pending}
         >
           Save draft
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          onClick={() => onSetStatus("PUBLISHED")}
-          disabled={pending}
-          className="rounded-lg bg-[#FF8A7A] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#ff7765] disabled:opacity-60"
+          variant="primary"
+          size="sm"
+          onPress={() => onSetStatus("PUBLISHED")}
+          isDisabled={pending}
         >
           {pending ? "Saving…" : editing && isPublished ? "Update" : "Publish"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -510,8 +513,10 @@ export default function PostForm({
       />
 
       {state?.error && (
-        <div className="mx-auto mb-6 max-w-2xl rounded-lg border border-[#F3C2BC] bg-[#FDECEC] px-4 py-3 text-sm font-medium text-[#B4332A]">
-          {state.error}
+        <div className="mx-auto mb-6 max-w-2xl">
+          <Alert status="danger">
+            <Alert.Description>{state.error}</Alert.Description>
+          </Alert>
         </div>
       )}
 
@@ -572,19 +577,17 @@ export default function PostForm({
       {settingsOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/30"
+            className="fixed inset-0 z-40 bg-black/30 animate-in fade-in duration-200"
             onClick={() => setSettingsOpen(false)}
           />
-          <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white shadow-xl">
+          <aside
+            className="fixed inset-y-0 right-0 z-50 w-[min(28rem,90vw)] overflow-y-auto bg-white shadow-xl animate-in slide-in-from-right duration-200"
+          >
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4 shadow-sm">
               <h2 className="text-lg font-bold">Post settings</h2>
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(false)}
-                className="rounded-lg bg-[#FF8A7A] px-4 py-1.5 text-sm font-semibold text-white"
-              >
+              <Button type="button" variant="primary" size="sm" onPress={() => setSettingsOpen(false)}>
                 Done
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-5 p-5">
@@ -597,11 +600,11 @@ export default function PostForm({
                   onChange={(url) => setCoverUrl(url ?? "")}
                 />
                 <Labeled label="Alt text" hint="Describes the image for accessibility. Defaults to the title.">
-                  <input
+                  <Input
+                    fullWidth
                     value={coverImageAlt}
                     onChange={(e) => setCoverImageAlt(e.target.value)}
                     placeholder={title || "Enter alt text…"}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
@@ -648,14 +651,14 @@ export default function PostForm({
                 {/* New author input */}
                 <div className="space-y-3">
                   <Labeled label="Name" hint="Type a new author name.">
-                    <input
+                    <Input
+                      fullWidth
                       value={authorId ? "" : authorName}
                       onChange={(e) => {
                         setAuthorId("");
                         setAuthorName(e.target.value);
                       }}
                       placeholder="New author name…"
-                      className={inputClass}
                     />
                   </Labeled>
                   <Labeled label="Avatar" hint="Profile picture for new author (max 2MB).">
@@ -725,21 +728,21 @@ export default function PostForm({
                     ))}
                   </div>
                 )}
-                <input
+                <Input
+                  fullWidth
                   value={categoryName}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   placeholder={blogCategories.length > 0 ? "Or type a new category…" : "Enter category name…"}
-                  className={inputClass}
                 />
               </div>
 
               {/* Excerpt */}
               <Labeled label="Excerpt" hint="Card blurb + meta description. Auto from the body if blank.">
-                <textarea
+                <TextArea
+                  fullWidth
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className={inputClass}
                 />
               </Labeled>
 
@@ -749,13 +752,14 @@ export default function PostForm({
                 error={errors.slug}
                 hint="Auto from the title. Edit to override."
               >
-                <input
+                <Input
+                  fullWidth
+                  className="font-mono"
                   value={effectiveSlug}
                   onChange={(e) => {
                     setSlug(slugify(e.target.value));
                     setSlugTouched(true);
                   }}
-                  className={`${inputClass} font-mono`}
                 />
                 <span className="mt-1 block text-xs text-[#9A9A9A]">
                   /{blog}/{effectiveSlug || "…"}
@@ -764,20 +768,20 @@ export default function PostForm({
 
               {/* Author date */}
               <Labeled label="Author date" hint="Defaults to today.">
-                <input
+                <Input
+                  fullWidth
                   value={authorDate}
                   onChange={(e) => setAuthorDate(e.target.value)}
                   type="date"
-                  className={inputClass}
                 />
               </Labeled>
 
               {/* Lede */}
               <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <input
+                <Input
+                  fullWidth
                   value={lede}
                   onChange={(e) => setLede(e.target.value)}
-                  className={inputClass}
                 />
               </Labeled>
 
@@ -796,20 +800,20 @@ export default function PostForm({
                   </div>
                 </div>
                 <Labeled label="SEO title" hint="Defaults to the title.">
-                  <input
+                  <Input
+                    fullWidth
                     value={seoTitle}
                     onChange={(e) => setSeoTitle(e.target.value)}
                     placeholder={title || "Defaults to title"}
-                    className={inputClass}
                   />
                 </Labeled>
                 <Labeled label="SEO description" hint="Defaults to the excerpt.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={seoDescription}
                     onChange={(e) => setSeoDescription(e.target.value)}
                     rows={2}
                     placeholder={description || "Defaults to excerpt"}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
@@ -817,32 +821,28 @@ export default function PostForm({
               {/* Featured / Carousel */}
               <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="Featured Carousel" />
-                <label className="flex items-center gap-3 rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
-                  <input
-                    type="checkbox"
-                    checked={featured}
-                    onChange={(e) => setFeatured(e.target.checked)}
-                    className="h-5 w-5 rounded border-[#DBDBDB] text-[#FF8A7A] focus:ring-[#FF8A7A]"
-                  />
-                  <div>
-                    <span className="block text-sm font-medium">Feature in carousel</span>
-                    <span className="block text-xs text-[#9A9A9A]">Show this post in the homepage carousel</span>
-                  </div>
-                </label>
+                <div className="rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
+                  <Switch isSelected={featured} onChange={setFeatured}>
+                    <Switch.Content>
+                      <span className="block text-sm font-medium">Feature in carousel</span>
+                      <span className="block text-xs text-[#9A9A9A]">Show this post in the homepage carousel</span>
+                    </Switch.Content>
+                  </Switch>
+                </div>
                 <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={carouselIntro}
                     onChange={(e) => setCarouselIntro(e.target.value)}
                     rows={2}
-                    className={inputClass}
                   />
                 </Labeled>
                 <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={carouselBody}
                     onChange={(e) => setCarouselBody(e.target.value)}
                     rows={3}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
@@ -851,34 +851,32 @@ export default function PostForm({
               <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="Call to Action" />
                 <Labeled label="Button label" hint="Leave blank for no CTA.">
-                  <input
+                  <Input
+                    fullWidth
                     value={ctaLabel}
                     onChange={(e) => setCtaLabel(e.target.value)}
                     placeholder="Try energiebee for free"
-                    className={inputClass}
                   />
                 </Labeled>
 
                 {/* internal / external toggle */}
-                <div className="inline-flex rounded-lg border border-[#DBDBDB] p-0.5 text-sm">
-                  <button
+                <div className="inline-flex gap-1.5">
+                  <Button
                     type="button"
-                    onClick={() => setCtaExternal(false)}
-                    className={`rounded-md px-3 py-1 font-medium ${
-                      !ctaExternal ? "bg-[#FF8A7A] text-white" : "text-[#545454]"
-                    }`}
+                    size="sm"
+                    variant={!ctaExternal ? "primary" : "outline"}
+                    onPress={() => setCtaExternal(false)}
                   >
                     Internal page
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    onClick={() => setCtaExternal(true)}
-                    className={`rounded-md px-3 py-1 font-medium ${
-                      ctaExternal ? "bg-[#FF8A7A] text-white" : "text-[#545454]"
-                    }`}
+                    size="sm"
+                    variant={ctaExternal ? "primary" : "outline"}
+                    onPress={() => setCtaExternal(true)}
                   >
                     External link
-                  </button>
+                  </Button>
                 </div>
 
                 {ctaExternal ? (
@@ -886,12 +884,12 @@ export default function PostForm({
                     label="External URL"
                     hint="Opens in a new tab. https:// is added if you omit it."
                   >
-                    <input
+                    <Input
+                      fullWidth
                       type="url"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="https://example.com"
-                      className={inputClass}
                     />
                   </Labeled>
                 ) : (
@@ -899,12 +897,13 @@ export default function PostForm({
                     label="Internal page"
                     hint="Search an existing page. Opens in the same tab."
                   >
-                    <input
+                    <Input
+                      fullWidth
+                      className="font-mono"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="/start"
                       list="route-options"
-                      className={`${inputClass} font-mono`}
                     />
                     <datalist id="route-options">
                       {internalRoutes.map((r) => (
