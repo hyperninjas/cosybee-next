@@ -13,7 +13,31 @@ import Image from "next/image";
 
 export default function ConnectedEcosystem() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 pb-8 text-black lg:py-20 lg:pb-10">
+    <section className="relative overflow-hidden bg-white py-16 text-black lg:py-20 ">
+      {/* early-access launch banner */}
+      <div className="mx-auto mb-20 max-w-360 px-6 sm:px-10 lg:px-30">
+        <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
+          <div className="">
+            <h3 className="text-xl font-extrabold leading-tight text-black sm:text-[36px] whitespace-pre-line">
+              {"Launching August 2026 \n Early Access Available."}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#545454] sm:text-base">
+              Be part of the first wave of connected home energy intelligence.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="/get-started"
+              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-[#DAE7ED] bg-white px-6 text-base lg:text-lg leading-[135%] font-semibold text-black transition-colors hover:bg-neutral-50"
+            >
+              Pre-order access
+            </a>
+            <CtaButton href="/get-started" size="md">
+              Register interest
+            </CtaButton>
+          </div>
+        </div>
+      </div>
       <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
@@ -62,31 +86,6 @@ export default function ConnectedEcosystem() {
             ),
           }}
         />
-      </div>
-
-      {/* early-access launch banner */}
-      <div className="mx-auto mt-12 max-w-360 px-6 sm:px-10 lg:px-30">
-        <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
-          <div className="">
-            <h3 className="text-xl font-extrabold leading-tight text-black sm:text-[36px] whitespace-pre-line">
-              {"Launching August 2026 \n Early Access Available."}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#545454] sm:text-base">
-              Be part of the first wave of connected home energy intelligence.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="/get-started"
-              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-[#DAE7ED] bg-white px-6 text-base lg:text-lg leading-[135%] font-semibold text-black transition-colors hover:bg-neutral-50"
-            >
-              Pre-order access
-            </a>
-            <CtaButton href="/get-started" size="md">
-              Register interest
-            </CtaButton>
-          </div>
-        </div>
       </div>
     </section>
   );
