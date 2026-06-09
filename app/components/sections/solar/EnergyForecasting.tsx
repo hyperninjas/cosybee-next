@@ -1,4 +1,4 @@
-import { CtaCard } from "../../ui/Cta";
+// import { CtaCard } from "../../ui/Cta";
 import { MediaCard, SectionHeader } from "../../ui/SectionContent";
 import Image from "next/image";
 import deviceImg from "@/public/smart/energiebee-energy-usage.png";
@@ -46,7 +46,7 @@ export default function EnergyForecasting() {
           ]}
         />
       </div>
-      <div className="mx-auto max-w-225 mt-12 lg:mt-16">
+      {/* <div className="mx-auto max-w-225 mt-12 lg:mt-16">
         <CtaCard
           glyph="sun"
           glyphColor="#A3D055"
@@ -58,7 +58,7 @@ export default function EnergyForecasting() {
           descClassName="!text-sm"
           buttonClassName="!text-lg"
         />
-      </div>
+      </div> */}
     </section>
   );
 }

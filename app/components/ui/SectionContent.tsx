@@ -133,7 +133,7 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto text-center ${className}`}>
+    <div className={`mx-auto text-left min-[550px]:text-center ${className}`}>
       <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-[40px]">
         {title}
       </h2>

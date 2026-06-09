@@ -45,7 +45,6 @@ export default function Home() {
       <EnergyMonitoring />
       <EnergyAnalytics />
       <SmartEnergyManagement />
-      {/* <WhyEnergieBee /> */}
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
       <EnergyForecasting />
