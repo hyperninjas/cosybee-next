@@ -260,14 +260,9 @@ export const adminApi = {
   /** Get all categories (full objects). */
   async getAllCategories(): Promise<Category[]> {
     try {
-      // Try admin endpoint first, fall back to public
       const [hive, learn] = await Promise.all([
-        fetchApi<{ data: Category[] }>("/api/admin/posts/categories?blog=hive").catch(() =>
-          fetchApi<{ data: Category[] }>("/api/posts/categories?blog=hive")
-        ),
-        fetchApi<{ data: Category[] }>("/api/admin/posts/categories?blog=learn").catch(() =>
-          fetchApi<{ data: Category[] }>("/api/posts/categories?blog=learn")
-        ),
+        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=hive"),
+        fetchApi<{ data: Category[] }>("/api/posts/categories?blog=learn"),
       ]);
       return [...(hive.data || []), ...(learn.data || [])];
     } catch (e) {
@@ -291,14 +286,9 @@ export const adminApi = {
   /** Get all tags (full objects). */
   async getAllTags(): Promise<Tag[]> {
     try {
-      // Try admin endpoint first, fall back to public
       const [hive, learn] = await Promise.all([
-        fetchApi<{ data: Tag[] }>("/api/admin/posts/tags?blog=hive").catch(() =>
-          fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive")
-        ),
-        fetchApi<{ data: Tag[] }>("/api/admin/posts/tags?blog=learn").catch(() =>
-          fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn")
-        ),
+        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive"),
+        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn"),
       ]);
       // Dedupe by id
       const tagMap = new Map<string, Tag>();
@@ -325,11 +315,7 @@ export const adminApi = {
   /** Get all authors. */
   async getAuthors(): Promise<Author[]> {
     try {
-      // Try admin endpoint first, fall back to public
-      const response = await fetchApi<{ data: Author[] }>("/api/admin/posts/authors").catch(() =>
-        fetchApi<{ data: Author[] }>("/api/posts/authors")
-      );
-      console.log("getAuthors response:", response);
+      const response = await fetchApi<{ data: Author[] }>("/api/posts/authors");
       return response.data || [];
     } catch (e) {
       console.error("getAuthors error:", e);
