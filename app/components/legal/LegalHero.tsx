@@ -18,7 +18,7 @@ export default function LegalHero({
   illustration?: ReactNode;
 }) {
   return (
-    <header className="mx-auto max-w-3xl px-6 pt-12 pb-6 text-center sm:px-10 sm:pt-16 lg:pt-20">
+    <header className="mx-auto max-w-3xl px-6 pt-6 pb-6 text-center sm:px-10 sm:pt-10 lg:pt-16">
       <span className="block text-base font-semibold tracking-wide text-[#EE3D1A] sm:text-lg">
         {label}
       </span>

@@ -67,7 +67,7 @@ export default function WhyEnergieBee() {
         {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
             absolute positioning + explicit width so the inner `w-full`
             has a definite reference */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 lg:block">
+        <div className="absolute -right-55! min-[1200px]:-right-40! top-0 hidden w-125.5 lg:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

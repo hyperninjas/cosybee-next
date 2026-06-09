@@ -2,10 +2,18 @@ import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import Breadcrumbs from "../components/ui/Breadcrumbs";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 import illustration from "@/public/illustration-cookies.svg";
 import Image from "next/image";
 
 import type { Metadata } from "next";
+
+const CRUMBS = [
+  { name: "Home", path: "/" },
+  { name: "Cookie Policy", path: "/cookies" },
+];
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
@@ -33,6 +41,10 @@ function Cookie({ children }: { children: React.ReactNode }) {
 export default function CookiesPage() {
   return (
     <main className="flex-1 bg-white text-black">
+      <JsonLd data={breadcrumbSchema(CRUMBS)} />
+      <div className="mx-auto max-w-3xl px-6 pt-8 sm:px-10 sm:pt-12 lg:pt-16">
+        <Breadcrumbs items={CRUMBS} />
+      </div>
       <LegalHero
         label="Cookie Policy"
         title="How We Use Cookies on Our Website"

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const NAV_LINKS = [
   { label: "smart", href: "/smart" },
@@ -86,9 +86,11 @@ function Logo({ className }: { className?: string }) {
 // }
 
 /**
- * Hamburger that morphs into an X when `open`. Both states share the same
- * three <line>s so the transition is a pure transform — no layout reads,
- * GPU-cheap, and motion-reduce-friendly.
+ * Hamburger that morphs into an X when `open`. Built from three absolutely
+ * positioned <span> bars (not SVG <line>) so the transform pivot is always
+ * the element's centre — iPad/Safari has long-standing bugs with
+ * `transform-box: fill-box` on zero-area SVG lines. Pure GPU transforms,
+ * motion-reduce-friendly.
  */
 function MenuToggleIcon({
   open,
@@ -97,56 +99,38 @@ function MenuToggleIcon({
   open: boolean;
   className?: string;
 }) {
+  const bar =
+    "absolute left-1/2 top-1/2 h-[2px] rounded-full bg-[#C7B734] transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none";
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <span
       aria-hidden="true"
-      className={className}
+      className={`relative inline-block ${className}`}
     >
-      <line
-        x1="4"
-        y1="4"
-        x2="16"
-        y2="4"
-        stroke="#C7B734"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
-          open ? "translate-y-1.5 rotate-45" : ""
-        }`}
-        style={{ transformBox: "fill-box" }}
+      <span
+        className={`${bar} w-4.25`}
+        style={{
+          transform: open
+            ? "translate(-50%, -50%) rotate(45deg)"
+            : "translate(-50%, calc(-50% - 8px))",
+        }}
       />
-      <line
-        x1="1"
-        y1="10"
-        x2="19"
-        y2="10"
-        stroke="#C7B734"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        className={`origin-center transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
-          open ? "scale-x-0 opacity-0" : ""
-        }`}
-        style={{ transformBox: "fill-box" }}
+      <span
+        className={`${bar} w-6.25 ${open ? "opacity-0" : ""}`}
+        style={{
+          transform: open
+            ? "translate(-50%, -50%) scaleX(0)"
+            : "translate(-50%, -50%)",
+        }}
       />
-      <line
-        x1="4"
-        y1="16"
-        x2="16"
-        y2="16"
-        stroke="#C7B734"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        className={`origin-center transition-transform duration-300 ease-out motion-reduce:transition-none ${
-          open ? "-translate-y-1.5 -rotate-45" : ""
-        }`}
-        style={{ transformBox: "fill-box" }}
+      <span
+        className={`${bar} w-4.25`}
+        style={{
+          transform: open
+            ? "translate(-50%, -50%) rotate(-45deg)"
+            : "translate(-50%, calc(-50% + 8px))",
+        }}
       />
-    </svg>
+    </span>
   );
 }
 
@@ -158,6 +142,7 @@ export default function Navbar({
   activeHref?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLElement | null>(null);
   const pathname = usePathname();
   const currentPath = activeHref ?? pathname;
 
@@ -168,19 +153,31 @@ export default function Navbar({
     return currentPath === href || currentPath.startsWith(`${href}/`);
   };
 
-  // Close on Escape; only mount the listener while the menu is open.
+  // Close on Escape or outside click; only mount the listeners while open.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
+    const onPointerDown = (e: PointerEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [open]);
 
   return (
     <header className="sticky top-0 z-50 bg-black text-white">
-      <nav className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30">
+      <nav
+        ref={navRef}
+        className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30"
+      >
         <Link href="/" aria-label="Cosybee home" className="shrink-0">
           <Logo className="h-12 w-auto lg:h-14" />
         </Link>

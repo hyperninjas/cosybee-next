@@ -78,7 +78,9 @@ function Slide({
       </div>
       <div className="flex flex-col h-full p-8 sm:p-10">
         <div className="flex items-center gap-4 text-base">
-          <span className="font-semibold text-[#EE3D1A]">{slide.category?.name ?? "Uncategorised"}</span>
+          <span className="font-semibold text-[#EE3D1A]">
+            {slide.category?.name ?? "Uncategorised"}
+          </span>
           <Dot />
           <span className="text-[#545454] text-[15px] font-medium">
             {formatReadTime(slide.readTime)}
@@ -99,7 +101,10 @@ function Slide({
           </p>
         )}
         <div className="flex items-center gap-3 mt-4">
-          <Avatar name={slide.author?.name ?? "energiebee"} avatarUrl={slide.author?.avatarUrl} />
+          <Avatar
+            name={slide.author?.name ?? "energiebee"}
+            avatarUrl={slide.author?.avatarUrl}
+          />
           <div className="text-base">
             <div className="font-bold text-black text-lg">
               {slide.author?.name ?? "energiebee"}
@@ -179,9 +184,9 @@ export default function BlogFeatured({
 
       {/* pagination row */}
       <div className="mt-8 relative h-13 flex items-center justify-between">
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center md:justify-center">
           <div
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-2"
             role="tablist"
             aria-label="Featured article slides"
           >

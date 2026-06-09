@@ -25,7 +25,7 @@ export default function Breadcrumbs({
 
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className={`flex flex-wrap items-center gap-1.5 text-xs ${base}`}>
+      <ol className={`flex flex-wrap items-center gap-1.5 text-sm ${base}`}>
         {items.map((item, i) => {
           const isLast = i === items.length - 1;
           return (
@@ -35,10 +35,7 @@ export default function Breadcrumbs({
                   {item.name}
                 </span>
               ) : (
-                <Link
-                  href={item.path}
-                  className={`transition-colors ${hover}`}
-                >
+                <Link href={item.path} className={`transition-colors ${hover}`}>
                   {item.name}
                 </Link>
               )}

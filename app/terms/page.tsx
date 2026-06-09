@@ -2,10 +2,18 @@ import LegalContainer from "../components/legal/LegalContainer";
 import LegalHero from "../components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "../components/legal/LegalSection";
+import Breadcrumbs from "../components/ui/Breadcrumbs";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 import illustration from "@/public/illustration-terms-conditions.svg";
 import Image from "next/image";
 
 import type { Metadata } from "next";
+
+const CRUMBS = [
+  { name: "Home", path: "/" },
+  { name: "Terms & Conditions", path: "/terms" },
+];
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
@@ -24,6 +32,10 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <main className="flex-1 bg-white text-black">
+      <JsonLd data={breadcrumbSchema(CRUMBS)} />
+      <div className="mx-auto max-w-3xl px-6 pt-8 sm:px-10 sm:pt-12 lg:pt-16">
+        <Breadcrumbs items={CRUMBS} />
+      </div>
       <LegalHero
         label="Terms & Conditions"
         title="Everything You Need to Know Before You Begin"
