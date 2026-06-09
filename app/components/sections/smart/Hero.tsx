@@ -53,10 +53,11 @@ export default function Hero() {
             {"Works With \n Your "}
             <span className="text-[#EFDF18]">Smart Home</span>
           </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[18px] md:text-[22px] leading-7">
-            Advanced AI-powered solar production predictions. Plan your energy
-            usage with confidence and maximise your solar investment with
-            industry-leading accuracy.
+          <p className="mt-5 max-w-145.5 text-base sm:text-[18px] md:text-[22px] leading-7">
+            Connect your solar system, battery and smart home devices to see
+            everything in one place. AI-powered insights help you understand
+            energy production, usage and savings — and make smarter decisions
+            every day.
           </p>
           <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started
