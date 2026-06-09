@@ -4,6 +4,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
+import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
 const NAV_LINKS = [
@@ -169,6 +170,10 @@ export default function Navbar({
         </ul>
 
         <div className="flex items-center gap-3 text-muted sm:gap-5">
+          {/* Navbar is always dark: tint the ghost button's hover/pressed
+              backgrounds white (the default light-gray pressed bg shows as a
+              blended white box when the menu is open). */}
+          <ThemeToggle className="text-white [--button-bg-hover:#ffffff1f] [--button-bg-pressed:#ffffff33]" />
           <UserMenu />
           {/* <button
             type="button"

@@ -5,6 +5,7 @@ import "./globals.css";
 import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
 import { HideOnAdmin } from "./components/layout/HideOnAdmin";
+import { Providers } from "./providers";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import InstallPrompt from "./components/InstallPrompt";
 import { Toaster } from "./components/ui/Toaster";
@@ -122,7 +123,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  colorScheme: "light",
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#000000" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
@@ -173,6 +174,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${manrope.variable} h-full antialiased scroll-smooth`}
     >
       <head>
@@ -235,16 +237,18 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
-        <HideOnAdmin>
-          <Navbar />
-        </HideOnAdmin>
-        {children}
-        <HideOnAdmin>
-          <Footer />
-        </HideOnAdmin>
-        <Toaster />
-        <ServiceWorkerRegistration />
-        <InstallPrompt />
+        <Providers>
+          <HideOnAdmin>
+            <Navbar />
+          </HideOnAdmin>
+          {children}
+          <HideOnAdmin>
+            <Footer />
+          </HideOnAdmin>
+          <Toaster />
+          <ServiceWorkerRegistration />
+          <InstallPrompt />
+        </Providers>
       </body>
     </html>
   );

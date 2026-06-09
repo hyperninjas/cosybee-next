@@ -57,7 +57,9 @@ export default function PerfectHarmony() {
           gap={5}
           cornerInset={4}
           left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          // Above-the-fold (section right below the hero) → eager-load so it
+          // isn't flagged as an un-prioritised LCP image.
+          topRight={{ src: beeFlowerImg.src, color: "#D4A017", priority: true }}
           bottomRight={{
             color: "#E9E19E",
             children: (

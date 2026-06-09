@@ -95,10 +95,15 @@ export default function UsersManager() {
   // effect body (set-state-in-effect).
   useEffect(() => {
     let active = true;
-    const silent = hasLoadedRef.current;
-    hasLoadedRef.current = true;
     Promise.resolve().then(() => {
-      if (active) fetchUsers({ silent });
+      if (!active) return;
+      // Read/mark "loaded" only when a fetch actually runs — NOT in the effect
+      // body. Otherwise a StrictMode mount that's immediately torn down would
+      // flip the ref, making the first real fetch run `silent` (busy only) and
+      // leaving `loading` stuck true → the table never leaves the skeleton.
+      const silent = hasLoadedRef.current;
+      hasLoadedRef.current = true;
+      fetchUsers({ silent });
     });
     return () => {
       active = false;

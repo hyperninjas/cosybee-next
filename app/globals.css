@@ -17,6 +17,7 @@
 .default,
 [data-theme="light"],
 [data-theme="default"] {
+  color-scheme: light;
   /* Theme Colors (Light Mode) */
   --accent: oklch(64.11% 0.1638 49.85);
   --accent-foreground: oklch(99.11% 0 0);

@@ -2,7 +2,7 @@
 
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { useRouter } from "next/navigation";
-import { Dropdown, Label, Separator } from "@heroui/react";
+import { Dropdown, Label, Separator, buttonVariants } from "@heroui/react";
 import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { authClient } from "@/app/lib/auth-client";
 
@@ -22,16 +22,21 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Navbar is dark, so the ghost button is re-tinted white; Sign up
+            uses the primary (accent) variant as-is. */}
         <Link
           href="/login"
-          className="text-sm font-medium text-muted transition-colors hover:text-white"
+          className={`${buttonVariants({
+            variant: "ghost",
+            size: "sm",
+          })} text-white hover:bg-white/10`}
         >
           Log in
         </Link>
         <Link
           href="/register"
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+          className={buttonVariants({ variant: "primary", size: "sm" })}
         >
           Sign up
         </Link>

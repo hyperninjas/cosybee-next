@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { Eye, EyeSlash, Lock } from "@gravity-ui/icons";
 import {
-  Button,
+  buttonVariants,
   Description,
   FieldError,
   InputGroup,
@@ -103,19 +103,26 @@ export function PasswordField({
           minLength={minLength}
         />
         <InputGroup.Suffix className="pr-0">
-          <Button
-            isIconOnly
+          {/* Native <button> (not HeroUI <Button>) so the toggle uses pure CSS
+              :hover. The icon swap happens during press, which leaves React
+              Aria's data-pressed/data-hovered stuck on the HeroUI button —
+              freezing the hover state after the first click. */}
+          <button
+            type="button"
             aria-label={visible ? "Hide password" : "Show password"}
-            size="sm"
-            variant="ghost"
-            onPress={() => setVisible((v) => !v)}
+            onClick={() => setVisible((v) => !v)}
+            className={buttonVariants({
+              variant: "ghost",
+              size: "sm",
+              isIconOnly: true,
+            })}
           >
             {visible ? (
               <Eye className="size-4" />
             ) : (
               <EyeSlash className="size-4" />
             )}
-          </Button>
+          </button>
         </InputGroup.Suffix>
       </InputGroup>
       {isInvalid && errorMessage ? (
