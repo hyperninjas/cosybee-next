@@ -10,7 +10,7 @@ export default function SmarterUnderstanding() {
     <section className="relative overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 lg:py-20 px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone mockup */}
-        <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
+        <div className="absolute -top-17! left-0 hidden w-[345.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy dashboard"
@@ -21,8 +21,10 @@ export default function SmarterUnderstanding() {
         </div>
 
         {/* middle: title + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
-          <SectionTitle align="center">A Smarter Understanding of Your Home</SectionTitle>
+        <div className="min-[1200px]:max-w-125 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+          <SectionTitle align="center">
+            A Smarter Understanding of Your Home
+          </SectionTitle>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-[345.3px] mx-auto min-[1200px]:hidden mt-8">
             <Image
