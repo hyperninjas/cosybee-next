@@ -21,15 +21,15 @@ export default function ConnectedEcosystem() {
           className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
+        <div className="min-[1200px]:max-w-163.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
           <SectionTitle>
             EnergieBee is evolving into a connected home energy ecosystem
           </SectionTitle>
-          <SectionLead className="max-w-163.5 max-[1200px]:text-center">
+          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
             Today we optimise and forecast energy. Tomorrow we actively connect
             and control it.
           </SectionLead>
-          <div className="mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="Home Energy Hub Integration"
               description="A central intelligence layer for managing energy across your entire home."

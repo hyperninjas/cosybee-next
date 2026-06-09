@@ -21,10 +21,10 @@ export default function SmarterUnderstanding() {
         </div>
 
         {/* middle: title + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
-          <SectionTitle>A Smarter Understanding of Your Home</SectionTitle>
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+          <SectionTitle align="center">A Smarter Understanding of Your Home</SectionTitle>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-[345.3px] min-[1200px]:hidden mt-8">
+          <div className="w-[345.3px] mx-auto min-[1200px]:hidden mt-8">
             <Image
               src={deviceImg}
               alt="energy dashboard"

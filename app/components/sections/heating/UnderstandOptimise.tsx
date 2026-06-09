@@ -20,11 +20,11 @@ export default function UnderstandOptimise() {
           />
         </div>
         {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
-          <SectionTitle>
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+          <SectionTitle align="center">
             Understand and Optimise Your Home Energy Today
           </SectionTitle>
-          <div className="mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="Real-Time Energy Forecasting"
               description="Predict heating demand using live usage patterns and system behaviour."
@@ -39,7 +39,7 @@ export default function UnderstandOptimise() {
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 min-[1200px]:hidden mt-10">
+          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
             <Image
               src={deviceImg}
               alt="energy dashboard"

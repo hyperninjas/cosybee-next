@@ -221,7 +221,7 @@ export function SectionTitle({
       : "min-[1200px]:text-left!";
   return (
     <h2
-      className={`text-3xl font-extrabold leading-tight sm:text-center ${desktopAlign} tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
+      className={`text-3xl font-extrabold leading-tight min-[550px]:text-center ${desktopAlign} tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
     >
       {children}
     </h2>

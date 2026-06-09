@@ -48,12 +48,12 @@ export default function WhyChoose() {
           className="pointer-events-none absolute -right-24 -top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
         />
         {/* text */}
-        <div className="z-9 flex flex-col max-[1200px]:items-center text-left min-[1200px]:max-w-163.5">
+        <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center text-left min-[1200px]:max-w-163.5">
           <SectionTitle>Why Choose EnergieBee?</SectionTitle>
-          <SectionLead className="max-w-163.5 max-[1200px]:text-center">
+          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>
-          <p className="mt-4 text-base leading-relaxed text-[#545454] max-[1200px]:text-center">
+          <p className="mt-4 text-base leading-relaxed text-[#545454] min-[550px]:max-[1200px]:text-center">
             EnergieBee is designed to solve three problems at once:
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-[#545454] marker:text-[#545454]">
@@ -61,11 +61,11 @@ export default function WhyChoose() {
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-126 leading-relaxed text-[#545454] max-[1200px]:text-center">
+          <p className="mt-4 text-base max-w-126 leading-relaxed text-[#545454] min-[550px]:max-[1200px]:text-center">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>
-          <div className="mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="Smarter by Design"
               description="Built on predictive models that continuously learn from real household energy patterns."
