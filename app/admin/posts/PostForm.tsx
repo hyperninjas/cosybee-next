@@ -217,7 +217,6 @@ function ActionBar({
   blog,
   setBlog,
   onSetStatus,
-  onOpenSettings,
   liveHref,
 }: {
   editing: boolean;
@@ -225,7 +224,6 @@ function ActionBar({
   blog: string;
   setBlog: (b: string) => void;
   onSetStatus: (s: string) => void;
-  onOpenSettings: () => void;
   liveHref?: string;
 }) {
   const { pending } = useFormStatus();
@@ -270,9 +268,6 @@ function ActionBar({
             View live ↗
           </Link>
         )}
-        <Button type="button" variant="outline" size="sm" onPress={onOpenSettings}>
-          Settings
-        </Button>
         <Button
           type="submit"
           variant="outline"
@@ -390,7 +385,6 @@ export default function PostForm({
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
   const [status, setStatus] = useState(post?.status ?? "DRAFT");
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Author handling - track selected ID, name, and avatar
   const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
@@ -508,7 +502,6 @@ export default function PostForm({
         blog={blog}
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
-        onOpenSettings={() => setSettingsOpen(true)}
         liveHref={liveHref}
       />
 
@@ -520,8 +513,10 @@ export default function PostForm({
         </div>
       )}
 
-      {/* Writing canvas */}
-      <div className="mx-auto max-w-2xl">
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+        {/* Writing canvas */}
+        <div className="min-w-0 flex-1">
+        <div className="mx-auto max-w-2xl">
         {/* cover - S3 upload */}
         <div className="mb-6">
           <PublicImageUpload
@@ -571,23 +566,13 @@ export default function PostForm({
         <div className="post-editor">
           <Editor initialContent={initialBlocks} onChange={setBlocks} />
         </div>
-      </div>
+        </div>
+        </div>
 
-      {/* Settings drawer */}
-      {settingsOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/30 animate-in fade-in duration-200"
-            onClick={() => setSettingsOpen(false)}
-          />
-          <aside
-            className="fixed inset-y-0 right-0 z-50 w-[min(28rem,90vw)] overflow-y-auto bg-white shadow-xl animate-in slide-in-from-right duration-200"
-          >
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#ECECEC] bg-white px-5 py-4 shadow-sm">
+        {/* Settings panel — always docked beside the editor */}
+        <aside className="w-full shrink-0 self-start overflow-hidden rounded-xl border border-[#ECECEC] bg-white lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-[26rem] lg:overflow-y-auto">
+            <div className="sticky top-0 z-10 border-b border-[#ECECEC] bg-white px-5 py-4">
               <h2 className="text-lg font-bold">Post settings</h2>
-              <Button type="button" variant="primary" size="sm" onPress={() => setSettingsOpen(false)}>
-                Done
-              </Button>
             </div>
 
             <div className="space-y-5 p-5">
@@ -916,8 +901,7 @@ export default function PostForm({
 
             </div>
           </aside>
-        </>
-      )}
+      </div>
     </form>
   );
 }
