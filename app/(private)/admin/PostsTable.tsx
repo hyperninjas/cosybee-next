@@ -201,6 +201,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
           >
             <Select.Trigger className="w-32">
               <Select.Value />
+              <Select.Indicator />
             </Select.Trigger>
             <Select.Popover>
               <ListBox>
