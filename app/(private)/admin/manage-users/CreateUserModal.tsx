@@ -89,7 +89,7 @@ export function CreateUserModal({
                 onChange={(v) => set("name", v)}
               >
                 <Label>Name</Label>
-                <Input placeholder="Full name" />
+                <Input variant="secondary" placeholder="Full name" />
               </TextField>
 
               <TextField
@@ -100,7 +100,7 @@ export function CreateUserModal({
                 onChange={(v) => set("email", v)}
               >
                 <Label>Email</Label>
-                <Input placeholder="admin@example.com" />
+                <Input variant="secondary" placeholder="admin@example.com" />
               </TextField>
 
               <PasswordField
@@ -116,6 +116,7 @@ export function CreateUserModal({
 
               <Select
                 aria-label="Role"
+                variant="secondary"
                 value={form.role}
                 onChange={(value: Key | null) =>
                   set("role", (value as Role) || "admin")

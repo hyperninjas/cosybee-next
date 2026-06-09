@@ -152,7 +152,7 @@ export default function UsersManager() {
           onChange={setQuery}
         >
           <Label className="sr-only">Search users</Label>
-          <Input placeholder="Search by email…" />
+          <Input variant="secondary" placeholder="Search by email…" />
         </TextField>
         <Button className="shrink-0" onPress={() => setShowCreate(true)}>
           <span aria-hidden className="text-base leading-none">
