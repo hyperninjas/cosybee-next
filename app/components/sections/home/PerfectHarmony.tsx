@@ -21,13 +21,13 @@ export default function PerfectHarmony() {
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="min-[1200px]:max-w-170.5 flex flex-col max-[1200px]:items-center z-9">
+        <div className="min-[1200px]:max-w-170.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
           <SectionTitle>Everything connected in one place</SectionTitle>
-          <p className="mt-3 max-w-xl text-base max-[1200px]:text-center leading-relaxed text-[#545454]">
+          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-[#545454]">
             A single app to see how your home performs in real conditions and
             understand your energy balance.
           </p>
-          <div className="mt-4 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="pie"
               descClassName="whitespace-pre-line"

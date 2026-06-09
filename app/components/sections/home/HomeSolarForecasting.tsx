@@ -26,13 +26,13 @@ export default function HomeSolarForecasting() {
         </div>
 
         {/* middle: title + feature cards */}
-        <div className="min-[1200px]:max-w-113.75 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center px-6 sm:px-10 lg:px-0">
+        <div className="min-[1200px]:max-w-113.75 max-[1200px]:max-w-160 flex flex-col justify-center px-6 sm:px-10 lg:px-0">
           <SectionTitle>Solar Forecasting</SectionTitle>
           {/* <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-[#545454]">
             A complete view of solar production, weather, and usage across the
             day.
           </p> */}
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximise Production"
@@ -49,7 +49,7 @@ export default function HomeSolarForecasting() {
               description="Understand patterns across your home energy."
             />
           </div>
-          <div className="w-[335.3px] -ml-3 min-[1200px]:hidden mt-4">
+          <div className="w-[335.3px] mx-auto min-[1200px]:hidden mt-4">
             <Image
               src={deviceImg}
               alt="EnergieBee solar dashboard"

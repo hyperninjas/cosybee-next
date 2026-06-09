@@ -85,7 +85,7 @@ export default function WhyEnergieBeeSolar({
           <SectionLead className="max-w-163.5 max-[1200px]:text-center">
             {lead}
           </SectionLead>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             {cards.map((c) => (
               <FeatureCard
                 key={c.title}

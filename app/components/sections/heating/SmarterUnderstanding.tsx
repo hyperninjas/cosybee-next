@@ -33,7 +33,7 @@ export default function SmarterUnderstanding() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Battery Optimisation Insights"
