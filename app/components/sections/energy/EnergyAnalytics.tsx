@@ -28,9 +28,9 @@ export default function EnergyAnalytics() {
           />
         </div>
         {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
-          <SectionTitle>Energy &amp; Savings Analytics</SectionTitle>
-          <div className="mt-8 space-y-8">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+          <SectionTitle align="center">Energy &amp; Savings Analytics</SectionTitle>
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="Bill Forecasting"
               description="Project your monthly and annual electricity costs based on real consumption patterns — never get blindsided by a bill again."
@@ -45,7 +45,7 @@ export default function EnergyAnalytics() {
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 min-[1200px]:hidden mt-10">
+          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
             <Image
               src={deviceImg}
               alt="energy analytics dashboard"

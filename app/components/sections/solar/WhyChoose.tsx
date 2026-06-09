@@ -24,7 +24,7 @@ export default function WhyChoose() {
             Part of the EnergieBee app — everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximise Production"

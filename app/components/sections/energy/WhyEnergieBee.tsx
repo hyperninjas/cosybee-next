@@ -27,14 +27,14 @@ export default function WhyEnergieBee() {
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
-          <SectionTitle>Why Choose EnergieBee Energy?</SectionTitle>
-          <SectionLead className="max-[1200px]:text-center">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+          <SectionTitle align="center">Why Choose EnergieBee Energy?</SectionTitle>
+          <SectionLead className="text-center">
             Part of the EnergieBee app — one dashboard for every kilowatt-hour,
             every device, every cost.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-[345.3px] min-[1200px]:hidden mt-8">
+          <div className="w-[345.3px] mx-auto min-[1200px]:hidden mt-8">
             <Image
               src={deviceImg}
               alt="energy analytics dashboard"
@@ -43,7 +43,7 @@ export default function WhyEnergieBee() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="See Everything"

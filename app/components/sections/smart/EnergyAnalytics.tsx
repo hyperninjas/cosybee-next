@@ -28,24 +28,27 @@ export default function EnergyAnalytics() {
           />
         </div>
         {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center">
-          <SectionTitle>Energy &amp; Savings Analytics</SectionTitle>
-          <div className="mt-8 space-y-8">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+          <SectionTitle align="center">Energy &amp; Savings</SectionTitle>
+          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-[#545454]">
+            Understand the impact of your energy choices.
+          </p>
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
-              title="Savings Calculator"
-              description="Track exactly how much money you're saving with solar. See monthly comparisons and cumulative savings over time."
+              title="Track Savings"
+              description="See how solar generation reduces your energy costs."
             />
             <FeatureItem
-              title="Grid Independence Metrics"
-              description="Monitor your energy independence level. Understand how much of your power comes from solar vs. the grid."
+              title="Energy Independence"
+              description="Understand how much energy comes from solar versus the grid."
             />
             <FeatureItem
-              title="Carbon Footprint Impact"
-              description="Visualise your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet."
+              title="Environmental Impact"
+              description="Track your carbon savings and environmental contribution."
             />
           </div>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 min-[1200px]:hidden mt-10">
+          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
             <Image
               src={deviceImg}
               alt="energy analytics dashboard"

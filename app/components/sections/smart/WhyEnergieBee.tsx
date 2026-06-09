@@ -27,14 +27,16 @@ export default function WhyEnergieBee() {
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
-          <SectionTitle>Works With Your Smart Home</SectionTitle>
-          <SectionLead className="max-[1200px]:text-center">
+        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+          <SectionTitle align="center" className="min-[550px]:text-center">
+            Works With Your Smart Home
+          </SectionTitle>
+          <SectionLead className="min-[550px]:text-center self-center">
             Part of the energiebee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-[345.3px] min-[1200px]:hidden mt-8">
+          <div className="w-[345.3px] mx-auto min-[1200px]:hidden mt-8">
             <Image
               src={deviceImg}
               alt="energy analytics dashboard"
@@ -43,7 +45,7 @@ export default function WhyEnergieBee() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximise Production"
@@ -65,7 +67,7 @@ export default function WhyEnergieBee() {
         {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
             absolute positioning + explicit width so the inner `w-full`
             has a definite reference */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 lg:block">
+        <div className="absolute -right-55! min-[1200px]:-right-40! top-0 hidden w-125.5 lg:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

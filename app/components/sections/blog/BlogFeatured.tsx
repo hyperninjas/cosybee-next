@@ -1,6 +1,6 @@
 "use client";
 
-import { AppImage as Image } from "@/app/components/ui/AppImage";
+import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../../ui/Avatar";
@@ -78,33 +78,38 @@ function Slide({
       </div>
       <div className="flex flex-col h-full p-8 sm:p-10">
         <div className="flex items-center gap-4 text-base">
-          <span className="font-semibold text-accent">{slide.category?.name ?? "Uncategorised"}</span>
+          <span className="font-semibold text-[#EE3D1A]">
+            {slide.category?.name ?? "Uncategorised"}
+          </span>
           <Dot />
-          <span className="text-muted text-[15px] font-medium">
+          <span className="text-[#545454] text-[15px] font-medium">
             {formatReadTime(slide.readTime)}
           </span>
         </div>
         <h2
           title={slide.title}
-          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[40px] mt-3"
+          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-black sm:text-3xl lg:text-[40px] mt-3"
         >
           {slide.title}
         </h2>
         {slide.carouselIntro && (
-          <p className="text-muted mt-4">{slide.carouselIntro}</p>
+          <p className="text-[#545454] mt-4">{slide.carouselIntro}</p>
         )}
         {slide.carouselBody && (
-          <p className="text-base text-muted mt-4 line-clamp-3">
+          <p className="text-base text-[#545454] mt-4 line-clamp-3">
             {slide.carouselBody}
           </p>
         )}
         <div className="flex items-center gap-3 mt-4">
-          <Avatar name={slide.author?.name ?? "energiebee"} avatarUrl={slide.author?.avatarUrl} />
+          <Avatar
+            name={slide.author?.name ?? "energiebee"}
+            avatarUrl={slide.author?.avatarUrl}
+          />
           <div className="text-base">
-            <div className="font-bold text-foreground text-lg">
+            <div className="font-bold text-black text-lg">
               {slide.author?.name ?? "energiebee"}
             </div>
-            <div className="text-muted mt-1 font-medium text-[15px]">
+            <div className="text-[#545454] mt-1 font-medium text-[15px]">
               {formatDate(slide.authorDate)}
             </div>
           </div>
@@ -159,7 +164,7 @@ export default function BlogFeatured({
     <section className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
       {/* embla viewport */}
       <div
-        className="overflow-hidden border border-border rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+        className="overflow-hidden border border-[#F6F6F6] rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
@@ -179,9 +184,9 @@ export default function BlogFeatured({
 
       {/* pagination row */}
       <div className="mt-8 relative h-13 flex items-center justify-between">
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center md:justify-center">
           <div
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-2"
             role="tablist"
             aria-label="Featured article slides"
           >
@@ -210,7 +215,7 @@ export default function BlogFeatured({
             type="button"
             aria-label="Previous slide"
             onClick={scrollPrev}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-background"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronLeft />
           </button>
@@ -218,7 +223,7 @@ export default function BlogFeatured({
             type="button"
             aria-label="Next slide"
             onClick={scrollNext}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-background"
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronRight />
           </button>

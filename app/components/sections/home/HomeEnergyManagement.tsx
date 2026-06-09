@@ -27,7 +27,7 @@ export default function HomeEnergyManagement() {
               A clear view of how energy is used, timed, and distributed across
               your home.
             </p> */}
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 md:mt-8 space-y-4">
               <FeatureCard
                 glyph="sun"
                 title="Energy Use"

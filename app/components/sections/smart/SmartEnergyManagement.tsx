@@ -14,20 +14,24 @@ export default function SmartEnergyManagement() {
           className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="z-9 flex flex-col max-[1200px]:items-center min-[1200px]:max-w-163.5">
+        <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
           <SectionTitle>Smart Home Integration</SectionTitle>
-          <div className="mt-8 space-y-8">
+          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-[#545454]">
+            Bring your solar system, battery and connected devices together in
+            one intelligent platform.
+          </p>
+          <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
-              title="Battery Optimisation"
-              description="Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency."
+              title="Connected Devices"
+              description="See how your smart home systems work together."
             />
             <FeatureItem
-              title="Smart Device Integration"
-              description="Connect to your smart home devices and optimise their energy usage based on your solar production patterns."
+              title="Smart Energy Management"
+              description="AI-powered recommendations help you use, store and save energy more effectively."
             />
             <FeatureItem
-              title="ROI Tracking"
-              description="Track your return on investment with detailed financial calculations. See exactly how long until your solar panels pay for themselves."
+              title="Performance Tracking"
+              description="Monitor long-term system performance and solar investment value."
             />
           </div>
         </div>

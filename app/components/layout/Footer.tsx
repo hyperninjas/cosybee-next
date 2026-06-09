@@ -40,7 +40,7 @@ const LEGAL_LINKS = [
 export default function Footer() {
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 lg:grid-cols-[1.5fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.5fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
         <div>
           <Image
@@ -95,21 +95,18 @@ export default function Footer() {
             <h3 className="text-lg font-bold tracking-[0.08em]">
               SOCIAL MEDIA
             </h3>
-            <SocialCluster
-              className="mt-5 h-auto pb-1 w-46"
-              {...SOCIAL}
-            />
+            <SocialCluster className="mt-5 h-auto pb-1 w-46" {...SOCIAL} />
           </div>
         </div>
       </div>
 
       {/* bottom strip */}
       <div className="border-t border-[#FFFFFF1A] ">
-        <div className="mx-auto flex max-w-360 flex-col-reverse sm:flex-col sm:justify-center sm:items-center gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between md:px-10 lg:px-30">
+        <div className="mx-auto flex max-w-360 flex-col-reverse sm:flex-col sm:justify-center sm:items-center gap-6 px-6 py-6 lg:flex-row lg:items-center lg:justify-between md:px-10 lg:px-30">
           <p className="text-sm font-medium text-white md:mt-0 mt-2">
             © 2026 EnergieBee. All rights reserved.
           </p>
-          <ul className="flex flex-wrap items-center gap-6">
+          <ul className="flex flex-wrap items-center gap-4 md:gap-6">
             {LEGAL_LINKS.map((link) => (
               <li key={link.label}>
                 <Link

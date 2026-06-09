@@ -20,14 +20,14 @@ export default function WhyEnergieBeeSolar() {
           className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="min-[1200px]:max-w-163.5 flex flex-col max-[1200px]:items-center z-9">
+        <div className="min-[1200px]:max-w-163.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
           <SectionTitle>Battery + Solar Ready</SectionTitle>
-          <SectionLead className="max-w-163.5 max-[1200px]:text-center">
+          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
             EnergieBee orchestrates your full energy stack — solar generation,
             battery storage, EV charging, and grid imports — to minimise cost at
             every hour.
           </SectionLead>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Smart Charging"

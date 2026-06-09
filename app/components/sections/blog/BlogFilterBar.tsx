@@ -58,7 +58,7 @@ export default function BlogFilterBar({
         </label>
 
         {/* category chips */}
-        <div className="flex flex-nowrap overflow-auto items-center gap-2 px-4">
+        <div className="flex flex-nowrap overflow-auto items-center gap-2">
           {categories.map((cat) => {
             const isActive = category === cat;
             return (

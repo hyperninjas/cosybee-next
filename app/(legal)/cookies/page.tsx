@@ -1,11 +1,19 @@
-import LegalContainer from "@/app/components/legal/LegalContainer";
-import LegalHero from "@/app/components/legal/LegalHero";
-// import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
-import LegalSection from "@/app/components/legal/LegalSection";
+import LegalContainer from "../components/legal/LegalContainer";
+import LegalHero from "../components/legal/LegalHero";
+// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
+import LegalSection from "../components/legal/LegalSection";
+import Breadcrumbs from "../components/ui/Breadcrumbs";
+import JsonLd from "../components/JsonLd";
+import { breadcrumbSchema } from "../lib/structured-data";
 import illustration from "@/public/illustration-cookies.svg";
-import { AppImage as Image } from "@/app/components/ui/AppImage";
+import Image from "next/image";
 
 import type { Metadata } from "next";
+
+const CRUMBS = [
+  { name: "Home", path: "/" },
+  { name: "Cookie Policy", path: "/cookies" },
+];
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
@@ -24,7 +32,7 @@ export const metadata: Metadata = {
 /** Inline monospace token used for cookie names like `session_id`. */
 function Cookie({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-surface-secondary px-1.5 py-0.5 font-mono text-[13px] text-accent">
+    <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[13px] text-[#EE3D1A]">
       {children}
     </code>
   );
@@ -32,7 +40,11 @@ function Cookie({ children }: { children: React.ReactNode }) {
 
 export default function CookiesPage() {
   return (
-    <main className="flex-1 bg-surface text-foreground">
+    <main className="flex-1 bg-white text-black">
+      <JsonLd data={breadcrumbSchema(CRUMBS)} />
+      <div className="mx-auto max-w-3xl px-6 pt-8 sm:px-10 sm:pt-12 lg:pt-16">
+        <Breadcrumbs items={CRUMBS} />
+      </div>
       <LegalHero
         label="Cookie Policy"
         title="How We Use Cookies on Our Website"
@@ -396,7 +408,7 @@ export default function CookiesPage() {
             We encourage you to review this policy periodically to stay informed
             about how we use cookies.
           </p>
-          <p className="mt-8 text-sm text-muted">
+          <p className="mt-8 text-sm text-neutral-500">
             Last updated: May 2026
           </p>
         </LegalSection>
