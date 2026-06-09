@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@heroui/react";
-import { ArrowRightFromSquare } from "@gravity-ui/icons";
 import { authClient } from "@/app/lib/auth-client";
 
 export function LogoutButton() {
@@ -13,8 +12,7 @@ export function LogoutButton() {
     setLoading(true);
     try {
       await authClient.signOut();
-      router.push("/login");
-      router.refresh();
+      router.push("/admin/login");
     } catch (err) {
       console.error("Logout failed:", err);
       setLoading(false);
@@ -22,14 +20,8 @@ export function LogoutButton() {
   }
 
   return (
-    <Button
-      variant="tertiary"
-      size="sm"
-      isPending={loading}
-      onPress={handleLogout}
-    >
-      <ArrowRightFromSquare className="size-4" />
-      Sign out
+    <Button variant="ghost" size="sm" onPress={handleLogout} isDisabled={loading}>
+      {loading ? "Signing out…" : "Logout"}
     </Button>
   );
 }

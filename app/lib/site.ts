@@ -44,6 +44,7 @@ export const ORG_CONTACT_EMAIL = "hello@EnergieBee.com";
 export const SOCIAL = {
   facebook: "https://www.facebook.com/EnergieBeeLtd/",
   instagram: "https://www.instagram.com/energiebee/",
+  youtube: "https://www.youtube.com/@EnergieBeeLtd",
   linkedin: "https://www.linkedin.com/company/energiebeeltd/",
 } as const;
 

@@ -1,44 +1,29 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+import Link from "next/link";
+import {
+  Button,
+  buttonVariants,
+  Chip,
+  Input,
+  ListBox,
+  ListBoxItem,
+  Pagination,
+  Select,
+  Spinner,
+  Table,
+  Tabs,
+} from "@heroui/react";
 import { deletePost, setStatus } from "./actions";
 import type { Category } from "@/app/lib/article-types";
-
-/** Simple spinner for loading states. */
-function Spinner({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      className={`animate-spin h-4 w-4 ${className}`}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      />
-    </svg>
-  );
-}
 
 /** Fallback for invalid local image paths (seeded placeholder data). */
 function getValidImageUrl(coverImage: string): string {
   if (!coverImage) return "/bee-flower.png";
-  // External URLs (API media, https, etc.) are valid
   if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
     return coverImage;
   }
-  // Local paths starting with /images/ likely don't exist
   if (coverImage.startsWith("/images/")) {
     return "/bee-flower.png";
   }
@@ -54,10 +39,10 @@ export type Row = {
   status: string;
   featured: boolean;
   coverImage: string;
-  updatedAt: string; // ISO
+  updatedAt: string;
 };
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -76,32 +61,15 @@ function relativeTime(iso: string): string {
   });
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const published = status === "PUBLISHED";
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-        published ? "bg-success-soft text-success" : "bg-background text-muted"
-      }`}
-    >
-      {published ? "Published" : "Draft"}
-    </span>
-  );
-}
-
 function DeleteButton({ id, blog, slug }: { id: string; blog: string; slug: string }) {
   const [confirming, setConfirming] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (!confirming) {
     return (
-      <button
-        type="button"
-        onClick={() => setConfirming(true)}
-        className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:border-danger hover:bg-[#FFF8F7] hover:text-accent"
-      >
+      <Button variant="outline" size="sm" onPress={() => setConfirming(true)}>
         Delete
-      </button>
+      </Button>
     );
   }
 
@@ -117,29 +85,12 @@ function DeleteButton({ id, blog, slug }: { id: string; blog: string; slug: stri
 
   return (
     <div className="flex items-center gap-1.5">
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={isPending}
-        className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#9c2c24] disabled:opacity-70"
-      >
-        {isPending ? (
-          <>
-            <Spinner className="text-white" />
-            Deleting…
-          </>
-        ) : (
-          "Confirm"
-        )}
-      </button>
-      <button
-        type="button"
-        onClick={() => setConfirming(false)}
-        disabled={isPending}
-        className="rounded-md border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-background disabled:opacity-50"
-      >
+      <Button variant="danger" size="sm" onPress={handleDelete} isDisabled={isPending}>
+        {isPending ? <Spinner size="sm" /> : "Confirm"}
+      </Button>
+      <Button variant="ghost" size="sm" onPress={() => setConfirming(false)} isDisabled={isPending}>
         Cancel
-      </button>
+      </Button>
     </div>
   );
 }
@@ -170,27 +121,15 @@ function StatusToggleButton({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleToggle}
-      disabled={isPending}
-      className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-70 ${
-        isPublished
-          ? "border-border bg-surface text-muted hover:border-border hover:bg-background"
-          : "border-[#C6E7C9] bg-[#E8F5E9] text-success hover:bg-[#DCF0DE]"
-      }`}
+    <Button
+      variant={isPublished ? "outline" : "primary"}
+      size="sm"
+      onPress={handleToggle}
+      isDisabled={isPending}
+      className="min-w-[90px]"
     >
-      {isPending ? (
-        <>
-          <Spinner />
-          {isPublished ? "Unpublishing…" : "Publishing…"}
-        </>
-      ) : isPublished ? (
-        "Unpublish"
-      ) : (
-        "Publish"
-      )}
-    </button>
+      {isPending ? <Spinner size="sm" /> : isPublished ? "Unpublish" : "Publish"}
+    </Button>
   );
 }
 
@@ -204,7 +143,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("ALL");
   const [blog, setBlog] = useState<"all" | "hive" | "learn">("all");
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const counts = useMemo(
     () => ({
@@ -227,143 +166,207 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
   }, [rows, tab, blog, query]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount - 1);
-  const shown = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
-
-  function reset<T>(setter: (v: T) => void) {
-    return (v: T) => {
-      setter(v);
-      setPage(0);
-    };
-  }
+  const safePage = Math.min(page, pageCount);
+  const shown = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div>
-      {/* tabs + search */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg border border-border bg-surface p-0.5 text-sm">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => reset(setTab)(t.key)}
-              className={`rounded-md px-3 py-1.5 font-medium ${
-                tab === t.key ? "bg-foreground text-white" : "text-muted"
-              }`}
-            >
-              {t.label}
-              <span className="ml-1.5 text-xs opacity-70">{counts[t.key]}</span>
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={blog}
-            onChange={(e) => reset(setBlog)(e.target.value as typeof blog)}
-            className="rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+      {/* Filters: Tabs + Blog Select + Search */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <Tabs
+          selectedKey={tab}
+          onSelectionChange={(k) => {
+            setTab(k as (typeof TABS)[number]["key"]);
+            setPage(1);
+          }}
+        >
+          <Tabs.List>
+            {TABS.map((t) => (
+              <Tabs.Tab key={t.key} id={t.key}>
+                {t.label}
+                <span className="ml-1.5 text-xs opacity-70">{counts[t.key]}</span>
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs>
+
+        <div className="flex items-center gap-3">
+          <Select
+            aria-label="Filter by blog"
+            selectedKey={blog}
+            onSelectionChange={(k) => {
+              setBlog(String(k) as typeof blog);
+              setPage(1);
+            }}
           >
-            <option value="all">All blogs</option>
-            <option value="hive">Hive</option>
-            <option value="learn">Learn</option>
-          </select>
-          <input
+            <Select.Trigger className="w-32">
+              <Select.Value />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                <ListBoxItem id="all">All blogs</ListBoxItem>
+                <ListBoxItem id="hive">Hive</ListBoxItem>
+                <ListBoxItem id="learn">Learn</ListBoxItem>
+              </ListBox>
+            </Select.Popover>
+          </Select>
+          <Input
+            className="w-48"
             value={query}
-            onChange={(e) => reset(setQuery)(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search posts…"
-            className="w-48 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+            aria-label="Search posts"
           />
         </div>
       </div>
 
+      {/* Table */}
       {shown.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted">
+        <div className="rounded-xl border border-dashed border-[#DBDBDB] py-16 text-center text-sm text-[#9A9A9A]">
           No posts match these filters.
-        </p>
+        </div>
       ) : (
-        <ul className="space-y-2">
-          {shown.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center gap-4 rounded-xl border border-border bg-surface p-3"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getValidImageUrl(r.coverImage)}
-                alt=""
-                className="h-14 w-20 shrink-0 rounded-lg bg-background object-cover"
-              />
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/admin/posts/${r.id}/edit`}
-                  className="block truncate font-semibold hover:text-accent"
-                >
-                  {r.title}
-                  {r.featured && (
-                    <span className="ml-2 align-middle text-xs font-medium text-[#C98A00]">
-                      ★
-                    </span>
-                  )}
-                </Link>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
-                  <span className="font-mono">/{r.blog}/{r.slug}</span>
-                  <span>·</span>
-                  <span>{r.category?.name ?? "Uncategorised"}</span>
-                  <span>·</span>
-                  <span>updated {relativeTime(r.updatedAt)}</span>
-                </div>
-              </div>
-              <StatusBadge status={r.status} />
-              <div className="flex shrink-0 items-center gap-2">
-                <Link
-                  href={`/admin/posts/${r.id}/edit`}
-                  className="rounded-md bg-foreground px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-foreground"
-                >
-                  Edit
-                </Link>
-                <Link
-                  href={`/admin/posts/${r.id}/preview`}
-                  target="_blank"
-                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:border-border hover:bg-background"
-                >
-                  Preview
-                </Link>
-                <StatusToggleButton
-                  id={r.id}
-                  blog={r.blog}
-                  slug={r.slug}
-                  status={r.status}
-                />
-                <DeleteButton id={r.id} blog={r.blog} slug={r.slug} />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <Table>
+          <Table.ScrollContainer className="overflow-x-auto">
+            <Table.Content aria-label="Posts">
+              <Table.Header>
+                <Table.Column isRowHeader>Post</Table.Column>
+                <Table.Column className="hidden md:table-cell">Blog</Table.Column>
+                <Table.Column className="hidden lg:table-cell">Category</Table.Column>
+                <Table.Column>Status</Table.Column>
+                <Table.Column className="hidden md:table-cell">Updated</Table.Column>
+                <Table.Column>Actions</Table.Column>
+              </Table.Header>
+              <Table.Body items={shown}>
+                {(row) => {
+                  const imageUrl = getValidImageUrl(row.coverImage);
+                  const updatedTime = relativeTime(row.updatedAt);
+                  return (
+                    <Table.Row id={row.id}>
+                      {/* Post (Title + Image + Slug) */}
+                      <Table.Cell>
+                        <div className="flex items-center gap-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imageUrl}
+                            alt=""
+                            className="hidden h-10 w-14 shrink-0 rounded-lg bg-[#F2F2F2] object-cover sm:block"
+                          />
+                          <div className="min-w-0">
+                            <Link
+                              href={`/admin/posts/${row.id}/edit`}
+                              className="block truncate font-semibold hover:text-[#FF8A7A]"
+                            >
+                              {row.title}
+                              {row.featured && (
+                                <span className="ml-1.5 text-[#C98A00]">★</span>
+                              )}
+                            </Link>
+                            <p className="truncate text-xs text-[#9A9A9A]">
+                              /{row.blog}/{row.slug}
+                            </p>
+                          </div>
+                        </div>
+                      </Table.Cell>
+
+                      {/* Blog */}
+                      <Table.Cell className="hidden md:table-cell">
+                        <Chip size="sm" variant="soft">
+                          {row.blog}
+                        </Chip>
+                      </Table.Cell>
+
+                      {/* Category */}
+                      <Table.Cell className="hidden lg:table-cell">
+                        <span className="text-sm text-[#545454]">
+                          {row.category?.name ?? "Uncategorised"}
+                        </span>
+                      </Table.Cell>
+
+                      {/* Status */}
+                      <Table.Cell>
+                        <Chip
+                          size="sm"
+                          variant="soft"
+                          color={row.status === "PUBLISHED" ? "success" : "default"}
+                        >
+                          {row.status === "PUBLISHED" ? "Published" : "Draft"}
+                        </Chip>
+                      </Table.Cell>
+
+                      {/* Updated */}
+                      <Table.Cell className="hidden md:table-cell">
+                        <span className="text-sm text-[#9A9A9A]">
+                          {updatedTime}
+                        </span>
+                      </Table.Cell>
+
+                      {/* Actions */}
+                      <Table.Cell>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/admin/posts/${row.id}/edit`}
+                            className={buttonVariants({ variant: "secondary", size: "sm" })}
+                          >
+                            Edit
+                          </Link>
+                          <Link
+                            href={`/admin/posts/${row.id}/preview`}
+                            target="_blank"
+                            className={`hidden sm:inline-flex ${buttonVariants({ variant: "outline", size: "sm" })}`}
+                          >
+                            Preview
+                          </Link>
+                          <StatusToggleButton
+                            id={row.id}
+                            blog={row.blog}
+                            slug={row.slug}
+                            status={row.status}
+                          />
+                          <DeleteButton id={row.id} blog={row.blog} slug={row.slug} />
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                }}
+              </Table.Body>
+            </Table.Content>
+          </Table.ScrollContainer>
+        </Table>
       )}
 
-      {/* pagination */}
-      {pageCount > 1 && (
-        <div className="mt-5 flex items-center justify-center gap-3 text-sm">
-          <button
-            type="button"
-            onClick={() => setPage(Math.max(0, safePage - 1))}
-            disabled={safePage === 0}
-            className="rounded-md border border-border px-3 py-1.5 font-medium disabled:opacity-40"
-          >
-            ← Prev
-          </button>
-          <span className="text-muted">
-            Page {safePage + 1} of {pageCount}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage(Math.min(pageCount - 1, safePage + 1))}
-            disabled={safePage >= pageCount - 1}
-            className="rounded-md border border-border px-3 py-1.5 font-medium disabled:opacity-40"
-          >
-            Next →
-          </button>
-        </div>
-      )}
+      {/* Pagination */}
+      <div className="mt-6 flex items-center justify-between">
+        <span className="text-sm text-[#545454]">
+          Showing {shown.length} of {filtered.length} posts
+        </span>
+        {pageCount > 1 && (
+          <Pagination>
+            <Pagination.Content>
+              <Pagination.Previous
+                isDisabled={safePage <= 1}
+                onPress={() => setPage(Math.max(1, safePage - 1))}
+              >
+                Previous
+              </Pagination.Previous>
+              <Pagination.Item>
+                <span className="px-3 text-sm text-[#545454]">
+                  Page {safePage} of {pageCount}
+                </span>
+              </Pagination.Item>
+              <Pagination.Next
+                isDisabled={safePage >= pageCount}
+                onPress={() => setPage(Math.min(pageCount, safePage + 1))}
+              >
+                Next
+              </Pagination.Next>
+            </Pagination.Content>
+          </Pagination>
+        )}
+      </div>
     </div>
   );
 }

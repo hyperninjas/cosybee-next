@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+import Image from "next/image";
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { Alert, Button, Chip, Input, ListBox, ListBoxItem, Select, Switch, TextArea } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "../actions";
 import { initialSaveState } from "../lib/form-state";
@@ -18,7 +19,7 @@ import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
   loading: () => (
-    <p className="py-6 text-sm text-muted">Loading editor…</p>
+    <p className="py-6 text-sm text-[#9A9A9A]">Loading editor…</p>
   ),
 });
 
@@ -75,9 +76,6 @@ type Props = {
   internalRoutes?: string[];
 };
 
-const inputClass =
-  "w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none";
-
 function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
 }
@@ -98,9 +96,9 @@ function Labeled({
       <span className="mb-1 block text-sm font-semibold">{label}</span>
       {children}
       {error ? (
-        <span className="mt-1 block text-xs font-medium text-accent">{error}</span>
+        <span className="mt-1 block text-xs font-medium text-[#B4332A]">{error}</span>
       ) : hint ? (
-        <span className="mt-1 block text-xs text-muted">{hint}</span>
+        <span className="mt-1 block text-xs text-[#9A9A9A]">{hint}</span>
       ) : null}
     </div>
   );
@@ -116,7 +114,7 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm font-semibold text-foreground">{title}</span>
+      <span className="text-sm font-semibold text-[#333]">{title}</span>
       {action}
     </div>
   );
@@ -147,8 +145,8 @@ function AuthorCard({
       onClick={onSelect}
       className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all ${
         selected
-          ? "border-accent bg-danger-soft ring-1 ring-accent"
-          : "border-border bg-surface hover:border-border hover:bg-background"
+          ? "border-[#FF8A7A] bg-[#FFF5F4] ring-1 ring-[#FF8A7A]"
+          : "border-[#ECECEC] bg-white hover:border-[#DBDBDB] hover:bg-[#FAFAFA]"
       }`}
     >
       {author.avatarUrl ? (
@@ -160,19 +158,19 @@ function AuthorCard({
           className="h-10 w-10 shrink-0 rounded-full object-cover"
         />
       ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-soft text-sm font-semibold text-danger">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFE4E1] text-sm font-semibold text-[#C0362C]">
           {initialsFrom(author.name)}
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-foreground">{author.name}</div>
+        <div className="truncate text-sm font-medium text-[#333]">{author.name}</div>
         {author.role && (
-          <div className="truncate text-xs text-muted">{author.role}</div>
+          <div className="truncate text-xs text-[#9A9A9A]">{author.role}</div>
         )}
       </div>
       {selected && (
         <svg
-          className="h-5 w-5 shrink-0 text-accent"
+          className="h-5 w-5 shrink-0 text-[#FF8A7A]"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -203,8 +201,8 @@ function CategoryPill({
       onClick={onSelect}
       className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all ${
         selected
-          ? "border-accent bg-accent text-white"
-          : "border-border bg-surface text-muted hover:border-accent hover:text-accent"
+          ? "border-[#FF8A7A] bg-[#FF8A7A] text-white"
+          : "border-[#DBDBDB] bg-white text-[#545454] hover:border-[#FF8A7A] hover:text-[#FF8A7A]"
       }`}
     >
       {category.name}
@@ -219,7 +217,6 @@ function ActionBar({
   blog,
   setBlog,
   onSetStatus,
-  onOpenSettings,
   liveHref,
 }: {
   editing: boolean;
@@ -227,32 +224,38 @@ function ActionBar({
   blog: string;
   setBlog: (b: string) => void;
   onSetStatus: (s: string) => void;
-  onOpenSettings: () => void;
   liveHref?: string;
 }) {
   const { pending } = useFormStatus();
   return (
-    <div className="sticky top-0 z-30 -mx-6 mb-6 flex items-center justify-between gap-3 border-b border-border bg-background/90 px-6 py-3 backdrop-blur">
+    <div className="sticky top-0 z-30 -mx-6 mb-6 flex items-center justify-between gap-3 border-b border-[#ECECEC] bg-[#FAFAFA]/90 px-6 py-3 backdrop-blur">
       <div className="flex items-center gap-3">
-        <Link href="/admin" className="text-sm text-muted hover:text-foreground">
+        <Link href="/admin" className="text-sm text-[#545454] hover:text-black">
           ← Posts
         </Link>
-        <select
-          value={blog}
-          onChange={(e) => setBlog(e.target.value)}
-          className="rounded-md border border-border bg-surface px-2 py-1 text-sm"
+        <Select
           aria-label="Blog"
+          selectedKey={blog}
+          onSelectionChange={(k) => setBlog(String(k))}
         >
-          <option value="hive">Hive</option>
-          <option value="learn">Learn</option>
-        </select>
-        <span
-          className={`hidden rounded-full px-2 py-0.5 text-xs font-semibold sm:inline ${
-            isPublished ? "bg-success-soft text-success" : "bg-background text-muted"
-          }`}
+          <Select.Trigger className="w-28">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              <ListBoxItem id="hive">Hive</ListBoxItem>
+              <ListBoxItem id="learn">Learn</ListBoxItem>
+            </ListBox>
+          </Select.Popover>
+        </Select>
+        <Chip
+          color={isPublished ? "success" : "default"}
+          size="sm"
+          variant="soft"
+          className="hidden sm:inline-flex"
         >
           {isPublished ? "Published" : "Draft"}
-        </span>
+        </Chip>
       </div>
 
       <div className="flex items-center gap-2">
@@ -260,34 +263,29 @@ function ActionBar({
           <Link
             href={liveHref}
             target="_blank"
-            className="hidden text-sm text-muted hover:text-foreground sm:inline"
+            className="hidden text-sm text-[#545454] hover:text-black sm:inline"
           >
             View live ↗
           </Link>
         )}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-background"
-        >
-          Settings
-        </button>
-        <button
+        <Button
           type="submit"
-          onClick={() => onSetStatus("DRAFT")}
-          disabled={pending}
-          className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-background disabled:opacity-60"
+          variant="outline"
+          size="sm"
+          onPress={() => onSetStatus("DRAFT")}
+          isDisabled={pending}
         >
           Save draft
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          onClick={() => onSetStatus("PUBLISHED")}
-          disabled={pending}
-          className="rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#ff7765] disabled:opacity-60"
+          variant="primary"
+          size="sm"
+          onPress={() => onSetStatus("PUBLISHED")}
+          isDisabled={pending}
         >
           {pending ? "Saving…" : editing && isPublished ? "Update" : "Publish"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -387,7 +385,6 @@ export default function PostForm({
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
   const [status, setStatus] = useState(post?.status ?? "DRAFT");
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Author handling - track selected ID, name, and avatar
   const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
@@ -505,18 +502,21 @@ export default function PostForm({
         blog={blog}
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
-        onOpenSettings={() => setSettingsOpen(true)}
         liveHref={liveHref}
       />
 
       {state?.error && (
-        <div className="mx-auto mb-6 max-w-2xl rounded-lg border border-danger bg-[#FDECEC] px-4 py-3 text-sm font-medium text-accent">
-          {state.error}
+        <div className="mx-auto mb-6 max-w-2xl">
+          <Alert status="danger">
+            <Alert.Description>{state.error}</Alert.Description>
+          </Alert>
         </div>
       )}
 
-      {/* Writing canvas */}
-      <div className="mx-auto max-w-2xl">
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+        {/* Writing canvas */}
+        <div className="min-w-0 flex-1">
+        <div className="mx-auto max-w-2xl">
         {/* cover - S3 upload */}
         <div className="mb-6">
           <PublicImageUpload
@@ -540,14 +540,14 @@ export default function PostForm({
           }}
           rows={1}
           placeholder="Post title…"
-          className="post-title w-full resize-none border-none bg-transparent font-extrabold tracking-tight text-foreground placeholder:text-muted focus:outline-none"
+          className="post-title w-full resize-none border-none bg-transparent font-extrabold tracking-tight text-black placeholder:text-[#C9C9C9] focus:outline-none"
         />
         {errors.title && (
-          <p className="mb-2 text-sm font-medium text-accent">{errors.title}</p>
+          <p className="mb-2 text-sm font-medium text-[#B4332A]">{errors.title}</p>
         )}
 
         {/* meta line */}
-        <div className="mb-4 text-xs text-muted">
+        <div className="mb-4 text-xs text-[#9A9A9A]">
           <span className="font-mono">/{blog}/{effectiveSlug || "…"}</span>
           {" · "}
           {readTime}
@@ -566,30 +566,18 @@ export default function PostForm({
         <div className="post-editor">
           <Editor initialContent={initialBlocks} onChange={setBlocks} />
         </div>
-      </div>
+        </div>
+        </div>
 
-      {/* Settings drawer */}
-      {settingsOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/30"
-            onClick={() => setSettingsOpen(false)}
-          />
-          <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-surface shadow-xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface px-5 py-4 shadow-sm">
+        {/* Settings panel — always docked beside the editor */}
+        <aside className="w-full shrink-0 self-start overflow-hidden rounded-xl border border-[#ECECEC] bg-white lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-[26rem] lg:overflow-y-auto">
+            <div className="sticky top-0 z-10 border-b border-[#ECECEC] bg-white px-5 py-4">
               <h2 className="text-lg font-bold">Post settings</h2>
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(false)}
-                className="rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-white"
-              >
-                Done
-              </button>
             </div>
 
             <div className="space-y-5 p-5">
               {/* Cover Image - FIRST */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="Cover Image" />
                 <PublicImageUpload
                   context="blog-cover"
@@ -597,21 +585,21 @@ export default function PostForm({
                   onChange={(url) => setCoverUrl(url ?? "")}
                 />
                 <Labeled label="Alt text" hint="Describes the image for accessibility. Defaults to the title.">
-                  <input
+                  <Input
+                    fullWidth
                     value={coverImageAlt}
                     onChange={(e) => setCoverImageAlt(e.target.value)}
                     placeholder={title || "Enter alt text…"}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
 
               {/* Author section - SECOND */}
-              <div className="space-y-4 rounded-lg border border-border p-4">
+              <div className="space-y-4 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader
                   title="Author"
                   action={
-                    <span className="text-xs text-muted">
+                    <span className="text-xs text-[#9A9A9A]">
                       {authors.length} author{authors.length !== 1 ? "s" : ""}
                     </span>
                   }
@@ -638,24 +626,24 @@ export default function PostForm({
                 {/* Divider */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border" />
+                    <div className="w-full border-t border-[#ECECEC]" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-surface px-2 text-xs text-muted">or create new</span>
+                    <span className="bg-white px-2 text-xs text-[#9A9A9A]">or create new</span>
                   </div>
                 </div>
 
                 {/* New author input */}
                 <div className="space-y-3">
                   <Labeled label="Name" hint="Type a new author name.">
-                    <input
+                    <Input
+                      fullWidth
                       value={authorId ? "" : authorName}
                       onChange={(e) => {
                         setAuthorId("");
                         setAuthorName(e.target.value);
                       }}
                       placeholder="New author name…"
-                      className={inputClass}
                     />
                   </Labeled>
                   <Labeled label="Avatar" hint="Profile picture for new author (max 2MB).">
@@ -674,7 +662,7 @@ export default function PostForm({
                 {/* Selected author preview */}
                 {(authorId || authorName) && (
                   <div className="rounded-lg bg-[#F8F8F8] p-3">
-                    <span className="mb-2 block text-xs font-medium text-muted">Selected</span>
+                    <span className="mb-2 block text-xs font-medium text-[#9A9A9A]">Selected</span>
                     <div className="flex items-center gap-3">
                       {authorAvatarUrl ? (
                         <Image
@@ -685,13 +673,13 @@ export default function PostForm({
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-danger-soft text-xs font-semibold text-danger">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFE4E1] text-xs font-semibold text-[#C0362C]">
                           {initialsFrom(authorName || "?")}
                         </div>
                       )}
                       <span className="text-sm font-medium">{authorName || "Unknown"}</span>
                       {authorId && (
-                        <span className="ml-auto rounded bg-success-soft px-1.5 py-0.5 text-xs text-success">
+                        <span className="ml-auto rounded bg-[#E6F4EA] px-1.5 py-0.5 text-xs text-[#1E7B34]">
                           Existing
                         </span>
                       )}
@@ -701,11 +689,11 @@ export default function PostForm({
               </div>
 
               {/* Category section - THIRD */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader
                   title="Category"
                   action={
-                    <span className="text-xs text-muted">
+                    <span className="text-xs text-[#9A9A9A]">
                       {blogCategories.length} in {blog}
                     </span>
                   }
@@ -725,21 +713,21 @@ export default function PostForm({
                     ))}
                   </div>
                 )}
-                <input
+                <Input
+                  fullWidth
                   value={categoryName}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   placeholder={blogCategories.length > 0 ? "Or type a new category…" : "Enter category name…"}
-                  className={inputClass}
                 />
               </div>
 
               {/* Excerpt */}
               <Labeled label="Excerpt" hint="Card blurb + meta description. Auto from the body if blank.">
-                <textarea
+                <TextArea
+                  fullWidth
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className={inputClass}
                 />
               </Labeled>
 
@@ -749,42 +737,43 @@ export default function PostForm({
                 error={errors.slug}
                 hint="Auto from the title. Edit to override."
               >
-                <input
+                <Input
+                  fullWidth
+                  className="font-mono"
                   value={effectiveSlug}
                   onChange={(e) => {
                     setSlug(slugify(e.target.value));
                     setSlugTouched(true);
                   }}
-                  className={`${inputClass} font-mono`}
                 />
-                <span className="mt-1 block text-xs text-muted">
+                <span className="mt-1 block text-xs text-[#9A9A9A]">
                   /{blog}/{effectiveSlug || "…"}
                 </span>
               </Labeled>
 
               {/* Author date */}
               <Labeled label="Author date" hint="Defaults to today.">
-                <input
+                <Input
+                  fullWidth
                   value={authorDate}
                   onChange={(e) => setAuthorDate(e.target.value)}
                   type="date"
-                  className={inputClass}
                 />
               </Labeled>
 
               {/* Lede */}
               <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <input
+                <Input
+                  fullWidth
                   value={lede}
                   onChange={(e) => setLede(e.target.value)}
-                  className={inputClass}
                 />
               </Labeled>
 
               {/* SEO */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="SEO & Search" />
-                <div className="rounded-md border border-border p-2.5">
+                <div className="rounded-md border border-[#EEE] p-2.5">
                   <div className="text-xs text-[#1a6b2f]">
                     energiebee.com › {blog} › {effectiveSlug || "…"}
                   </div>
@@ -796,89 +785,83 @@ export default function PostForm({
                   </div>
                 </div>
                 <Labeled label="SEO title" hint="Defaults to the title.">
-                  <input
+                  <Input
+                    fullWidth
                     value={seoTitle}
                     onChange={(e) => setSeoTitle(e.target.value)}
                     placeholder={title || "Defaults to title"}
-                    className={inputClass}
                   />
                 </Labeled>
                 <Labeled label="SEO description" hint="Defaults to the excerpt.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={seoDescription}
                     onChange={(e) => setSeoDescription(e.target.value)}
                     rows={2}
                     placeholder={description || "Defaults to excerpt"}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
 
               {/* Featured / Carousel */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="Featured Carousel" />
-                <label className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-background">
-                  <input
-                    type="checkbox"
-                    checked={featured}
-                    onChange={(e) => setFeatured(e.target.checked)}
-                    className="h-5 w-5 rounded border-border text-accent focus:ring-accent"
-                  />
-                  <div>
-                    <span className="block text-sm font-medium">Feature in carousel</span>
-                    <span className="block text-xs text-muted">Show this post in the homepage carousel</span>
-                  </div>
-                </label>
+                <div className="rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
+                  <Switch isSelected={featured} onChange={setFeatured}>
+                    <Switch.Content>
+                      <span className="block text-sm font-medium">Feature in carousel</span>
+                      <span className="block text-xs text-[#9A9A9A]">Show this post in the homepage carousel</span>
+                    </Switch.Content>
+                  </Switch>
+                </div>
                 <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={carouselIntro}
                     onChange={(e) => setCarouselIntro(e.target.value)}
                     rows={2}
-                    className={inputClass}
                   />
                 </Labeled>
                 <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
-                  <textarea
+                  <TextArea
+                    fullWidth
                     value={carouselBody}
                     onChange={(e) => setCarouselBody(e.target.value)}
                     rows={3}
-                    className={inputClass}
                   />
                 </Labeled>
               </div>
 
               {/* Call to action */}
-              <div className="space-y-3 rounded-lg border border-border p-4">
+              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
                 <SectionHeader title="Call to Action" />
                 <Labeled label="Button label" hint="Leave blank for no CTA.">
-                  <input
+                  <Input
+                    fullWidth
                     value={ctaLabel}
                     onChange={(e) => setCtaLabel(e.target.value)}
                     placeholder="Try energiebee for free"
-                    className={inputClass}
                   />
                 </Labeled>
 
                 {/* internal / external toggle */}
-                <div className="inline-flex rounded-lg border border-border p-0.5 text-sm">
-                  <button
+                <div className="inline-flex gap-1.5">
+                  <Button
                     type="button"
-                    onClick={() => setCtaExternal(false)}
-                    className={`rounded-md px-3 py-1 font-medium ${
-                      !ctaExternal ? "bg-accent text-white" : "text-muted"
-                    }`}
+                    size="sm"
+                    variant={!ctaExternal ? "primary" : "outline"}
+                    onPress={() => setCtaExternal(false)}
                   >
                     Internal page
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    onClick={() => setCtaExternal(true)}
-                    className={`rounded-md px-3 py-1 font-medium ${
-                      ctaExternal ? "bg-accent text-white" : "text-muted"
-                    }`}
+                    size="sm"
+                    variant={ctaExternal ? "primary" : "outline"}
+                    onPress={() => setCtaExternal(true)}
                   >
                     External link
-                  </button>
+                  </Button>
                 </div>
 
                 {ctaExternal ? (
@@ -886,12 +869,12 @@ export default function PostForm({
                     label="External URL"
                     hint="Opens in a new tab. https:// is added if you omit it."
                   >
-                    <input
+                    <Input
+                      fullWidth
                       type="url"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="https://example.com"
-                      className={inputClass}
                     />
                   </Labeled>
                 ) : (
@@ -899,12 +882,13 @@ export default function PostForm({
                     label="Internal page"
                     hint="Search an existing page. Opens in the same tab."
                   >
-                    <input
+                    <Input
+                      fullWidth
+                      className="font-mono"
                       value={ctaHref}
                       onChange={(e) => setCtaHref(e.target.value)}
                       placeholder="/start"
                       list="route-options"
-                      className={`${inputClass} font-mono`}
                     />
                     <datalist id="route-options">
                       {internalRoutes.map((r) => (
@@ -917,8 +901,7 @@ export default function PostForm({
 
             </div>
           </aside>
-        </>
-      )}
+      </div>
     </form>
   );
 }

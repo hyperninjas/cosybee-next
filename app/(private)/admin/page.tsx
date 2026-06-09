@@ -1,6 +1,7 @@
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { buttonVariants } from "@heroui/react";
 import { listPosts } from "./lib/queries";
 import PostsTable, { type Row } from "./PostsTable";
 import SavedToast from "./SavedToast";
@@ -28,18 +29,18 @@ export default async function AdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold">Posts</h1>
-          <p className="mt-1 text-sm text-muted">{posts.length} total</p>
+          <p className="mt-1 text-sm text-[#545454]">{posts.length} total</p>
         </div>
         <div className="flex gap-3">
           <Link
             href="/admin/posts/new?blog=hive"
-            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent hover:shadow-md"
+            className={buttonVariants({ variant: "primary" })}
           >
             + New Hive post
           </Link>
           <Link
             href="/admin/posts/new?blog=learn"
-            className="rounded-lg bg-foreground px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-foreground hover:shadow-md"
+            className={buttonVariants({ variant: "secondary" })}
           >
             + New Learn post
           </Link>
