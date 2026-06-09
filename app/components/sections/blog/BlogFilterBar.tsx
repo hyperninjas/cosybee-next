@@ -59,11 +59,11 @@ export default function BlogFilterBar({
 
         {/* category chips */}
         <div className="flex flex-nowrap overflow-auto items-center gap-2">
-          {categories.map((cat) => {
+          {categories.map((cat, i) => {
             const isActive = category === cat;
             return (
               <button
-                key={cat}
+                key={cat + i}
                 type="button"
                 onClick={() => onCategoryChange(cat)}
                 className={`rounded-full px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${

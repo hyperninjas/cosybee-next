@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
     // far smaller than 100); 75 is Next's default, used by any <Image> without
     // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
     // size ladders above.
-    qualities: [75, 85],
+    qualities: [75, 85, 90],
     // Allow external images from the backend API and S3
     remotePatterns: [
       {
@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: {
-    compilationMode: 'all',
+    compilationMode: "all",
   },
 
   experimental: {
@@ -137,12 +137,36 @@ const nextConfig: NextConfig = {
       // the brand-story page goes to the blog.
       { source: "/control-matters", destination: "/energy", permanent: true },
       { source: "/energy-management", destination: "/energy", permanent: true },
-      { source: "/energy-monitoring-commercial", destination: "/energy", permanent: true },
-      { source: "/energy-monitoring-industrial", destination: "/energy", permanent: true },
-      { source: "/monitoring-matters", destination: "/energy", permanent: true },
-      { source: "/real-time-reporting-commercial", destination: "/energy", permanent: true },
-      { source: "/real-time-reporting-industrial", destination: "/energy", permanent: true },
-      { source: "/knocking-down-barriers", destination: "/hive", permanent: true },
+      {
+        source: "/energy-monitoring-commercial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/energy-monitoring-industrial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/monitoring-matters",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/real-time-reporting-commercial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/real-time-reporting-industrial",
+        destination: "/energy",
+        permanent: true,
+      },
+      {
+        source: "/knocking-down-barriers",
+        destination: "/hive",
+        permanent: true,
+      },
     ];
   },
 
@@ -163,16 +187,12 @@ const nextConfig: NextConfig = {
         // meta tag in app/admin/layout.tsx and applies to all response types,
         // including redirects and non-HTML responses.
         source: "/admin/:path*",
-        headers: [
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-        ],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
         // `:path*` above doesn't match the bare /admin route — cover it too.
         source: "/admin",
-        headers: [
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-        ],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
         // The service worker must never be HTTP-cached, otherwise browsers
