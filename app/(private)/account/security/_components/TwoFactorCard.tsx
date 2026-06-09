@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { PasswordField } from "@/app/components/ui/PasswordField";
 import QRCode from "qrcode";
 import {
   Alert,
   Button,
   Card,
   Chip,
-  Input,
   InputOTP,
   Label,
   REGEXP_ONLY_DIGITS,
-  TextField,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import { isFreshSessionError } from "@/app/lib/api-error";
@@ -148,16 +147,14 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
         {/* Enable — step 1: password */}
         {mode === "enable-password" && (
           <form onSubmit={startEnable} className="flex max-w-md flex-col gap-4">
-            <TextField
+            <PasswordField
               name="password"
-              type="password"
+              label="Confirm your password"
+              autoComplete="current-password"
               isRequired
               value={password}
               onChange={setPassword}
-            >
-              <Label>Confirm your password</Label>
-              <Input variant="secondary" autoComplete="current-password" />
-            </TextField>
+            />
             <div className="flex gap-2">
               <Button type="submit" isPending={busy}>
                 Continue
@@ -240,16 +237,14 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
         {/* Disable — confirm password */}
         {mode === "disable" && (
           <form onSubmit={disable} className="flex max-w-md flex-col gap-4">
-            <TextField
+            <PasswordField
               name="password"
-              type="password"
+              label="Confirm your password to disable"
+              autoComplete="current-password"
               isRequired
               value={password}
               onChange={setPassword}
-            >
-              <Label>Confirm your password to disable</Label>
-              <Input variant="secondary" autoComplete="current-password" />
-            </TextField>
+            />
             <div className="flex gap-2">
               <Button type="submit" variant="danger" isPending={busy}>
                 Disable two-factor

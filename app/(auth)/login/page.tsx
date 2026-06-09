@@ -2,17 +2,19 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Envelope, Key } from "@gravity-ui/icons";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
+import { PasswordField } from "@/app/components/ui/PasswordField";
+import { TextInputField } from "@/app/components/ui/TextInputField";
 import {
   Alert,
   Button,
   Card,
   Checkbox,
-  Input,
   InputOTP,
   Label,
   REGEXP_ONLY_DIGITS,
-  TextField,
+  toast,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import { safeRedirect } from "@/app/lib/safe-redirect";
@@ -27,7 +29,6 @@ function LoginForm() {
   // "credentials" → email+password; "twofa" → the second-factor challenge that
   // better-auth requires when the account has 2FA enabled.
   const [step, setStep] = useState<"credentials" | "twofa">("credentials");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Second-factor state.
@@ -46,7 +47,6 @@ function LoginForm() {
 
   async function onCredentials(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
@@ -56,7 +56,7 @@ function LoginForm() {
     });
 
     if (error) {
-      setError(error.message || "Invalid email or password.");
+      toast.danger(error.message || "Invalid email or password.");
       setLoading(false);
       return;
     }
@@ -74,7 +74,6 @@ function LoginForm() {
 
   async function onVerify(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const { error } = useBackup
@@ -85,7 +84,7 @@ function LoginForm() {
       : await authClient.twoFactor.verifyTotp({ code, trustDevice });
 
     if (error) {
-      setError(error.message || "That code wasn't valid. Try again.");
+      toast.danger(error.message || "That code wasn't valid. Try again.");
       setLoading(false);
       return;
     }
@@ -120,31 +119,31 @@ function LoginForm() {
         {step === "credentials" ? (
           <>
             <form onSubmit={onCredentials} className="flex flex-col gap-4">
-              <TextField name="email" type="email" isRequired>
-                <Label>Email</Label>
-                <Input variant="secondary" placeholder="you@example.com" autoComplete="email" />
-              </TextField>
-              <TextField name="password" type="password" isRequired>
-                <div className="flex items-center justify-between">
-                  <Label>Password</Label>
+              <TextInputField
+                name="email"
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                inputMode="email"
+                isRequired
+                autoFocus
+                icon={<Envelope className="size-4 text-muted" />}
+              />
+              <PasswordField
+                name="password"
+                label="Password"
+                autoComplete="current-password"
+                isRequired
+                labelAction={
                   <Link
                     href="/forgot-password"
                     className="text-xs text-muted hover:text-foreground"
                   >
                     Forgot password?
                   </Link>
-                </div>
-                <Input variant="secondary" placeholder="••••••••" autoComplete="current-password" />
-              </TextField>
-
-              {error && (
-                <Alert status="danger">
-                  <Alert.Indicator />
-                  <Alert.Content>
-                    <Alert.Title>{error}</Alert.Title>
-                  </Alert.Content>
-                </Alert>
-              )}
+                }
+              />
 
               <Button type="submit" className="w-full" isPending={loading}>
                 {loading ? "Signing in…" : "Sign in"}
@@ -156,16 +155,16 @@ function LoginForm() {
         ) : (
           <form onSubmit={onVerify} className="flex flex-col gap-4">
             {useBackup ? (
-              <TextField
+              <TextInputField
                 name="backupCode"
-                type="text"
+                label="Backup code"
+                placeholder="xxxxxxxx"
+                autoComplete="one-time-code"
                 isRequired
                 value={backupCode}
                 onChange={setBackupCode}
-              >
-                <Label>Backup code</Label>
-                <Input variant="secondary" placeholder="xxxxxxxx" autoComplete="one-time-code" />
-              </TextField>
+                icon={<Key className="size-4 text-muted" />}
+              />
             ) : (
               <div className="flex flex-col gap-2">
                 <Label>Authentication code</Label>
@@ -188,15 +187,6 @@ function LoginForm() {
                   </InputOTP.Group>
                 </InputOTP>
               </div>
-            )}
-
-            {error && (
-              <Alert status="danger">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>{error}</Alert.Title>
-                </Alert.Content>
-              </Alert>
             )}
 
             <Checkbox
@@ -223,20 +213,21 @@ function LoginForm() {
               {loading ? "Verifying…" : "Verify"}
             </Button>
 
-            <button
+            <Button
               type="button"
-              onClick={() => {
+              variant="tertiary"
+              size="sm"
+              className="mx-auto"
+              onPress={() => {
                 setUseBackup((v) => !v);
-                setError("");
                 setCode("");
                 setBackupCode("");
               }}
-              className="text-center text-sm text-muted hover:text-foreground"
             >
               {useBackup
                 ? "Use your authenticator app instead"
                 : "Use a backup code instead"}
-            </button>
+            </Button>
           </form>
         )}
       </Card.Content>

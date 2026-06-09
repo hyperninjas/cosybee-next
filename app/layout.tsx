@@ -6,6 +6,7 @@ import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import InstallPrompt from "./components/InstallPrompt";
+import { Toaster } from "./components/ui/Toaster";
 import {
   ORG_ADDRESS,
   ORG_CONTACT_EMAIL,
@@ -236,6 +237,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <Toaster />
         <ServiceWorkerRegistration />
         <InstallPrompt />
       </body>

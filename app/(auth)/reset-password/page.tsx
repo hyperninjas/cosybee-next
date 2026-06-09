@@ -2,16 +2,17 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Envelope } from "@gravity-ui/icons";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
+import { PasswordField } from "@/app/components/ui/PasswordField";
+import { TextInputField } from "@/app/components/ui/TextInputField";
 import {
-  Alert,
   Button,
   Card,
-  Input,
   InputOTP,
   Label,
   REGEXP_ONLY_DIGITS,
-  TextField,
+  toast,
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 
@@ -23,25 +24,20 @@ function ResetPasswordForm() {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const pwTooShort = password.length > 0 && password.length < 8;
+  const mismatch = confirm.length > 0 && confirm !== password;
+  const emailValid = /.+@.+\..+/.test(email);
+  const canSubmit =
+    emailValid &&
+    otp.length === 6 &&
+    password.length >= 8 &&
+    password === confirm;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
-
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit code from your email.");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Passwords do not match.");
-      return;
-    }
+    if (!canSubmit) return;
 
     setLoading(true);
     const { error } = await authClient.emailOtp.resetPassword({
@@ -51,7 +47,7 @@ function ResetPasswordForm() {
     });
 
     if (error) {
-      setError(error.message || "Failed to reset password.");
+      toast.danger(error.message || "Failed to reset password.");
       setLoading(false);
       return;
     }
@@ -68,15 +64,18 @@ function ResetPasswordForm() {
       </Card.Header>
       <Card.Content>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <TextField name="email" type="email" isRequired>
-            <Label>Email</Label>
-            <Input variant="secondary"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </TextField>
+          <TextInputField
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            inputMode="email"
+            isRequired
+            value={email}
+            onChange={setEmail}
+            icon={<Envelope className="size-4 text-muted" />}
+          />
 
           <div className="flex flex-col gap-2">
             <Label>6-digit code</Label>
@@ -100,35 +99,35 @@ function ResetPasswordForm() {
             </InputOTP>
           </div>
 
-          <TextField name="password" type="password" isRequired>
-            <Label>New password</Label>
-            <Input variant="secondary"
-              placeholder="At least 8 characters"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </TextField>
-          <TextField name="confirm" type="password" isRequired>
-            <Label>Confirm new password</Label>
-            <Input variant="secondary"
-              placeholder="Re-enter your password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
-          </TextField>
+          <PasswordField
+            name="password"
+            label="New password"
+            autoComplete="new-password"
+            isRequired
+            value={password}
+            onChange={setPassword}
+            description="Use at least 8 characters."
+            isInvalid={pwTooShort}
+            errorMessage="Password must be at least 8 characters."
+          />
+          <PasswordField
+            name="confirm"
+            label="Confirm new password"
+            placeholder="Re-enter your password"
+            autoComplete="new-password"
+            isRequired
+            value={confirm}
+            onChange={setConfirm}
+            isInvalid={mismatch}
+            errorMessage="Passwords don't match."
+          />
 
-          {error && (
-            <Alert status="danger">
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>{error}</Alert.Title>
-              </Alert.Content>
-            </Alert>
-          )}
-
-          <Button type="submit" className="w-full" isPending={loading}>
+          <Button
+            type="submit"
+            className="w-full"
+            isPending={loading}
+            isDisabled={!canSubmit}
+          >
             {loading ? "Resetting…" : "Reset password"}
           </Button>
         </form>

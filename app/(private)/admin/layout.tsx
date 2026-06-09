@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminHeader } from "./AdminHeader";
+import { AdminBreadcrumbs } from "./AdminBreadcrumbs";
 import { requireAdmin } from "@/app/lib/server-session";
 
 // Keep the admin panel out of search results.
@@ -22,7 +23,10 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AdminHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <AdminBreadcrumbs />
+        {children}
+      </main>
     </div>
   );
 }

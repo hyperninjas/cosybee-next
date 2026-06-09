@@ -1,26 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { Envelope } from "@gravity-ui/icons";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
-import {
-  Alert,
-  Button,
-  Card,
-  Input,
-  Label,
-  TextField,
-} from "@heroui/react";
+import { TextInputField } from "@/app/components/ui/TextInputField";
+import { Button, Card, toast } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     const { error } = await authClient.emailOtp.sendVerificationOtp({
@@ -29,7 +22,7 @@ export default function ForgotPasswordPage() {
     });
 
     if (error) {
-      setError(error.message || "Failed to send reset code.");
+      toast.danger(error.message || "Failed to send reset code.");
       setLoading(false);
       return;
     }
@@ -75,26 +68,27 @@ export default function ForgotPasswordPage() {
       </Card.Header>
       <Card.Content>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <TextField name="email" type="email" isRequired>
-            <Label>Email</Label>
-            <Input variant="secondary"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </TextField>
+          <TextInputField
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            inputMode="email"
+            isRequired
+            autoFocus
+            value={email}
+            onChange={setEmail}
+            icon={<Envelope className="size-4 text-muted" />}
+            description="We'll email you a 6-digit reset code."
+          />
 
-          {error && (
-            <Alert status="danger">
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>{error}</Alert.Title>
-              </Alert.Content>
-            </Alert>
-          )}
-
-          <Button type="submit" className="w-full" isPending={loading}>
+          <Button
+            type="submit"
+            className="w-full"
+            isPending={loading}
+            isDisabled={!/.+@.+\..+/.test(email)}
+          >
             {loading ? "Sending…" : "Send reset code"}
           </Button>
         </form>

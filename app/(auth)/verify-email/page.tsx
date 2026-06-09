@@ -4,12 +4,12 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import {
-  Alert,
   Button,
   Card,
   InputOTP,
   Label,
   REGEXP_ONLY_DIGITS,
+  toast,
 } from "@heroui/react";
 import { authClient, useSession } from "@/app/lib/auth-client";
 import { safeRedirect } from "@/app/lib/safe-redirect";
@@ -22,8 +22,6 @@ function VerifyEmailForm() {
   const email = params.get("email") ?? data?.user?.email ?? "";
 
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
   const hasSentInitial = useRef(false);
@@ -37,23 +35,18 @@ function VerifyEmailForm() {
       .sendVerificationOtp({ email, type: "email-verification" })
       .then(({ error }) => {
         if (error) {
-          setError(error.message || "Couldn't send verification code.");
+          toast.danger(error.message || "Couldn't send verification code.");
         }
       });
   }, [email]);
 
   async function onVerify(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
-    setNotice("");
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit code from your email.");
-      return;
-    }
+    if (otp.length !== 6) return;
     setVerifying(true);
     const { error } = await authClient.emailOtp.verifyEmail({ email, otp });
     if (error) {
-      setError(error.message || "That code wasn't valid. Try again.");
+      toast.danger(error.message || "That code wasn't valid. Try again.");
       setVerifying(false);
       return;
     }
@@ -64,15 +57,13 @@ function VerifyEmailForm() {
   }
 
   async function resend() {
-    setError("");
-    setNotice("");
     setResending(true);
     const { error } = await authClient.emailOtp.sendVerificationOtp({
       email,
       type: "email-verification",
     });
-    setNotice(error ? "" : "A new code is on its way.");
-    if (error) setError(error.message || "Couldn't resend the code.");
+    if (error) toast.danger(error.message || "Couldn't resend the code.");
+    else toast.success("A new code is on its way.");
     setResending(false);
   }
 
@@ -109,23 +100,6 @@ function VerifyEmailForm() {
               </InputOTP.Group>
             </InputOTP>
           </div>
-
-          {notice && (
-            <Alert status="success">
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>{notice}</Alert.Title>
-              </Alert.Content>
-            </Alert>
-          )}
-          {error && (
-            <Alert status="danger">
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>{error}</Alert.Title>
-              </Alert.Content>
-            </Alert>
-          )}
 
           <Button
             type="submit"

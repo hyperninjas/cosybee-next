@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Alert,
-  Button,
-  Card,
-  Input,
-  Label,
-  TextField,
-} from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import { isFreshSessionError } from "@/app/lib/api-error";
 import { ReauthNotice } from "@/app/components/account/ReauthNotice";
+import { PasswordField } from "@/app/components/ui/PasswordField";
 
 export function ChangePasswordCard() {
   const [current, setCurrent] = useState("");
@@ -19,23 +13,16 @@ export function ChangePasswordCard() {
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
   const [reauth, setReauth] = useState(false);
-  const [status, setStatus] = useState<
-    { kind: "ok" | "error"; message: string } | null
-  >(null);
+
+  const pwTooShort = next.length > 0 && next.length < 8;
+  const mismatch = confirm.length > 0 && confirm !== next;
+  const canSubmit =
+    current.length > 0 && next.length >= 8 && next === confirm;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus(null);
+    if (!canSubmit) return;
     setReauth(false);
-
-    if (next.length < 8) {
-      setStatus({ kind: "error", message: "New password must be at least 8 characters." });
-      return;
-    }
-    if (next !== confirm) {
-      setStatus({ kind: "error", message: "New passwords do not match." });
-      return;
-    }
 
     setSaving(true);
     const { error } = await authClient.changePassword({
@@ -48,13 +35,10 @@ export function ChangePasswordCard() {
       if (isFreshSessionError(error)) {
         setReauth(true);
       } else {
-        setStatus({ kind: "error", message: error.message || "Could not change password." });
+        toast.danger(error.message || "Could not change password.");
       }
     } else {
-      setStatus({
-        kind: "ok",
-        message: "Password changed. Other sessions were signed out.",
-      });
+      toast.success("Password changed. Other sessions were signed out.");
       setCurrent("");
       setNext("");
       setConfirm("");
@@ -72,49 +56,40 @@ export function ChangePasswordCard() {
       </Card.Header>
       <Card.Content>
         <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4">
-          <TextField
+          <PasswordField
             name="current"
-            type="password"
+            label="Current password"
+            autoComplete="current-password"
             isRequired
             value={current}
             onChange={setCurrent}
-          >
-            <Label>Current password</Label>
-            <Input variant="secondary" autoComplete="current-password" />
-          </TextField>
-          <TextField
+          />
+          <PasswordField
             name="next"
-            type="password"
+            label="New password"
+            autoComplete="new-password"
             isRequired
             value={next}
             onChange={setNext}
-          >
-            <Label>New password</Label>
-            <Input variant="secondary" autoComplete="new-password" placeholder="At least 8 characters" />
-          </TextField>
-          <TextField
+            description="Use at least 8 characters."
+            isInvalid={pwTooShort}
+            errorMessage="Password must be at least 8 characters."
+          />
+          <PasswordField
             name="confirm"
-            type="password"
+            label="Confirm new password"
+            autoComplete="new-password"
             isRequired
             value={confirm}
             onChange={setConfirm}
-          >
-            <Label>Confirm new password</Label>
-            <Input variant="secondary" autoComplete="new-password" />
-          </TextField>
+            isInvalid={mismatch}
+            errorMessage="Passwords don't match."
+          />
 
           {reauth && <ReauthNotice />}
-          {status && (
-            <Alert status={status.kind === "ok" ? "success" : "danger"}>
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Title>{status.message}</Alert.Title>
-              </Alert.Content>
-            </Alert>
-          )}
 
           <div>
-            <Button type="submit" isPending={saving}>
+            <Button type="submit" isPending={saving} isDisabled={!canSubmit}>
               {saving ? "Updating…" : "Update password"}
             </Button>
           </div>
