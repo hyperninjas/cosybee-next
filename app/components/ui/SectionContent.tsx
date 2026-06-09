@@ -201,17 +201,27 @@ export function MediaCard({
   );
 }
 
-/** Large bold section heading (e.g. "Why Choose EnergieBee Solar?"). */
+/** Large bold section heading (e.g. "Why Choose EnergieBee Solar?").
+ *  Default alignment: text-left below sm, centered sm-to-1199, text-left at
+ *  1200px+. Pass `align="center"` when the title should stay centered at
+ *  desktop (e.g. for sections with a centered text column). */
 export function SectionTitle({
   children,
   className = "",
+  align = "left",
 }: {
   children: ReactNode;
   className?: string;
+  /** Alignment at ≥1200px. Below 1200px is always sm:text-center. */
+  align?: "left" | "center";
 }) {
+  const desktopAlign =
+    align === "center"
+      ? "min-[1200px]:text-center!"
+      : "min-[1200px]:text-left!";
   return (
     <h2
-      className={`text-3xl font-extrabold leading-tight sm:text-center min-[1200px]:text-left!  tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
+      className={`text-3xl font-extrabold leading-tight sm:text-center ${desktopAlign} tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
     >
       {children}
     </h2>

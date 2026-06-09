@@ -27,7 +27,7 @@ export default function HomeSolarForecasting() {
 
         {/* middle: title + feature cards */}
         <div className="min-[1200px]:max-w-113.75 max-[1200px]:max-w-160 flex flex-col justify-center px-6 sm:px-10 lg:px-0">
-          <SectionTitle>Solar Forecasting</SectionTitle>
+          <SectionTitle align="center">Solar Forecasting</SectionTitle>
           {/* <p className="mt-3 max-w-xl text-base leading-relaxed max-[1200px]:text-center text-[#545454]">
             A complete view of solar production, weather, and usage across the
             day.

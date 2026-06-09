@@ -34,7 +34,7 @@ export default function HomeHero() {
             fetchPriority="high"
             quality={90}
             placeholder="blur"
-            className="absolute -right-10 bottom-0 h-full hidden md:block w-auto z-9"
+            className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block w-auto z-9"
           />
         </div>
         <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
