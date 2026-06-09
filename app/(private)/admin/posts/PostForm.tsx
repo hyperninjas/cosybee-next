@@ -240,6 +240,7 @@ function ActionBar({
         >
           <Select.Trigger className="w-28">
             <Select.Value />
+            <Select.Indicator />
           </Select.Trigger>
           <Select.Popover>
             <ListBox>
