@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, Label, TextField, toast } from "@heroui/react";
 import type { SortDescriptor } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
@@ -19,7 +19,11 @@ export default function UsersManager() {
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  // `loading` drives the full skeleton (first load only); `busy` is the
+  // lightweight indicator for silent refetches (sort, search, paginate).
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   // `query` is the raw input; `search` is the debounced value actually sent.
   const [query, setQuery] = useState("");
@@ -31,11 +35,13 @@ export default function UsersManager() {
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  // `silent` refreshes the data without flipping the skeleton — used after a
-  // create so the table updates in place instead of flashing a full reload.
+  // `silent` refreshes the data without flipping the skeleton — keeps the
+  // current rows visible under a `busy` indicator instead of a full reload.
   const fetchUsers = useCallback(
     async (opts?: { silent?: boolean }) => {
-      if (!opts?.silent) setLoading(true);
+      const silent = opts?.silent ?? false;
+      if (silent) setBusy(true);
+      else setLoading(true);
       try {
         const { data, error } = await authClient.admin.listUsers({
           query: {
@@ -61,7 +67,8 @@ export default function UsersManager() {
       } catch {
         toast.danger("Something went wrong loading users");
       } finally {
-        if (!opts?.silent) setLoading(false);
+        if (silent) setBusy(false);
+        else setLoading(false);
       }
     },
     [page, search, sort],
@@ -82,12 +89,16 @@ export default function UsersManager() {
     return () => clearTimeout(t);
   }, [query]);
 
-  // Fetch on page/search change. Deferred to a microtask so the loading toggle
-  // doesn't fire synchronously inside the effect body (set-state-in-effect).
+  // Fetch on page/search/sort change. The first load shows the skeleton; every
+  // subsequent refetch runs silently (rows stay, busy indicator shows).
+  // Deferred to a microtask so the toggle doesn't fire synchronously inside the
+  // effect body (set-state-in-effect).
   useEffect(() => {
     let active = true;
+    const silent = hasLoadedRef.current;
+    hasLoadedRef.current = true;
     Promise.resolve().then(() => {
-      if (active) fetchUsers();
+      if (active) fetchUsers({ silent });
     });
     return () => {
       active = false;
@@ -191,6 +202,7 @@ export default function UsersManager() {
       <UsersTable
         users={users}
         loading={loading}
+        busy={busy}
         sortDescriptor={sort}
         onSortChange={handleSortChange}
         page={page}

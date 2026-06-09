@@ -56,6 +56,7 @@ function SortableHeader({
 export function UsersTable({
   users,
   loading,
+  busy,
   sortDescriptor,
   onSortChange,
   page,
@@ -69,6 +70,7 @@ export function UsersTable({
 }: {
   users: User[];
   loading: boolean;
+  busy: boolean;
   sortDescriptor: SortDescriptor;
   onSortChange: (descriptor: SortDescriptor) => void;
   page: number;
@@ -88,14 +90,28 @@ export function UsersTable({
   const rangeEnd = Math.min(page * limit, total);
 
   return (
-    <Table>
-      <Table.ScrollContainer>
-        <Table.Content
-          aria-label="Users"
-          className="min-w-190"
-          sortDescriptor={sortDescriptor}
-          onSortChange={onSortChange}
-        >
+    <div className="relative">
+      {/* Silent-refetch feedback: rows stay visible (dimmed) under a pill. */}
+      {busy && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm">
+            <Spinner size="sm" />
+            Updating…
+          </div>
+        </div>
+      )}
+      <div
+        className={`transition-opacity ${busy ? "pointer-events-none opacity-60" : ""}`}
+        aria-busy={busy}
+      >
+        <Table>
+          <Table.ScrollContainer>
+            <Table.Content
+              aria-label="Users"
+              className="min-w-190"
+              sortDescriptor={sortDescriptor}
+              onSortChange={onSortChange}
+            >
           <Table.Header>
             <Table.Column allowsSorting isRowHeader id="name">
               {({ sortDirection }) => (
@@ -227,8 +243,10 @@ export function UsersTable({
               </Pagination.Item>
             </Pagination.Content>
           </Pagination>
-        </Table.Footer>
-      )}
-    </Table>
+            </Table.Footer>
+          )}
+        </Table>
+      </div>
+    </div>
   );
 }
