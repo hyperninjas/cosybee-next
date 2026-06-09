@@ -1,11 +1,11 @@
 import Image from "next/image";
-import LegalContainer from "../components/legal/LegalContainer";
-import LegalHero from "../components/legal/LegalHero";
-// import LegalIllustrationPlaceholder from "../components/legal/LegalIllustrationPlaceholder";
-import LegalSection from "../components/legal/LegalSection";
-import Breadcrumbs from "../components/ui/Breadcrumbs";
-import JsonLd from "../components/JsonLd";
-import { breadcrumbSchema } from "../lib/structured-data";
+import LegalContainer from "@/app/components/legal/LegalContainer";
+import LegalHero from "@/app/components/legal/LegalHero";
+// import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
+import LegalSection from "@/app/components/legal/LegalSection";
+import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
+import JsonLd from "@/app/components/JsonLd";
+import { breadcrumbSchema } from "@/app/lib/structured-data";
 import illustration from "@/public/illustration-privacy-policy.svg";
 
 import type { Metadata } from "next";

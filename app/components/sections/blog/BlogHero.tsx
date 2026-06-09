@@ -1,7 +1,7 @@
 import Image, { type StaticImageData } from "next/image";
-import Breadcrumbs from "../../ui/Breadcrumbs";
-// import Hexagon from "../../ui/Hexagon";
-// import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
+// import Hexagon from "@/app/components/ui/Hexagon";
+// import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 // import sideImage from "@/public/bee-hive.png";
 // import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 

@@ -29,7 +29,7 @@ export default async function AdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold">Posts</h1>
-          <p className="mt-1 text-sm text-[#545454]">{posts.length} total</p>
+          <p className="mt-1 text-sm text-muted">{posts.length} total</p>
         </div>
         <div className="flex gap-3">
           <Link

@@ -1,11 +1,11 @@
 // import { PHOTOS } from "@/app/lib/photos";
-// import EpcCard from "../../mockups/phone/EpcCard";
-// import PhoneFrame from "../../mockups/phone/PhoneFrame";
-// import PhoneGreeting from "../../mockups/phone/PhoneGreeting";
-// import PhoneTabs from "../../mockups/phone/PhoneTabs";
-import { CtaButton } from "../../ui/Cta";
-// import Hexagon from "../../ui/Hexagon";
-// import HiveHexCluster from "../../ui/HiveHexCluster";
+// import EpcCard from "@/app/components/mockups/phone/EpcCard";
+// import PhoneFrame from "@/app/components/mockups/phone/PhoneFrame";
+// import PhoneGreeting from "@/app/components/mockups/phone/PhoneGreeting";
+// import PhoneTabs from "@/app/components/mockups/phone/PhoneTabs";
+import { CtaButton } from "@/app/components/ui/Cta";
+// import Hexagon from "@/app/components/ui/Hexagon";
+// import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 // import beeFlowerImg from "@/public/bee-flower.png";
 // import deviceImg from "@/public/solar/energiebee-app-solar-potential-epc-rating.png";
 // import windTurbineImg from "@/public/wind-turbine.png";

@@ -18,7 +18,7 @@ import {
 } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import { safeRedirect } from "@/app/lib/safe-redirect";
-import { SocialButtons } from "../_components/SocialButtons";
+import { SocialButtons } from "@/app/(auth)/_components/SocialButtons";
 
 function LoginForm() {
   const router = useRouter();

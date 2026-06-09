@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Hexagon from "../../ui/Hexagon";
+import Hexagon from "@/app/components/ui/Hexagon";
 
 function EnvelopeIcon() {
   return (

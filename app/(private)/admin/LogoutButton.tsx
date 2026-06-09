@@ -20,7 +20,15 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onPress={handleLogout} isDisabled={loading}>
+    // HeroUI Button has no `warning` variant, so we use the warning color token
+    // on a ghost button for the cautionary look.
+    <Button
+      variant="ghost"
+      size="sm"
+      className="text-warning hover:text-warning"
+      onPress={handleLogout}
+      isDisabled={loading}
+    >
       {loading ? "Signing out…" : "Logout"}
     </Button>
   );

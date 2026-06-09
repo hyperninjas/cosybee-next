@@ -8,10 +8,10 @@ import {
   formatReadTime,
   ARTICLES_PER_PAGE,
 } from "@/app/lib/article-types";
-import Avatar from "../../ui/Avatar";
-import Divider from "../../ui/Divider";
-import Dot from "../../ui/Dot";
-import Pagination from "../../ui/Pagination";
+import Avatar from "@/app/components/ui/Avatar";
+import Divider from "@/app/components/ui/Divider";
+import Dot from "@/app/components/ui/Dot";
+import Pagination from "@/app/components/ui/Pagination";
 
 /** Format ISO date string to display format. */
 function formatDate(isoDate: string): string {

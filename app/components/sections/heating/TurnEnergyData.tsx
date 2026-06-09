@@ -1,7 +1,7 @@
-import Hexagon from "../../ui/Hexagon";
-import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
+import Hexagon from "@/app/components/ui/Hexagon";
+import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImg from "@/public/energy-management.png";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 
 export default function TurnEnergyData() {

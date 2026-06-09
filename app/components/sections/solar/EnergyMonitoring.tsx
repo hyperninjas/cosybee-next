@@ -1,6 +1,6 @@
-import Hexagon from "../../ui/Hexagon";
-import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
-import HiveHexCluster from "../../ui/HiveHexCluster";
+import Hexagon from "@/app/components/ui/Hexagon";
+import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
 import windTurbineImg from "@/public/wind-turbine.png";

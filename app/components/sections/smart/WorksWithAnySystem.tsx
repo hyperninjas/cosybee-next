@@ -1,4 +1,4 @@
-import { CtaCard } from "../../ui/Cta";
+import { CtaCard } from "@/app/components/ui/Cta";
 
 /**
  * Standalone CTA section advertising broad smart-home compatibility.

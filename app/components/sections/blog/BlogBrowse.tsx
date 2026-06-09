@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { type Article } from "@/app/lib/article-types";
-import Divider from "../../ui/Divider";
+import Divider from "@/app/components/ui/Divider";
 import BlogFeatured from "./BlogFeatured";
 import BlogFilterBar from "./BlogFilterBar";
 import BlogLatestArticles from "./BlogLatestArticles";

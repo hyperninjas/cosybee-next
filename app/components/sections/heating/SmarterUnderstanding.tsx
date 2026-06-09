@@ -1,6 +1,6 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
+import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
+import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";

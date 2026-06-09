@@ -35,33 +35,32 @@ export function RoleSelect({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Select
-        aria-label={`Role for ${userName}`}
-        variant="secondary"
-        className="w-30"
-        isDisabled={pending}
-        value={role}
-        onChange={handleChange}
-      >
-        <Select.Trigger>
-          <Select.Value />
-          <Select.Indicator />
-        </Select.Trigger>
-        <Select.Popover>
-          <ListBox>
-            <ListBox.Item id="user" textValue="User">
-              User
-              <ListBox.ItemIndicator />
-            </ListBox.Item>
-            <ListBox.Item id="admin" textValue="Admin">
-              Admin
-              <ListBox.ItemIndicator />
-            </ListBox.Item>
-          </ListBox>
-        </Select.Popover>
-      </Select>
-      {pending && <Spinner size="sm" />}
-    </div>
+    <Select
+      aria-label={`Role for ${userName}`}
+      variant="secondary"
+      className="w-30"
+      isDisabled={pending}
+      value={role}
+      onChange={handleChange}
+    >
+      <Select.Trigger>
+        <Select.Value />
+        {/* Swap the chevron for a spinner in place — same footprint, so the
+            row never shifts while the change is in flight. */}
+        {pending ? <Spinner size="sm" /> : <Select.Indicator />}
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          <ListBox.Item id="user" textValue="User">
+            User
+            <ListBox.ItemIndicator />
+          </ListBox.Item>
+          <ListBox.Item id="admin" textValue="Admin">
+            Admin
+            <ListBox.ItemIndicator />
+          </ListBox.Item>
+        </ListBox>
+      </Select.Popover>
+    </Select>
   );
 }

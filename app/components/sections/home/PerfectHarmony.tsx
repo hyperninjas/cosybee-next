@@ -1,11 +1,11 @@
 import Image from "next/image";
-import HiveHexCluster from "../../ui/HiveHexCluster";
-// import { CtaButton } from "../../ui/Cta";
-import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
+// import { CtaButton } from "@/app/components/ui/Cta";
+import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
 import beeFlowerImg from "@/public/bee-flower.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy.png";
-import Hexagon from "../../ui/Hexagon";
+import Hexagon from "@/app/components/ui/Hexagon";
 
 /**
  * "Everything in perfect harmony" — text + 3 feature items on the left,

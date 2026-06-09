@@ -1,17 +1,23 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { EllipsisVertical } from "@gravity-ui/icons";
 import {
-  Button,
   buttonVariants,
+  Button,
   Chip,
+  Dropdown,
+  EmptyState,
   Input,
+  Label,
   ListBox,
   ListBoxItem,
+  Modal,
   Pagination,
   Select,
-  Spinner,
+  Separator,
   Table,
   Tabs,
 } from "@heroui/react";
@@ -61,77 +67,9 @@ function relativeTime(iso: string): string {
   });
 }
 
-function DeleteButton({ id, blog, slug }: { id: string; blog: string; slug: string }) {
-  const [confirming, setConfirming] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  if (!confirming) {
-    return (
-      <Button variant="outline" size="sm" onPress={() => setConfirming(true)}>
-        Delete
-      </Button>
-    );
-  }
-
-  const handleDelete = () => {
-    const formData = new FormData();
-    formData.append("id", id);
-    formData.append("blog", blog);
-    formData.append("slug", slug);
-    startTransition(() => {
-      deletePost(formData);
-    });
-  };
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <Button variant="danger" size="sm" onPress={handleDelete} isDisabled={isPending}>
-        {isPending ? <Spinner size="sm" /> : "Confirm"}
-      </Button>
-      <Button variant="ghost" size="sm" onPress={() => setConfirming(false)} isDisabled={isPending}>
-        Cancel
-      </Button>
-    </div>
-  );
-}
-
-function StatusToggleButton({
-  id,
-  blog,
-  slug,
-  status,
-}: {
-  id: string;
-  blog: string;
-  slug: string;
-  status: string;
-}) {
-  const [isPending, startTransition] = useTransition();
-  const isPublished = status === "PUBLISHED";
-
-  const handleToggle = () => {
-    const formData = new FormData();
-    formData.append("id", id);
-    formData.append("blog", blog);
-    formData.append("slug", slug);
-    formData.append("status", isPublished ? "DRAFT" : "PUBLISHED");
-    startTransition(() => {
-      setStatus(formData);
-    });
-  };
-
-  return (
-    <Button
-      variant={isPublished ? "outline" : "primary"}
-      size="sm"
-      onPress={handleToggle}
-      isDisabled={isPending}
-      className="min-w-[90px]"
-    >
-      {isPending ? <Spinner size="sm" /> : isPublished ? "Unpublish" : "Publish"}
-    </Button>
-  );
-}
+type OptimisticAction =
+  | { type: "status"; id: string; status: string }
+  | { type: "delete"; id: string };
 
 const TABS = [
   { key: "ALL", label: "All" },
@@ -139,7 +77,137 @@ const TABS = [
   { key: "DRAFT", label: "Drafts" },
 ] as const;
 
+/**
+ * Row actions as a single three-dot menu (keeps the column compact and
+ * consistent). Edit/Preview navigate; Publish toggles optimistically; Delete
+ * opens a confirm modal so the destructive action is intentional.
+ */
+function RowActions({
+  row,
+  onToggle,
+  onDelete,
+}: {
+  row: Row;
+  onToggle: (row: Row) => void;
+  onDelete: (row: Row) => void;
+}) {
+  const router = useRouter();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const isPublished = row.status === "PUBLISHED";
+
+  function onAction(key: string) {
+    switch (key) {
+      case "edit":
+        router.push(`/admin/posts/${row.id}/edit`);
+        break;
+      case "preview":
+        window.open(
+          `/admin/posts/${row.id}/preview`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+        break;
+      case "toggle":
+        onToggle(row);
+        break;
+      case "delete":
+        setConfirmOpen(true);
+        break;
+    }
+  }
+
+  return (
+    <>
+      <Dropdown>
+        <Dropdown.Trigger
+          aria-label="Post actions"
+          // Dropdown.Trigger IS the <button> (a nested <Button> would be
+          // button-in-button). Its `.dropdown__trigger` class is `inline-block`,
+          // which overrides the button's flex centering — so re-assert
+          // inline-flex centering via utilities (utilities beat the component layer).
+          className={`${buttonVariants({
+            variant: "ghost",
+            size: "sm",
+            isIconOnly: true,
+          })} inline-flex items-center justify-center`}
+        >
+          <EllipsisVertical className="size-4" />
+        </Dropdown.Trigger>
+        <Dropdown.Popover className="min-w-40">
+          <Dropdown.Menu onAction={(key) => onAction(String(key))}>
+            <Dropdown.Item id="edit" textValue="Edit">
+              <Label>Edit</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="preview" textValue="Preview">
+              <Label>Preview</Label>
+            </Dropdown.Item>
+            <Dropdown.Item
+              id="toggle"
+              textValue={isPublished ? "Unpublish" : "Publish"}
+            >
+              <Label>{isPublished ? "Unpublish" : "Publish"}</Label>
+            </Dropdown.Item>
+            <Separator />
+            <Dropdown.Item id="delete" textValue="Delete" variant="danger">
+              <Label>Delete</Label>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+
+      <Modal.Backdrop
+        variant="blur"
+        isOpen={confirmOpen}
+        onOpenChange={setConfirmOpen}
+      >
+        <Modal.Container size="sm">
+          <Modal.Dialog>
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Delete this post?</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <p className="text-sm text-muted">
+                <span className="font-medium text-foreground">{row.title}</span>{" "}
+                (/{row.blog}/{row.slug}) will be permanently deleted. This
+                can&apos;t be undone.
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot="close" variant="tertiary">
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onPress={() => {
+                  onDelete(row);
+                  setConfirmOpen(false);
+                }}
+              >
+                Delete post
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </>
+  );
+}
+
 export default function PostsTable({ rows }: { rows: Row[] }) {
+  // Optimistic mirror of the server data: status flips and deletes apply
+  // instantly, then reconcile when the server action revalidates `rows`.
+  const [optimisticRows, applyOptimistic] = useOptimistic(
+    rows,
+    (state, action: OptimisticAction) =>
+      action.type === "delete"
+        ? state.filter((r) => r.id !== action.id)
+        : state.map((r) =>
+            r.id === action.id ? { ...r, status: action.status } : r,
+          ),
+  );
+  const [, startTransition] = useTransition();
+
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("ALL");
   const [blog, setBlog] = useState<"all" | "hive" | "learn">("all");
   const [query, setQuery] = useState("");
@@ -147,33 +215,79 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
 
   const counts = useMemo(
     () => ({
-      ALL: rows.length,
-      PUBLISHED: rows.filter((r) => r.status === "PUBLISHED").length,
-      DRAFT: rows.filter((r) => r.status === "DRAFT").length,
+      ALL: optimisticRows.length,
+      PUBLISHED: optimisticRows.filter((r) => r.status === "PUBLISHED").length,
+      DRAFT: optimisticRows.filter((r) => r.status === "DRAFT").length,
     }),
-    [rows],
+    [optimisticRows],
   );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rows.filter((r) => {
+    return optimisticRows.filter((r) => {
       if (tab !== "ALL" && r.status !== tab) return false;
       if (blog !== "all" && r.blog !== blog) return false;
-      if (q && !`${r.title} ${r.slug} ${r.category?.name ?? ""}`.toLowerCase().includes(q))
+      if (
+        q &&
+        !`${r.title} ${r.slug} ${r.category?.name ?? ""}`
+          .toLowerCase()
+          .includes(q)
+      )
         return false;
       return true;
     });
-  }, [rows, tab, blog, query]);
+  }, [optimisticRows, tab, blog, query]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
-  const shown = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const shown = filtered.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+
+  // Precompute display fields during render (NOT inside the Table render prop,
+  // which runs outside render and would trip the React Compiler on the helpers).
+  const items = shown.map((r) => ({
+    ...r,
+    imageUrl: getValidImageUrl(r.coverImage),
+    updatedLabel: relativeTime(r.updatedAt),
+  }));
+
+  const showNumbered = pageCount > 1 && pageCount <= 7;
+  const rangeStart = filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, filtered.length);
+
+  function onToggleStatus(row: Row) {
+    const next = row.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+    const fd = new FormData();
+    fd.append("id", row.id);
+    fd.append("blog", row.blog);
+    fd.append("slug", row.slug);
+    fd.append("status", next);
+    startTransition(async () => {
+      applyOptimistic({ type: "status", id: row.id, status: next });
+      await setStatus(fd);
+    });
+  }
+
+  function onDelete(row: Row) {
+    const fd = new FormData();
+    fd.append("id", row.id);
+    fd.append("blog", row.blog);
+    fd.append("slug", row.slug);
+    startTransition(async () => {
+      applyOptimistic({ type: "delete", id: row.id });
+      await deletePost(fd);
+    });
+  }
 
   return (
     <div>
-      {/* Filters: Tabs + Blog Select + Search */}
+      {/* Filters: Tabs + Blog Select + Search (on the page background → the
+          default primary input variant is correct here). */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Tabs
+          variant="secondary"
           selectedKey={tab}
           onSelectionChange={(k) => {
             setTab(k as (typeof TABS)[number]["key"]);
@@ -184,7 +298,9 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
             {TABS.map((t) => (
               <Tabs.Tab key={t.key} id={t.key}>
                 {t.label}
-                <span className="ml-1.5 text-xs opacity-70">{counts[t.key]}</span>
+                <span className="ml-1.5 text-xs opacity-70">
+                  {counts[t.key]}
+                </span>
               </Tabs.Tab>
             ))}
           </Tabs.List>
@@ -224,150 +340,155 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
         </div>
       </div>
 
-      {/* Table */}
-      {shown.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[#DBDBDB] py-16 text-center text-sm text-[#9A9A9A]">
-          No posts match these filters.
-        </div>
-      ) : (
-        <Table>
-          <Table.ScrollContainer className="overflow-x-auto">
-            <Table.Content aria-label="Posts">
-              <Table.Header>
-                <Table.Column isRowHeader>Post</Table.Column>
-                <Table.Column className="hidden md:table-cell">Blog</Table.Column>
-                <Table.Column className="hidden lg:table-cell">Category</Table.Column>
-                <Table.Column>Status</Table.Column>
-                <Table.Column className="hidden md:table-cell">Updated</Table.Column>
-                <Table.Column>Actions</Table.Column>
-              </Table.Header>
-              <Table.Body items={shown}>
-                {(row) => {
-                  const imageUrl = getValidImageUrl(row.coverImage);
-                  const updatedTime = relativeTime(row.updatedAt);
-                  return (
-                    <Table.Row id={row.id}>
-                      {/* Post (Title + Image + Slug) */}
-                      <Table.Cell>
-                        <div className="flex items-center gap-3">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={imageUrl}
-                            alt=""
-                            className="hidden h-10 w-14 shrink-0 rounded-lg bg-[#F2F2F2] object-cover sm:block"
-                          />
-                          <div className="min-w-0">
-                            <Link
-                              href={`/admin/posts/${row.id}/edit`}
-                              className="block truncate font-semibold hover:text-[#FF8A7A]"
-                            >
-                              {row.title}
-                              {row.featured && (
-                                <span className="ml-1.5 text-[#C98A00]">★</span>
-                              )}
-                            </Link>
-                            <p className="truncate text-xs text-[#9A9A9A]">
-                              /{row.blog}/{row.slug}
-                            </p>
-                          </div>
-                        </div>
-                      </Table.Cell>
-
-                      {/* Blog */}
-                      <Table.Cell className="hidden md:table-cell">
-                        <Chip size="sm" variant="soft">
-                          {row.blog}
-                        </Chip>
-                      </Table.Cell>
-
-                      {/* Category */}
-                      <Table.Cell className="hidden lg:table-cell">
-                        <span className="text-sm text-[#545454]">
-                          {row.category?.name ?? "Uncategorised"}
-                        </span>
-                      </Table.Cell>
-
-                      {/* Status */}
-                      <Table.Cell>
-                        <Chip
-                          size="sm"
-                          variant="soft"
-                          color={row.status === "PUBLISHED" ? "success" : "default"}
+      <Table>
+        <Table.ScrollContainer className="overflow-x-auto">
+          <Table.Content aria-label="Posts" className="min-w-200">
+            <Table.Header>
+              <Table.Column isRowHeader>Post</Table.Column>
+              <Table.Column className="hidden md:table-cell">Blog</Table.Column>
+              <Table.Column className="hidden lg:table-cell">
+                Category
+              </Table.Column>
+              <Table.Column>Status</Table.Column>
+              <Table.Column className="hidden md:table-cell">
+                Updated
+              </Table.Column>
+              <Table.Column className="text-end">Actions</Table.Column>
+            </Table.Header>
+            <Table.Body
+              items={items}
+              renderEmptyState={() => (
+                <EmptyState className="flex h-40 w-full flex-col items-center justify-center gap-2 text-center">
+                  <span className="text-sm font-medium text-foreground">
+                    No posts found
+                  </span>
+                  <span className="text-xs text-muted">
+                    Try a different filter or search.
+                  </span>
+                </EmptyState>
+              )}
+            >
+              {(row) => (
+                <Table.Row id={row.id}>
+                  {/* Post (Image + Title + Slug) */}
+                  <Table.Cell>
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={row.imageUrl}
+                        alt=""
+                        className="hidden h-10 w-14 shrink-0 rounded-lg bg-default object-cover sm:block"
+                      />
+                      <div className="min-w-0">
+                        <Link
+                          href={`/admin/posts/${row.id}/edit`}
+                          className="block truncate font-semibold transition-colors hover:text-accent"
                         >
-                          {row.status === "PUBLISHED" ? "Published" : "Draft"}
-                        </Chip>
-                      </Table.Cell>
+                          {row.title}
+                          {row.featured && (
+                            <span className="ml-1.5 text-warning">★</span>
+                          )}
+                        </Link>
+                        <p className="truncate text-xs text-muted">
+                          /{row.blog}/{row.slug}
+                        </p>
+                      </div>
+                    </div>
+                  </Table.Cell>
 
-                      {/* Updated */}
-                      <Table.Cell className="hidden md:table-cell">
-                        <span className="text-sm text-[#9A9A9A]">
-                          {updatedTime}
-                        </span>
-                      </Table.Cell>
+                  {/* Blog */}
+                  <Table.Cell className="hidden md:table-cell">
+                    <Chip size="sm" variant="soft">
+                      {row.blog}
+                    </Chip>
+                  </Table.Cell>
 
-                      {/* Actions */}
-                      <Table.Cell>
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/admin/posts/${row.id}/edit`}
-                            className={buttonVariants({ variant: "secondary", size: "sm" })}
-                          >
-                            Edit
-                          </Link>
-                          <Link
-                            href={`/admin/posts/${row.id}/preview`}
-                            target="_blank"
-                            className={`hidden sm:inline-flex ${buttonVariants({ variant: "outline", size: "sm" })}`}
-                          >
-                            Preview
-                          </Link>
-                          <StatusToggleButton
-                            id={row.id}
-                            blog={row.blog}
-                            slug={row.slug}
-                            status={row.status}
-                          />
-                          <DeleteButton id={row.id} blog={row.blog} slug={row.slug} />
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                }}
-              </Table.Body>
-            </Table.Content>
-          </Table.ScrollContainer>
-        </Table>
-      )}
+                  {/* Category */}
+                  <Table.Cell className="hidden lg:table-cell">
+                    <span className="text-sm text-muted">
+                      {row.category?.name ?? "Uncategorised"}
+                    </span>
+                  </Table.Cell>
 
-      {/* Pagination */}
-      <div className="mt-6 flex items-center justify-between">
-        <span className="text-sm text-[#545454]">
-          Showing {shown.length} of {filtered.length} posts
-        </span>
-        {pageCount > 1 && (
-          <Pagination>
-            <Pagination.Content>
-              <Pagination.Previous
-                isDisabled={safePage <= 1}
-                onPress={() => setPage(Math.max(1, safePage - 1))}
-              >
-                Previous
-              </Pagination.Previous>
-              <Pagination.Item>
-                <span className="px-3 text-sm text-[#545454]">
-                  Page {safePage} of {pageCount}
-                </span>
-              </Pagination.Item>
-              <Pagination.Next
-                isDisabled={safePage >= pageCount}
-                onPress={() => setPage(Math.min(pageCount, safePage + 1))}
-              >
-                Next
-              </Pagination.Next>
-            </Pagination.Content>
-          </Pagination>
+                  {/* Status */}
+                  <Table.Cell>
+                    <Chip
+                      size="sm"
+                      variant="soft"
+                      color={row.status === "PUBLISHED" ? "success" : "default"}
+                    >
+                      {row.status === "PUBLISHED" ? "Published" : "Draft"}
+                    </Chip>
+                  </Table.Cell>
+
+                  {/* Updated */}
+                  <Table.Cell className="hidden md:table-cell">
+                    <span className="text-sm text-muted">
+                      {row.updatedLabel}
+                    </span>
+                  </Table.Cell>
+
+                  {/* Actions */}
+                  <Table.Cell className="text-end">
+                    <div className="flex justify-end">
+                      <RowActions
+                        row={row}
+                        onToggle={onToggleStatus}
+                        onDelete={onDelete}
+                      />
+                    </div>
+                  </Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
+
+        {filtered.length > 0 && (
+          <Table.Footer>
+            <Pagination size="sm" className="w-full flex-wrap gap-2">
+              <Pagination.Summary>
+                Showing {rangeStart}–{rangeEnd} of {filtered.length} posts
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    isDisabled={safePage <= 1}
+                    onPress={() => setPage(Math.max(1, safePage - 1))}
+                  >
+                    <Pagination.PreviousIcon />
+                    Prev
+                  </Pagination.Previous>
+                </Pagination.Item>
+
+                {showNumbered &&
+                  Array.from({ length: pageCount }, (_, i) => i + 1).map(
+                    (p) => (
+                      <Pagination.Item key={p} className="hidden sm:flex">
+                        <Pagination.Link
+                          isActive={p === safePage}
+                          onPress={() => setPage(p)}
+                        >
+                          {p}
+                        </Pagination.Link>
+                      </Pagination.Item>
+                    ),
+                  )}
+
+                <Pagination.Item>
+                  <Pagination.Next
+                    isDisabled={safePage >= pageCount}
+                    onPress={() => setPage(Math.min(pageCount, safePage + 1))}
+                  >
+                    Next
+                    <Pagination.NextIcon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>
+          </Table.Footer>
         )}
-      </div>
+      </Table>
     </div>
   );
 }

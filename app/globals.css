@@ -1,33 +1,100 @@
-/* Lock the cascade-layer order up front so Tailwind's `utilities` always wins
-   over HeroUI's `components`/`base`, regardless of how Turbopack splits the
-   imported CSS into chunks. */
-@layer theme, base, components, utilities;
-
 @import "tailwindcss";
+/* HeroUI v3 design system. Must come after Tailwind. Its default theme is
+   declared on :root (light), so HeroUI components render correctly without
+   adding any theme class to <html> — keeping the existing site untouched.
+   We deliberately do NOT add `bg-background text-foreground` to <body>, so
+   HeroUI's neutral background never overrides the site's own white canvas. */
 @import "@heroui/styles";
+/*
+ * HeroUI Theme Customization
+ * Add this to your global.css after importing @heroui/styles
+ * Only includes variables users need to customize
+ * @see https://heroui.com/docs/react/getting-started/theming
+ */
 
-@theme {
+:root,
+.light,
+.default,
+[data-theme="light"],
+[data-theme="default"] {
+  /* Theme Colors (Light Mode) */
+  --accent: oklch(64.11% 0.1638 49.85);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(97.02% 0.0015 49.85);
+  --border: oklch(90.00% 0.0015 49.85);
+  --danger: oklch(65.32% 0.2335 1.26);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(94.00% 0.0015 49.85);
+  --default-foreground: oklch(21.03% 0.0059 49.85);
+  --field-background: oklch(100.00% 0.0008 49.85);
+  --field-border: transparent;
+  --field-foreground: oklch(21.03% 0.0015 49.85);
+  --field-placeholder: oklch(55.17% 0.0030 49.85);
+  --focus: oklch(64.11% 0.1638 49.85);
+  --foreground: oklch(21.03% 0.0015 49.85);
+  --muted: oklch(55.17% 0.0030 49.85);
+  --overlay: oklch(100.00% 0.0004 49.85);
+  --overlay-foreground: oklch(21.03% 0.0015 49.85);
+  --scrollbar: oklch(87.10% 0.0015 49.85);
+  --segment: oklch(100.00% 0.0015 49.85);
+  --segment-foreground: oklch(21.03% 0.0015 49.85);
+  --separator: oklch(92.00% 0.0015 49.85);
+  --success: oklch(73.29% 0.1941 126.33);
+  --success-foreground: oklch(21.03% 0.0059 126.33);
+  --surface: oklch(100.00% 0.0008 49.85);
+  --surface-foreground: oklch(21.03% 0.0015 49.85);
+  --surface-secondary: oklch(95.24% 0.0012 49.85);
+  --surface-secondary-foreground: oklch(21.03% 0.0015 49.85);
+  --surface-tertiary: oklch(93.73% 0.0012 49.85);
+  --surface-tertiary-foreground: oklch(21.03% 0.0015 49.85);
+  --warning: oklch(78.19% 0.1590 47.85);
+  --warning-foreground: oklch(21.03% 0.0059 47.85);
 
-  --font-sans: var(--font-manrope), system-ui, -apple-system, "Segoe UI",
-    sans-serif;
+  /* Border Radius */
+  --radius: 0.25rem;
+  --field-radius: 0.5rem;
 
+  /* Font Family */
+  /* Make sure to load Manrope font in your app */
+  --font-sans: "Manrope", sans-serif;
 }
 
-/* Brand the HeroUI semantic palette. v3 drives its "primary"/accent role off
-   `--accent`; the default is a blue, so we remap it to the energiebee red and
-   point `--danger` at the existing destructive red. Declared unlayered so it
-   wins over HeroUI's `@layer base` token defaults. */
-:root {
-  --accent: #e63b2e;
-  --accent-foreground: #ffffff;
-  --danger: #b4332a;
-  --danger-foreground: #ffffff;
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* Theme Colors (Dark Mode) */
+  --accent: oklch(64.11% 0.1638 49.85);
+  --accent-foreground: oklch(99.11% 0 0);
+  --background: oklch(12.00% 0.0015 49.85);
+  --border: oklch(28.00% 0.0015 49.85);
+  --danger: oklch(59.40% 0.1973 0.15);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(27.40% 0.0015 49.85);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: oklch(21.03% 0.0030 49.85);
+  --field-border: transparent;
+  --field-foreground: oklch(99.11% 0.0015 49.85);
+  --field-placeholder: oklch(70.50% 0.0030 49.85);
+  --focus: oklch(64.11% 0.1638 49.85);
+  --foreground: oklch(99.11% 0.0015 49.85);
+  --muted: oklch(70.50% 0.0030 49.85);
+  --overlay: oklch(21.03% 0.0030 49.85);
+  --overlay-foreground: oklch(99.11% 0.0015 49.85);
+  --scrollbar: oklch(70.50% 0.0015 49.85);
+  --segment: oklch(39.64% 0.0015 49.85);
+  --segment-foreground: oklch(99.11% 0.0015 49.85);
+  --separator: oklch(25.00% 0.0015 49.85);
+  --success: oklch(73.29% 0.1941 126.33);
+  --success-foreground: oklch(21.03% 0.0059 126.33);
+  --surface: oklch(21.03% 0.0030 49.85);
+  --surface-foreground: oklch(99.11% 0.0015 49.85);
+  --surface-secondary: oklch(25.70% 0.0023 49.85);
+  --surface-secondary-foreground: oklch(99.11% 0.0015 49.85);
+  --surface-tertiary: oklch(27.21% 0.0023 49.85);
+  --surface-tertiary-foreground: oklch(99.11% 0.0015 49.85);
+  --warning: oklch(82.03% 0.1392 51.86);
+  --warning-foreground: oklch(21.03% 0.0059 51.86);
 }
-
-body {
-  font-family: var(--font-sans);
-}
-
 /* Server-rendered article body (BlockNote -> HTML). Mirrors the prior
    hand-built renderer's typography. */
 .article-body > * + * {

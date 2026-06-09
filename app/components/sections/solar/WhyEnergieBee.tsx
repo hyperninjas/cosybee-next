@@ -1,11 +1,11 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
+import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import {
   FeatureCard,
   GlyphName,
   SectionLead,
   SectionTitle,
-} from "../../ui/SectionContent";
+} from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import Image, { type StaticImageData } from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";

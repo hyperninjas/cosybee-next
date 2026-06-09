@@ -1,9 +1,9 @@
 // import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import Hexagon from "../../ui/Hexagon";
-// import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
+import Hexagon from "@/app/components/ui/Hexagon";
+// import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
+import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 // import sideImage from "@/public/energy-monitoring.png";
-import HiveHexCluster from "../../ui/HiveHexCluster";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/smart/energiebee-app-home-heating-spend-graph.png";
 import windTurbineImg from "@/public/wind-turbine.png";

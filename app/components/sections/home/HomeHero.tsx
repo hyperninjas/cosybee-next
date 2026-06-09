@@ -1,8 +1,8 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { CtaButton } from "../../ui/Cta";
+import { CtaButton } from "@/app/components/ui/Cta";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import heroDeviceImg from "@/public/energibee-hero-device.png";
-import AppStoreButton from "../../ui/AppStoreButton";
+import AppStoreButton from "@/app/components/ui/AppStoreButton";
 
 /**
  * Home hero — "One app. Total energy clarity." Background photo of

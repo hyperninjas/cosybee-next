@@ -1,4 +1,4 @@
-import CosybeeMark from "../../ui/CosybeeMark";
+import CosybeeMark from "@/app/components/ui/CosybeeMark";
 
 /** "Good Morning" + cosybee logo row used at the top of every phone mock. */
 export default function PhoneGreeting() {

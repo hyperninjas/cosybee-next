@@ -1,7 +1,7 @@
-import { FeatureCard, SectionTitle } from "../../ui/SectionContent";
-import Hexagon from "../../ui/Hexagon";
+import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
+import Hexagon from "@/app/components/ui/Hexagon";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import HiveHexCluster from "../../ui/HiveHexCluster";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy-management.png";
 import beeFlowerImg from "@/public/bee-flower.png";

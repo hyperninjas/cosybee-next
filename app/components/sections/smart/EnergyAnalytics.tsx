@@ -1,6 +1,6 @@
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "../../ui/SharedImageHexCluster";
-import { FeatureItem, SectionTitle } from "../../ui/SectionContent";
+import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
+import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/smart/energiebee-app-weekly-energy-spend-overview.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";

@@ -1,11 +1,11 @@
-import Hexagon from "../../ui/Hexagon";
+import Hexagon from "@/app/components/ui/Hexagon";
 import {
   FeatureItem,
   SectionLead,
   SectionTitle,
-} from "../../ui/SectionContent";
-import { CtaButton } from "../../ui/Cta";
-import HiveHexCluster from "../../ui/HiveHexCluster";
+} from "@/app/components/ui/SectionContent";
+import { CtaButton } from "@/app/components/ui/Cta";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/heating/energiebee-app-smart-thermostat.png";
 import windTurbineImg from "@/public/wind-turbine.png";

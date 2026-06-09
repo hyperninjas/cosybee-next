@@ -3,10 +3,10 @@
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
-import Avatar from "../../ui/Avatar";
-import { CtaButton } from "../../ui/Cta";
+import Avatar from "@/app/components/ui/Avatar";
+import { CtaButton } from "@/app/components/ui/Cta";
 import { type Article, formatReadTime } from "@/app/lib/article-types";
-import Dot from "../../ui/Dot";
+import Dot from "@/app/components/ui/Dot";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {

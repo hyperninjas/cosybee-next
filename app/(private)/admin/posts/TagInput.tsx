@@ -97,7 +97,7 @@ export default function TagInput({
                   e.preventDefault();
                   add(s);
                 }}
-                className="flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-[#F4F8FA]"
+                className="flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-background"
               >
                 <span className="text-muted">#</span>
                 {s}

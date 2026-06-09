@@ -2,24 +2,43 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
-import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Alert, Button, Chip, Input, ListBox, ListBoxItem, Select, Switch, TextArea } from "@heroui/react";
+import {
+  Alert,
+  Button,
+  Chip,
+  Input,
+  ListBox,
+  ListBoxItem,
+  Select,
+  Spinner,
+  Switch,
+  TextArea,
+} from "@heroui/react";
+import {
+  ArrowLeft,
+  ArrowUpRightFromSquare,
+  CircleCheckFill,
+} from "@gravity-ui/icons";
 import type { PartialBlock } from "@blocknote/core";
-import { savePost } from "../actions";
-import { initialSaveState } from "../lib/form-state";
+import { savePost } from "@/app/(private)/admin/actions";
+import { initialSaveState } from "@/app/(private)/admin/lib/form-state";
 import { slugify } from "@/app/lib/slug";
 import { estimateReadTime } from "@/app/lib/read-time";
 import TagInput from "./TagInput";
 import type { Author, Category, Tag } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
+import { AppAvatar } from "@/app/components/ui/AppAvatar";
+import { AppLink } from "@/app/components/ui/AppLink";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
   loading: () => (
-    <p className="py-6 text-sm text-[#9A9A9A]">Loading editor…</p>
+    <div className="flex items-center gap-2 py-6 text-sm text-muted">
+      <Spinner size="sm" />
+      Loading editor…
+    </div>
   ),
 });
 
@@ -93,12 +112,16 @@ function Labeled({
 }) {
   return (
     <div>
-      <span className="mb-1 block text-sm font-semibold">{label}</span>
+      <span className="mb-1 block text-sm font-semibold text-foreground">
+        {label}
+      </span>
       {children}
       {error ? (
-        <span className="mt-1 block text-xs font-medium text-[#B4332A]">{error}</span>
+        <span className="mt-1 block text-xs font-medium text-danger">
+          {error}
+        </span>
       ) : hint ? (
-        <span className="mt-1 block text-xs text-[#9A9A9A]">{hint}</span>
+        <span className="mt-1 block text-xs text-muted">{hint}</span>
       ) : null}
     </div>
   );
@@ -114,19 +137,10 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm font-semibold text-[#333]">{title}</span>
+      <span className="text-sm font-semibold text-foreground">{title}</span>
       {action}
     </div>
   );
-}
-
-/** Derive initials from a name */
-function initialsFrom(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  const first = parts[0][0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
 }
 
 /** Author selection card */
@@ -145,41 +159,26 @@ function AuthorCard({
       onClick={onSelect}
       className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all ${
         selected
-          ? "border-[#FF8A7A] bg-[#FFF5F4] ring-1 ring-[#FF8A7A]"
-          : "border-[#ECECEC] bg-white hover:border-[#DBDBDB] hover:bg-[#FAFAFA]"
+          ? "border-accent bg-accent-soft ring-1 ring-accent"
+          : "border-border bg-surface hover:border-border hover:bg-background"
       }`}
     >
-      {author.avatarUrl ? (
-        <Image
-          src={author.avatarUrl}
-          alt={author.name}
-          width={40}
-          height={40}
-          className="h-10 w-10 shrink-0 rounded-full object-cover"
-        />
-      ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFE4E1] text-sm font-semibold text-[#C0362C]">
-          {initialsFrom(author.name)}
-        </div>
-      )}
+      <AppAvatar
+        src={author.avatarUrl}
+        name={author.name}
+        size="md"
+        className="shrink-0"
+      />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-[#333]">{author.name}</div>
+        <div className="truncate text-sm font-medium text-foreground">
+          {author.name}
+        </div>
         {author.role && (
-          <div className="truncate text-xs text-[#9A9A9A]">{author.role}</div>
+          <div className="truncate text-xs text-muted">{author.role}</div>
         )}
       </div>
       {selected && (
-        <svg
-          className="h-5 w-5 shrink-0 text-[#FF8A7A]"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            fillRule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <CircleCheckFill className="size-5 shrink-0 text-accent" />
       )}
     </button>
   );
@@ -201,8 +200,8 @@ function CategoryPill({
       onClick={onSelect}
       className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all ${
         selected
-          ? "border-[#FF8A7A] bg-[#FF8A7A] text-white"
-          : "border-[#DBDBDB] bg-white text-[#545454] hover:border-[#FF8A7A] hover:text-[#FF8A7A]"
+          ? "border-accent bg-accent text-accent-foreground"
+          : "border-border bg-surface text-muted hover:border-accent hover:text-accent"
       }`}
     >
       {category.name}
@@ -228,11 +227,15 @@ function ActionBar({
 }) {
   const { pending } = useFormStatus();
   return (
-    <div className="sticky top-0 z-30 -mx-6 mb-6 flex items-center justify-between gap-3 border-b border-[#ECECEC] bg-[#FAFAFA]/90 px-6 py-3 backdrop-blur">
+    <div className="sticky top-0 z-30 -mx-4 mb-6 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
       <div className="flex items-center gap-3">
-        <Link href="/admin" className="text-sm text-[#545454] hover:text-black">
-          ← Posts
-        </Link>
+        <AppLink
+          href="/admin"
+          className="inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          <span className="hidden sm:inline">Posts</span>
+        </AppLink>
         <Select
           aria-label="Blog"
           selectedKey={blog}
@@ -261,13 +264,14 @@ function ActionBar({
 
       <div className="flex items-center gap-2">
         {liveHref && (
-          <Link
+          <AppLink
             href={liveHref}
-            target="_blank"
-            className="hidden text-sm text-[#545454] hover:text-black sm:inline"
+            external
+            className="hidden items-center gap-1 text-sm text-muted transition-colors hover:text-foreground sm:inline-flex"
           >
-            View live ↗
-          </Link>
+            View live
+            <ArrowUpRightFromSquare className="size-3.5" />
+          </AppLink>
         )}
         <Button
           type="submit"
@@ -275,6 +279,7 @@ function ActionBar({
           size="sm"
           onPress={() => onSetStatus("DRAFT")}
           isDisabled={pending}
+          isPending={pending && !isPublished}
         >
           Save draft
         </Button>
@@ -284,8 +289,9 @@ function ActionBar({
           size="sm"
           onPress={() => onSetStatus("PUBLISHED")}
           isDisabled={pending}
+          isPending={pending && isPublished}
         >
-          {pending ? "Saving…" : editing && isPublished ? "Update" : "Publish"}
+          {editing && isPublished ? "Update" : "Publish"}
         </Button>
       </div>
     </div>
@@ -435,21 +441,6 @@ export default function PostForm({
     if (statusRef.current) statusRef.current.value = s;
   }
 
-  // Handle author selection - either ID or custom name
-  function handleAuthorChange(value: string) {
-    const selectedAuthor = authors.find((a) => a.id === value || a.name === value);
-    if (selectedAuthor) {
-      setAuthorId(selectedAuthor.id);
-      setAuthorName(selectedAuthor.name);
-      setAuthorAvatarUrl(selectedAuthor.avatarUrl ?? "");
-    } else {
-      // Custom name entered
-      setAuthorId("");
-      setAuthorName(value);
-      // Keep avatar if user is just changing the name
-    }
-  }
-
   // Handle category selection
   function handleCategoryChange(value: string) {
     const selectedCategory = blogCategories.find((c) => c.id === value);
@@ -509,7 +500,10 @@ export default function PostForm({
       {state?.error && (
         <div className="mx-auto mb-6 max-w-2xl">
           <Alert status="danger">
-            <Alert.Description>{state.error}</Alert.Description>
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Description>{state.error}</Alert.Description>
+            </Alert.Content>
           </Alert>
         </div>
       )}
@@ -517,391 +511,435 @@ export default function PostForm({
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         {/* Writing canvas */}
         <div className="min-w-0 flex-1">
-        <div className="mx-auto max-w-2xl">
-        {/* cover - S3 upload */}
-        <div className="mb-6">
-          <PublicImageUpload
-            context="blog-cover"
-            value={coverUrl || null}
-            onChange={(url) => setCoverUrl(url ?? "")}
-          />
-        </div>
+          <div className="mx-auto max-w-2xl">
+            {/* cover - S3 upload */}
+            <div className="mb-6">
+              <PublicImageUpload
+                context="blog-cover"
+                value={coverUrl || null}
+                onChange={(url) => setCoverUrl(url ?? "")}
+              />
+            </div>
 
-        {/* title */}
-        <textarea
-          name="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          // Auto-size on every render so long/edited titles fit on load.
-          ref={(el) => {
-            if (el) {
-              el.style.height = "auto";
-              el.style.height = `${el.scrollHeight}px`;
-            }
-          }}
-          rows={1}
-          placeholder="Post title…"
-          className="post-title w-full resize-none border-none bg-transparent font-extrabold tracking-tight text-black placeholder:text-[#C9C9C9] focus:outline-none"
-        />
-        {errors.title && (
-          <p className="mb-2 text-sm font-medium text-[#B4332A]">{errors.title}</p>
-        )}
+            {/* title */}
+            <textarea
+              name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              // Auto-size on every render so long/edited titles fit on load.
+              ref={(el) => {
+                if (el) {
+                  el.style.height = "auto";
+                  el.style.height = `${el.scrollHeight}px`;
+                }
+              }}
+              rows={1}
+              placeholder="Post title…"
+              className="post-title w-full resize-none border-none bg-transparent font-extrabold tracking-tight text-foreground placeholder:text-muted focus:outline-none"
+            />
+            {errors.title && (
+              <p className="mb-2 text-sm font-medium text-danger">
+                {errors.title}
+              </p>
+            )}
 
-        {/* meta line */}
-        <div className="mb-4 text-xs text-[#9A9A9A]">
-          <span className="font-mono">/{blog}/{effectiveSlug || "…"}</span>
-          {" · "}
-          {readTime}
-        </div>
+            {/* meta line */}
+            <div className="mb-4 text-xs text-muted">
+              <span className="font-mono">
+                /{blog}/{effectiveSlug || "…"}
+              </span>
+              {" · "}
+              {readTime}
+            </div>
 
-        {/* tags */}
-        <div className="mb-6">
-          <TagInput
-            name="tags"
-            initial={initialTagNames}
-            suggestions={tagSuggestions}
-          />
-        </div>
+            {/* tags */}
+            <div className="mb-6">
+              <TagInput
+                name="tags"
+                initial={initialTagNames}
+                suggestions={tagSuggestions}
+              />
+            </div>
 
-        {/* body */}
-        <div className="post-editor">
-          <Editor initialContent={initialBlocks} onChange={setBlocks} />
-        </div>
-        </div>
+            {/* body */}
+            <div className="post-editor">
+              <Editor initialContent={initialBlocks} onChange={setBlocks} />
+            </div>
+          </div>
         </div>
 
         {/* Settings panel — always docked beside the editor */}
-        <aside className="w-full shrink-0 self-start overflow-hidden rounded-xl border border-[#ECECEC] bg-white lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-[26rem] lg:overflow-y-auto">
-            <div className="sticky top-0 z-10 border-b border-[#ECECEC] bg-white px-5 py-4">
-              <h2 className="text-lg font-bold">Post settings</h2>
+        <aside className="w-full shrink-0 self-start overflow-hidden rounded-xl border border-border bg-surface lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-104 lg:overflow-y-auto">
+          <div className="sticky top-0 z-10 border-b border-border bg-surface px-5 py-4">
+            <h2 className="text-lg font-bold text-foreground">Post settings</h2>
+          </div>
+
+          <div className="space-y-5 p-5">
+            {/* Cover Image - FIRST */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <SectionHeader title="Cover image" />
+              <PublicImageUpload
+                context="blog-cover"
+                value={coverUrl || null}
+                onChange={(url) => setCoverUrl(url ?? "")}
+              />
+              <Labeled
+                label="Alt text"
+                hint="Describes the image for accessibility. Defaults to the title."
+              >
+                <Input
+                  variant="secondary"
+                  fullWidth
+                  value={coverImageAlt}
+                  onChange={(e) => setCoverImageAlt(e.target.value)}
+                  placeholder={title || "Enter alt text…"}
+                />
+              </Labeled>
             </div>
 
-            <div className="space-y-5 p-5">
-              {/* Cover Image - FIRST */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader title="Cover Image" />
-                <PublicImageUpload
-                  context="blog-cover"
-                  value={coverUrl || null}
-                  onChange={(url) => setCoverUrl(url ?? "")}
-                />
-                <Labeled label="Alt text" hint="Describes the image for accessibility. Defaults to the title.">
+            {/* Author section - SECOND */}
+            <div className="space-y-4 rounded-lg border border-border p-4">
+              <SectionHeader
+                title="Author"
+                action={
+                  <span className="text-xs text-muted">
+                    {authors.length} author{authors.length !== 1 ? "s" : ""}
+                  </span>
+                }
+              />
+
+              {/* Existing authors list */}
+              {authors.length > 0 && (
+                <div className="max-h-48 space-y-2 overflow-y-auto">
+                  {authors.map((a) => (
+                    <AuthorCard
+                      key={a.id}
+                      author={a}
+                      selected={authorId === a.id}
+                      onSelect={() => {
+                        setAuthorId(a.id);
+                        setAuthorName(a.name);
+                        setAuthorAvatarUrl(a.avatarUrl ?? "");
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-surface px-2 text-xs text-muted">
+                    or create new
+                  </span>
+                </div>
+              </div>
+
+              {/* New author input */}
+              <div className="space-y-3">
+                <Labeled label="Name" hint="Type a new author name.">
                   <Input
+                    variant="secondary"
                     fullWidth
-                    value={coverImageAlt}
-                    onChange={(e) => setCoverImageAlt(e.target.value)}
-                    placeholder={title || "Enter alt text…"}
+                    value={authorId ? "" : authorName}
+                    onChange={(e) => {
+                      setAuthorId("");
+                      setAuthorName(e.target.value);
+                    }}
+                    placeholder="New author name…"
+                  />
+                </Labeled>
+                <Labeled
+                  label="Avatar"
+                  hint="Profile picture for new author (max 2MB)."
+                >
+                  <PublicImageUpload
+                    context="user-avatar"
+                    value={authorId ? null : authorAvatarUrl || null}
+                    onChange={(url) => {
+                      if (!authorId) {
+                        setAuthorAvatarUrl(url ?? "");
+                      }
+                    }}
                   />
                 </Labeled>
               </div>
 
-              {/* Author section - SECOND */}
-              <div className="space-y-4 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader
-                  title="Author"
-                  action={
-                    <span className="text-xs text-[#9A9A9A]">
-                      {authors.length} author{authors.length !== 1 ? "s" : ""}
+              {/* Selected author preview */}
+              {(authorId || authorName) && (
+                <div className="rounded-lg bg-background p-3">
+                  <span className="mb-2 block text-xs font-medium text-muted">
+                    Selected
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <AppAvatar
+                      src={authorAvatarUrl}
+                      name={authorName || "?"}
+                      size="sm"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      {authorName || "Unknown"}
                     </span>
-                  }
-                />
-
-                {/* Existing authors list */}
-                {authors.length > 0 && (
-                  <div className="max-h-48 space-y-2 overflow-y-auto">
-                    {authors.map((a) => (
-                      <AuthorCard
-                        key={a.id}
-                        author={a}
-                        selected={authorId === a.id}
-                        onSelect={() => {
-                          setAuthorId(a.id);
-                          setAuthorName(a.name);
-                          setAuthorAvatarUrl(a.avatarUrl ?? "");
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#ECECEC]" />
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-white px-2 text-xs text-[#9A9A9A]">or create new</span>
+                    {authorId && (
+                      <Chip
+                        color="success"
+                        size="sm"
+                        variant="soft"
+                        className="ml-auto"
+                      >
+                        Existing
+                      </Chip>
+                    )}
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* New author input */}
-                <div className="space-y-3">
-                  <Labeled label="Name" hint="Type a new author name.">
-                    <Input
-                      fullWidth
-                      value={authorId ? "" : authorName}
-                      onChange={(e) => {
-                        setAuthorId("");
-                        setAuthorName(e.target.value);
+            {/* Category section - THIRD */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <SectionHeader
+                title="Category"
+                action={
+                  <span className="text-xs text-muted">
+                    {blogCategories.length} in {blog}
+                  </span>
+                }
+              />
+              {blogCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {blogCategories.map((c) => (
+                    <CategoryPill
+                      key={c.id}
+                      category={c}
+                      selected={categoryId === c.id}
+                      onSelect={() => {
+                        setCategoryId(c.id);
+                        setCategoryName(c.name);
                       }}
-                      placeholder="New author name…"
                     />
-                  </Labeled>
-                  <Labeled label="Avatar" hint="Profile picture for new author (max 2MB).">
-                    <PublicImageUpload
-                      context="user-avatar"
-                      value={authorId ? null : (authorAvatarUrl || null)}
-                      onChange={(url) => {
-                        if (!authorId) {
-                          setAuthorAvatarUrl(url ?? "");
-                        }
-                      }}
-                    />
-                  </Labeled>
+                  ))}
                 </div>
+              )}
+              <Input
+                variant="secondary"
+                fullWidth
+                value={categoryName}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                placeholder={
+                  blogCategories.length > 0
+                    ? "Or type a new category…"
+                    : "Enter category name…"
+                }
+              />
+            </div>
 
-                {/* Selected author preview */}
-                {(authorId || authorName) && (
-                  <div className="rounded-lg bg-[#F8F8F8] p-3">
-                    <span className="mb-2 block text-xs font-medium text-[#9A9A9A]">Selected</span>
-                    <div className="flex items-center gap-3">
-                      {authorAvatarUrl ? (
-                        <Image
-                          src={authorAvatarUrl}
-                          alt={authorName}
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFE4E1] text-xs font-semibold text-[#C0362C]">
-                          {initialsFrom(authorName || "?")}
-                        </div>
-                      )}
-                      <span className="text-sm font-medium">{authorName || "Unknown"}</span>
-                      {authorId && (
-                        <span className="ml-auto rounded bg-[#E6F4EA] px-1.5 py-0.5 text-xs text-[#1E7B34]">
-                          Existing
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+            {/* Excerpt */}
+            <Labeled
+              label="Excerpt"
+              hint="Card blurb + meta description. Auto from the body if blank."
+            >
+              <TextArea
+                variant="secondary"
+                fullWidth
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </Labeled>
+
+            {/* Slug */}
+            <Labeled
+              label="Slug"
+              error={errors.slug}
+              hint="Auto from the title. Edit to override."
+            >
+              <Input
+                variant="secondary"
+                fullWidth
+                className="font-mono"
+                value={effectiveSlug}
+                onChange={(e) => {
+                  setSlug(slugify(e.target.value));
+                  setSlugTouched(true);
+                }}
+              />
+              <span className="mt-1 block text-xs text-muted">
+                /{blog}/{effectiveSlug || "…"}
+              </span>
+            </Labeled>
+
+            {/* Author date */}
+            <Labeled label="Author date" hint="Defaults to today.">
+              <Input
+                variant="secondary"
+                fullWidth
+                value={authorDate}
+                onChange={(e) => setAuthorDate(e.target.value)}
+                type="date"
+              />
+            </Labeled>
+
+            {/* Lede */}
+            <Labeled label="Lede" hint="Bold subtitle under the title.">
+              <Input
+                variant="secondary"
+                fullWidth
+                value={lede}
+                onChange={(e) => setLede(e.target.value)}
+              />
+            </Labeled>
+
+            {/* SEO */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <SectionHeader title="SEO & Search" />
+              {/* Google SERP preview — keeps Google's signature colours */}
+              <div className="rounded-md border border-border p-2.5">
+                <div className="text-xs text-[#1a6b2f]">
+                  energiebee.com › {blog} › {effectiveSlug || "…"}
+                </div>
+                <div className="leading-tight text-[#1a0dab]">
+                  {truncate(metaTitle, 60)}
+                </div>
+                <div className="mt-0.5 text-xs text-[#4d5156]">
+                  {truncate(metaDesc || "Add a description…", 150)}
+                </div>
               </div>
-
-              {/* Category section - THIRD */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader
-                  title="Category"
-                  action={
-                    <span className="text-xs text-[#9A9A9A]">
-                      {blogCategories.length} in {blog}
-                    </span>
-                  }
-                />
-                {blogCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {blogCategories.map((c) => (
-                      <CategoryPill
-                        key={c.id}
-                        category={c}
-                        selected={categoryId === c.id}
-                        onSelect={() => {
-                          setCategoryId(c.id);
-                          setCategoryName(c.name);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
+              <Labeled label="SEO title" hint="Defaults to the title.">
                 <Input
+                  variant="secondary"
                   fullWidth
-                  value={categoryName}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  placeholder={blogCategories.length > 0 ? "Or type a new category…" : "Enter category name…"}
+                  value={seoTitle}
+                  onChange={(e) => setSeoTitle(e.target.value)}
+                  placeholder={title || "Defaults to title"}
                 />
-              </div>
-
-              {/* Excerpt */}
-              <Labeled label="Excerpt" hint="Card blurb + meta description. Auto from the body if blank.">
+              </Labeled>
+              <Labeled label="SEO description" hint="Defaults to the excerpt.">
                 <TextArea
+                  variant="secondary"
                   fullWidth
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={seoDescription}
+                  onChange={(e) => setSeoDescription(e.target.value)}
+                  rows={2}
+                  placeholder={description || "Defaults to excerpt"}
+                />
+              </Labeled>
+            </div>
+
+            {/* Featured / Carousel */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <SectionHeader title="Featured Carousel" />
+              <div className="rounded-lg border border-border p-3 transition-colors hover:bg-background">
+                <Switch isSelected={featured} onChange={setFeatured}>
+                  <Switch.Content>
+                    <span className="block text-sm font-medium text-foreground">
+                      Feature in carousel
+                    </span>
+                    <span className="block text-xs text-muted">
+                      Show this post in the homepage carousel
+                    </span>
+                  </Switch.Content>
+                </Switch>
+              </div>
+              <Labeled
+                label="Carousel intro"
+                hint="Auto-filled from lede/excerpt if blank."
+              >
+                <TextArea
+                  variant="secondary"
+                  fullWidth
+                  value={carouselIntro}
+                  onChange={(e) => setCarouselIntro(e.target.value)}
+                  rows={2}
+                />
+              </Labeled>
+              <Labeled
+                label="Carousel body"
+                hint="Auto-filled from the excerpt if blank."
+              >
+                <TextArea
+                  variant="secondary"
+                  fullWidth
+                  value={carouselBody}
+                  onChange={(e) => setCarouselBody(e.target.value)}
                   rows={3}
                 />
               </Labeled>
-
-              {/* Slug */}
-              <Labeled
-                label="Slug"
-                error={errors.slug}
-                hint="Auto from the title. Edit to override."
-              >
-                <Input
-                  fullWidth
-                  className="font-mono"
-                  value={effectiveSlug}
-                  onChange={(e) => {
-                    setSlug(slugify(e.target.value));
-                    setSlugTouched(true);
-                  }}
-                />
-                <span className="mt-1 block text-xs text-[#9A9A9A]">
-                  /{blog}/{effectiveSlug || "…"}
-                </span>
-              </Labeled>
-
-              {/* Author date */}
-              <Labeled label="Author date" hint="Defaults to today.">
-                <Input
-                  fullWidth
-                  value={authorDate}
-                  onChange={(e) => setAuthorDate(e.target.value)}
-                  type="date"
-                />
-              </Labeled>
-
-              {/* Lede */}
-              <Labeled label="Lede" hint="Bold subtitle under the title.">
-                <Input
-                  fullWidth
-                  value={lede}
-                  onChange={(e) => setLede(e.target.value)}
-                />
-              </Labeled>
-
-              {/* SEO */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader title="SEO & Search" />
-                <div className="rounded-md border border-[#EEE] p-2.5">
-                  <div className="text-xs text-[#1a6b2f]">
-                    energiebee.com › {blog} › {effectiveSlug || "…"}
-                  </div>
-                  <div className="text-[#1a0dab] leading-tight">
-                    {truncate(metaTitle, 60)}
-                  </div>
-                  <div className="mt-0.5 text-xs text-[#4d5156]">
-                    {truncate(metaDesc || "Add a description…", 150)}
-                  </div>
-                </div>
-                <Labeled label="SEO title" hint="Defaults to the title.">
-                  <Input
-                    fullWidth
-                    value={seoTitle}
-                    onChange={(e) => setSeoTitle(e.target.value)}
-                    placeholder={title || "Defaults to title"}
-                  />
-                </Labeled>
-                <Labeled label="SEO description" hint="Defaults to the excerpt.">
-                  <TextArea
-                    fullWidth
-                    value={seoDescription}
-                    onChange={(e) => setSeoDescription(e.target.value)}
-                    rows={2}
-                    placeholder={description || "Defaults to excerpt"}
-                  />
-                </Labeled>
-              </div>
-
-              {/* Featured / Carousel */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader title="Featured Carousel" />
-                <div className="rounded-lg border border-[#ECECEC] p-3 transition-colors hover:bg-[#FAFAFA]">
-                  <Switch isSelected={featured} onChange={setFeatured}>
-                    <Switch.Content>
-                      <span className="block text-sm font-medium">Feature in carousel</span>
-                      <span className="block text-xs text-[#9A9A9A]">Show this post in the homepage carousel</span>
-                    </Switch.Content>
-                  </Switch>
-                </div>
-                <Labeled label="Carousel intro" hint="Auto-filled from lede/excerpt if blank.">
-                  <TextArea
-                    fullWidth
-                    value={carouselIntro}
-                    onChange={(e) => setCarouselIntro(e.target.value)}
-                    rows={2}
-                  />
-                </Labeled>
-                <Labeled label="Carousel body" hint="Auto-filled from the excerpt if blank.">
-                  <TextArea
-                    fullWidth
-                    value={carouselBody}
-                    onChange={(e) => setCarouselBody(e.target.value)}
-                    rows={3}
-                  />
-                </Labeled>
-              </div>
-
-              {/* Call to action */}
-              <div className="space-y-3 rounded-lg border border-[#ECECEC] p-4">
-                <SectionHeader title="Call to Action" />
-                <Labeled label="Button label" hint="Leave blank for no CTA.">
-                  <Input
-                    fullWidth
-                    value={ctaLabel}
-                    onChange={(e) => setCtaLabel(e.target.value)}
-                    placeholder="Try energiebee for free"
-                  />
-                </Labeled>
-
-                {/* internal / external toggle */}
-                <div className="inline-flex gap-1.5">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={!ctaExternal ? "primary" : "outline"}
-                    onPress={() => setCtaExternal(false)}
-                  >
-                    Internal page
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={ctaExternal ? "primary" : "outline"}
-                    onPress={() => setCtaExternal(true)}
-                  >
-                    External link
-                  </Button>
-                </div>
-
-                {ctaExternal ? (
-                  <Labeled
-                    label="External URL"
-                    hint="Opens in a new tab. https:// is added if you omit it."
-                  >
-                    <Input
-                      fullWidth
-                      type="url"
-                      value={ctaHref}
-                      onChange={(e) => setCtaHref(e.target.value)}
-                      placeholder="https://example.com"
-                    />
-                  </Labeled>
-                ) : (
-                  <Labeled
-                    label="Internal page"
-                    hint="Search an existing page. Opens in the same tab."
-                  >
-                    <Input
-                      fullWidth
-                      className="font-mono"
-                      value={ctaHref}
-                      onChange={(e) => setCtaHref(e.target.value)}
-                      placeholder="/start"
-                      list="route-options"
-                    />
-                    <datalist id="route-options">
-                      {internalRoutes.map((r) => (
-                        <option key={r} value={r} />
-                      ))}
-                    </datalist>
-                  </Labeled>
-                )}
-              </div>
-
             </div>
-          </aside>
+
+            {/* Call to action */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <SectionHeader title="Call to Action" />
+              <Labeled label="Button label" hint="Leave blank for no CTA.">
+                <Input
+                  variant="secondary"
+                  fullWidth
+                  value={ctaLabel}
+                  onChange={(e) => setCtaLabel(e.target.value)}
+                  placeholder="Try energiebee for free"
+                />
+              </Labeled>
+
+              {/* internal / external toggle */}
+              <div className="inline-flex gap-1.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={!ctaExternal ? "primary" : "outline"}
+                  onPress={() => setCtaExternal(false)}
+                >
+                  Internal page
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={ctaExternal ? "primary" : "outline"}
+                  onPress={() => setCtaExternal(true)}
+                >
+                  External link
+                </Button>
+              </div>
+
+              {ctaExternal ? (
+                <Labeled
+                  label="External URL"
+                  hint="Opens in a new tab. https:// is added if you omit it."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    type="url"
+                    value={ctaHref}
+                    onChange={(e) => setCtaHref(e.target.value)}
+                    placeholder="https://example.com"
+                  />
+                </Labeled>
+              ) : (
+                <Labeled
+                  label="Internal page"
+                  hint="Search an existing page. Opens in the same tab."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    className="font-mono"
+                    value={ctaHref}
+                    onChange={(e) => setCtaHref(e.target.value)}
+                    placeholder="/start"
+                    list="route-options"
+                  />
+                  <datalist id="route-options">
+                    {internalRoutes.map((r) => (
+                      <option key={r} value={r} />
+                    ))}
+                  </datalist>
+                </Labeled>
+              )}
+            </div>
+          </div>
+        </aside>
       </div>
     </form>
   );

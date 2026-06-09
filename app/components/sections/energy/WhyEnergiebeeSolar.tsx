@@ -1,10 +1,10 @@
-import Hexagon from "../../ui/Hexagon";
+import Hexagon from "@/app/components/ui/Hexagon";
 import {
   FeatureCard,
   SectionLead,
   SectionTitle,
-} from "../../ui/SectionContent";
-import HiveHexCluster from "../../ui/HiveHexCluster";
+} from "@/app/components/ui/SectionContent";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/energy/energiebee-app-live-solar-energy-flow.png";
 import windTurbineImg from "@/public/wind-turbine.png";

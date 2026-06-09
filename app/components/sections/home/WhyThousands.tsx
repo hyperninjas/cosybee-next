@@ -1,9 +1,9 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { SectionHeader } from "../../ui/SectionContent";
+import { SectionHeader } from "@/app/components/ui/SectionContent";
 import hexaChart from "@/public/hexa-wand-icon.svg";
 import hexaSun from "@/public/hexa-connector-icon.svg";
 import hexaDollar from "@/public/hexa-dollar.svg";
-import Hexagon from "../../ui/Hexagon";
+import Hexagon from "@/app/components/ui/Hexagon";
 
 const POINTS = [
   {
