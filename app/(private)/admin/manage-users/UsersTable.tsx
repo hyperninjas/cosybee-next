@@ -88,11 +88,11 @@ export function UsersTable({
   const rangeEnd = Math.min(page * limit, total);
 
   return (
-    <Table className="min-h-90">
+    <Table>
       <Table.ScrollContainer>
         <Table.Content
           aria-label="Users"
-          className="h-full min-w-190"
+          className="min-w-190"
           sortDescriptor={sortDescriptor}
           onSortChange={onSortChange}
         >

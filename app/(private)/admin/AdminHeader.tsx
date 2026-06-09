@@ -18,7 +18,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
         {/* Brand → dashboard */}
         <Link href="/admin" className="flex items-center gap-2.5">
-          <CosybeeMark className="h-7 w-auto" />
+          <CosybeeLogo className="h-8 w-auto" />
           <span className="text-lg font-extrabold tracking-tight text-foreground">
             energiebee <span className="text-accent">admin</span>
           </span>
