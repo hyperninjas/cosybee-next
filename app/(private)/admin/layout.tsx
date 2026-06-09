@@ -18,11 +18,11 @@ export default async function AdminLayout({
   // proxy.ts only confirms *a* session exists; this confirms it's an admin
   // (validated against the external auth server) — non-admins are sent home,
   // unauthenticated users to login.
-  await requireAdmin();
+  const { user } = await requireAdmin();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AdminHeader />
+      <AdminHeader user={user} />
       <main className="mx-auto max-w-6xl px-6 py-10">
         <AdminBreadcrumbs />
         {children}

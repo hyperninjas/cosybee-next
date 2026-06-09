@@ -4,6 +4,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
+import { HideOnAdmin } from "./components/layout/HideOnAdmin";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import InstallPrompt from "./components/InstallPrompt";
 import { Toaster } from "./components/ui/Toaster";
@@ -234,9 +235,13 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
-        <Navbar />
+        <HideOnAdmin>
+          <Navbar />
+        </HideOnAdmin>
         {children}
-        <Footer />
+        <HideOnAdmin>
+          <Footer />
+        </HideOnAdmin>
         <Toaster />
         <ServiceWorkerRegistration />
         <InstallPrompt />

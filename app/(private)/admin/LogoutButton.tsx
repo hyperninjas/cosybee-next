@@ -1,6 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@heroui/react";
+import { ArrowRightFromSquare } from "@gravity-ui/icons";
 import { authClient } from "@/app/lib/auth-client";
 
 export function LogoutButton() {
@@ -20,12 +22,14 @@ export function LogoutButton() {
   }
 
   return (
-    <button
-      onClick={handleLogout}
-      disabled={loading}
-      className="text-sm font-medium text-muted hover:text-danger transition-colors disabled:opacity-50"
+    <Button
+      variant="tertiary"
+      size="sm"
+      isPending={loading}
+      onPress={handleLogout}
     >
-      {loading ? "Signing out..." : "Logout"}
-    </button>
+      <ArrowRightFromSquare className="size-4" />
+      Sign out
+    </Button>
   );
 }
