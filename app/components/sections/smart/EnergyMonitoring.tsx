@@ -8,10 +8,12 @@ import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/smart/energiebee-app-home-heating-spend-graph.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 export default function EnergyMonitoring() {
   return (
-    <section className="relative overflow-hidden bg-surface py-12 text-foreground lg:py-16">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+    <Section surface="surface" spacing="sm" className="text-foreground">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* uniform 3-hex hive cluster */}
 
         <HiveHexCluster
@@ -47,7 +49,7 @@ export default function EnergyMonitoring() {
         {/* text */}
         <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center! min-[1200px]:max-w-163.5">
           <SectionTitle>AI-Powered Insights</SectionTitle>
-          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-[#545454]">
+          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-muted">
             See what&apos;s happening across your home energy system.
           </p>
           <div className="mt-6 md:mt-8 space-y-8">
@@ -65,7 +67,7 @@ export default function EnergyMonitoring() {
             />
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

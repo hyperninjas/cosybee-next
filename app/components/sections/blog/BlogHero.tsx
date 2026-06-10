@@ -1,5 +1,6 @@
 import Image, { type StaticImageData } from "next/image";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
+import { Section } from "@/app/components/ui/Section";
 // import Hexagon from "@/app/components/ui/Hexagon";
 // import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 // import sideImage from "@/public/bee-hive.png";
@@ -25,7 +26,7 @@ export default function BlogHero({
   crumbs,
 }: Props) {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
+    <Section spacing="none" surface="dark" className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
       {/* background photo */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -70,6 +71,6 @@ export default function BlogHero({
           className="w-full"
         /> */}
       </div>
-    </section>
+    </Section>
   );
 }

@@ -1,5 +1,7 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { CtaButton } from "@/app/components/ui/Cta";
+import { Section } from "@/app/components/ui/Section";
+import { Heading, Text } from "@/app/components/ui/Typography";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import heroDeviceImg from "@/public/energibee-hero-device.png";
 import AppStoreButton from "@/app/components/ui/AppStoreButton";
@@ -10,7 +12,11 @@ import AppStoreButton from "@/app/components/ui/AppStoreButton";
  */
 export default function HomeHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
+    <Section
+      spacing="none"
+      surface="dark"
+      className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]"
+    >
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -42,15 +48,15 @@ export default function HomeHero() {
 
       <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px]">
+          <Heading as="h1" variant="display">
             One app.
             <br />
             Total energy clarity.
-          </h1>
-          <p className="mt-5 max-w-129.5 text-base sm:text-[18px] md:text-[22px] leading-7">
+          </Heading>
+          <Text variant="heroLead" className="mt-5 max-w-129.5">
             <strong>EnergieBee</strong> shows how your home uses energy day by
             day. Understand heating, solar and energy balance in one place.
-          </p>
+          </Text>
           <div className="mt-14 flex flex-wrap items-center gap-4">
             <CtaButton href="/try" size="md">
               Try it for free
@@ -59,6 +65,6 @@ export default function HomeHero() {
           </div>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

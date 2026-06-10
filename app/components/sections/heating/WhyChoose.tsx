@@ -9,6 +9,8 @@ import windTurbineImg from "@/public/wind-turbine.png";
 import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/heating/energiebee-app-heating-overview.png";
 import Image from "next/image";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 
 const PROBLEMS = [
   "energy waste",
@@ -18,8 +20,8 @@ const PROBLEMS = [
 
 export default function WhyChoose() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-16 text-black lg:py-20">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+    <Section spacing="md" className="bg-surface-secondary text-foreground">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* 3-hex hive cluster — three distinct cells */}
         <HiveHexCluster
           gap={5}
@@ -53,15 +55,15 @@ export default function WhyChoose() {
           <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>
-          <p className="mt-4 text-base leading-relaxed text-[#545454] min-[550px]:max-[1200px]:text-center">
+          <p className="mt-4 text-base leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
             EnergieBee is designed to solve three problems at once:
           </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-[#545454] marker:text-[#545454]">
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-muted marker:text-muted">
             {PROBLEMS.map((p) => (
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-126 leading-relaxed text-[#545454] min-[550px]:max-[1200px]:text-center">
+          <p className="mt-4 text-base max-w-126 leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>
@@ -80,7 +82,7 @@ export default function WhyChoose() {
             />
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

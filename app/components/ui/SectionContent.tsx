@@ -1,5 +1,6 @@
 import Image, { type StaticImageData } from "next/image";
 import { type ReactNode } from "react";
+import { Heading, Text } from "@/app/components/ui/Typography";
 import { HEX_PATH } from "@/app/lib/hex";
 import hexaCheck from "@/public/hexa-check.svg";
 import hexaSun from "@/public/hexa-sun.svg";
@@ -134,11 +135,11 @@ export function SectionHeader({
 }) {
   return (
     <div className={`mx-auto text-left min-[550px]:text-center ${className}`}>
-      <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-[40px]">
+      <Heading variant="title" className="text-foreground">
         {title}
-      </h2>
+      </Heading>
       {description && (
-        <p className="mx-auto mt-1.5 text-base leading-relaxed text-neutral-600 sm:text-lg">
+        <p className="mx-auto mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
           {description}
         </p>
       )}
@@ -165,7 +166,7 @@ export function MediaCard({
   mediaBg?: string;
 }) {
   return (
-    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-[#DAE7ED] bg-[#FAFBFC] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
+    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-border bg-surface shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
       {media && (
         <div
           className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-6 overflow-hidden max-h-100"
@@ -175,10 +176,10 @@ export function MediaCard({
         </div>
       )}
       <div className="p-6 sm:p-7">
-        <h3 className="text-2xl font-extrabold leading-tight text-black sm:text-[24px]">
+        <h3 className="text-2xl font-extrabold leading-tight text-foreground sm:text-[24px]">
           {title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-[#545454] sm:text-base">
+        <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
           {description}
         </p>
         {bullets && bullets.length > 0 && (
@@ -191,7 +192,7 @@ export function MediaCard({
                   aria-hidden
                   className="h-5 w-6 lg:h-6 lg:w-7"
                 />
-                <span className="text-sm text-black sm:text-base">{b}</span>
+                <span className="text-sm text-foreground sm:text-base">{b}</span>
               </li>
             ))}
           </ul>
@@ -220,11 +221,12 @@ export function SectionTitle({
       ? "min-[1200px]:text-center!"
       : "min-[1200px]:text-left!";
   return (
-    <h2
-      className={`text-3xl font-extrabold leading-tight min-[550px]:text-center ${desktopAlign} tracking-tight text-black sm:text-4xl lg:text-[40px] ${className}`}
+    <Heading
+      variant="title"
+      className={`min-[550px]:text-center ${desktopAlign} text-foreground ${className}`}
     >
       {children}
-    </h2>
+    </Heading>
   );
 }
 
@@ -237,11 +239,13 @@ export function SectionLead({
   className?: string;
 }) {
   return (
-    <p
-      className={`mt-4 w-full max-w-xl text-base leading-relaxed text-[#545454] sm:text-base ${className}`}
+    <Text
+      variant="lead"
+      tone="muted"
+      className={`mt-4 w-full max-w-xl ${className}`}
     >
       {children}
-    </p>
+    </Text>
   );
 }
 
@@ -266,10 +270,10 @@ export function FeatureItem({
         className="mt-1.5"
       />
       <div>
-        <h3 className="text-base font-bold text-[#1F1F1F] sm:text-lg">
+        <h3 className="text-base font-bold text-foreground sm:text-lg">
           {title}
         </h3>
-        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-[#545454] sm:text-sm">
+        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted sm:text-sm">
           {description}
         </p>
       </div>
@@ -295,7 +299,7 @@ export function FeatureCard({
   descClassName?: string;
 }) {
   return (
-    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-surface p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
       <Image
         src={GLYPH_SVGS[glyph]}
         alt=""
@@ -304,12 +308,12 @@ export function FeatureCard({
       />
       <div>
         <h3
-          className={`text-lg font-bold text-black sm:text-lg  ${titleClassName}`}
+          className={`text-lg font-bold text-foreground sm:text-lg  ${titleClassName}`}
         >
           {title}
         </h3>
         <p
-          className={`mt-1 text-sm leading-relaxed text-[#545454] ${descClassName}`}
+          className={`mt-1 text-sm leading-relaxed text-muted ${descClassName}`}
         >
           {description}
         </p>

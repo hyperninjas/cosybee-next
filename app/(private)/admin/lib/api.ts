@@ -130,6 +130,13 @@ async function fetchApi<T>(
   };
 
   console.log(`[adminApi] Fetching: ${url}`);
+  // TEMP DIAGNOSTIC — remove after debugging the 400 "received undefined" save.
+  console.log(
+    `[adminApi:diag] method=${options.method ?? "GET"} ct=${headers["Content-Type"]} ` +
+      `bodyType=${typeof options.body} ` +
+      `bodyLen=${typeof options.body === "string" ? options.body.length : options.body == null ? 0 : "non-string"} ` +
+      `bodyHead=${typeof options.body === "string" ? JSON.stringify(options.body.slice(0, 80)) : "n/a"}`,
+  );
 
   const res = await fetch(url, {
     ...options,

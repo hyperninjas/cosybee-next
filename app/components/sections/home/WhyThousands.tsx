@@ -1,4 +1,6 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import hexaChart from "@/public/hexa-wand-icon.svg";
 import hexaSun from "@/public/hexa-connector-icon.svg";
@@ -32,8 +34,11 @@ const POINTS = [
  */
 export default function WhyThousands() {
   return (
-    <section className="bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] overflow-hidden">
-      <div className="max-w-360 mx-auto relative py-20 lg:py-25  px-6 sm:px-10 lg:px-30">
+    <Section
+      spacing="none"
+      className="bg-[linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)]"
+    >
+      <Container className="py-20 lg:py-25">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#fff"
@@ -66,7 +71,7 @@ export default function WhyThousands() {
             ))}
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

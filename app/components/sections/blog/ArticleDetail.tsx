@@ -89,15 +89,15 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
 
           {/* title + meta */}
           <header className="mt-4 lg:mt-7">
-            <h1 className="text-[24px] font-bold text-black sm:text-[28px]">
+            <h1 className="text-[24px] font-bold text-foreground sm:text-[28px]">
               {article.title}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
-              <span className="inline-flex items-center rounded-full border border-[#DBE6EB] bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
+              <span className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
                 {article.category?.name ?? "Uncategorised"}
               </span>
               <Dot />
-              <span className="text-[#545454]">
+              <span className="text-muted">
                 {formatReadTime(article.readTime)}
               </span>
             </div>
@@ -107,7 +107,7 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
                   <Link
                     key={tag.id}
                     href={`${basePath}/tag/${tag.slug}`}
-                    className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-[#545454] transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
+                    className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-muted transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
                   >
                     {`#${tag.name}`}
                   </Link>
@@ -125,18 +125,18 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
                   {article.author?.slug ? (
                     <Link
                       href={`/author/${article.author.slug}`}
-                      className="font-bold text-lg text-black transition-colors hover:text-[#FF8A7A]"
+                      className="font-bold text-lg text-foreground transition-colors hover:text-[#FF8A7A]"
                     >
                       {article.author.name}
                     </Link>
                   ) : (
-                    <div className="font-bold text-lg text-black">
+                    <div className="font-bold text-lg text-foreground">
                       {article.author?.name ?? "energiebee"}
                     </div>
                   )}
                   <time
                     dateTime={article.publishedAt ?? article.authorDate}
-                    className="block text-[#545454] text-[15px] mt-1 font-medium"
+                    className="block text-muted text-[15px] mt-1 font-medium"
                   >
                     {formatDate(article.authorDate)}
                   </time>
@@ -161,14 +161,14 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
 
           {/* lede / subtitle */}
           {article.lede && (
-            <p className="mt-10 px-10 lg:px-20 text-lg font-bold leading-snug text-black sm:text-xl">
+            <p className="mt-10 px-10 lg:px-20 text-lg font-bold leading-snug text-foreground sm:text-xl">
               {article.lede}
             </p>
           )}
 
           {/* body — server-rendered HTML from the BlockNote document */}
           <div
-            className="article-body mt-10 px-2 md:px-10 lg:px-20 text-[#545454] wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 px-2 md:px-10 lg:px-20 text-muted wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
@@ -197,7 +197,7 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
       {/* more blogs */}
       {related.length > 0 && (
         <section className="mx-auto max-w-225 px-6 pb-16 sm:px-5 lg:pb-24">
-          <h2 className="text-2xl font-extrabold text-black sm:text-3xl">
+          <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
             More blogs
           </h2>
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">

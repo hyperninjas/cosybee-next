@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { useState } from "react";
 
 function ShareIcon() {
@@ -42,18 +43,21 @@ export default function ShareButton({ title }: { title: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={share}
-      aria-label="Share article"
-      className="relative flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-surface text-foreground transition-colors hover:bg-background"
-    >
-      <ShareIcon />
+    <div className="relative inline-flex">
+      <Button
+        isIconOnly
+        variant="tertiary"
+        aria-label="Share article"
+        onPress={share}
+        className="h-16 w-16 rounded-lg"
+      >
+        <ShareIcon />
+      </Button>
       {copied && (
         <span className="absolute -top-8 right-0 whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs font-medium text-white">
           Link copied!
         </span>
       )}
-    </button>
+    </div>
   );
 }

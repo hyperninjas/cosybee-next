@@ -1,4 +1,5 @@
 import { CtaCard } from "@/app/components/ui/Cta";
+import { Section } from "@/app/components/ui/Section";
 
 export type WorksWithAnySystemProps = {
   title?: string;
@@ -20,7 +21,7 @@ export default function WorksWithAnySystem({
   href = "/start",
 }: WorksWithAnySystemProps = {}) {
   return (
-    <section className="bg-background">
+    <Section surface="base" spacing="none">
       <div className="mx-auto max-w-360 pb-11 pt-4 px-4 lg:px-30 bg-background">
         <CtaCard
           title={title}
@@ -29,6 +30,6 @@ export default function WorksWithAnySystem({
           href={href}
         />
       </div>
-    </section>
+    </Section>
   );
 }

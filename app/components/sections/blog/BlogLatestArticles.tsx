@@ -9,9 +9,11 @@ import {
   ARTICLES_PER_PAGE,
 } from "@/app/lib/article-types";
 import Avatar from "@/app/components/ui/Avatar";
+import { Section } from "@/app/components/ui/Section";
 import Divider from "@/app/components/ui/Divider";
 import Dot from "@/app/components/ui/Dot";
 import Pagination from "@/app/components/ui/Pagination";
+import { Button } from "@heroui/react";
 
 /** Format ISO date string to display format. */
 function formatDate(isoDate: string): string {
@@ -171,7 +173,8 @@ export default function BlogLatestArticles({
         : "Latest Articles";
 
   return (
-    <section
+    <Section
+      spacing="none"
       className={`mx-auto max-w-360 px-6 py-12 pt-0 sm:px-10 lg:px-30 lg:py-12 ${heading === "Latest Articles" ? "lg:pt-0" : ""} `}
     >
       <h2 className="text-2xl font-bold text-foreground sm:text-[32px]">
@@ -190,15 +193,15 @@ export default function BlogLatestArticles({
       )}
       {canLoadMore && (
         <div className="mt-10 flex justify-center">
-          <button
-            type="button"
-            onClick={() =>
+          <Button
+            variant="tertiary"
+            onPress={() =>
               setVisible((v) => Math.min(v + LOAD_STEP, filtered.length))
             }
-            className="rounded-[9px] bg-[#F2F4F7] px-8 py-3 text-lg font-bold text-foreground transition-colors hover:bg-surface-secondary"
+            className="rounded-[9px] bg-surface-secondary px-8 py-3 text-lg font-bold text-foreground transition-colors hover:bg-surface-tertiary"
           >
             Load More
-          </button>
+          </Button>
         </div>
       )}
       {!isFiltered && (
@@ -206,6 +209,6 @@ export default function BlogLatestArticles({
           <Pagination basePath={basePath} page={page} totalPages={totalPages} />
         </div>
       )}
-    </section>
+    </Section>
   );
 }

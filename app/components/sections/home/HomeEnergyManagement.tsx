@@ -1,4 +1,6 @@
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import Hexagon from "@/app/components/ui/Hexagon";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
@@ -12,8 +14,8 @@ import beeFlowerImg from "@/public/bee-flower.png";
  */
 export default function HomeEnergyManagement() {
   return (
-    <section className="relative overflow-hidden py-20 text-white lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6 lg:px-30">
+    <Section spacing="lg" className="text-white">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
@@ -72,7 +74,7 @@ export default function HomeEnergyManagement() {
             ),
           }}
         />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

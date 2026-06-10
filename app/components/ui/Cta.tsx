@@ -1,3 +1,4 @@
+import { Card } from "@heroui/react";
 import { type ReactNode } from "react";
 import { HexBadge, type InlineGlyphName } from "./SectionContent";
 
@@ -114,9 +115,14 @@ export function CtaCard({
   descClassName?: string;
   buttonClassName?: string;
 }) {
+  // HeroUI Card: `variant="secondary"` supplies the themed surface + border;
+  // Card.Title / Card.Description give semantic, theme-aware text (no manual
+  // colour classes). We keep the brand radius/shadow/padding + the hive bg and
+  // the horizontal-at-1200px layout via className.
   return (
-    <div
-      className={`flex flex-col items-start gap-5 rounded-3xl border border-border bg-surface-secondary ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
+    <Card
+      variant="secondary"
+      className={`flex-col items-start gap-5 rounded-3xl ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
     >
       {glyph && (
         <HexBadge
@@ -125,19 +131,18 @@ export function CtaCard({
           className="h-14 w-16 sm:h-18 sm:w-22"
         />
       )}
-      <div className="flex-1">
-        <h3
-          className={`text-xl  font-extrabold leading-tight text-foreground sm:text-2xl lg:text-[40px] 
-            ${titleClassName}`}
+      <Card.Header className="flex-1 gap-0 p-0">
+        <Card.Title
+          className={`text-xl font-extrabold leading-tight sm:text-2xl lg:text-[40px] ${titleClassName}`}
         >
           {title}
-        </h3>
-        <p
-          className={`mt-2 text-sm max-w-188.25 leading-relaxed text-muted sm:text-base ${descClassName}`}
+        </Card.Title>
+        <Card.Description
+          className={`mt-2 max-w-188.25 text-sm leading-relaxed sm:text-base ${descClassName}`}
         >
           {description}
-        </p>
-      </div>
+        </Card.Description>
+      </Card.Header>
       <CtaButton
         href={href}
         size="md"
@@ -145,6 +150,6 @@ export function CtaCard({
       >
         {buttonText}
       </CtaButton>
-    </div>
+    </Card>
   );
 }

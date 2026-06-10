@@ -10,7 +10,7 @@ import sideImage from "@/public/energy-analytics-side.png";
  */
 export default function HomeSolarForecasting() {
   return (
-    <section className="relative overflow-hidden bg-[#F7F7F7] py-10 text-black min-[1200px]:py-25">
+    <section className="relative overflow-hidden bg-surface-secondary py-10 text-foreground min-[1200px]:py-25">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12  lg:gap-10">
         {/* left: phone — wrapper has explicit width, image fills it via
             w-full h-auto so it scales proportionally instead of rendering

@@ -10,25 +10,27 @@ import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/heating/energiebee-app-smart-thermostat.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import Image from "next/image";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 
 export default function ConnectedEcosystem() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 text-black lg:py-20 ">
+    <Section spacing="md" className="bg-surface text-foreground">
       {/* early-access launch banner */}
-      <div className="mx-auto mb-20 max-w-360 px-6 sm:px-10 lg:px-30">
-        <div className="flex flex-col gap-5 rounded-2xl border border-[#DAE7ED] bg-[#FAFBFC] p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
+      <Container className="mb-20">
+        <div className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
           <div className="">
-            <h3 className="text-xl font-extrabold leading-tight text-black sm:text-[36px] whitespace-pre-line">
+            <h3 className="text-xl font-extrabold leading-tight text-foreground sm:text-[36px] whitespace-pre-line">
               {"Launching August 2026 \n Early Access Available."}
             </h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#545454] sm:text-base">
+            <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
               Be part of the first wave of connected home energy intelligence.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="/get-started"
-              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-[#DAE7ED] bg-white px-6 text-base lg:text-lg leading-[135%] font-semibold text-black transition-colors hover:bg-neutral-50"
+              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-border bg-surface px-6 text-base lg:text-lg leading-[135%] font-semibold text-foreground transition-colors hover:bg-neutral-50"
             >
               Pre-order access
             </a>
@@ -37,8 +39,8 @@ export default function ConnectedEcosystem() {
             </CtaButton>
           </div>
         </div>
-      </div>
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+      </Container>
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
@@ -86,7 +88,7 @@ export default function ConnectedEcosystem() {
             ),
           }}
         />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

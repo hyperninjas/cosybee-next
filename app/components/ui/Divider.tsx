@@ -1,8 +1,9 @@
+import { Separator } from "@heroui/react";
+
 /**
- * Thin horizontal rule used between page sections. Renders a single
- * 1px line in the project's neutral border color; override with the
- * `className` prop when you need extra margin, a different color,
- * etc. Use `<Divider vertical />` for a vertical separator.
+ * Thin separator line used between page sections. Thin wrapper over HeroUI's
+ * `Separator` (theme-aware, accessible `role="separator"`), keeping the
+ * project's `vertical` shorthand. Pass `className` for extra margin etc.
  */
 export default function Divider({
   vertical = false,
@@ -12,8 +13,10 @@ export default function Divider({
   vertical?: boolean;
   className?: string;
 }) {
-  const base = vertical
-    ? "h-full w-px border-l border-border"
-    : "w-full border-b border-border";
-  return <div role="separator" className={`${base} ${className}`} />;
+  return (
+    <Separator
+      orientation={vertical ? "vertical" : "horizontal"}
+      className={className}
+    />
+  );
 }

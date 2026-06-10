@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Button } from "@heroui/react";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 /**
@@ -120,11 +121,13 @@ export default function InstallPrompt() {
       aria-label="Install EnergieBee"
       className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-2xl border border-black/10 bg-surface p-4 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-4"
     >
-      <button
-        type="button"
-        onClick={dismiss}
+      <Button
+        isIconOnly
+        variant="ghost"
+        size="sm"
         aria-label="Dismiss"
-        className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full text-muted transition hover:bg-surface-secondary hover:text-muted"
+        onPress={dismiss}
+        className="absolute right-3 top-3 rounded-full text-muted"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
@@ -134,7 +137,7 @@ export default function InstallPrompt() {
             strokeLinecap="round"
           />
         </svg>
-      </button>
+      </Button>
 
       <div className="flex items-start gap-3 pr-6">
         <Image
@@ -164,20 +167,20 @@ export default function InstallPrompt() {
 
           {!isIOS && (
             <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={install}
-                className="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white shadow-[0_12px_24px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+              <Button
+                variant="primary"
+                onPress={install}
+                className="rounded-xl shadow-[0_12px_24px_-10px_rgba(238,61,26,0.6)]"
               >
                 Install app
-              </button>
-              <button
-                type="button"
-                onClick={dismiss}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:text-foreground"
+              </Button>
+              <Button
+                variant="ghost"
+                onPress={dismiss}
+                className="rounded-xl text-muted"
               >
                 Not now
-              </button>
+              </Button>
             </div>
           )}
         </div>

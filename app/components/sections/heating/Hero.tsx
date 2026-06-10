@@ -4,6 +4,7 @@
 // import PhoneGreeting from "@/app/components/mockups/phone/PhoneGreeting";
 // import PhoneTabs from "@/app/components/mockups/phone/PhoneTabs";
 import { CtaButton } from "@/app/components/ui/Cta";
+import { Heading, Text } from "@/app/components/ui/Typography";
 // import Hexagon from "@/app/components/ui/Hexagon";
 // import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 // import beeFlowerImg from "@/public/bee-flower.png";
@@ -11,6 +12,7 @@ import { CtaButton } from "@/app/components/ui/Cta";
 // import windTurbineImg from "@/public/wind-turbine.png";
 import heroBgImg from "@/public/Cover/energiebee-heating-cover.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Section } from "@/app/components/ui/Section";
 
 // function HeroPhone({ className = "" }: { className?: string }) {
 //   return (
@@ -24,7 +26,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 export default function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
+    <Section spacing="none" surface="dark" className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
       {/* background photo + gradients */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
@@ -49,19 +51,23 @@ export default function Hero() {
         /> */}
         {/* text */}
         <div className="relative z-10 ">
-          <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px] whitespace-pre-line">
+          <Heading
+            as="h1"
+            variant="display"
+            className="whitespace-pre-line"
+          >
             {"Home Heating \n"}
             <span className="text-[#EFDF18]">Intelligence</span>
-          </h1>
-          <p className="mt-5 max-w-165 text-base sm:text-[18px] md:text-[22px] leading-7">
+          </Heading>
+          <Text variant="heroLead" className="mt-5 max-w-165">
             Predictive energy intelligence that helps you understand, optimise,
             and reduce your home heating consumption.
-          </p>
-          <p className="mt-5 max-w-165 text-base sm:text-[18px] md:text-[22px] leading-7">
+          </Text>
+          <Text variant="heroLead" className="mt-5 max-w-165">
             Powered by high-accuracy forecasting models, real-time energy data,
             and climate-aware intelligence that reduces waste, cost, and carbon
             impact.
-          </p>
+          </Text>
           <CtaButton href="/get-started" size="md" className="mt-10">
             Get Started
           </CtaButton>
@@ -94,6 +100,6 @@ export default function Hero() {
           }}
         /> */}
       </div>
-    </section>
+    </Section>
   );
 }

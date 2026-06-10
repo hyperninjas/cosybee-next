@@ -30,7 +30,7 @@ export default function EnergyAnalytics() {
         {/* middle: title + features */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
           <SectionTitle align="center">Energy &amp; Savings</SectionTitle>
-          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-[#545454]">
+          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-muted">
             Understand the impact of your energy choices.
           </p>
           <div className="mt-6 md:mt-8 space-y-8">

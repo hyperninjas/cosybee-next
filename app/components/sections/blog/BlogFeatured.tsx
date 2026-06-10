@@ -5,8 +5,10 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "@/app/components/ui/Avatar";
 import { CtaButton } from "@/app/components/ui/Cta";
+import { Section } from "@/app/components/ui/Section";
 import { type Article, formatReadTime } from "@/app/lib/article-types";
 import Dot from "@/app/components/ui/Dot";
+import { Button } from "@heroui/react";
 
 /** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
 function isExternalUrl(url: string): boolean {
@@ -82,21 +84,21 @@ function Slide({
             {slide.category?.name ?? "Uncategorised"}
           </span>
           <Dot />
-          <span className="text-[#545454] text-[15px] font-medium">
+          <span className="text-muted text-[15px] font-medium">
             {formatReadTime(slide.readTime)}
           </span>
         </div>
         <h2
           title={slide.title}
-          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-black sm:text-3xl lg:text-[40px] mt-3"
+          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[40px] mt-3"
         >
           {slide.title}
         </h2>
         {slide.carouselIntro && (
-          <p className="text-[#545454] mt-4">{slide.carouselIntro}</p>
+          <p className="text-muted mt-4">{slide.carouselIntro}</p>
         )}
         {slide.carouselBody && (
-          <p className="text-base text-[#545454] mt-4 line-clamp-3">
+          <p className="text-base text-muted mt-4 line-clamp-3">
             {slide.carouselBody}
           </p>
         )}
@@ -106,10 +108,10 @@ function Slide({
             avatarUrl={slide.author?.avatarUrl}
           />
           <div className="text-base">
-            <div className="font-bold text-black text-lg">
+            <div className="font-bold text-foreground text-lg">
               {slide.author?.name ?? "energiebee"}
             </div>
-            <div className="text-[#545454] mt-1 font-medium text-[15px]">
+            <div className="text-muted mt-1 font-medium text-[15px]">
               {formatDate(slide.authorDate)}
             </div>
           </div>
@@ -161,10 +163,10 @@ export default function BlogFeatured({
   if (slides.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
+    <Section spacing="none" className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
       {/* embla viewport */}
       <div
-        className="overflow-hidden border border-[#F6F6F6] rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+        className="overflow-hidden border border-border rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
@@ -211,24 +213,26 @@ export default function BlogFeatured({
           </div>
         </div>
         <div className="flex absolute right-0 items-center gap-2">
-          <button
-            type="button"
+          <Button
+            isIconOnly
+            variant="tertiary"
             aria-label="Previous slide"
-            onClick={scrollPrev}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            onPress={scrollPrev}
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronLeft />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            isIconOnly
+            variant="tertiary"
             aria-label="Next slide"
-            onClick={scrollNext}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-[#F6F6F6] bg-white text-black shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            onPress={scrollNext}
+            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronRight />
-          </button>
+          </Button>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

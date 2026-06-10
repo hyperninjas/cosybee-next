@@ -3,11 +3,13 @@ import Hexagon from "@/app/components/ui/Hexagon";
 import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/energy-monitoring.png";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 
 export default function AccurateIntelligence() {
   return (
-    <section className="relative overflow-hidden bg-surface py-16 text-foreground lg:py-20">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+    <Section spacing="md" surface="surface" className="text-foreground">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
           src={sideImage.src}
@@ -39,7 +41,7 @@ export default function AccurateIntelligence() {
             />
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

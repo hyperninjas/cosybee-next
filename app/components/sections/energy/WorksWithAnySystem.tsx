@@ -1,4 +1,5 @@
 import { CtaCard } from "@/app/components/ui/Cta";
+import { Section } from "@/app/components/ui/Section";
 
 /**
  * Standalone CTA section advertising broad solar-system compatibility.
@@ -7,13 +8,13 @@ import { CtaCard } from "@/app/components/ui/Cta";
  */
 export default function WorksWithAnySystem() {
   return (
-    <section className="mx-auto max-w-360 pb-8 pt-3 px-4 lg:px-30">
+    <Section spacing="none" className="mx-auto max-w-360 pb-8 pt-3 px-4 lg:px-30">
       <CtaCard
         title="Works With Any Energy Setup"
         description="Compatible with smart meters, inverters, batteries, and EV chargers from all major brands. Plug-and-play setup in minutes."
         buttonText="Get Started Today"
         href="/start"
       />
-    </section>
+    </Section>
   );
 }

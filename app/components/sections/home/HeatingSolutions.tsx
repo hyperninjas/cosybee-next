@@ -4,6 +4,8 @@ import Hexagon from "@/app/components/ui/Hexagon";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
 // import sideImage from "@/public/energy-monitoring.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";
@@ -17,8 +19,8 @@ import beeFlowerImg from "@/public/bee-flower.png";
  */
 export default function HeatingSolutions() {
   return (
-    <section className="relative overflow-hidden bg-surface py-20 text-foreground lg:py-25">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-6 lg:px-30">
+    <Section spacing="lg" surface="surface" className="text-foreground">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-6">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#F7F2E1"
@@ -75,7 +77,7 @@ export default function HeatingSolutions() {
             />
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

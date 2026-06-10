@@ -10,6 +10,8 @@ import deviceImg from "@/public/solar/energiebee-app-solar-cycle.png";
 import windTurbineImg from "@/public/wind-turbine.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import type { FeatureCardContent } from "./WhyEnergieBee";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 
 export type WhyEnergieBeeSolarProps = {
   title?: string;
@@ -72,8 +74,8 @@ export default function WhyEnergieBeeSolar({
   bottomRight = DEFAULT_BOTTOM_RIGHT,
 }: WhyEnergieBeeSolarProps = {}) {
   return (
-    <section className="relative overflow-hidden bg-background py-16 pb-8 text-foreground lg:py-20 lg:pb-10">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+    <Section surface="base" spacing="none" className="py-16 pb-8 text-foreground lg:py-20 lg:pb-10">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
@@ -104,7 +106,7 @@ export default function WhyEnergieBeeSolar({
           topRight={topRight}
           bottomRight={bottomRight}
         />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

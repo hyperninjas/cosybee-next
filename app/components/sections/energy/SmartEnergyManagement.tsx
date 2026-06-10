@@ -3,11 +3,13 @@ import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImg from "@/public/energy-management.png";
 import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 
 export default function SmartEnergyManagement() {
   return (
-    <section className="relative overflow-hidden bg-surface py-16 text-foreground lg:py-16">
-      <div className="relative mx-auto grid max-w-360 grid-cols-1 items-center gap-12 px-6 sm:px-10 min-[1200px]:grid-cols-2 min-[1200px]:gap-16 lg:px-30">
+    <Section spacing="none" surface="surface" className="py-16 text-foreground lg:py-16">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
@@ -39,7 +41,7 @@ export default function SmartEnergyManagement() {
           placements={HIVE_3_PLACEMENTS}
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
         />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

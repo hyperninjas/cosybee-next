@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Input, TextField, TextArea } from "@heroui/react";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import Hexagon from "@/app/components/ui/Hexagon";
 
 function EnvelopeIcon() {
@@ -42,8 +45,8 @@ export default function ContactSection() {
   };
 
   return (
-    <section className="relative isolate overflow-hidden bg-black text-white">
-      <div className="relative mx-auto max-w-360 px-6 py-20 sm:px-10 lg:px-30 lg:py-25">
+    <Section spacing="none" surface="dark" className="isolate">
+      <Container className="py-20 lg:py-25">
         {/* decorative side hexes bleeding in from left + right */}
         <Hexagon
           color="#7A6F1C"
@@ -91,38 +94,47 @@ export default function ContactSection() {
           onSubmit={onSubmit}
           className="mx-auto mt-16 flex max-w-295 flex-col gap-5"
         >
-          <input
-            type="text"
-            placeholder="Name"
+          <TextField
+            aria-label="Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full rounded-full bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
-          />
-          <input
+            onChange={setName}
+            isRequired
+          >
+            <Input
+              placeholder="Name"
+              className="w-full rounded-full bg-surface px-7 py-5 text-base"
+            />
+          </TextField>
+          <TextField
+            aria-label="Email"
             type="email"
-            placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full rounded-full bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
-          />
-          <textarea
+            onChange={setEmail}
+            isRequired
+          >
+            <Input
+              placeholder="Email"
+              className="w-full rounded-full bg-surface px-7 py-5 text-base"
+            />
+          </TextField>
+          <TextArea
+            aria-label="Message"
             placeholder="Message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            required
             rows={4}
-            className="w-full resize-none rounded-3xl bg-surface px-7 py-5 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[#EFDF18]/50"
+            required
+            className="w-full resize-none rounded-3xl bg-surface px-7 py-5 text-base"
           />
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-full border border-[#EFDF18] bg-transparent px-7 py-5 text-base font-semibold text-white transition-colors hover:bg-[#EFDF18]/10 sm:text-lg"
+            variant="outline"
+            className="w-full rounded-full border border-[#EFDF18] text-white hover:bg-[#EFDF18]/10 sm:text-lg"
           >
             Send
-          </button>
+          </Button>
         </form>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
