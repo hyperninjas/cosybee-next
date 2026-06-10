@@ -78,8 +78,15 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
       {/* Warm up the connection to the media host — article images load from
           it cross-origin (React 19 hoists this to <head> and dedups it). */}
       <link rel="preconnect" href="https://eb-api.technext.it" />
+      {/* Prefer the backend-rendered Article schema when present — single
+          source of truth. Fall back to the locally-built schema only when
+          the backend didn't ship it (older API responses). Breadcrumb
+          schema is always our own concern. */}
       <JsonLd
-        data={[blogPostingSchema(article, path), breadcrumbSchema(crumbs)]}
+        data={[
+          article.jsonLd ?? blogPostingSchema(article, path),
+          breadcrumbSchema(crumbs),
+        ]}
       />
       <ReadingProgress />
       <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
@@ -146,18 +153,41 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
             </div>
           </header>
 
-          {/* hero image */}
-          <div className="relative mt-10 aspect-4/3 overflow-hidden rounded-3xl sm:aspect-16/10">
-            <Image
-              src={article.coverImage}
-              alt={article.coverImageAlt}
-              fill
-              priority
-              sizes="(min-width: 800px) 800px, 100vw"
-              className="object-cover"
-              unoptimized={isExternalUrl(article.coverImage)}
-            />
-          </div>
+          {/* hero image — wrapped as <figure> so any caption/credit the
+              author entered renders semantically with the image. */}
+          <figure className="mt-10">
+            <div
+              {...(article.coverImageTitle
+                ? { title: article.coverImageTitle }
+                : {})}
+              className="relative aspect-4/3 overflow-hidden rounded-3xl sm:aspect-16/10"
+            >
+              <Image
+                src={article.coverImage}
+                alt={article.coverImageAlt}
+                fill
+                priority
+                sizes="(min-width: 800px) 800px, 100vw"
+                className="object-cover"
+                unoptimized={isExternalUrl(article.coverImage)}
+              />
+            </div>
+            {(article.coverImageCaption || article.coverImageCredit) && (
+              <figcaption className="mt-3 px-2 text-sm text-[#545454] sm:px-0">
+                {article.coverImageCaption && (
+                  <span>{article.coverImageCaption}</span>
+                )}
+                {article.coverImageCaption && article.coverImageCredit && (
+                  <span aria-hidden> · </span>
+                )}
+                {article.coverImageCredit && (
+                  <span className="text-[#787878]">
+                    {article.coverImageCredit}
+                  </span>
+                )}
+              </figcaption>
+            )}
+          </figure>
 
           {/* lede / subtitle */}
           {article.lede && (

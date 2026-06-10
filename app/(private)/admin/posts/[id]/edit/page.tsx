@@ -45,6 +45,15 @@ export default async function EditPostPage({
     // Media
     coverImage: post.coverImage,
     coverImageAlt: post.coverImageAlt,
+    coverImageTitle: post.coverImageTitle ?? null,
+    coverImageCaption: post.coverImageCaption ?? null,
+    coverImageCredit: post.coverImageCredit ?? null,
+
+    // SEO / social
+    ogImage: post.ogImage ?? null,
+    ogImageAlt: post.ogImageAlt ?? null,
+    canonicalUrl: post.canonicalUrl ?? null,
+    noindex: post.noindex ?? false,
 
     // Display
     readTime: post.readTime,
@@ -60,8 +69,9 @@ export default async function EditPostPage({
     ctaHref: post.ctaHref,
     ctaExternal: post.ctaExternal,
 
-    // Status
+    // Status / scheduling
     status: post.status,
+    publishedAt: post.publishedAt ?? null,
 
     // Content
     contentJson: post.contentJson,

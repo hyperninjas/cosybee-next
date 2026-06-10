@@ -26,6 +26,17 @@ export interface ApiPost {
   // Media
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
+  /** Backend-rendered Article JSON-LD. Detail endpoint only. */
+  jsonLd?: Record<string, unknown> | null;
 
   // Display
   /** Minutes (integer) — format as "N min read" on display. */
@@ -44,7 +55,7 @@ export interface ApiPost {
   ctaExternal: boolean;
 
   // Status
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   publishedAt: string | null;
 
   // Content

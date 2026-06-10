@@ -24,6 +24,16 @@ export interface AdminPost {
   // Media
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | null;
 
   // Display
   readTime: number;
@@ -39,8 +49,8 @@ export interface AdminPost {
   ctaHref: string | null;
   ctaExternal: boolean;
 
-  // Status
-  status: "DRAFT" | "PUBLISHED";
+  // Status / scheduling
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   publishedAt: string | null;
 
   // Content

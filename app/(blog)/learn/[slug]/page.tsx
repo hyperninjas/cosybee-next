@@ -23,14 +23,28 @@ export async function generateMetadata({
   return {
     title: seoTitle,
     description: article.seoDescription ?? article.description,
-    alternates: { canonical: `/learn/${article.slug}` },
+    alternates: {
+      canonical: article.canonicalUrl ?? `/learn/${article.slug}`,
+    },
+    robots: article.noindex ? { index: false, follow: true } : undefined,
     openGraph: {
       url: `/learn/${article.slug}`,
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // og:image intentionally omitted: the branded per-article
-      // opengraph-image.tsx is auto-injected by Next at this route.
+      // When the author supplied a custom share image, surface it here.
+      // Otherwise the branded per-article opengraph-image.tsx that Next
+      // auto-injects at this route handles the social card.
+      ...(article.ogImage
+        ? {
+            images: [
+              {
+                url: article.ogImage,
+                alt: article.ogImageAlt ?? article.coverImageAlt,
+              },
+            ],
+          }
+        : {}),
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
       authors: [article.author?.name ?? "energiebee"],

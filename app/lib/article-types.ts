@@ -52,6 +52,18 @@ export type Article = {
   /** Public path to the cover image. */
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle: string | null;
+  coverImageCaption: string | null;
+  coverImageCredit: string | null;
+
+  // SEO / social
+  /** 1200×630 social share image; falls back to coverImage if null. */
+  ogImage: string | null;
+  ogImageAlt: string | null;
+  canonicalUrl: string | null;
+  noindex: boolean;
+  /** Server-rendered schema.org Article JSON-LD (detail view only). */
+  jsonLd: Record<string, unknown> | null;
 
   // Display
   /** Read time in minutes (integer). */
@@ -71,7 +83,7 @@ export type Article = {
   ctaExternal: boolean;
 
   // Status
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   /** ISO date the article was published. */
   publishedAt: string | null;
 
