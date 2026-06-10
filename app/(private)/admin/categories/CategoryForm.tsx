@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
 import {
   Alert,
   Button,
@@ -16,7 +15,7 @@ import {
 } from "@heroui/react";
 import type { Category } from "@/app/lib/article-types";
 import { saveCategory } from "../taxonomy/actions";
-import { initialSaveState } from "../lib/form-state";
+import { initialSaveState, type EntitySaveState } from "../lib/form-state";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { slugify } from "@/app/lib/slug";
 
@@ -62,11 +61,33 @@ function SaveButton({ label }: { label: string }) {
   );
 }
 
-export default function CategoryForm({ category }: { category?: Category }) {
-  const [state, formAction] = useActionState(saveCategory, initialSaveState);
+export default function CategoryForm({
+  category,
+  defaultBlog,
+  onSaved,
+  onCancel,
+}: {
+  category?: Category;
+  /** Blog the form starts on when creating (no `category` prop). Lets the
+   *  post-editor's "new category" modal scope the create to the post's
+   *  current blog instead of always defaulting to "hive". */
+  defaultBlog?: "hive" | "learn";
+  onSaved?: (saved?: Category) => void;
+  onCancel?: () => void;
+}) {
+  const [state, formAction] = useActionState<
+    EntitySaveState<Category>,
+    FormData
+  >(saveCategory, initialSaveState);
   const errors = state?.fieldErrors ?? {};
 
-  const [blog, setBlog] = useState<"hive" | "learn">(category?.blog ?? "hive");
+  useEffect(() => {
+    if (state?.ok) onSaved?.(state.entity);
+  }, [state, onSaved]);
+
+  const [blog, setBlog] = useState<"hive" | "learn">(
+    category?.blog ?? defaultBlog ?? "hive",
+  );
   const [name, setName] = useState(category?.name ?? "");
   const [slug, setSlug] = useState(category?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(category?.slug));
@@ -216,12 +237,15 @@ export default function CategoryForm({ category }: { category?: Category }) {
       </Card>
 
       <div className="flex items-center justify-end gap-2">
-        <Link
-          href="/admin/categories"
-          className="text-sm text-muted transition-colors hover:text-foreground"
-        >
-          Cancel
-        </Link>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-sm text-muted transition-colors hover:text-foreground"
+          >
+            Cancel
+          </button>
+        )}
         <SaveButton label={category ? "Update category" : "Create category"} />
       </div>
     </form>

@@ -378,14 +378,6 @@ export const adminApi = {
   // Authors CRUD
   // ---------------------------------------------------------------
 
-  async getAuthor(id: string): Promise<Author | null> {
-    try {
-      return await fetchApi<Author>(`/api/admin/posts/authors/${id}`);
-    } catch {
-      return null;
-    }
-  },
-
   async createAuthor(input: AuthorInput): Promise<Author> {
     return fetchApi<Author>("/api/admin/posts/authors", {
       method: "POST",
@@ -407,14 +399,6 @@ export const adminApi = {
   // ---------------------------------------------------------------
   // Categories CRUD
   // ---------------------------------------------------------------
-
-  async getCategory(id: string): Promise<Category | null> {
-    try {
-      return await fetchApi<Category>(`/api/admin/posts/categories/${id}`);
-    } catch {
-      return null;
-    }
-  },
 
   async createCategory(input: CategoryInput): Promise<Category> {
     return fetchApi<Category>("/api/admin/posts/categories", {
@@ -440,14 +424,6 @@ export const adminApi = {
   // ---------------------------------------------------------------
   // Tags CRUD
   // ---------------------------------------------------------------
-
-  async getTag(id: string): Promise<Tag | null> {
-    try {
-      return await fetchApi<Tag>(`/api/admin/posts/tags/${id}`);
-    } catch {
-      return null;
-    }
-  },
 
   async createTag(input: TagInput): Promise<Tag> {
     return fetchApi<Tag>("/api/admin/posts/tags", {

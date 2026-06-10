@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
 import {
   Alert,
   Button,
@@ -13,7 +12,7 @@ import {
 } from "@heroui/react";
 import type { Author } from "@/app/lib/article-types";
 import { saveAuthor } from "../taxonomy/actions";
-import { initialSaveState } from "../lib/form-state";
+import { initialSaveState, type EntitySaveState } from "../lib/form-state";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { slugify } from "@/app/lib/slug";
 
@@ -59,9 +58,28 @@ function SaveButton({ label }: { label: string }) {
   );
 }
 
-export default function AuthorForm({ author }: { author?: Author }) {
-  const [state, formAction] = useActionState(saveAuthor, initialSaveState);
+export default function AuthorForm({
+  author,
+  onSaved,
+  onCancel,
+}: {
+  author?: Author;
+  /** Called when the server action returns `{ ok: true }`. The saved
+   *  Author is forwarded so callers (e.g. the post-editor's create-author
+   *  modal) can auto-select the new record without a refetch. */
+  onSaved?: (saved?: Author) => void;
+  /** Called when the user clicks Cancel. */
+  onCancel?: () => void;
+}) {
+  const [state, formAction] = useActionState<EntitySaveState<Author>, FormData>(
+    saveAuthor,
+    initialSaveState,
+  );
   const errors = state?.fieldErrors ?? {};
+
+  useEffect(() => {
+    if (state?.ok) onSaved?.(state.entity);
+  }, [state, onSaved]);
 
   const [name, setName] = useState(author?.name ?? "");
   const [slug, setSlug] = useState(author?.slug ?? "");
@@ -231,12 +249,15 @@ export default function AuthorForm({ author }: { author?: Author }) {
       </Card>
 
       <div className="flex items-center justify-end gap-2">
-        <Link
-          href="/admin/authors"
-          className="text-sm text-muted transition-colors hover:text-foreground"
-        >
-          Cancel
-        </Link>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-sm text-muted transition-colors hover:text-foreground"
+          >
+            Cancel
+          </button>
+        )}
         <SaveButton label={author ? "Update author" : "Create author"} />
       </div>
     </form>

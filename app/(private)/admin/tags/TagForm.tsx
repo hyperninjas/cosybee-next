@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
 import {
   Alert,
   Button,
@@ -58,9 +57,21 @@ function SaveButton({ label }: { label: string }) {
   );
 }
 
-export default function TagForm({ tag }: { tag?: Tag }) {
+export default function TagForm({
+  tag,
+  onSaved,
+  onCancel,
+}: {
+  tag?: Tag;
+  onSaved?: () => void;
+  onCancel?: () => void;
+}) {
   const [state, formAction] = useActionState(saveTag, initialSaveState);
   const errors = state?.fieldErrors ?? {};
+
+  useEffect(() => {
+    if (state?.ok) onSaved?.();
+  }, [state, onSaved]);
 
   const [name, setName] = useState(tag?.name ?? "");
   // On rename, keep the existing slug stable so /tag/<slug> URLs survive.
@@ -141,12 +152,15 @@ export default function TagForm({ tag }: { tag?: Tag }) {
       </Card>
 
       <div className="flex items-center justify-end gap-2">
-        <Link
-          href="/admin/tags"
-          className="text-sm text-muted transition-colors hover:text-foreground"
-        >
-          Cancel
-        </Link>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-sm text-muted transition-colors hover:text-foreground"
+          >
+            Cancel
+          </button>
+        )}
         <SaveButton label={tag ? "Update tag" : "Create tag"} />
       </div>
     </form>

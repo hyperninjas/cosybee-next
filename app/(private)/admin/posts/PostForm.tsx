@@ -7,9 +7,12 @@ import { useFormStatus } from "react-dom";
 import {
   Alert,
   Button,
+  Calendar,
   Card,
   Chip,
   ComboBox,
+  DateField,
+  DatePicker,
   Input,
   ListBox,
   ListBoxItem,
@@ -19,11 +22,15 @@ import {
   Spinner,
   Switch,
   TextArea,
+  useOverlayState,
 } from "@heroui/react";
+import { parseDate } from "@internationalized/date";
 import {
   ArrowLeft,
   ArrowUpRightFromSquare,
   CircleCheckFill,
+  Pencil,
+  Plus,
 } from "@gravity-ui/icons";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "@/app/(private)/admin/actions";
@@ -38,7 +45,8 @@ import { AppLink } from "@/app/components/ui/AppLink";
 import { useUpload } from "@/app/hooks/useUpload";
 import { validate } from "@/app/lib/storage";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
-import { updateAuthorAvatar } from "@/app/(private)/admin/taxonomy/actions";
+import { AuthorFormModal } from "@/app/(private)/admin/authors/AuthorFormModal";
+import { CategoryFormModal } from "@/app/(private)/admin/categories/CategoryFormModal";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -141,157 +149,6 @@ function Labeled({
       ) : hint ? (
         <span className="mt-1 block text-xs text-muted">{hint}</span>
       ) : null}
-    </div>
-  );
-}
-
-/**
- * Avatar with a small pen icon overlay that opens a file picker.
- * Uses the same upload pipeline as PublicImageUpload (useUpload + validate).
- *
- * When `authorId` is set we patch the existing author record via the
- * dedicated PATCH endpoint so the change persists immediately — the post
- * editor's savePost path otherwise drops authorAvatarUrl when an
- * existing author is selected.
- *
- * Edge cases covered:
- *  - Local blob preview shows immediately while the upload runs.
- *  - Spinner overlay during upload; pen hidden so it can't double-fire.
- *  - On success the local blob is revoked and cleared so the new src
- *    (the uploaded URL) becomes the source of truth on the next render.
- *  - On failure the local preview is rolled back so the UI returns to
- *    the prior avatar/initials.
- *  - File input value is reset after every change so picking the same
- *    file twice in a row still fires onChange.
- *  - Client-side `validate` runs before upload; error text renders
- *    underneath the avatar.
- *  - Object URL is revoked on unmount.
- */
-function EditableAvatar({
-  name,
-  src,
-  authorId,
-  onChange,
-}: {
-  name: string;
-  src: string;
-  /** When set, the upload also PATCHes this author's stored avatar. */
-  authorId?: string;
-  onChange: (url: string) => void;
-}) {
-  const { upload, status, progress, error } = useUpload("author-avatar");
-  const [localPreview, setLocalPreview] = useState<string | null>(null);
-  const [clientError, setClientError] = useState<string | null>(null);
-  const [persistError, setPersistError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Always revoke the most recent blob URL on unmount or when it changes.
-  useEffect(
-    () => () => {
-      if (localPreview) URL.revokeObjectURL(localPreview);
-    },
-    [localPreview],
-  );
-
-  const handleFile = useCallback(
-    async (file: File) => {
-      const problem = validate(file, "author-avatar");
-      if (problem) {
-        setClientError(problem);
-        return;
-      }
-      setClientError(null);
-      setPersistError(null);
-      const preview = URL.createObjectURL(file);
-      setLocalPreview(preview);
-      try {
-        const { fileUrl } = await upload(file, {
-          alt: `${name} avatar`,
-        });
-        // Hand the canonical URL up — and drop the blob so subsequent
-        // src changes (e.g. picking another author) aren't shadowed.
-        setLocalPreview(null);
-        URL.revokeObjectURL(preview);
-        // author-avatar is a public context so fileUrl is always set,
-        // but the response type is nullable — fall back defensively.
-        const url = fileUrl ?? "";
-        onChange(url);
-
-        // For existing authors, the post-save action drops authorAvatarUrl
-        // (line in actions.ts: `authorId ? { authorId } : { ..., authorAvatarUrl }`).
-        // PATCH the author record directly so the change actually persists.
-        if (authorId && url) {
-          const result = await updateAuthorAvatar(
-            authorId,
-            url,
-            `${name} avatar`,
-          );
-          if (!result.ok) setPersistError(result.error);
-        }
-      } catch {
-        setLocalPreview(null);
-        URL.revokeObjectURL(preview);
-      }
-    },
-    [upload, onChange, name, authorId],
-  );
-
-  const isUploading = status === "uploading";
-  const shown = localPreview ?? src;
-  const showPen = !isUploading;
-
-  return (
-    <div className="flex flex-col items-start">
-      <div className="relative">
-        <AppAvatar src={shown || undefined} name={name} size="sm" />
-        {showPen && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            aria-label={shown ? "Change avatar" : "Upload avatar"}
-            className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm transition-colors hover:bg-background"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-2.5"
-              aria-hidden
-            >
-              <path d="M11.5 2.5l2 2-7 7-3 1 1-3 7-7z" />
-            </svg>
-          </button>
-        )}
-        {isUploading && (
-          <div
-            aria-label={`Uploading ${progress}%`}
-            className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-[10px] font-semibold text-white"
-          >
-            {progress}%
-          </div>
-        )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-            // Allow picking the same file again immediately.
-            e.target.value = "";
-          }}
-          className="hidden"
-          disabled={isUploading}
-        />
-      </div>
-      {(clientError || error || persistError) && (
-        <p className="mt-1 text-[11px] font-medium text-danger">
-          {clientError ?? error ?? persistError}
-        </p>
-      )}
     </div>
   );
 }
@@ -614,9 +471,56 @@ export default function PostForm({
     post?.author?.avatarUrl ?? "",
   );
 
-  // Category handling - track selected ID or custom name
+  // Author create/edit modal. `editingAuthor === undefined` means "create
+  // mode", any defined value means "edit this author".
+  const authorModal = useOverlayState();
+  const [editingAuthor, setEditingAuthor] = useState<Author | undefined>(
+    undefined,
+  );
+  const selectedAuthor = authors.find((a) => a.id === authorId);
+
+  const openCreateAuthor = () => {
+    setEditingAuthor(undefined);
+    authorModal.open();
+  };
+  const openEditAuthor = () => {
+    if (!selectedAuthor) return;
+    setEditingAuthor(selectedAuthor);
+    authorModal.open();
+  };
+  /** Sync local author state with the just-saved record so the picker shows
+   *  the new/updated author immediately — the parent's router.refresh()
+   *  catches up the `authors` prop on the next render. */
+  const handleAuthorSaved = (saved?: Author) => {
+    if (!saved) return;
+    setAuthorId(saved.id);
+    setAuthorName(saved.name);
+    setAuthorAvatarUrl(saved.avatarUrl ?? "");
+  };
+
+  // Category handling - track selected ID and display name.
   const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
   const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
+
+  // Category create/edit modal. Mirror of the author setup.
+  const categoryModal = useOverlayState();
+  const [editingCategory, setEditingCategory] = useState<Category | undefined>(
+    undefined,
+  );
+
+  const openCreateCategory = () => {
+    setEditingCategory(undefined);
+    categoryModal.open();
+  };
+  const openEditCategory = (selected: Category) => {
+    setEditingCategory(selected);
+    categoryModal.open();
+  };
+  const handleCategorySaved = (saved?: Category) => {
+    if (!saved) return;
+    setCategoryId(saved.id);
+    setCategoryName(saved.name);
+  };
 
   // Cover image URL (from S3)
   const [coverUrl, setCoverUrl] = useState(post?.coverImage ?? "");
@@ -689,6 +593,7 @@ export default function PostForm({
 
   // Filter categories by selected blog
   const blogCategories = categories.filter((c) => c.blog === blog);
+  const selectedCategory = blogCategories.find((c) => c.id === categoryId);
 
   function setStatusForSubmit(s: string) {
     setStatus(s as "DRAFT" | "PUBLISHED");
@@ -761,21 +666,9 @@ export default function PostForm({
         value={ctaEnabled && ctaExternal ? "on" : ""}
       />
       {/* Cover extras */}
-      <input
-        type="hidden"
-        name="coverImageTitle"
-        value={coverImageTitle}
-      />
-      <input
-        type="hidden"
-        name="coverImageCaption"
-        value={coverImageCaption}
-      />
-      <input
-        type="hidden"
-        name="coverImageCredit"
-        value={coverImageCredit}
-      />
+      <input type="hidden" name="coverImageTitle" value={coverImageTitle} />
+      <input type="hidden" name="coverImageCaption" value={coverImageCaption} />
+      <input type="hidden" name="coverImageCredit" value={coverImageCredit} />
       {/* SEO / social */}
       <input type="hidden" name="ogImage" value={ogImage} />
       <input type="hidden" name="ogImageAlt" value={ogImageAlt} />
@@ -922,10 +815,7 @@ export default function PostForm({
                     placeholder={title || "Enter alt text…"}
                   />
                 </Labeled>
-                <Labeled
-                  label="Title"
-                  hint="Tooltip shown on hover. Optional."
-                >
+                <Labeled label="Title" hint="Tooltip shown on hover. Optional.">
                   <Input
                     variant="secondary"
                     fullWidth
@@ -973,96 +863,112 @@ export default function PostForm({
                 <div className="space-y-3">
                   <Labeled
                     label="Name"
-                    hint="Pick an existing author or type a new one."
+                    hint="Pick an existing author. Use + to add a new one."
                   >
-                    <ComboBox
-                      aria-label="Author"
-                      items={authors}
-                      allowsCustomValue
-                      menuTrigger="focus"
-                      selectedKey={authorId || null}
-                      inputValue={authorName}
-                      onInputChange={(value) => {
-                        setAuthorId("");
-                        setAuthorName(value);
-                      }}
-                      onSelectionChange={(key) => {
-                        const a = authors.find((x) => x.id === String(key));
-                        if (a) {
-                          setAuthorId(a.id);
-                          setAuthorName(a.name);
-                          setAuthorAvatarUrl(a.avatarUrl ?? "");
-                        }
-                      }}
-                    >
-                      <ComboBox.InputGroup>
-                        <Input
-                          variant="secondary"
-                          fullWidth
-                          placeholder="Search authors or type a new name…"
-                        />
-                        <ComboBox.Trigger />
-                      </ComboBox.InputGroup>
-                      <ComboBox.Popover>
-                        <ListBox>
-                          {(author: Author) => (
-                            <ListBoxItem id={author.id} textValue={author.name}>
-                              <div className="flex items-center gap-2">
-                                <AppAvatar
-                                  src={author.avatarUrl}
-                                  name={author.name}
-                                  size="sm"
-                                />
-                                <div className="min-w-0">
-                                  <div className="truncate text-sm font-medium">
-                                    {author.name}
-                                  </div>
-                                  {author.role && (
-                                    <div className="truncate text-xs text-muted">
-                                      {author.role}
+                    <div className="flex items-stretch gap-2">
+                      {/* Avatar of the selected author overlays the input's
+                          left padding so the picker doubles as the preview.
+                          pointer-events-none keeps clicks landing on the
+                          input/trigger underneath. */}
+                      <div className="relative flex-1">
+                        {authorId && (
+                          <AppAvatar
+                            src={authorAvatarUrl}
+                            name={authorName || "?"}
+                            size="sm"
+                            className="pointer-events-none absolute left-2 top-1/2 z-10 size-6 -translate-y-1/2"
+                          />
+                        )}
+                        <ComboBox
+                          aria-label="Author"
+                          items={authors}
+                          menuTrigger="focus"
+                          selectedKey={authorId || null}
+                          onSelectionChange={(key) => {
+                            const a = authors.find((x) => x.id === String(key));
+                            if (a) {
+                              setAuthorId(a.id);
+                              setAuthorName(a.name);
+                              setAuthorAvatarUrl(a.avatarUrl ?? "");
+                            } else {
+                              // Selection cleared.
+                              setAuthorId("");
+                              setAuthorName("");
+                              setAuthorAvatarUrl("");
+                            }
+                          }}
+                        >
+                          <ComboBox.InputGroup>
+                            <Input
+                              variant="secondary"
+                              fullWidth
+                              placeholder="Search authors…"
+                              className={authorId ? "pl-10" : ""}
+                            />
+                            <ComboBox.Trigger />
+                          </ComboBox.InputGroup>
+                          <ComboBox.Popover>
+                            <ListBox>
+                              {(author: Author) => (
+                                <ListBoxItem
+                                  id={author.id}
+                                  textValue={author.name}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <AppAvatar
+                                      src={author.avatarUrl}
+                                      name={author.name}
+                                      size="sm"
+                                    />
+                                    <div className="min-w-0">
+                                      <div className="truncate text-sm font-medium">
+                                        {author.name}
+                                      </div>
+                                      {author.role && (
+                                        <div className="truncate text-xs text-muted">
+                                          {author.role}
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
-                                </div>
-                              </div>
-                            </ListBoxItem>
-                          )}
-                        </ListBox>
-                      </ComboBox.Popover>
-                    </ComboBox>
+                                  </div>
+                                </ListBoxItem>
+                              )}
+                            </ListBox>
+                          </ComboBox.Popover>
+                        </ComboBox>
+                      </div>
+                      {authorId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="md"
+                          aria-label="Edit author"
+                          onPress={openEditAuthor}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="md"
+                        aria-label="Create author"
+                        onPress={openCreateAuthor}
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    </div>
                   </Labeled>
                 </div>
-
-                {/* Selected author preview */}
-                {(authorId || authorName) && (
-                  <div className="rounded-lg bg-background p-3">
-                    <span className="mb-2 block text-xs font-medium text-muted">
-                      Selected
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <EditableAvatar
-                        name={authorName || "?"}
-                        src={authorAvatarUrl}
-                        authorId={authorId || undefined}
-                        onChange={(url) => setAuthorAvatarUrl(url)}
-                      />
-                      <span className="text-sm font-medium text-foreground">
-                        {authorName || "Unknown"}
-                      </span>
-                      {authorId && (
-                        <Chip
-                          color="success"
-                          size="sm"
-                          variant="soft"
-                          className="ml-auto"
-                        >
-                          Existing
-                        </Chip>
-                      )}
-                    </div>
-                  </div>
-                )}
               </Card.Content>
             </Card>
+
+            <AuthorFormModal
+              isOpen={authorModal.isOpen}
+              onOpenChange={authorModal.setOpen}
+              author={editingAuthor}
+              onSaved={handleAuthorSaved}
+            />
 
             {/* Category section - THIRD */}
             <Card>
@@ -1075,49 +981,107 @@ export default function PostForm({
                 </p>
               </Card.Header>
               <Card.Content className="space-y-3">
-                <ComboBox
-                  aria-label="Category"
-                  items={blogCategories}
-                  allowsCustomValue
-                  menuTrigger="focus"
-                  selectedKey={categoryId || null}
-                  inputValue={categoryName}
-                  onInputChange={(value) => {
-                    setCategoryId("");
-                    setCategoryName(value);
-                  }}
-                  onSelectionChange={(key) => {
-                    const c = blogCategories.find((x) => x.id === String(key));
-                    if (c) {
-                      setCategoryId(c.id);
-                      setCategoryName(c.name);
-                    }
-                  }}
-                >
-                  <ComboBox.InputGroup>
-                    <Input
-                      variant="secondary"
-                      fullWidth
-                      placeholder={
-                        blogCategories.length > 0
-                          ? "Search categories or type a new name…"
-                          : "Enter category name…"
-                      }
-                    />
-                    <ComboBox.Trigger />
-                  </ComboBox.InputGroup>
-                  <ComboBox.Popover>
-                    <ListBox>
-                      {(category: Category) => (
-                        <ListBoxItem id={category.id} textValue={category.name}>
-                          {category.name}
-                        </ListBoxItem>
-                      )}
-                    </ListBox>
-                  </ComboBox.Popover>
-                </ComboBox>
+                <div className="flex items-stretch gap-2">
+                  {/* The selected category's color swatch overlays the
+                      input's left padding — visual cue matching the
+                      author avatar treatment above. */}
+                  <div className="relative flex-1">
+                    {categoryId && selectedCategory?.color && (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute left-3 top-1/2 z-10 size-3 -translate-y-1/2 rounded-full"
+                        style={{ backgroundColor: selectedCategory.color }}
+                      />
+                    )}
+                    <ComboBox
+                      aria-label="Category"
+                      items={blogCategories}
+                      menuTrigger="focus"
+                      selectedKey={categoryId || null}
+                      onSelectionChange={(key) => {
+                        const c = blogCategories.find(
+                          (x) => x.id === String(key),
+                        );
+                        if (c) {
+                          setCategoryId(c.id);
+                          setCategoryName(c.name);
+                        } else {
+                          setCategoryId("");
+                          setCategoryName("");
+                        }
+                      }}
+                    >
+                      <ComboBox.InputGroup>
+                        <Input
+                          variant="secondary"
+                          fullWidth
+                          placeholder={
+                            blogCategories.length > 0
+                              ? "Search categories…"
+                              : "No categories yet"
+                          }
+                          className={
+                            categoryId && selectedCategory?.color ? "pl-9" : ""
+                          }
+                        />
+                        <ComboBox.Trigger />
+                      </ComboBox.InputGroup>
+                      <ComboBox.Popover>
+                        <ListBox>
+                          {(category: Category) => (
+                            <ListBoxItem
+                              id={category.id}
+                              textValue={category.name}
+                            >
+                              <div className="flex items-center gap-2">
+                                {category.color && (
+                                  <span
+                                    aria-hidden
+                                    className="inline-block size-3 shrink-0 rounded-full"
+                                    style={{ backgroundColor: category.color }}
+                                  />
+                                )}
+                                <span className="truncate">
+                                  {category.name}
+                                </span>
+                              </div>
+                            </ListBoxItem>
+                          )}
+                        </ListBox>
+                      </ComboBox.Popover>
+                    </ComboBox>
+                  </div>
+                  {selectedCategory && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="md"
+                      aria-label="Edit category"
+                      onPress={() => openEditCategory(selectedCategory)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    aria-label="Create category"
+                    onPress={openCreateCategory}
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                </div>
               </Card.Content>
             </Card>
+
+            <CategoryFormModal
+              isOpen={categoryModal.isOpen}
+              onOpenChange={categoryModal.setOpen}
+              category={editingCategory}
+              defaultBlog={blog === "hive" || blog === "learn" ? blog : "hive"}
+              onSaved={handleCategorySaved}
+            />
 
             {/* Post details */}
             <Card>
@@ -1162,15 +1126,59 @@ export default function PostForm({
                   </span>
                 </Labeled>
 
-                {/* Author date */}
+                {/* Author date — segmented input + pop-out calendar.
+                    Wire format stays "YYYY-MM-DD" via parseDate ↔ toString(). */}
                 <Labeled label="Author date" hint="Defaults to today.">
-                  <Input
-                    variant="secondary"
-                    fullWidth
-                    value={authorDate}
-                    onChange={(e) => setAuthorDate(e.target.value)}
-                    type="date"
-                  />
+                  <DatePicker
+                    aria-label="Author date"
+                    value={
+                      authorDate
+                        ? (() => {
+                            try {
+                              return parseDate(authorDate);
+                            } catch {
+                              return null;
+                            }
+                          })()
+                        : null
+                    }
+                    onChange={(v) => setAuthorDate(v ? v.toString() : "")}
+                    className="w-full"
+                  >
+                    <DateField.Group fullWidth variant="secondary">
+                      <DateField.InputContainer>
+                        <DateField.Input>
+                          {(segment) => <DateField.Segment segment={segment} />}
+                        </DateField.Input>
+                      </DateField.InputContainer>
+                      <DateField.Suffix>
+                        <DatePicker.Trigger>
+                          <DatePicker.TriggerIndicator />
+                        </DatePicker.Trigger>
+                      </DateField.Suffix>
+                    </DateField.Group>
+                    {/* HeroUI caps the popover at `max-w-(--trigger-width)`
+                        — fine for full-width inputs but our trigger is an
+                        icon button. Lift the cap and let the calendar's
+                        intrinsic grid drive the popover width. */}
+                    <DatePicker.Popover className="!max-w-fit w-fit">
+                      <Calendar>
+                        <Calendar.Header>
+                          <Calendar.NavButton slot="previous" />
+                          <Calendar.Heading className="text-center" />
+                          <Calendar.NavButton slot="next" />
+                        </Calendar.Header>
+                        <Calendar.Grid>
+                          <Calendar.GridHeader>
+                            {(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
+                          </Calendar.GridHeader>
+                          <Calendar.GridBody>
+                            {(date) => <Calendar.Cell date={date} />}
+                          </Calendar.GridBody>
+                        </Calendar.Grid>
+                      </Calendar>
+                    </DatePicker.Popover>
+                  </DatePicker>
                 </Labeled>
 
                 {/* Lede */}
@@ -1274,7 +1282,8 @@ export default function PostForm({
                         Hide from search engines
                       </span>
                       <span className="block text-xs text-muted">
-                        Adds &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot; /&gt;
+                        Adds &lt;meta name=&quot;robots&quot;
+                        content=&quot;noindex&quot; /&gt;
                       </span>
                     </Switch.Content>
                     <Switch.Control>

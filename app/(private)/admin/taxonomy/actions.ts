@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { slugify } from "@/app/lib/slug";
 import {
   adminApi,
@@ -9,7 +8,8 @@ import {
   type CategoryInput,
   type TagInput,
 } from "../lib/api";
-import type { SaveState } from "../lib/form-state";
+import type { EntitySaveState, SaveState } from "../lib/form-state";
+import type { Author, Category } from "@/app/lib/article-types";
 import { assertAdmin } from "../lib/auth";
 
 function str(form: FormData, key: string): string {
@@ -33,9 +33,9 @@ function optInt(form: FormData, key: string): number | null {
 // ---------------------------------------------------------------
 
 export async function saveAuthor(
-  _prev: SaveState,
+  _prev: EntitySaveState<Author>,
   formData: FormData,
-): Promise<SaveState> {
+): Promise<EntitySaveState<Author>> {
   await assertAdmin();
 
   const id = optStr(formData, "id");
@@ -64,54 +64,37 @@ export async function saveAuthor(
     github: optStr(formData, "github"),
   };
 
+  let entity: Author;
   try {
-    if (id) {
-      await adminApi.updateAuthor(id, input);
-    } else {
-      await adminApi.createAuthor(input);
-    }
+    entity = id
+      ? await adminApi.updateAuthor(id, input)
+      : await adminApi.createAuthor(input);
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };
   }
 
   revalidatePath("/admin/authors");
-  redirect("/admin/authors");
-}
-
-export async function deleteAuthorAction(formData: FormData): Promise<void> {
-  await assertAdmin();
-  const id = str(formData, "id");
-  if (!id) return;
-  try {
-    await adminApi.deleteAuthor(id);
-  } catch (e) {
-    console.error("[deleteAuthor]", e);
-  }
-  revalidatePath("/admin/authors");
+  return { ok: true, entity };
 }
 
 /**
- * Patch just the avatar fields on an existing author. Lets the in-place
- * EditableAvatar in the post editor update an existing author's photo
- * without leaving the editor (or losing the post-form state to a redirect).
+ * Delete actions return SaveState so the calling dialog can detect the
+ * outcome via useActionState and close itself / surface the error inline.
+ * The shape mirrors saveAuthor / saveCategory / saveTag.
  */
-export async function updateAuthorAvatar(
-  authorId: string,
-  avatarUrl: string,
-  avatarAlt?: string | null,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function deleteAuthorAction(
+  _prev: SaveState,
+  formData: FormData,
+): Promise<SaveState> {
   await assertAdmin();
-  if (!authorId) return { ok: false, error: "Missing author id." };
+  const id = str(formData, "id");
+  if (!id) return { ok: false, error: "Missing author id." };
   try {
-    await adminApi.updateAuthor(authorId, {
-      avatarUrl,
-      avatarAlt: avatarAlt ?? null,
-    });
+    await adminApi.deleteAuthor(id);
   } catch (e) {
-    return { ok: false, error: (e as Error).message };
+    return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/authors");
-  revalidatePath("/admin/posts");
   return { ok: true };
 }
 
@@ -120,9 +103,9 @@ export async function updateAuthorAvatar(
 // ---------------------------------------------------------------
 
 export async function saveCategory(
-  _prev: SaveState,
+  _prev: EntitySaveState<Category>,
   formData: FormData,
-): Promise<SaveState> {
+): Promise<EntitySaveState<Category>> {
   await assertAdmin();
 
   const id = optStr(formData, "id");
@@ -154,30 +137,33 @@ export async function saveCategory(
     color: optStr(formData, "color"),
   };
 
+  let entity: Category;
   try {
-    if (id) {
-      await adminApi.updateCategory(id, input);
-    } else {
-      await adminApi.createCategory(input);
-    }
+    entity = id
+      ? await adminApi.updateCategory(id, input)
+      : await adminApi.createCategory(input);
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };
   }
 
   revalidatePath("/admin/categories");
-  redirect("/admin/categories");
+  return { ok: true, entity };
 }
 
-export async function deleteCategoryAction(formData: FormData): Promise<void> {
+export async function deleteCategoryAction(
+  _prev: SaveState,
+  formData: FormData,
+): Promise<SaveState> {
   await assertAdmin();
   const id = str(formData, "id");
-  if (!id) return;
+  if (!id) return { ok: false, error: "Missing category id." };
   try {
     await adminApi.deleteCategory(id);
   } catch (e) {
-    console.error("[deleteCategory]", e);
+    return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/categories");
+  return { ok: true };
 }
 
 // ---------------------------------------------------------------
@@ -219,17 +205,21 @@ export async function saveTag(
   }
 
   revalidatePath("/admin/tags");
-  redirect("/admin/tags");
+  return { ok: true };
 }
 
-export async function deleteTagAction(formData: FormData): Promise<void> {
+export async function deleteTagAction(
+  _prev: SaveState,
+  formData: FormData,
+): Promise<SaveState> {
   await assertAdmin();
   const id = str(formData, "id");
-  if (!id) return;
+  if (!id) return { ok: false, error: "Missing tag id." };
   try {
     await adminApi.deleteTag(id);
   } catch (e) {
-    console.error("[deleteTag]", e);
+    return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/tags");
+  return { ok: true };
 }
