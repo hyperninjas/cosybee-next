@@ -32,19 +32,15 @@ export async function generateMetadata({
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // When the author supplied a custom share image, surface it here.
-      // Otherwise the branded per-article opengraph-image.tsx that Next
-      // auto-injects at this route handles the social card.
-      ...(article.ogImage
-        ? {
-            images: [
-              {
-                url: article.ogImage,
-                alt: article.ogImageAlt ?? article.coverImageAlt,
-              },
-            ],
-          }
-        : {}),
+      // Per spec: og:image is the explicit override when set, otherwise the
+      // raw cover image. Setting images here overrides any file-based
+      // opengraph-image.tsx at the route.
+      images: [
+        {
+          url: article.ogImage ?? article.coverImage,
+          alt: article.ogImageAlt ?? article.coverImageAlt,
+        },
+      ],
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
       authors: [article.author?.name ?? "energiebee"],
