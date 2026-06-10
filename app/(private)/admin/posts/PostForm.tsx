@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -37,6 +37,7 @@ import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { AppLink } from "@/app/components/ui/AppLink";
 import { useUpload } from "@/app/hooks/useUpload";
 import { validate } from "@/app/lib/storage";
+import { findContentImagesMissingAlt } from "@/app/lib/content-images";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -163,7 +164,7 @@ function EditableAvatar({
   disabled?: boolean;
   onChange: (url: string) => void;
 }) {
-  const { upload, status, progress, error } = useUpload("user-avatar");
+  const { upload, status, progress, error } = useUpload("author-avatar");
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -178,7 +179,7 @@ function EditableAvatar({
 
   const handleFile = useCallback(
     async (file: File) => {
-      const problem = validate(file, "user-avatar");
+      const problem = validate(file, "author-avatar");
       if (problem) {
         setClientError(problem);
         return;
@@ -187,7 +188,9 @@ function EditableAvatar({
       const preview = URL.createObjectURL(file);
       setLocalPreview(preview);
       try {
-        const { fileUrl } = await upload(file);
+        const { fileUrl } = await upload(file, {
+          alt: `${name} avatar`,
+        });
         // Hand the canonical URL up — and drop the blob so subsequent
         // src changes (e.g. picking another author) aren't shadowed.
         setLocalPreview(null);
@@ -200,7 +203,7 @@ function EditableAvatar({
         URL.revokeObjectURL(preview);
       }
     },
-    [upload, onChange],
+    [upload, onChange, name],
   );
 
   const isUploading = status === "uploading";
@@ -351,6 +354,7 @@ function ActionBar({
   setBlog,
   onSetStatus,
   liveHref,
+  disabled = false,
 }: {
   editing: boolean;
   isPublished: boolean;
@@ -358,6 +362,8 @@ function ActionBar({
   setBlog: (b: string) => void;
   onSetStatus: (s: string) => void;
   liveHref?: string;
+  /** Block both save buttons (e.g. content images missing alt text). */
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
@@ -412,7 +418,7 @@ function ActionBar({
           variant="outline"
           size="sm"
           onPress={() => onSetStatus("DRAFT")}
-          isDisabled={pending}
+          isDisabled={pending || disabled}
           isPending={pending && !isPublished}
         >
           Save draft
@@ -422,7 +428,7 @@ function ActionBar({
           variant="primary"
           size="sm"
           onPress={() => onSetStatus("PUBLISHED")}
-          isDisabled={pending}
+          isDisabled={pending || disabled}
           isPending={pending && isPublished}
         >
           {editing && isPublished ? "Update" : "Publish"}
@@ -582,6 +588,14 @@ export default function PostForm({
   const [ctaLabel, setCtaLabel] = useState(post?.ctaLabel ?? "");
   const [ctaEnabled, setCtaEnabled] = useState(Boolean(post?.ctaLabel));
 
+  // Every content image must carry alt text or the backend rejects the save.
+  // Compute lazily on each edit so the warning + disabled-save state stay in
+  // sync with the editor.
+  const missingAlts = useMemo(
+    () => findContentImagesMissingAlt(blocks as unknown[]),
+    [blocks],
+  );
+
   const effectiveSlug = slugTouched ? slug : slugify(title);
   const readTime = estimateReadTime(blocks);
   const metaTitle = (seoTitle || title || "Untitled").trim();
@@ -672,6 +686,7 @@ export default function PostForm({
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
         liveHref={liveHref}
+        disabled={missingAlts.length > 0}
       />
       {state?.error && (
         <div className="mx-auto mb-6 max-w-2xl">
@@ -693,6 +708,7 @@ export default function PostForm({
                 context="blog-cover"
                 value={coverUrl || null}
                 onChange={(url) => setCoverUrl(url ?? "")}
+                alt={coverImageAlt || title}
               />
             </div>
 
@@ -736,6 +752,32 @@ export default function PostForm({
               />
             </div>
 
+            {/* Block the save until every content image carries alt text —
+                the backend rejects un-alt'd images with a 400. */}
+            {missingAlts.length > 0 && (
+              <div className="mb-4">
+                <Alert status="warning">
+                  <Alert.Indicator />
+                  <Alert.Content>
+                    <Alert.Title>
+                      {missingAlts.length === 1
+                        ? "1 image is missing alt text"
+                        : `${missingAlts.length} images are missing alt text`}
+                    </Alert.Title>
+                    <Alert.Description>
+                      Add an alt/caption to{" "}
+                      {missingAlts.map((m, i) => (
+                        <span key={m.index}>
+                          {i > 0 && ", "}image #{m.index}
+                        </span>
+                      ))}{" "}
+                      in the editor below before saving.
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert>
+              </div>
+            )}
+
             {/* body */}
             <div className="post-editor">
               <Editor initialContent={initialBlocks} onChange={setBlocks} />
@@ -762,6 +804,7 @@ export default function PostForm({
                   context="blog-cover"
                   value={coverUrl || null}
                   onChange={(url) => setCoverUrl(url ?? "")}
+                  alt={coverImageAlt || title}
                 />
                 <Labeled
                   label="Alt text"

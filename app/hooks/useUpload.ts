@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   uploadFile,
   StorageError,
+  type ConfirmMetadata,
   type ConfirmResponse,
   type UploadContext,
 } from "@/app/lib/storage";
@@ -18,16 +19,18 @@ export function useUpload(context: UploadContext) {
   const abortRef = useRef<AbortController | null>(null);
 
   const upload = useCallback(
-    async (file: File): Promise<ConfirmResponse> => {
+    async (file: File, metadata?: ConfirmMetadata): Promise<ConfirmResponse> => {
       abortRef.current = new AbortController();
       setStatus("uploading");
       setProgress(0);
       setError(null);
       try {
-        const result = await uploadFile(file, context, {
-          onProgress: setProgress,
-          signal: abortRef.current.signal,
-        });
+        const result = await uploadFile(
+          file,
+          context,
+          { onProgress: setProgress, signal: abortRef.current.signal },
+          metadata,
+        );
         setStatus("done");
         return result;
       } catch (e) {

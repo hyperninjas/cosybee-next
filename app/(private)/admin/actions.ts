@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { findContentImagesMissingAlt } from "@/app/lib/content-images";
 import { adminApi } from "./lib/api";
 import type { SaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
@@ -136,6 +137,17 @@ export async function savePost(
 
   const base = slugify(str(formData, "slug") || title);
   if (title && !base) fieldErrors.slug = "Could not derive a slug from the title.";
+
+  // The backend rejects any content image without alt text. Catch it here so
+  // the error surfaces inline instead of as a raw 400 from the upstream API.
+  const missingAlts = findContentImagesMissingAlt(blocks);
+  if (missingAlts.length > 0) {
+    const list = missingAlts.map((m) => `#${m.index}`).join(", ");
+    return {
+      ok: false,
+      error: `Add alt text to content image${missingAlts.length === 1 ? "" : "s"} ${list} before saving.`,
+    };
+  }
 
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, error: "Add a title to save your post.", fieldErrors };
