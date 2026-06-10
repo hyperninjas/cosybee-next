@@ -67,6 +67,15 @@ export type FormPost = {
   // Media
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
 
   // Display
   readTime: number;
@@ -82,8 +91,9 @@ export type FormPost = {
   ctaHref: string | null;
   ctaExternal: boolean;
 
-  // Status
-  status: "DRAFT" | "PUBLISHED";
+  // Status / scheduling
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  publishedAt?: string | null;
 
   // Content
   contentJson: Record<string, unknown> | null;
@@ -349,7 +359,7 @@ function CategoryPill({
 /** Sticky top action bar — uses form status for the saving state. */
 function ActionBar({
   editing,
-  isPublished,
+  status,
   blog,
   setBlog,
   onSetStatus,
@@ -357,7 +367,7 @@ function ActionBar({
   disabled = false,
 }: {
   editing: boolean;
-  isPublished: boolean;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   blog: string;
   setBlog: (b: string) => void;
   onSetStatus: (s: string) => void;
@@ -366,6 +376,18 @@ function ActionBar({
   disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
+  const isPublished = status === "PUBLISHED";
+  const isArchived = status === "ARCHIVED";
+  const chipColor = isPublished
+    ? ("success" as const)
+    : isArchived
+      ? ("warning" as const)
+      : ("default" as const);
+  const chipLabel = isPublished
+    ? "Published"
+    : isArchived
+      ? "Archived"
+      : "Draft";
   return (
     <div className="sticky top-0 z-30 mb-6 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur sm:px-6">
       <div className="flex items-center gap-3">
@@ -393,12 +415,12 @@ function ActionBar({
           </Select.Popover>
         </Select>
         <Chip
-          color={isPublished ? "success" : "default"}
+          color={chipColor}
           size="sm"
           variant="soft"
           className="hidden sm:inline-flex"
         >
-          {isPublished ? "Published" : "Draft"}
+          {chipLabel}
         </Chip>
       </div>
 
@@ -419,17 +441,29 @@ function ActionBar({
           size="sm"
           onPress={() => onSetStatus("DRAFT")}
           isDisabled={pending || disabled}
-          isPending={pending && !isPublished}
+          isPending={pending && status === "DRAFT"}
         >
           Save draft
         </Button>
+        {editing && (isPublished || isArchived) && (
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            onPress={() => onSetStatus(isArchived ? "DRAFT" : "ARCHIVED")}
+            isDisabled={pending || disabled}
+            isPending={pending && status === "ARCHIVED"}
+          >
+            {isArchived ? "Unarchive" : "Archive"}
+          </Button>
+        )}
         <Button
           type="submit"
           variant="primary"
           size="sm"
           onPress={() => onSetStatus("PUBLISHED")}
           isDisabled={pending || disabled}
-          isPending={pending && isPublished}
+          isPending={pending && status === "PUBLISHED"}
         >
           {editing && isPublished ? "Update" : "Publish"}
         </Button>
@@ -588,6 +622,33 @@ export default function PostForm({
   const [ctaLabel, setCtaLabel] = useState(post?.ctaLabel ?? "");
   const [ctaEnabled, setCtaEnabled] = useState(Boolean(post?.ctaLabel));
 
+  // Cover extras
+  const [coverImageTitle, setCoverImageTitle] = useState(
+    post?.coverImageTitle ?? "",
+  );
+  const [coverImageCaption, setCoverImageCaption] = useState(
+    post?.coverImageCaption ?? "",
+  );
+  const [coverImageCredit, setCoverImageCredit] = useState(
+    post?.coverImageCredit ?? "",
+  );
+
+  // SEO / social
+  const [ogImage, setOgImage] = useState(post?.ogImage ?? "");
+  const [ogImageAlt, setOgImageAlt] = useState(post?.ogImageAlt ?? "");
+  const [canonicalUrl, setCanonicalUrl] = useState(post?.canonicalUrl ?? "");
+  const [noindex, setNoindex] = useState(post?.noindex ?? false);
+
+  // Scheduling — datetime-local value (YYYY-MM-DDTHH:mm). Empty = no schedule.
+  const [publishedAt, setPublishedAt] = useState(() => {
+    if (!post?.publishedAt) return "";
+    const d = new Date(post.publishedAt);
+    if (isNaN(d.getTime())) return "";
+    // Trim seconds/timezone for <input type="datetime-local">.
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
+
   // Every content image must carry alt text or the backend rejects the save.
   // Compute lazily on each edit so the warning + disabled-save state stay in
   // sync with the editor.
@@ -679,9 +740,32 @@ export default function PostForm({
         name="ctaExternal"
         value={ctaEnabled && ctaExternal ? "on" : ""}
       />
+      {/* Cover extras */}
+      <input
+        type="hidden"
+        name="coverImageTitle"
+        value={coverImageTitle}
+      />
+      <input
+        type="hidden"
+        name="coverImageCaption"
+        value={coverImageCaption}
+      />
+      <input
+        type="hidden"
+        name="coverImageCredit"
+        value={coverImageCredit}
+      />
+      {/* SEO / social */}
+      <input type="hidden" name="ogImage" value={ogImage} />
+      <input type="hidden" name="ogImageAlt" value={ogImageAlt} />
+      <input type="hidden" name="canonicalUrl" value={canonicalUrl} />
+      <input type="hidden" name="noindex" value={noindex ? "on" : ""} />
+      {/* Scheduling — empty value means "no schedule, publish immediately". */}
+      <input type="hidden" name="publishedAt" value={publishedAt} />
       <ActionBar
         editing={Boolean(post)}
-        isPublished={isPublished}
+        status={status}
         blog={blog}
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
@@ -816,6 +900,39 @@ export default function PostForm({
                     value={coverImageAlt}
                     onChange={(e) => setCoverImageAlt(e.target.value)}
                     placeholder={title || "Enter alt text…"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Title"
+                  hint="Tooltip shown on hover. Optional."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageTitle}
+                    onChange={(e) => setCoverImageTitle(e.target.value)}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Caption"
+                  hint="Short caption rendered beneath the hero. Optional."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageCaption}
+                    onChange={(e) => setCoverImageCaption(e.target.value)}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Credit"
+                  hint='e.g. "© EnergieBee" or "Photo by Jane Doe". Optional.'
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageCredit}
+                    onChange={(e) => setCoverImageCredit(e.target.value)}
                   />
                 </Labeled>
               </Card.Content>
@@ -1088,6 +1205,85 @@ export default function PostForm({
                     onChange={(e) => setSeoDescription(e.target.value)}
                     rows={2}
                     placeholder={description || "Defaults to excerpt"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Social share image"
+                  hint="1200×630 image shown on social cards. Defaults to the cover image."
+                >
+                  <PublicImageUpload
+                    context="blog-cover"
+                    value={ogImage || null}
+                    onChange={(url) => setOgImage(url ?? "")}
+                    alt={ogImageAlt || title}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Share image alt text"
+                  hint="Defaults to the cover alt text."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={ogImageAlt}
+                    onChange={(e) => setOgImageAlt(e.target.value)}
+                    placeholder={coverImageAlt || "Defaults to cover alt"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Canonical URL"
+                  hint="Override the canonical link. Leave blank to derive from the slug."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    type="url"
+                    value={canonicalUrl}
+                    onChange={(e) => setCanonicalUrl(e.target.value)}
+                    placeholder="https://energiebee.com/learn/about-us"
+                  />
+                </Labeled>
+                <div className="rounded-lg border border-border p-3 transition-colors hover:bg-background">
+                  <Switch
+                    isSelected={noindex}
+                    className="justify-between"
+                    onChange={setNoindex}
+                  >
+                    <Switch.Content>
+                      <span className="block text-sm font-medium text-foreground">
+                        Hide from search engines
+                      </span>
+                      <span className="block text-xs text-muted">
+                        Adds &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot; /&gt;
+                      </span>
+                    </Switch.Content>
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>
+                </div>
+              </Card.Content>
+            </Card>
+
+            {/* Schedule — set a future publishedAt to delay publication.
+                Only meaningful when the eventual save status is PUBLISHED. */}
+            <Card>
+              <Card.Header>
+                <Card.Title className="text-sm font-semibold">
+                  Schedule
+                </Card.Title>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                <Labeled
+                  label="Publish at"
+                  hint="Leave blank to publish immediately when you save. Future times = the post goes live automatically."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    type="datetime-local"
+                    value={publishedAt}
+                    onChange={(e) => setPublishedAt(e.target.value)}
                   />
                 </Labeled>
               </Card.Content>

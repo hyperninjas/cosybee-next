@@ -87,6 +87,15 @@ export interface PostInput {
   // Media
   coverImage?: string;
   coverImageAlt?: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
 
   // Display
   readTime?: number;
@@ -102,8 +111,10 @@ export interface PostInput {
   ctaHref?: string | null;
   ctaExternal?: boolean;
 
-  // Status
-  status?: "DRAFT" | "PUBLISHED";
+  // Status / scheduling — set status: "PUBLISHED" with a future publishedAt
+  // to schedule. Backend gates public visibility on publishedAt <= now.
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  publishedAt?: string | null;
 
   // Content
   contentJson?: Record<string, unknown>;
@@ -235,8 +246,11 @@ export const adminApi = {
     await fetchApi(`/api/posts/${id}`, { method: "DELETE" });
   },
 
-  /** Update post status (publish/unpublish). */
-  async setStatus(id: string, status: "DRAFT" | "PUBLISHED"): Promise<AdminPost> {
+  /** Update post status (draft / publish / archive). */
+  async setStatus(
+    id: string,
+    status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
+  ): Promise<AdminPost> {
     return fetchApi<AdminPost>(`/api/posts/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
