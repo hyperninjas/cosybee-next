@@ -38,6 +38,7 @@ import { AppLink } from "@/app/components/ui/AppLink";
 import { useUpload } from "@/app/hooks/useUpload";
 import { validate } from "@/app/lib/storage";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
+import { updateAuthorAvatar } from "@/app/(private)/admin/taxonomy/actions";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -148,9 +149,12 @@ function Labeled({
  * Avatar with a small pen icon overlay that opens a file picker.
  * Uses the same upload pipeline as PublicImageUpload (useUpload + validate).
  *
+ * When `authorId` is set we patch the existing author record via the
+ * dedicated PATCH endpoint so the change persists immediately — the post
+ * editor's savePost path otherwise drops authorAvatarUrl when an
+ * existing author is selected.
+ *
  * Edge cases covered:
- *  - `disabled` hides the pen and blocks clicks (used when an existing
- *    author is selected — we don't want to overwrite their avatar).
  *  - Local blob preview shows immediately while the upload runs.
  *  - Spinner overlay during upload; pen hidden so it can't double-fire.
  *  - On success the local blob is revoked and cleared so the new src
@@ -166,17 +170,19 @@ function Labeled({
 function EditableAvatar({
   name,
   src,
-  disabled = false,
+  authorId,
   onChange,
 }: {
   name: string;
   src: string;
-  disabled?: boolean;
+  /** When set, the upload also PATCHes this author's stored avatar. */
+  authorId?: string;
   onChange: (url: string) => void;
 }) {
   const { upload, status, progress, error } = useUpload("author-avatar");
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Always revoke the most recent blob URL on unmount or when it changes.
@@ -195,6 +201,7 @@ function EditableAvatar({
         return;
       }
       setClientError(null);
+      setPersistError(null);
       const preview = URL.createObjectURL(file);
       setLocalPreview(preview);
       try {
@@ -205,20 +212,33 @@ function EditableAvatar({
         // src changes (e.g. picking another author) aren't shadowed.
         setLocalPreview(null);
         URL.revokeObjectURL(preview);
-        // user-avatar is a public context so fileUrl is always set,
+        // author-avatar is a public context so fileUrl is always set,
         // but the response type is nullable — fall back defensively.
-        onChange(fileUrl ?? "");
+        const url = fileUrl ?? "";
+        onChange(url);
+
+        // For existing authors, the post-save action drops authorAvatarUrl
+        // (line in actions.ts: `authorId ? { authorId } : { ..., authorAvatarUrl }`).
+        // PATCH the author record directly so the change actually persists.
+        if (authorId && url) {
+          const result = await updateAuthorAvatar(
+            authorId,
+            url,
+            `${name} avatar`,
+          );
+          if (!result.ok) setPersistError(result.error);
+        }
       } catch {
         setLocalPreview(null);
         URL.revokeObjectURL(preview);
       }
     },
-    [upload, onChange, name],
+    [upload, onChange, name, authorId],
   );
 
   const isUploading = status === "uploading";
   const shown = localPreview ?? src;
-  const showPen = !disabled && !isUploading;
+  const showPen = !isUploading;
 
   return (
     <div className="flex flex-col items-start">
@@ -264,12 +284,12 @@ function EditableAvatar({
             e.target.value = "";
           }}
           className="hidden"
-          disabled={disabled || isUploading}
+          disabled={isUploading}
         />
       </div>
-      {(clientError || error) && (
+      {(clientError || error || persistError) && (
         <p className="mt-1 text-[11px] font-medium text-danger">
-          {clientError ?? error}
+          {clientError ?? error ?? persistError}
         </p>
       )}
     </div>
@@ -1022,7 +1042,7 @@ export default function PostForm({
                       <EditableAvatar
                         name={authorName || "?"}
                         src={authorAvatarUrl}
-                        disabled={!!authorId}
+                        authorId={authorId || undefined}
                         onChange={(url) => setAuthorAvatarUrl(url)}
                       />
                       <span className="text-sm font-medium text-foreground">

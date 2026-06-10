@@ -90,6 +90,31 @@ export async function deleteAuthorAction(formData: FormData): Promise<void> {
   revalidatePath("/admin/authors");
 }
 
+/**
+ * Patch just the avatar fields on an existing author. Lets the in-place
+ * EditableAvatar in the post editor update an existing author's photo
+ * without leaving the editor (or losing the post-form state to a redirect).
+ */
+export async function updateAuthorAvatar(
+  authorId: string,
+  avatarUrl: string,
+  avatarAlt?: string | null,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await assertAdmin();
+  if (!authorId) return { ok: false, error: "Missing author id." };
+  try {
+    await adminApi.updateAuthor(authorId, {
+      avatarUrl,
+      avatarAlt: avatarAlt ?? null,
+    });
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+  revalidatePath("/admin/authors");
+  revalidatePath("/admin/posts");
+  return { ok: true };
+}
+
 // ---------------------------------------------------------------
 // Categories
 // ---------------------------------------------------------------
