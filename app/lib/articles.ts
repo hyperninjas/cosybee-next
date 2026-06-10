@@ -105,6 +105,16 @@ function toArticle(post: ApiPost): Article {
     // Media
     coverImage: getValidImageUrl(post.coverImage),
     coverImageAlt: post.coverImageAlt ?? "",
+    coverImageTitle: post.coverImageTitle ?? null,
+    coverImageCaption: post.coverImageCaption ?? null,
+    coverImageCredit: post.coverImageCredit ?? null,
+
+    // SEO / social
+    ogImage: post.ogImage ?? null,
+    ogImageAlt: post.ogImageAlt ?? null,
+    canonicalUrl: post.canonicalUrl ?? null,
+    noindex: post.noindex ?? false,
+    jsonLd: post.jsonLd ?? null,
 
     // Display
     readTime: post.readTime ?? 1,

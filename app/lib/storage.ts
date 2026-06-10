@@ -14,7 +14,23 @@ export type UploadContext =
   | "blog-cover"
   | "blog-content-image"
   | "blog-document"
+  | "author-avatar"
   | "user-avatar";
+
+/**
+ * Optional metadata sent to `/api/storage/confirm`. Populates the media
+ * registry so the asset shows up in the picker, gets dedup'd, and can be
+ * cleaned up automatically when replaced/orphaned. Width/height also help
+ * the reader render images without layout shift.
+ */
+export interface ConfirmMetadata {
+  alt?: string;
+  title?: string;
+  caption?: string;
+  credit?: string;
+  width?: number;
+  height?: number;
+}
 
 export interface PresignResponse {
   context: UploadContext;
@@ -75,11 +91,16 @@ export interface UploadOptions {
 /**
  * Full upload: presign → POST to S3 → confirm. Returns the confirmed object
  * (with `fileUrl` for public contexts, or `key` to store for private ones).
+ *
+ * Pass `metadata` to populate the media registry: alt/title/caption/credit
+ * and natural width/height. Width/height are auto-derived from the file for
+ * any image when not supplied.
  */
 export async function uploadFile(
   file: File,
   context: UploadContext,
   opts: UploadOptions = {},
+  metadata: ConfirmMetadata = {},
 ): Promise<ConfirmResponse> {
   // Browsers sometimes leave file.type empty — fall back so the presigned
   // policy's exact Content-Type condition can still match.
@@ -94,10 +115,56 @@ export async function uploadFile(
   // 2) upload bytes straight to S3
   await postToS3(presign.upload, file, contentType, opts);
 
-  // 3) confirm → promotes out of pending/ and returns the live URL/key
+  // 3) auto-derive natural dimensions for images so the server doesn't have
+  // to fetch + decode the asset just to learn them. Only runs when the caller
+  // didn't supply explicit values.
+  const dims =
+    metadata.width == null && metadata.height == null && file.type.startsWith("image/")
+      ? await readImageDimensions(file).catch(() => null)
+      : null;
+
+  // 4) confirm → promotes out of pending/ and returns the live URL/key
   return api<ConfirmResponse>("/api/storage/confirm", {
     method: "POST",
-    body: JSON.stringify({ key: presign.key }),
+    body: JSON.stringify({
+      key: presign.key,
+      ...stripUndefined({
+        ...metadata,
+        width: metadata.width ?? dims?.width,
+        height: metadata.height ?? dims?.height,
+      }),
+    }),
+  });
+}
+
+/** Drop keys whose value is undefined so the JSON body stays clean. */
+function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const k in obj) {
+    if (obj[k] !== undefined) out[k] = obj[k];
+  }
+  return out;
+}
+
+/**
+ * Read an image's natural pixel dimensions client-side. Uses an object URL
+ * and a hidden Image — fast, no server round-trip. Revokes the URL when done.
+ */
+function readImageDimensions(
+  file: File,
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image dimensions"));
+    };
+    img.src = url;
   });
 }
 
@@ -182,6 +249,10 @@ export const LIMITS: Record<
   "blog-document": {
     types: ["application/pdf"],
     maxBytes: 20 * 1024 * 1024,
+  },
+  "author-avatar": {
+    types: ["image/jpeg", "image/png", "image/webp", "image/avif"],
+    maxBytes: 2 * 1024 * 1024,
   },
   "user-avatar": {
     types: ["image/jpeg", "image/png", "image/webp", "image/avif"],

@@ -47,6 +47,8 @@ export default function Footer() {
             src={EnergieBeeLogo}
             alt="EnergieBee"
             className="h-auto w-36"
+            quality={85}
+            loading="eager"
           />
           {/* <p className="mt-5 max-w-70 text-[15px] leading-relaxed text-white">
             Smart home energy control that pays for itself. Save up to £300/year

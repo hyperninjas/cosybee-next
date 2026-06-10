@@ -43,6 +43,16 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     // Media
     coverImage: row.coverImage,
     coverImageAlt: row.coverImageAlt,
+    coverImageTitle: row.coverImageTitle ?? null,
+    coverImageCaption: row.coverImageCaption ?? null,
+    coverImageCredit: row.coverImageCredit ?? null,
+
+    // SEO / social
+    ogImage: row.ogImage ?? null,
+    ogImageAlt: row.ogImageAlt ?? null,
+    canonicalUrl: row.canonicalUrl ?? null,
+    noindex: row.noindex ?? false,
+    jsonLd: row.jsonLd ?? null,
 
     // Display
     readTime: row.readTime,

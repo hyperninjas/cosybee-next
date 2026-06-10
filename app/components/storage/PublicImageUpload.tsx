@@ -14,12 +14,27 @@ export function PublicImageUpload({
   value,
   onChange,
   disabled = false,
+  alt,
+  title,
+  caption,
+  credit,
 }: {
-  context: "blog-cover" | "blog-content-image" | "user-avatar";
+  context:
+    | "blog-cover"
+    | "blog-content-image"
+    | "user-avatar"
+    | "author-avatar";
   value: string | null;
   onChange: (url: string | null) => void;
   /** Block uploads (e.g. unverified email — the backend would 403 anyway). */
   disabled?: boolean;
+  /** Forwarded to /storage/confirm so the asset lands in the media registry
+   *  with proper accessibility metadata. Width/height are auto-derived from
+   *  the file — no need to pass them. */
+  alt?: string;
+  title?: string;
+  caption?: string;
+  credit?: string;
 }) {
   const { upload, status, progress, error, reset } = useUpload(context);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -45,13 +60,13 @@ export function PublicImageUpload({
       setClientError(null);
       setLocalPreview(URL.createObjectURL(file));
       try {
-        const { fileUrl } = await upload(file);
+        const { fileUrl } = await upload(file, { alt, title, caption, credit });
         onChange(fileUrl);
       } catch {
         setLocalPreview(null);
       }
     },
-    [context, upload, onChange],
+    [context, upload, onChange, alt, title, caption, credit],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

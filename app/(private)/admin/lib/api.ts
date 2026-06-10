@@ -24,6 +24,16 @@ export interface AdminPost {
   // Media
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | null;
 
   // Display
   readTime: number;
@@ -39,8 +49,8 @@ export interface AdminPost {
   ctaHref: string | null;
   ctaExternal: boolean;
 
-  // Status
-  status: "DRAFT" | "PUBLISHED";
+  // Status / scheduling
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   publishedAt: string | null;
 
   // Content
@@ -87,6 +97,15 @@ export interface PostInput {
   // Media
   coverImage?: string;
   coverImageAlt?: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
 
   // Display
   readTime?: number;
@@ -102,8 +121,10 @@ export interface PostInput {
   ctaHref?: string | null;
   ctaExternal?: boolean;
 
-  // Status
-  status?: "DRAFT" | "PUBLISHED";
+  // Status / scheduling — set status: "PUBLISHED" with a future publishedAt
+  // to schedule. Backend gates public visibility on publishedAt <= now.
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  publishedAt?: string | null;
 
   // Content
   contentJson?: Record<string, unknown>;
@@ -175,16 +196,18 @@ async function fetchApiMultipart<T>(
 }
 
 export const adminApi = {
-  /** List all posts (including drafts) for admin dashboard. */
+  /** List all posts (including drafts + archived) for admin dashboard.
+   *  Uses the dedicated admin endpoint so the response carries
+   *  every status, not just live posts. */
   async listPosts(): Promise<AdminPostRow[]> {
     try {
-      // Fetch from both blogs and combine
+      // One call per blog so we can paginate independently if needed.
       const [hiveResponse, learnResponse] = await Promise.all([
         fetchApi<{ data: AdminPost[] }>(
-          "/api/posts?blog=hive&include_drafts=true&limit=50",
+          "/api/admin/posts?blog=hive&limit=50",
         ),
         fetchApi<{ data: AdminPost[] }>(
-          "/api/posts?blog=learn&include_drafts=true&limit=50",
+          "/api/admin/posts?blog=learn&limit=50",
         ),
       ]);
       const allPosts = [
@@ -242,8 +265,11 @@ export const adminApi = {
     await fetchApi(`/api/posts/${id}`, { method: "DELETE" });
   },
 
-  /** Update post status (publish/unpublish). */
-  async setStatus(id: string, status: "DRAFT" | "PUBLISHED"): Promise<AdminPost> {
+  /** Update post status (draft / publish / archive). */
+  async setStatus(
+    id: string,
+    status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
+  ): Promise<AdminPost> {
     return fetchApi<AdminPost>(`/api/posts/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
@@ -347,4 +373,136 @@ export const adminApi = {
       return false;
     }
   },
+
+  // ---------------------------------------------------------------
+  // Authors CRUD
+  // ---------------------------------------------------------------
+
+  async getAuthor(id: string): Promise<Author | null> {
+    try {
+      return await fetchApi<Author>(`/api/admin/posts/authors/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createAuthor(input: AuthorInput): Promise<Author> {
+    return fetchApi<Author>("/api/admin/posts/authors", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateAuthor(id: string, input: Partial<AuthorInput>): Promise<Author> {
+    return fetchApi<Author>(`/api/admin/posts/authors/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteAuthor(id: string): Promise<void> {
+    await fetchApi(`/api/admin/posts/authors/${id}`, { method: "DELETE" });
+  },
+
+  // ---------------------------------------------------------------
+  // Categories CRUD
+  // ---------------------------------------------------------------
+
+  async getCategory(id: string): Promise<Category | null> {
+    try {
+      return await fetchApi<Category>(`/api/admin/posts/categories/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createCategory(input: CategoryInput): Promise<Category> {
+    return fetchApi<Category>("/api/admin/posts/categories", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateCategory(
+    id: string,
+    input: Partial<CategoryInput>,
+  ): Promise<Category> {
+    return fetchApi<Category>(`/api/admin/posts/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteCategory(id: string): Promise<void> {
+    await fetchApi(`/api/admin/posts/categories/${id}`, { method: "DELETE" });
+  },
+
+  // ---------------------------------------------------------------
+  // Tags CRUD
+  // ---------------------------------------------------------------
+
+  async getTag(id: string): Promise<Tag | null> {
+    try {
+      return await fetchApi<Tag>(`/api/admin/posts/tags/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createTag(input: TagInput): Promise<Tag> {
+    return fetchApi<Tag>("/api/admin/posts/tags", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateTag(id: string, input: Partial<TagInput>): Promise<Tag> {
+    return fetchApi<Tag>(`/api/admin/posts/tags/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteTag(id: string): Promise<void> {
+    await fetchApi(`/api/admin/posts/tags/${id}`, { method: "DELETE" });
+  },
 };
+
+// ---------------------------------------------------------------
+// Input shapes for the new CRUD endpoints. Required fields only — the
+// backend fills in slug, timestamps, and any derived columns.
+// ---------------------------------------------------------------
+
+export interface AuthorInput {
+  name: string;
+  slug?: string;
+  avatarUrl?: string | null;
+  avatarAlt?: string | null;
+  avatarWidth?: number | null;
+  avatarHeight?: number | null;
+  bio?: string | null;
+  role?: string | null;
+  email?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+}
+
+export interface CategoryInput {
+  blog: "hive" | "learn";
+  name: string;
+  slug?: string;
+  description?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  iconUrl?: string | null;
+  color?: string | null;
+}
+
+export interface TagInput {
+  name: string;
+  /** Keep the existing slug stable on rename unless explicitly set. */
+  slug?: string;
+  description?: string | null;
+}

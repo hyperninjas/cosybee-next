@@ -23,14 +23,24 @@ export async function generateMetadata({
   return {
     title: seoTitle,
     description: article.seoDescription ?? article.description,
-    alternates: { canonical: `/hive/${article.slug}` },
+    alternates: {
+      canonical: article.canonicalUrl ?? `/hive/${article.slug}`,
+    },
+    robots: article.noindex ? { index: false, follow: true } : undefined,
     openGraph: {
       url: `/hive/${article.slug}`,
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // og:image intentionally omitted: the branded per-article
-      // opengraph-image.tsx is auto-injected by Next at this route.
+      // Per spec: og:image is the explicit override when set, otherwise the
+      // raw cover image. Setting images here overrides any file-based
+      // opengraph-image.tsx at the route.
+      images: [
+        {
+          url: article.ogImage ?? article.coverImage,
+          alt: article.ogImageAlt ?? article.coverImageAlt,
+        },
+      ],
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
       authors: [article.author?.name ?? "energiebee"],

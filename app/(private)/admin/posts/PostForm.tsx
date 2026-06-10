@@ -1,16 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {
   Alert,
   Button,
+  Card,
   Chip,
+  ComboBox,
   Input,
   ListBox,
   ListBoxItem,
+  Radio,
+  RadioGroup,
   Select,
   Spinner,
   Switch,
@@ -31,6 +35,10 @@ import type { Author, Category, Tag } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { AppLink } from "@/app/components/ui/AppLink";
+import { useUpload } from "@/app/hooks/useUpload";
+import { validate } from "@/app/lib/storage";
+import { findContentImagesMissingAlt } from "@/app/lib/content-images";
+import { updateAuthorAvatar } from "@/app/(private)/admin/taxonomy/actions";
 
 const Editor = dynamic(() => import("./Editor"), {
   ssr: false,
@@ -60,6 +68,15 @@ export type FormPost = {
   // Media
   coverImage: string;
   coverImageAlt: string;
+  coverImageTitle?: string | null;
+  coverImageCaption?: string | null;
+  coverImageCredit?: string | null;
+
+  // SEO / social
+  ogImage?: string | null;
+  ogImageAlt?: string | null;
+  canonicalUrl?: string | null;
+  noindex?: boolean;
 
   // Display
   readTime: number;
@@ -75,8 +92,9 @@ export type FormPost = {
   ctaHref: string | null;
   ctaExternal: boolean;
 
-  // Status
-  status: "DRAFT" | "PUBLISHED";
+  // Status / scheduling
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  publishedAt?: string | null;
 
   // Content
   contentJson: Record<string, unknown> | null;
@@ -123,6 +141,157 @@ function Labeled({
       ) : hint ? (
         <span className="mt-1 block text-xs text-muted">{hint}</span>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Avatar with a small pen icon overlay that opens a file picker.
+ * Uses the same upload pipeline as PublicImageUpload (useUpload + validate).
+ *
+ * When `authorId` is set we patch the existing author record via the
+ * dedicated PATCH endpoint so the change persists immediately — the post
+ * editor's savePost path otherwise drops authorAvatarUrl when an
+ * existing author is selected.
+ *
+ * Edge cases covered:
+ *  - Local blob preview shows immediately while the upload runs.
+ *  - Spinner overlay during upload; pen hidden so it can't double-fire.
+ *  - On success the local blob is revoked and cleared so the new src
+ *    (the uploaded URL) becomes the source of truth on the next render.
+ *  - On failure the local preview is rolled back so the UI returns to
+ *    the prior avatar/initials.
+ *  - File input value is reset after every change so picking the same
+ *    file twice in a row still fires onChange.
+ *  - Client-side `validate` runs before upload; error text renders
+ *    underneath the avatar.
+ *  - Object URL is revoked on unmount.
+ */
+function EditableAvatar({
+  name,
+  src,
+  authorId,
+  onChange,
+}: {
+  name: string;
+  src: string;
+  /** When set, the upload also PATCHes this author's stored avatar. */
+  authorId?: string;
+  onChange: (url: string) => void;
+}) {
+  const { upload, status, progress, error } = useUpload("author-avatar");
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [clientError, setClientError] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Always revoke the most recent blob URL on unmount or when it changes.
+  useEffect(
+    () => () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    },
+    [localPreview],
+  );
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      const problem = validate(file, "author-avatar");
+      if (problem) {
+        setClientError(problem);
+        return;
+      }
+      setClientError(null);
+      setPersistError(null);
+      const preview = URL.createObjectURL(file);
+      setLocalPreview(preview);
+      try {
+        const { fileUrl } = await upload(file, {
+          alt: `${name} avatar`,
+        });
+        // Hand the canonical URL up — and drop the blob so subsequent
+        // src changes (e.g. picking another author) aren't shadowed.
+        setLocalPreview(null);
+        URL.revokeObjectURL(preview);
+        // author-avatar is a public context so fileUrl is always set,
+        // but the response type is nullable — fall back defensively.
+        const url = fileUrl ?? "";
+        onChange(url);
+
+        // For existing authors, the post-save action drops authorAvatarUrl
+        // (line in actions.ts: `authorId ? { authorId } : { ..., authorAvatarUrl }`).
+        // PATCH the author record directly so the change actually persists.
+        if (authorId && url) {
+          const result = await updateAuthorAvatar(
+            authorId,
+            url,
+            `${name} avatar`,
+          );
+          if (!result.ok) setPersistError(result.error);
+        }
+      } catch {
+        setLocalPreview(null);
+        URL.revokeObjectURL(preview);
+      }
+    },
+    [upload, onChange, name, authorId],
+  );
+
+  const isUploading = status === "uploading";
+  const shown = localPreview ?? src;
+  const showPen = !isUploading;
+
+  return (
+    <div className="flex flex-col items-start">
+      <div className="relative">
+        <AppAvatar src={shown || undefined} name={name} size="sm" />
+        {showPen && (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            aria-label={shown ? "Change avatar" : "Upload avatar"}
+            className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-border bg-surface text-foreground shadow-sm transition-colors hover:bg-background"
+          >
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-2.5"
+              aria-hidden
+            >
+              <path d="M11.5 2.5l2 2-7 7-3 1 1-3 7-7z" />
+            </svg>
+          </button>
+        )}
+        {isUploading && (
+          <div
+            aria-label={`Uploading ${progress}%`}
+            className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-[10px] font-semibold text-white"
+          >
+            {progress}%
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+            // Allow picking the same file again immediately.
+            e.target.value = "";
+          }}
+          className="hidden"
+          disabled={isUploading}
+        />
+      </div>
+      {(clientError || error || persistError) && (
+        <p className="mt-1 text-[11px] font-medium text-danger">
+          {clientError ?? error ?? persistError}
+        </p>
+      )}
     </div>
   );
 }
@@ -177,9 +346,7 @@ function AuthorCard({
           <div className="truncate text-xs text-muted">{author.role}</div>
         )}
       </div>
-      {selected && (
-        <CircleCheckFill className="size-5 shrink-0 text-accent" />
-      )}
+      {selected && <CircleCheckFill className="size-5 shrink-0 text-accent" />}
     </button>
   );
 }
@@ -212,30 +379,45 @@ function CategoryPill({
 /** Sticky top action bar — uses form status for the saving state. */
 function ActionBar({
   editing,
-  isPublished,
+  status,
   blog,
   setBlog,
   onSetStatus,
   liveHref,
+  disabled = false,
 }: {
   editing: boolean;
-  isPublished: boolean;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   blog: string;
   setBlog: (b: string) => void;
   onSetStatus: (s: string) => void;
   liveHref?: string;
+  /** Block both save buttons (e.g. content images missing alt text). */
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
+  const isPublished = status === "PUBLISHED";
+  const isArchived = status === "ARCHIVED";
+  const chipColor = isPublished
+    ? ("success" as const)
+    : isArchived
+      ? ("warning" as const)
+      : ("default" as const);
+  const chipLabel = isPublished
+    ? "Published"
+    : isArchived
+      ? "Archived"
+      : "Draft";
   return (
-    <div className="sticky top-0 z-30 -mx-4 mb-6 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+    <div className="sticky top-0 z-30 mb-6 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur sm:px-6">
       <div className="flex items-center gap-3">
-        <AppLink
+        {/* <AppLink
           href="/admin"
           className="inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           <span className="hidden sm:inline">Posts</span>
-        </AppLink>
+        </AppLink> */}
         <Select
           aria-label="Blog"
           selectedKey={blog}
@@ -253,12 +435,12 @@ function ActionBar({
           </Select.Popover>
         </Select>
         <Chip
-          color={isPublished ? "success" : "default"}
+          color={chipColor}
           size="sm"
           variant="soft"
           className="hidden sm:inline-flex"
         >
-          {isPublished ? "Published" : "Draft"}
+          {chipLabel}
         </Chip>
       </div>
 
@@ -278,18 +460,30 @@ function ActionBar({
           variant="outline"
           size="sm"
           onPress={() => onSetStatus("DRAFT")}
-          isDisabled={pending}
-          isPending={pending && !isPublished}
+          isDisabled={pending || disabled}
+          isPending={pending && status === "DRAFT"}
         >
           Save draft
         </Button>
+        {editing && (isPublished || isArchived) && (
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            onPress={() => onSetStatus(isArchived ? "DRAFT" : "ARCHIVED")}
+            isDisabled={pending || disabled}
+            isPending={pending && status === "ARCHIVED"}
+          >
+            {isArchived ? "Unarchive" : "Archive"}
+          </Button>
+        )}
         <Button
           type="submit"
           variant="primary"
           size="sm"
           onPress={() => onSetStatus("PUBLISHED")}
-          isDisabled={pending}
-          isPending={pending && isPublished}
+          isDisabled={pending || disabled}
+          isPending={pending && status === "PUBLISHED"}
         >
           {editing && isPublished ? "Update" : "Publish"}
         </Button>
@@ -314,7 +508,12 @@ export default function PostForm({
     try {
       const parsed = post.contentJson;
       // Handle { blocks: [...] } format from backend (BlockNote format)
-      if (parsed && typeof parsed === "object" && "blocks" in parsed && Array.isArray(parsed.blocks)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        "blocks" in parsed &&
+        Array.isArray(parsed.blocks)
+      ) {
         return parsed.blocks as PartialBlock[];
       }
       // Handle raw array format (BlockNote format)
@@ -322,10 +521,19 @@ export default function PostForm({
         return parsed as PartialBlock[];
       }
       // Handle legacy format: { sections: [{ heading, paragraphs, blocks }] }
-      if (parsed && typeof parsed === "object" && "sections" in parsed && Array.isArray(parsed.sections)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        "sections" in parsed &&
+        Array.isArray(parsed.sections)
+      ) {
         const blocks: PartialBlock[] = [];
         type LegacyBlock = string | { items: string[] };
-        type LegacySection = { heading?: string; paragraphs?: string[]; blocks?: LegacyBlock[] };
+        type LegacySection = {
+          heading?: string;
+          paragraphs?: string[];
+          blocks?: LegacyBlock[];
+        };
 
         for (const section of parsed.sections as LegacySection[]) {
           // Add section heading if present
@@ -356,7 +564,11 @@ export default function PostForm({
                   type: "paragraph",
                   content: [{ type: "text", text: block, styles: {} }],
                 });
-              } else if (block && typeof block === "object" && "items" in block) {
+              } else if (
+                block &&
+                typeof block === "object" &&
+                "items" in block
+              ) {
                 // Bullet list
                 const items = (block as { items: string[] }).items;
                 if (Array.isArray(items)) {
@@ -388,7 +600,9 @@ export default function PostForm({
   const [title, setTitle] = useState(post?.title ?? "");
   const [description, setDescription] = useState(post?.description ?? "");
   const [seoTitle, setSeoTitle] = useState(post?.seoTitle ?? "");
-  const [seoDescription, setSeoDescription] = useState(post?.seoDescription ?? "");
+  const [seoDescription, setSeoDescription] = useState(
+    post?.seoDescription ?? "",
+  );
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
   const [status, setStatus] = useState(post?.status ?? "DRAFT");
@@ -396,7 +610,9 @@ export default function PostForm({
   // Author handling - track selected ID, name, and avatar
   const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
   const [authorName, setAuthorName] = useState(post?.author?.name ?? "");
-  const [authorAvatarUrl, setAuthorAvatarUrl] = useState(post?.author?.avatarUrl ?? "");
+  const [authorAvatarUrl, setAuthorAvatarUrl] = useState(
+    post?.author?.avatarUrl ?? "",
+  );
 
   // Category handling - track selected ID or custom name
   const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
@@ -424,6 +640,42 @@ export default function PostForm({
   const [carouselIntro, setCarouselIntro] = useState(post?.carouselIntro ?? "");
   const [carouselBody, setCarouselBody] = useState(post?.carouselBody ?? "");
   const [ctaLabel, setCtaLabel] = useState(post?.ctaLabel ?? "");
+  const [ctaEnabled, setCtaEnabled] = useState(Boolean(post?.ctaLabel));
+
+  // Cover extras
+  const [coverImageTitle, setCoverImageTitle] = useState(
+    post?.coverImageTitle ?? "",
+  );
+  const [coverImageCaption, setCoverImageCaption] = useState(
+    post?.coverImageCaption ?? "",
+  );
+  const [coverImageCredit, setCoverImageCredit] = useState(
+    post?.coverImageCredit ?? "",
+  );
+
+  // SEO / social
+  const [ogImage, setOgImage] = useState(post?.ogImage ?? "");
+  const [ogImageAlt, setOgImageAlt] = useState(post?.ogImageAlt ?? "");
+  const [canonicalUrl, setCanonicalUrl] = useState(post?.canonicalUrl ?? "");
+  const [noindex, setNoindex] = useState(post?.noindex ?? false);
+
+  // Scheduling — datetime-local value (YYYY-MM-DDTHH:mm). Empty = no schedule.
+  const [publishedAt, setPublishedAt] = useState(() => {
+    if (!post?.publishedAt) return "";
+    const d = new Date(post.publishedAt);
+    if (isNaN(d.getTime())) return "";
+    // Trim seconds/timezone for <input type="datetime-local">.
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
+
+  // Every content image must carry alt text or the backend rejects the save.
+  // Compute lazily on each edit so the warning + disabled-save state stay in
+  // sync with the editor.
+  const missingAlts = useMemo(
+    () => findContentImagesMissingAlt(blocks as unknown[]),
+    [blocks],
+  );
 
   const effectiveSlug = slugTouched ? slug : slugify(title);
   const readTime = estimateReadTime(blocks);
@@ -431,7 +683,9 @@ export default function PostForm({
   const metaDesc = (seoDescription || description).trim();
   const isPublished = status === "PUBLISHED";
   const liveHref =
-    post && post.status === "PUBLISHED" ? `/${post.blog}/${post.slug}` : undefined;
+    post && post.status === "PUBLISHED"
+      ? `/${post.blog}/${post.slug}`
+      : undefined;
 
   // Filter categories by selected blog
   const blogCategories = categories.filter((c) => c.blog === blog);
@@ -465,14 +719,29 @@ export default function PostForm({
       <input type="hidden" name="slug" value={effectiveSlug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
-      <input ref={statusRef} type="hidden" name="status" defaultValue={status} />
+      <input
+        ref={statusRef}
+        type="hidden"
+        name="status"
+        defaultValue={status}
+      />
       {/* Author - send ID if available, otherwise name + avatar */}
       {authorId && <input type="hidden" name="authorId" value={authorId} />}
-      <input type="hidden" name="authorName" value={authorName || "energiebee"} />
+      <input
+        type="hidden"
+        name="authorName"
+        value={authorName || "energiebee"}
+      />
       <input type="hidden" name="authorAvatarUrl" value={authorAvatarUrl} />
       {/* Category - send ID if available, otherwise name */}
-      {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
-      <input type="hidden" name="category" value={categoryName || "Uncategorised"} />
+      {categoryId && (
+        <input type="hidden" name="categoryId" value={categoryId} />
+      )}
+      <input
+        type="hidden"
+        name="category"
+        value={categoryName || "Uncategorised"}
+      />
       {/* Author date - hidden input ensures it's always submitted even when drawer is closed */}
       <input type="hidden" name="authorDate" value={authorDate} />
       {/* Other drawer fields - hidden inputs ensure submission when drawer is closed */}
@@ -484,19 +753,45 @@ export default function PostForm({
       <input type="hidden" name="featured" value={featured ? "on" : ""} />
       <input type="hidden" name="carouselIntro" value={carouselIntro} />
       <input type="hidden" name="carouselBody" value={carouselBody} />
-      <input type="hidden" name="ctaLabel" value={ctaLabel} />
-      <input type="hidden" name="ctaHref" value={ctaHref} />
-      <input type="hidden" name="ctaExternal" value={ctaExternal ? "on" : ""} />
-
+      <input type="hidden" name="ctaLabel" value={ctaEnabled ? ctaLabel : ""} />
+      <input type="hidden" name="ctaHref" value={ctaEnabled ? ctaHref : ""} />
+      <input
+        type="hidden"
+        name="ctaExternal"
+        value={ctaEnabled && ctaExternal ? "on" : ""}
+      />
+      {/* Cover extras */}
+      <input
+        type="hidden"
+        name="coverImageTitle"
+        value={coverImageTitle}
+      />
+      <input
+        type="hidden"
+        name="coverImageCaption"
+        value={coverImageCaption}
+      />
+      <input
+        type="hidden"
+        name="coverImageCredit"
+        value={coverImageCredit}
+      />
+      {/* SEO / social */}
+      <input type="hidden" name="ogImage" value={ogImage} />
+      <input type="hidden" name="ogImageAlt" value={ogImageAlt} />
+      <input type="hidden" name="canonicalUrl" value={canonicalUrl} />
+      <input type="hidden" name="noindex" value={noindex ? "on" : ""} />
+      {/* Scheduling — empty value means "no schedule, publish immediately". */}
+      <input type="hidden" name="publishedAt" value={publishedAt} />
       <ActionBar
         editing={Boolean(post)}
-        isPublished={isPublished}
+        status={status}
         blog={blog}
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
         liveHref={liveHref}
+        disabled={missingAlts.length > 0}
       />
-
       {state?.error && (
         <div className="mx-auto mb-6 max-w-2xl">
           <Alert status="danger">
@@ -507,7 +802,6 @@ export default function PostForm({
           </Alert>
         </div>
       )}
-
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         {/* Writing canvas */}
         <div className="min-w-0 flex-1">
@@ -518,6 +812,7 @@ export default function PostForm({
                 context="blog-cover"
                 value={coverUrl || null}
                 onChange={(url) => setCoverUrl(url ?? "")}
+                alt={coverImageAlt || title}
               />
             </div>
 
@@ -561,6 +856,32 @@ export default function PostForm({
               />
             </div>
 
+            {/* Block the save until every content image carries alt text —
+                the backend rejects un-alt'd images with a 400. */}
+            {missingAlts.length > 0 && (
+              <div className="mb-4">
+                <Alert status="warning">
+                  <Alert.Indicator />
+                  <Alert.Content>
+                    <Alert.Title>
+                      {missingAlts.length === 1
+                        ? "1 image is missing alt text"
+                        : `${missingAlts.length} images are missing alt text`}
+                    </Alert.Title>
+                    <Alert.Description>
+                      Add an alt/caption to{" "}
+                      {missingAlts.map((m, i) => (
+                        <span key={m.index}>
+                          {i > 0 && ", "}image #{m.index}
+                        </span>
+                      ))}{" "}
+                      in the editor below before saving.
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert>
+              </div>
+            )}
+
             {/* body */}
             <div className="post-editor">
               <Editor initialContent={initialBlocks} onChange={setBlocks} />
@@ -569,375 +890,589 @@ export default function PostForm({
         </div>
 
         {/* Settings panel — always docked beside the editor */}
-        <aside className="w-full shrink-0 self-start overflow-hidden rounded-xl border border-border bg-surface lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-104 lg:overflow-y-auto">
-          <div className="sticky top-0 z-10 border-b border-border bg-surface px-5 py-4">
+        <aside className="w-full shrink-0 self-start overflow-hidden lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-104 lg:overflow-y-auto">
+          <div className="sticky top-0 z-10 border-b border-border bg-surface px-5 py-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)]">
             <h2 className="text-lg font-bold text-foreground">Post settings</h2>
           </div>
 
-          <div className="space-y-5 p-5">
+          <div className="space-y-5 py-5 px-1">
             {/* Cover Image - FIRST */}
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <SectionHeader title="Cover image" />
-              <PublicImageUpload
-                context="blog-cover"
-                value={coverUrl || null}
-                onChange={(url) => setCoverUrl(url ?? "")}
-              />
-              <Labeled
-                label="Alt text"
-                hint="Describes the image for accessibility. Defaults to the title."
-              >
-                <Input
-                  variant="secondary"
-                  fullWidth
-                  value={coverImageAlt}
-                  onChange={(e) => setCoverImageAlt(e.target.value)}
-                  placeholder={title || "Enter alt text…"}
+            <Card>
+              <Card.Header>
+                <Card.Title className="text-sm font-semibold">
+                  Cover image
+                </Card.Title>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                <PublicImageUpload
+                  context="blog-cover"
+                  value={coverUrl || null}
+                  onChange={(url) => setCoverUrl(url ?? "")}
+                  alt={coverImageAlt || title}
                 />
-              </Labeled>
-            </div>
+                <Labeled
+                  label="Alt text"
+                  hint="Describes the image for accessibility. Defaults to the title."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageAlt}
+                    onChange={(e) => setCoverImageAlt(e.target.value)}
+                    placeholder={title || "Enter alt text…"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Title"
+                  hint="Tooltip shown on hover. Optional."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageTitle}
+                    onChange={(e) => setCoverImageTitle(e.target.value)}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Caption"
+                  hint="Short caption rendered beneath the hero. Optional."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageCaption}
+                    onChange={(e) => setCoverImageCaption(e.target.value)}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Credit"
+                  hint='e.g. "© EnergieBee" or "Photo by Jane Doe". Optional.'
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={coverImageCredit}
+                    onChange={(e) => setCoverImageCredit(e.target.value)}
+                  />
+                </Labeled>
+              </Card.Content>
+            </Card>
 
             {/* Author section - SECOND */}
-            <div className="space-y-4 rounded-lg border border-border p-4">
-              <SectionHeader
-                title="Author"
-                action={
-                  <span className="text-xs text-muted">
-                    {authors.length} author{authors.length !== 1 ? "s" : ""}
-                  </span>
-                }
-              />
-
-              {/* Existing authors list */}
-              {authors.length > 0 && (
-                <div className="max-h-48 space-y-2 overflow-y-auto">
-                  {authors.map((a) => (
-                    <AuthorCard
-                      key={a.id}
-                      author={a}
-                      selected={authorId === a.id}
-                      onSelect={() => {
-                        setAuthorId(a.id);
-                        setAuthorName(a.name);
-                        setAuthorAvatarUrl(a.avatarUrl ?? "");
+            <Card>
+              <Card.Header className="flex flex-row justify-between gap-2">
+                <Card.Title className="text-sm font-semibold">
+                  Author
+                </Card.Title>
+                <p className="text-xs text-muted">
+                  {authors.length} author{authors.length !== 1 ? "s" : ""}
+                </p>
+              </Card.Header>
+              <Card.Content className="space-y-4">
+                {/* Author picker: search existing or type a new name */}
+                <div className="space-y-3">
+                  <Labeled
+                    label="Name"
+                    hint="Pick an existing author or type a new one."
+                  >
+                    <ComboBox
+                      aria-label="Author"
+                      items={authors}
+                      allowsCustomValue
+                      menuTrigger="focus"
+                      selectedKey={authorId || null}
+                      inputValue={authorName}
+                      onInputChange={(value) => {
+                        setAuthorId("");
+                        setAuthorName(value);
                       }}
-                    />
-                  ))}
+                      onSelectionChange={(key) => {
+                        const a = authors.find((x) => x.id === String(key));
+                        if (a) {
+                          setAuthorId(a.id);
+                          setAuthorName(a.name);
+                          setAuthorAvatarUrl(a.avatarUrl ?? "");
+                        }
+                      }}
+                    >
+                      <ComboBox.InputGroup>
+                        <Input
+                          variant="secondary"
+                          fullWidth
+                          placeholder="Search authors or type a new name…"
+                        />
+                        <ComboBox.Trigger />
+                      </ComboBox.InputGroup>
+                      <ComboBox.Popover>
+                        <ListBox>
+                          {(author: Author) => (
+                            <ListBoxItem id={author.id} textValue={author.name}>
+                              <div className="flex items-center gap-2">
+                                <AppAvatar
+                                  src={author.avatarUrl}
+                                  name={author.name}
+                                  size="sm"
+                                />
+                                <div className="min-w-0">
+                                  <div className="truncate text-sm font-medium">
+                                    {author.name}
+                                  </div>
+                                  {author.role && (
+                                    <div className="truncate text-xs text-muted">
+                                      {author.role}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </ListBoxItem>
+                          )}
+                        </ListBox>
+                      </ComboBox.Popover>
+                    </ComboBox>
+                  </Labeled>
                 </div>
-              )}
 
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-surface px-2 text-xs text-muted">
-                    or create new
-                  </span>
-                </div>
-              </div>
-
-              {/* New author input */}
-              <div className="space-y-3">
-                <Labeled label="Name" hint="Type a new author name.">
-                  <Input
-                    variant="secondary"
-                    fullWidth
-                    value={authorId ? "" : authorName}
-                    onChange={(e) => {
-                      setAuthorId("");
-                      setAuthorName(e.target.value);
-                    }}
-                    placeholder="New author name…"
-                  />
-                </Labeled>
-                <Labeled
-                  label="Avatar"
-                  hint="Profile picture for new author (max 2MB)."
-                >
-                  <PublicImageUpload
-                    context="user-avatar"
-                    value={authorId ? null : authorAvatarUrl || null}
-                    onChange={(url) => {
-                      if (!authorId) {
-                        setAuthorAvatarUrl(url ?? "");
-                      }
-                    }}
-                  />
-                </Labeled>
-              </div>
-
-              {/* Selected author preview */}
-              {(authorId || authorName) && (
-                <div className="rounded-lg bg-background p-3">
-                  <span className="mb-2 block text-xs font-medium text-muted">
-                    Selected
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <AppAvatar
-                      src={authorAvatarUrl}
-                      name={authorName || "?"}
-                      size="sm"
-                    />
-                    <span className="text-sm font-medium text-foreground">
-                      {authorName || "Unknown"}
+                {/* Selected author preview */}
+                {(authorId || authorName) && (
+                  <div className="rounded-lg bg-background p-3">
+                    <span className="mb-2 block text-xs font-medium text-muted">
+                      Selected
                     </span>
-                    {authorId && (
-                      <Chip
-                        color="success"
-                        size="sm"
-                        variant="soft"
-                        className="ml-auto"
-                      >
-                        Existing
-                      </Chip>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <EditableAvatar
+                        name={authorName || "?"}
+                        src={authorAvatarUrl}
+                        authorId={authorId || undefined}
+                        onChange={(url) => setAuthorAvatarUrl(url)}
+                      />
+                      <span className="text-sm font-medium text-foreground">
+                        {authorName || "Unknown"}
+                      </span>
+                      {authorId && (
+                        <Chip
+                          color="success"
+                          size="sm"
+                          variant="soft"
+                          className="ml-auto"
+                        >
+                          Existing
+                        </Chip>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </Card.Content>
+            </Card>
 
             {/* Category section - THIRD */}
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <SectionHeader
-                title="Category"
-                action={
-                  <span className="text-xs text-muted">
-                    {blogCategories.length} in {blog}
-                  </span>
-                }
-              />
-              {blogCategories.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {blogCategories.map((c) => (
-                    <CategoryPill
-                      key={c.id}
-                      category={c}
-                      selected={categoryId === c.id}
-                      onSelect={() => {
-                        setCategoryId(c.id);
-                        setCategoryName(c.name);
-                      }}
+            <Card>
+              <Card.Header className="flex flex-row justify-between gap-2">
+                <Card.Title className="text-sm font-semibold">
+                  Category
+                </Card.Title>
+                <p className="text-xs text-muted">
+                  {blogCategories.length} in {blog}
+                </p>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                <ComboBox
+                  aria-label="Category"
+                  items={blogCategories}
+                  allowsCustomValue
+                  menuTrigger="focus"
+                  selectedKey={categoryId || null}
+                  inputValue={categoryName}
+                  onInputChange={(value) => {
+                    setCategoryId("");
+                    setCategoryName(value);
+                  }}
+                  onSelectionChange={(key) => {
+                    const c = blogCategories.find((x) => x.id === String(key));
+                    if (c) {
+                      setCategoryId(c.id);
+                      setCategoryName(c.name);
+                    }
+                  }}
+                >
+                  <ComboBox.InputGroup>
+                    <Input
+                      variant="secondary"
+                      fullWidth
+                      placeholder={
+                        blogCategories.length > 0
+                          ? "Search categories or type a new name…"
+                          : "Enter category name…"
+                      }
                     />
-                  ))}
-                </div>
-              )}
-              <Input
-                variant="secondary"
-                fullWidth
-                value={categoryName}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                placeholder={
-                  blogCategories.length > 0
-                    ? "Or type a new category…"
-                    : "Enter category name…"
-                }
-              />
-            </div>
+                    <ComboBox.Trigger />
+                  </ComboBox.InputGroup>
+                  <ComboBox.Popover>
+                    <ListBox>
+                      {(category: Category) => (
+                        <ListBoxItem id={category.id} textValue={category.name}>
+                          {category.name}
+                        </ListBoxItem>
+                      )}
+                    </ListBox>
+                  </ComboBox.Popover>
+                </ComboBox>
+              </Card.Content>
+            </Card>
 
-            {/* Excerpt */}
-            <Labeled
-              label="Excerpt"
-              hint="Card blurb + meta description. Auto from the body if blank."
-            >
-              <TextArea
-                variant="secondary"
-                fullWidth
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-              />
-            </Labeled>
-
-            {/* Slug */}
-            <Labeled
-              label="Slug"
-              error={errors.slug}
-              hint="Auto from the title. Edit to override."
-            >
-              <Input
-                variant="secondary"
-                fullWidth
-                className="font-mono"
-                value={effectiveSlug}
-                onChange={(e) => {
-                  setSlug(slugify(e.target.value));
-                  setSlugTouched(true);
-                }}
-              />
-              <span className="mt-1 block text-xs text-muted">
-                /{blog}/{effectiveSlug || "…"}
-              </span>
-            </Labeled>
-
-            {/* Author date */}
-            <Labeled label="Author date" hint="Defaults to today.">
-              <Input
-                variant="secondary"
-                fullWidth
-                value={authorDate}
-                onChange={(e) => setAuthorDate(e.target.value)}
-                type="date"
-              />
-            </Labeled>
-
-            {/* Lede */}
-            <Labeled label="Lede" hint="Bold subtitle under the title.">
-              <Input
-                variant="secondary"
-                fullWidth
-                value={lede}
-                onChange={(e) => setLede(e.target.value)}
-              />
-            </Labeled>
-
-            {/* SEO */}
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <SectionHeader title="SEO & Search" />
-              {/* Google SERP preview — keeps Google's signature colours */}
-              <div className="rounded-md border border-border p-2.5">
-                <div className="text-xs text-[#1a6b2f]">
-                  energiebee.com › {blog} › {effectiveSlug || "…"}
-                </div>
-                <div className="leading-tight text-[#1a0dab]">
-                  {truncate(metaTitle, 60)}
-                </div>
-                <div className="mt-0.5 text-xs text-[#4d5156]">
-                  {truncate(metaDesc || "Add a description…", 150)}
-                </div>
-              </div>
-              <Labeled label="SEO title" hint="Defaults to the title.">
-                <Input
-                  variant="secondary"
-                  fullWidth
-                  value={seoTitle}
-                  onChange={(e) => setSeoTitle(e.target.value)}
-                  placeholder={title || "Defaults to title"}
-                />
-              </Labeled>
-              <Labeled label="SEO description" hint="Defaults to the excerpt.">
-                <TextArea
-                  variant="secondary"
-                  fullWidth
-                  value={seoDescription}
-                  onChange={(e) => setSeoDescription(e.target.value)}
-                  rows={2}
-                  placeholder={description || "Defaults to excerpt"}
-                />
-              </Labeled>
-            </div>
-
-            {/* Featured / Carousel */}
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <SectionHeader title="Featured Carousel" />
-              <div className="rounded-lg border border-border p-3 transition-colors hover:bg-background">
-                <Switch isSelected={featured} onChange={setFeatured}>
-                  <Switch.Content>
-                    <span className="block text-sm font-medium text-foreground">
-                      Feature in carousel
-                    </span>
-                    <span className="block text-xs text-muted">
-                      Show this post in the homepage carousel
-                    </span>
-                  </Switch.Content>
-                </Switch>
-              </div>
-              <Labeled
-                label="Carousel intro"
-                hint="Auto-filled from lede/excerpt if blank."
-              >
-                <TextArea
-                  variant="secondary"
-                  fullWidth
-                  value={carouselIntro}
-                  onChange={(e) => setCarouselIntro(e.target.value)}
-                  rows={2}
-                />
-              </Labeled>
-              <Labeled
-                label="Carousel body"
-                hint="Auto-filled from the excerpt if blank."
-              >
-                <TextArea
-                  variant="secondary"
-                  fullWidth
-                  value={carouselBody}
-                  onChange={(e) => setCarouselBody(e.target.value)}
-                  rows={3}
-                />
-              </Labeled>
-            </div>
-
-            {/* Call to action */}
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <SectionHeader title="Call to Action" />
-              <Labeled label="Button label" hint="Leave blank for no CTA.">
-                <Input
-                  variant="secondary"
-                  fullWidth
-                  value={ctaLabel}
-                  onChange={(e) => setCtaLabel(e.target.value)}
-                  placeholder="Try energiebee for free"
-                />
-              </Labeled>
-
-              {/* internal / external toggle */}
-              <div className="inline-flex gap-1.5">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={!ctaExternal ? "primary" : "outline"}
-                  onPress={() => setCtaExternal(false)}
-                >
-                  Internal page
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={ctaExternal ? "primary" : "outline"}
-                  onPress={() => setCtaExternal(true)}
-                >
-                  External link
-                </Button>
-              </div>
-
-              {ctaExternal ? (
+            {/* Post details */}
+            <Card>
+              <Card.Header>
+                <Card.Title className="text-sm font-semibold">
+                  Post details
+                </Card.Title>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                {/* Excerpt */}
                 <Labeled
-                  label="External URL"
-                  hint="Opens in a new tab. https:// is added if you omit it."
+                  label="Excerpt"
+                  hint="Card blurb + meta description. Auto from the body if blank."
                 >
-                  <Input
+                  <TextArea
                     variant="secondary"
                     fullWidth
-                    type="url"
-                    value={ctaHref}
-                    onChange={(e) => setCtaHref(e.target.value)}
-                    placeholder="https://example.com"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
                   />
                 </Labeled>
-              ) : (
+
+                {/* Slug */}
                 <Labeled
-                  label="Internal page"
-                  hint="Search an existing page. Opens in the same tab."
+                  label="Slug"
+                  error={errors.slug}
+                  hint="Auto from the title. Edit to override."
                 >
                   <Input
                     variant="secondary"
                     fullWidth
                     className="font-mono"
-                    value={ctaHref}
-                    onChange={(e) => setCtaHref(e.target.value)}
-                    placeholder="/start"
-                    list="route-options"
+                    value={effectiveSlug}
+                    onChange={(e) => {
+                      setSlug(slugify(e.target.value));
+                      setSlugTouched(true);
+                    }}
                   />
-                  <datalist id="route-options">
-                    {internalRoutes.map((r) => (
-                      <option key={r} value={r} />
-                    ))}
-                  </datalist>
+                  <span className="mt-1 block text-xs text-muted">
+                    /{blog}/{effectiveSlug || "…"}
+                  </span>
                 </Labeled>
-              )}
-            </div>
+
+                {/* Author date */}
+                <Labeled label="Author date" hint="Defaults to today.">
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={authorDate}
+                    onChange={(e) => setAuthorDate(e.target.value)}
+                    type="date"
+                  />
+                </Labeled>
+
+                {/* Lede */}
+                <Labeled label="Lede" hint="Bold subtitle under the title.">
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={lede}
+                    onChange={(e) => setLede(e.target.value)}
+                  />
+                </Labeled>
+              </Card.Content>
+            </Card>
+
+            {/* SEO */}
+            <Card>
+              <Card.Header>
+                <Card.Title className="text-sm font-semibold">
+                  SEO &amp; Search
+                </Card.Title>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                {/* Google SERP preview — keeps Google's signature colours */}
+                <div className="rounded-md border border-border p-2.5">
+                  <div className="text-xs text-[#1a6b2f]">
+                    energiebee.com › {blog} › {effectiveSlug || "…"}
+                  </div>
+                  <div className="leading-tight text-[#1a0dab]">
+                    {truncate(metaTitle, 60)}
+                  </div>
+                  <div className="mt-0.5 text-xs text-[#4d5156]">
+                    {truncate(metaDesc || "Add a description…", 150)}
+                  </div>
+                </div>
+                <Labeled label="SEO title" hint="Defaults to the title.">
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    placeholder={title || "Defaults to title"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="SEO description"
+                  hint="Defaults to the excerpt."
+                >
+                  <TextArea
+                    variant="secondary"
+                    fullWidth
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={2}
+                    placeholder={description || "Defaults to excerpt"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Social share image"
+                  hint="1200×630 image shown on social cards. Defaults to the cover image."
+                >
+                  <PublicImageUpload
+                    context="blog-cover"
+                    value={ogImage || null}
+                    onChange={(url) => setOgImage(url ?? "")}
+                    alt={ogImageAlt || title}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Share image alt text"
+                  hint="Defaults to the cover alt text."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    value={ogImageAlt}
+                    onChange={(e) => setOgImageAlt(e.target.value)}
+                    placeholder={coverImageAlt || "Defaults to cover alt"}
+                  />
+                </Labeled>
+                <Labeled
+                  label="Canonical URL"
+                  hint="Override the canonical link. Leave blank to derive from the slug."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    type="url"
+                    value={canonicalUrl}
+                    onChange={(e) => setCanonicalUrl(e.target.value)}
+                    placeholder="https://energiebee.com/learn/about-us"
+                  />
+                </Labeled>
+                <div className="rounded-lg border border-border p-3 transition-colors hover:bg-background">
+                  <Switch
+                    isSelected={noindex}
+                    className="justify-between"
+                    onChange={setNoindex}
+                  >
+                    <Switch.Content>
+                      <span className="block text-sm font-medium text-foreground">
+                        Hide from search engines
+                      </span>
+                      <span className="block text-xs text-muted">
+                        Adds &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot; /&gt;
+                      </span>
+                    </Switch.Content>
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>
+                </div>
+              </Card.Content>
+            </Card>
+
+            {/* Schedule — set a future publishedAt to delay publication.
+                Only meaningful when the eventual save status is PUBLISHED. */}
+            <Card>
+              <Card.Header>
+                <Card.Title className="text-sm font-semibold">
+                  Schedule
+                </Card.Title>
+              </Card.Header>
+              <Card.Content className="space-y-3">
+                <Labeled
+                  label="Publish at"
+                  hint="Leave blank to publish immediately when you save. Future times = the post goes live automatically."
+                >
+                  <Input
+                    variant="secondary"
+                    fullWidth
+                    type="datetime-local"
+                    value={publishedAt}
+                    onChange={(e) => setPublishedAt(e.target.value)}
+                  />
+                </Labeled>
+              </Card.Content>
+            </Card>
+
+            {/* Featured / Carousel */}
+            {/* Featured / Carousel — Switch in the card header, fields below when on */}
+            <Card className="gap-0">
+              <Card.Header>
+                <Switch
+                  isSelected={featured}
+                  className={"justify-between"}
+                  onChange={setFeatured}
+                >
+                  <Switch.Content>
+                    <span className="block text-sm font-semibold text-foreground">
+                      Feature in carousel
+                    </span>
+                    <span className="block text-xs text-muted">
+                      Show this post in the featured carousel
+                    </span>
+                  </Switch.Content>
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </Card.Header>
+              <div
+                aria-hidden={!featured}
+                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+                  featured
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <Card.Content className="space-y-3 mt-4">
+                    <Labeled
+                      label="Carousel intro"
+                      hint="Auto-filled from lede/excerpt if blank."
+                    >
+                      <TextArea
+                        variant="secondary"
+                        fullWidth
+                        value={carouselIntro}
+                        onChange={(e) => setCarouselIntro(e.target.value)}
+                        rows={2}
+                      />
+                    </Labeled>
+                    <Labeled
+                      label="Carousel body"
+                      hint="Auto-filled from the excerpt if blank."
+                    >
+                      <TextArea
+                        variant="secondary"
+                        fullWidth
+                        value={carouselBody}
+                        onChange={(e) => setCarouselBody(e.target.value)}
+                        rows={3}
+                      />
+                    </Labeled>
+                  </Card.Content>
+                </div>
+              </div>
+            </Card>
+
+            {/* Call to action */}
+            {/* Call to Action — Switch in the card header, fields below when on */}
+            <Card className="gap-0">
+              <Card.Header>
+                <Switch
+                  isSelected={ctaEnabled}
+                  className={"justify-between"}
+                  onChange={setCtaEnabled}
+                >
+                  <Switch.Content>
+                    <span className="block text-sm font-semibold text-foreground">
+                      Show a call to action
+                    </span>
+                    <span className="block text-xs text-muted">
+                      Adds a button at the end of the article
+                    </span>
+                  </Switch.Content>
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </Card.Header>
+              <div
+                aria-hidden={!ctaEnabled}
+                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+                  ctaEnabled
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <Card.Content className="space-y-3 mt-4">
+                    <Labeled label="Button label" hint="Shown on the button.">
+                      <Input
+                        variant="secondary"
+                        fullWidth
+                        value={ctaLabel}
+                        onChange={(e) => setCtaLabel(e.target.value)}
+                        placeholder="Try energiebee for free"
+                      />
+                    </Labeled>
+
+                    {/* internal / external toggle */}
+                    <RadioGroup
+                      aria-label="CTA link type"
+                      variant="secondary"
+                      value={ctaExternal ? "external" : "internal"}
+                      onChange={(v) => setCtaExternal(v === "external")}
+                      className="flex flex-row gap-4"
+                    >
+                      <Radio value="internal">
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        <Radio.Content>Internal page</Radio.Content>
+                      </Radio>
+                      <Radio value="external">
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        <Radio.Content>External link</Radio.Content>
+                      </Radio>
+                    </RadioGroup>
+
+                    {ctaExternal ? (
+                      <Labeled
+                        label="External URL"
+                        hint="Opens in a new tab. https:// is added if you omit it."
+                      >
+                        <Input
+                          variant="secondary"
+                          fullWidth
+                          type="url"
+                          value={ctaHref}
+                          onChange={(e) => setCtaHref(e.target.value)}
+                          placeholder="https://example.com"
+                        />
+                      </Labeled>
+                    ) : (
+                      <Labeled
+                        label="Internal page"
+                        hint="Search an existing page. Opens in the same tab."
+                      >
+                        <Input
+                          variant="secondary"
+                          fullWidth
+                          className="font-mono"
+                          value={ctaHref}
+                          onChange={(e) => setCtaHref(e.target.value)}
+                          placeholder="/start"
+                          list="route-options"
+                        />
+                        <datalist id="route-options">
+                          {internalRoutes.map((r) => (
+                            <option key={r} value={r} />
+                          ))}
+                        </datalist>
+                      </Labeled>
+                    )}
+                  </Card.Content>
+                </div>
+              </div>
+            </Card>
           </div>
         </aside>
       </div>

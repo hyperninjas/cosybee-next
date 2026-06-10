@@ -5,12 +5,13 @@ import { redirect } from "next/navigation";
 import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { findContentImagesMissingAlt } from "@/app/lib/content-images";
 import { adminApi } from "./lib/api";
 import type { SaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
 
 const BLOGS = new Set(["hive", "learn"]);
-const STATUSES = new Set(["DRAFT", "PUBLISHED"]);
+const STATUSES = new Set(["DRAFT", "PUBLISHED", "ARCHIVED"]);
 const MAX_TAGS = 8;
 
 function str(form: FormData, key: string): string {
@@ -102,7 +103,9 @@ export async function savePost(
   const rawBlog = str(formData, "blog");
   const blog = BLOGS.has(rawBlog) ? (rawBlog as "hive" | "learn") : "hive";
   const rawStatus = str(formData, "status");
-  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
+  const status = STATUSES.has(rawStatus)
+    ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
+    : "DRAFT";
   const title = str(formData, "title");
   const contentJsonStr = str(formData, "contentJson") || "[]";
 
@@ -136,6 +139,17 @@ export async function savePost(
 
   const base = slugify(str(formData, "slug") || title);
   if (title && !base) fieldErrors.slug = "Could not derive a slug from the title.";
+
+  // The backend rejects any content image without alt text. Catch it here so
+  // the error surfaces inline instead of as a raw 400 from the upstream API.
+  const missingAlts = findContentImagesMissingAlt(blocks);
+  if (missingAlts.length > 0) {
+    const list = missingAlts.map((m) => `#${m.index}`).join(", ");
+    return {
+      ok: false,
+      error: `Add alt text to content image${missingAlts.length === 1 ? "" : "s"} ${list} before saving.`,
+    };
+  }
 
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, error: "Add a title to save your post.", fieldErrors };
@@ -177,6 +191,16 @@ export async function savePost(
   const categoryId = optStr(formData, "categoryId");
   const category = str(formData, "category") || "Uncategorised";
 
+  // Scheduling: convert the datetime-local string from the form to ISO. An
+  // empty string means "publish immediately" — we send null so the backend
+  // uses its server clock.
+  const publishedAtRaw = str(formData, "publishedAt");
+  const publishedAtIso = (() => {
+    if (!publishedAtRaw) return null;
+    const d = new Date(publishedAtRaw);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  })();
+
   const data = {
     blog,
     slug,
@@ -191,6 +215,16 @@ export async function savePost(
     readTime: readTimeMinutes,
     coverImage,
     coverImageAlt: str(formData, "coverImageAlt") || title,
+    coverImageTitle: optStr(formData, "coverImageTitle"),
+    coverImageCaption: optStr(formData, "coverImageCaption"),
+    coverImageCredit: optStr(formData, "coverImageCredit"),
+    // SEO / social
+    ogImage: optStr(formData, "ogImage"),
+    ogImageAlt: optStr(formData, "ogImageAlt"),
+    canonicalUrl: optStr(formData, "canonicalUrl"),
+    noindex: formData.get("noindex") === "on",
+    // Scheduling
+    publishedAt: publishedAtIso,
     lede,
     ctaLabel,
     ctaHref,
@@ -247,7 +281,9 @@ export async function setStatus(formData: FormData): Promise<void> {
   const blog = str(formData, "blog");
   const slug = str(formData, "slug");
   const rawStatus = str(formData, "status");
-  const status = STATUSES.has(rawStatus) ? (rawStatus as "DRAFT" | "PUBLISHED") : "DRAFT";
+  const status = STATUSES.has(rawStatus)
+    ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
+    : "DRAFT";
   if (!id || !blog || !slug) return;
 
   try {
