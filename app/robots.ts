@@ -27,13 +27,13 @@ const AI_CRAWLERS = [
 
 /**
  * Generates /robots.txt at build time. Allows all crawlers — including the
- * AI crawlers above — everywhere except internal Next.js paths and the admin
- * panel, and points at the sitemap. The admin routes are also marked noindex
- * via metadata and an X-Robots-Tag header (see app/admin/layout.tsx and
- * next.config.ts).
+ * AI crawlers above — everywhere except internal Next.js paths, the admin
+ * panel, and the member account section, and points at the sitemap. The admin
+ * and account routes are also marked noindex via metadata and an X-Robots-Tag
+ * header (see their layouts and next.config.ts).
  */
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ["/api/", "/admin"];
+  const disallow = ["/api/", "/admin", "/account"];
   return {
     rules: [
       {

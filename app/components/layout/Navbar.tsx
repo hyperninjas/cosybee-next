@@ -4,8 +4,9 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
-import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
-import { UserMenu } from "./UserMenu";
+// Hidden for now — restore alongside the nav cluster below.
+// import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
+// import { UserMenu } from "./UserMenu";
 
 const NAV_LINKS = [
   { label: "smart", href: "/smart" },
@@ -173,8 +174,9 @@ export default function Navbar({
           {/* Navbar is always dark: tint the ghost button's hover/pressed
               backgrounds white (the default light-gray pressed bg shows as a
               blended white box when the menu is open). */}
+          {/* Hidden for now — theme toggle and login/signup.
           <ThemeToggle className="text-white [--button-bg-hover:#ffffff1f] [--button-bg-pressed:#ffffff33]" />
-          <UserMenu />
+          <UserMenu /> */}
           {/* <button
             type="button"
             aria-label="Search"

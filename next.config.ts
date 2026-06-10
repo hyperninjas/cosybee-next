@@ -195,6 +195,19 @@ const nextConfig: NextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
+        // Keep the member account section (profile, security, etc.) out of
+        // every search index. Backs up the `noindex` meta tag in
+        // app/(private)/account/layout.tsx at the HTTP level, covering
+        // redirects and non-HTML responses.
+        source: "/account/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        // `:path*` above doesn't match the bare /account route — cover it too.
+        source: "/account",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
         // The service worker must never be HTTP-cached, otherwise browsers
         // can keep serving a stale worker and updates won't roll out.
         source: "/sw.js",
