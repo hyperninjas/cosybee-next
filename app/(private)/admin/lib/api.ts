@@ -189,16 +189,18 @@ async function fetchApiMultipart<T>(
 }
 
 export const adminApi = {
-  /** List all posts (including drafts) for admin dashboard. */
+  /** List all posts (including drafts + archived) for admin dashboard.
+   *  Uses the dedicated admin endpoint so the response carries
+   *  every status, not just live posts. */
   async listPosts(): Promise<AdminPostRow[]> {
     try {
-      // Fetch from both blogs and combine
+      // One call per blog so we can paginate independently if needed.
       const [hiveResponse, learnResponse] = await Promise.all([
         fetchApi<{ data: AdminPost[] }>(
-          "/api/posts?blog=hive&include_drafts=true&limit=50",
+          "/api/admin/posts?blog=hive&limit=50",
         ),
         fetchApi<{ data: AdminPost[] }>(
-          "/api/posts?blog=learn&include_drafts=true&limit=50",
+          "/api/admin/posts?blog=learn&limit=50",
         ),
       ]);
       const allPosts = [
@@ -371,28 +373,28 @@ export const adminApi = {
 
   async getAuthor(id: string): Promise<Author | null> {
     try {
-      return await fetchApi<Author>(`/api/posts/authors/${id}`);
+      return await fetchApi<Author>(`/api/admin/posts/authors/${id}`);
     } catch {
       return null;
     }
   },
 
   async createAuthor(input: AuthorInput): Promise<Author> {
-    return fetchApi<Author>("/api/posts/authors", {
+    return fetchApi<Author>("/api/admin/posts/authors", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   async updateAuthor(id: string, input: Partial<AuthorInput>): Promise<Author> {
-    return fetchApi<Author>(`/api/posts/authors/${id}`, {
+    return fetchApi<Author>(`/api/admin/posts/authors/${id}`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
   async deleteAuthor(id: string): Promise<void> {
-    await fetchApi(`/api/posts/authors/${id}`, { method: "DELETE" });
+    await fetchApi(`/api/admin/posts/authors/${id}`, { method: "DELETE" });
   },
 
   // ---------------------------------------------------------------
@@ -401,14 +403,14 @@ export const adminApi = {
 
   async getCategory(id: string): Promise<Category | null> {
     try {
-      return await fetchApi<Category>(`/api/posts/categories/${id}`);
+      return await fetchApi<Category>(`/api/admin/posts/categories/${id}`);
     } catch {
       return null;
     }
   },
 
   async createCategory(input: CategoryInput): Promise<Category> {
-    return fetchApi<Category>("/api/posts/categories", {
+    return fetchApi<Category>("/api/admin/posts/categories", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -418,14 +420,14 @@ export const adminApi = {
     id: string,
     input: Partial<CategoryInput>,
   ): Promise<Category> {
-    return fetchApi<Category>(`/api/posts/categories/${id}`, {
+    return fetchApi<Category>(`/api/admin/posts/categories/${id}`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
   async deleteCategory(id: string): Promise<void> {
-    await fetchApi(`/api/posts/categories/${id}`, { method: "DELETE" });
+    await fetchApi(`/api/admin/posts/categories/${id}`, { method: "DELETE" });
   },
 
   // ---------------------------------------------------------------
@@ -434,28 +436,28 @@ export const adminApi = {
 
   async getTag(id: string): Promise<Tag | null> {
     try {
-      return await fetchApi<Tag>(`/api/posts/tags/${id}`);
+      return await fetchApi<Tag>(`/api/admin/posts/tags/${id}`);
     } catch {
       return null;
     }
   },
 
   async createTag(input: TagInput): Promise<Tag> {
-    return fetchApi<Tag>("/api/posts/tags", {
+    return fetchApi<Tag>("/api/admin/posts/tags", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   async updateTag(id: string, input: Partial<TagInput>): Promise<Tag> {
-    return fetchApi<Tag>(`/api/posts/tags/${id}`, {
+    return fetchApi<Tag>(`/api/admin/posts/tags/${id}`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
   async deleteTag(id: string): Promise<void> {
-    await fetchApi(`/api/posts/tags/${id}`, { method: "DELETE" });
+    await fetchApi(`/api/admin/posts/tags/${id}`, { method: "DELETE" });
   },
 };
 
