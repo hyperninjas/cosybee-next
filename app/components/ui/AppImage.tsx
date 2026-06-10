@@ -1,96 +1,55 @@
-"use client";
-
 import NextImage, { type ImageProps } from "next/image";
-import { tv, type VariantProps } from "@heroui/styles";
-import { forwardRef, useState } from "react";
+import { AppImageReveal } from "./AppImageReveal";
+import { imageVariants, type AppImageProps } from "./image-variants";
+
+// Re-export so existing imports of these names from "./AppImage" keep working.
+export { imageVariants } from "./image-variants";
+export type { ImageVariants, AppImageProps } from "./image-variants";
 
 /**
  * AppImage — our reusable Image **primitive**.
  *
  * HeroUI v3 has no Image component, so this is our own, built the HeroUI way
- * (`tv` from `@heroui/styles`). It renders a single `next/image` element (so it
- * also works as a Radix `asChild` slot — e.g. inside HeroUI `Avatar.Image`),
- * keeping full Next optimization (AVIF/WebP, `fill`, `sizes`, `priority`, lazy,
- * responsive). Variants cover the scenarios a site needs:
- *   - `fit`: cover / contain / fill / none / scaleDown (full-width, hero, bg)
- *   - `radius`: none … full (avatars, cards)
- *   - `animation`: none / fade / zoom / blur (reveal on load, or off)
+ * (`tv` from `@heroui/styles`, see ./image-variants). It renders a single
+ * `next/image`, keeping full Next optimization (AVIF/WebP, `fill`, `sizes`,
+ * `priority`, lazy, responsive).
  *
- * All `next/image` props pass through. Use `fill` (with a sized, relative
- * parent) for backgrounds/covers, or `width`+`height` for fixed images.
+ * Performance: the default (static) path is a **server component** — no
+ * `"use client"`, no state, no hydration. Only when an `animation` is requested
+ * do we delegate to the client {@link AppImageReveal}, so a page full of static
+ * images ships zero image-related JS. All `next/image` props pass through.
  */
-export const imageVariants = tv({
-  base: "max-w-full",
-  variants: {
-    fit: {
-      cover: "object-cover",
-      contain: "object-contain",
-      fill: "object-fill",
-      none: "object-none",
-      scaleDown: "object-scale-down",
-    },
-    radius: {
-      none: "rounded-none",
-      sm: "rounded-sm",
-      md: "rounded-md",
-      lg: "rounded-lg",
-      xl: "rounded-xl",
-      "2xl": "rounded-2xl",
-      "3xl": "rounded-3xl",
-      full: "rounded-full",
-    },
-    animation: {
-      none: "",
-      fade: "opacity-0 transition-opacity duration-500 ease-out data-[loaded=true]:opacity-100",
-      zoom: "scale-105 opacity-0 transition-all duration-500 ease-out data-[loaded=true]:scale-100 data-[loaded=true]:opacity-100",
-      blur: "blur-md opacity-0 transition-[opacity,filter] duration-500 ease-out data-[loaded=true]:blur-0 data-[loaded=true]:opacity-100",
-    },
-  },
-  defaultVariants: {
-    fit: "cover",
-    radius: "none",
-    animation: "none",
-  },
-});
-
-export type ImageVariants = VariantProps<typeof imageVariants>;
-
-export interface AppImageProps extends Omit<ImageProps, "src">, ImageVariants {
-  /** Optional so `src` can also arrive via Radix `asChild` (e.g. Avatar.Image). */
-  src?: ImageProps["src"];
-}
-
-export const AppImage = forwardRef<HTMLImageElement, AppImageProps>(
-  function AppImage(
-    {
-      fit,
-      radius,
-      animation,
-      className,
-      title = "",
-      onLoad,
-      alt = "",
-      ...props
-    },
-    ref,
-  ) {
-    // Nothing to reveal when there's no animation → start "loaded".
-    const animated = Boolean(animation) && animation !== "none";
-    const [loaded, setLoaded] = useState(!animated);
-
+export function AppImage({
+  fit,
+  radius,
+  animation,
+  className,
+  title = "",
+  alt = "",
+  ...props
+}: AppImageProps) {
+  // Animated reveal needs client-side load tracking → mount the client island.
+  if (animation && animation !== "none") {
     return (
-      <NextImage
-        ref={ref}
-        {...(props as ImageProps)}
-        alt={alt}
+      <AppImageReveal
+        fit={fit}
+        radius={radius}
+        animation={animation}
+        className={className}
         title={title}
-        data-loaded={loaded}
-        className={imageVariants({ fit, radius, animation, className })}
-        onLoad={(e) => {
-          setLoaded(true);
-          onLoad?.(e);
-        }}
+        alt={alt}
+        {...props}
       />
     );
-  },
-);
+  }
+
+  // Static path: pure server component, zero client JS.
+  return (
+    <NextImage
+      {...(props as ImageProps)}
+      alt={alt}
+      title={title}
+      className={imageVariants({ fit, radius, animation: "none", className })}
+    />
+  );
+}

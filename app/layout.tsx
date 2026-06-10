@@ -226,7 +226,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         {/* Consently cookie-consent banner. As a consent manager it must run
          *  before any tracking scripts hydrate, so it uses the
          *  `beforeInteractive` strategy (Next injects it into <head>). */}

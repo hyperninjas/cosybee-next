@@ -55,9 +55,11 @@
   --radius: 0.25rem;
   --field-radius: 0.5rem;
 
-  /* Font Family */
-  /* Make sure to load Manrope font in your app */
-  --font-sans: "Manrope", sans-serif;
+  /* Font Family — Manrope is self-hosted by next/font and exposed as
+     var(--font-manrope) (see app/layout.tsx). Reference that variable; the bare
+     "Manrope" name does NOT match the hashed self-hosted family, so it would
+     silently fall back to a system font. */
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark,
@@ -108,7 +110,7 @@
 .article-body h1,
 .article-body h2,
 .article-body h3 {
-  color: #000;
+  color: var(--foreground);
   font-weight: 700;
   line-height: 1.25;
   max-width: 36.875rem;
@@ -138,20 +140,20 @@
   margin-top: 0.5rem;
 }
 .article-body li::marker {
-  color: #545454;
+  color: var(--muted);
 }
 .article-body a {
-  color: #1b6ac9;
+  color: var(--accent);
   text-decoration: underline;
   word-break: break-word;
   transition: color 150ms;
 }
 .article-body a:hover {
-  color: #0b4ec9;
+  color: var(--accent-hover);
 }
 .article-body strong {
   font-weight: 700;
-  color: #000;
+  color: var(--foreground);
 }
 .article-body img {
   border-radius: 1.5rem;
@@ -165,19 +167,21 @@
 }
 .article-body blockquote {
   margin-top: 1.5rem;
-  border-left: 3px solid #ff8a7a;
+  border-left: 3px solid var(--accent);
   padding: 0.25rem 0 0.25rem 1.25rem;
   font-size: 1.25rem;
   font-style: italic;
-  color: #2a2a2a;
+  color: var(--muted);
 }
 .article-body code {
-  background: #f3f4f6;
+  background: var(--surface-secondary);
   border-radius: 0.3rem;
   padding: 0.12em 0.38em;
   font-size: 0.9em;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+/* Code blocks stay intentionally dark in both themes (a deliberate "terminal"
+   look that reads fine on light and dark pages). */
 .article-body pre {
   margin-top: 1.5rem;
   overflow-x: auto;
@@ -200,12 +204,12 @@
   margin-top: 0.5rem;
   text-align: center;
   font-size: 0.85rem;
-  color: #8a8a8a;
+  color: var(--muted);
 }
 .article-body hr {
   margin: 2rem 0;
   border: 0;
-  border-top: 1px solid #ececec;
+  border-top: 1px solid var(--separator);
 }
 
 /* --- Admin editor (Medium / dev.to feel) ------------------------- */
