@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Card,
   Chip,
   ListBox,
   ListBoxItem,
@@ -48,7 +49,7 @@ export function ActionBar({
       ? "Archived"
       : "Draft";
   return (
-    <div className="sticky top-0 z-30 mb-6 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur sm:px-6">
+    <Card className="sticky top-20 z-30 mb-6 flex-row items-center justify-between">
       <div className="flex items-center gap-3">
         <Select
           aria-label="Blog"
@@ -120,6 +121,6 @@ export function ActionBar({
           {editing && isPublished ? "Update" : "Publish"}
         </Button>
       </div>
-    </div>
+    </Card>
   );
 }

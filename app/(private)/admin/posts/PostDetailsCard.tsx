@@ -116,7 +116,7 @@ export function PostDetailsCard({
                 for full-width inputs but our trigger is an icon button.
                 Lift the cap and let the calendar's intrinsic grid drive
                 the popover width. */}
-            <DatePicker.Popover className="!max-w-fit w-fit">
+            <DatePicker.Popover className="max-w-fit! w-fit">
               <Calendar>
                 <Calendar.Header>
                   <Calendar.NavButton slot="previous" />

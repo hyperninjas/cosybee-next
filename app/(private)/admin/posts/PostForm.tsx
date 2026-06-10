@@ -157,11 +157,7 @@ function parseInitialBlocks(
                 type: "paragraph",
                 content: [{ type: "text", text: block, styles: {} }],
               });
-            } else if (
-              block &&
-              typeof block === "object" &&
-              "items" in block
-            ) {
+            } else if (block && typeof block === "object" && "items" in block) {
               const items = (block as { items: string[] }).items;
               if (Array.isArray(items)) {
                 for (const item of items) {
@@ -374,7 +370,7 @@ export default function PostForm({
         </div>
       )}
 
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         {/* Writing canvas */}
         <div className="min-w-0 flex-1">
           <div className="mx-auto max-w-2xl">
@@ -455,12 +451,12 @@ export default function PostForm({
         </div>
 
         {/* Settings panel — docked beside the editor on lg+. */}
-        <aside className="w-full shrink-0 self-start overflow-hidden lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:w-104 lg:overflow-y-auto">
-          <div className="sticky top-0 z-10 border-b border-border bg-surface px-5 py-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)]">
+        <aside className="w-full shrink-0 self-start overflow-hidden lg:sticky lg:top-42 lg:max-h-[calc(100vh-12.9rem)] lg:w-104 lg:overflow-y-auto px-2">
+          {/* <div className="sticky top-0 z-10 border-b border-border bg-surface px-5 py-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)]">
             <h2 className="text-lg font-bold text-foreground">Post settings</h2>
-          </div>
+          </div> */}
 
-          <div className="space-y-5 py-5 px-1">
+          <div className="space-y-5 pb-5 rounded-2xl">
             <CoverImageCard
               title={title}
               coverUrl={coverUrl}
