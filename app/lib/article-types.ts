@@ -8,8 +8,16 @@ export type Author = {
   name: string;
   slug: string;
   avatarUrl: string | null;
+  avatarAlt?: string | null;
+  avatarWidth?: number | null;
+  avatarHeight?: number | null;
   bio: string | null;
   role: string | null;
+  email?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
 };
 
 export type Category = {
@@ -18,12 +26,18 @@ export type Category = {
   name: string;
   slug: string;
   description: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  iconUrl?: string | null;
+  /** CSS-token-friendly colour (e.g. `#EE3D1A` or `oklch(...)`). */
+  color?: string | null;
 };
 
 export type Tag = {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
 };
 
 export type Article = {

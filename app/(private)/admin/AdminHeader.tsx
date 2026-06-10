@@ -35,6 +35,9 @@ export function AdminHeader({ user }: { user: AdminUser }) {
   const router = useRouter();
   const pathname = usePathname();
   const onUsers = pathname?.startsWith("/admin/manage-users") ?? false;
+  const onAuthors = pathname?.startsWith("/admin/authors") ?? false;
+  const onCategories = pathname?.startsWith("/admin/categories") ?? false;
+  const onTags = pathname?.startsWith("/admin/tags") ?? false;
 
   // Drives the mobile dropdown: internal nav, external (new-tab) links, sign out.
   async function onMenuAction(key: string) {
@@ -65,6 +68,33 @@ export function AdminHeader({ user }: { user: AdminUser }) {
         {/* Desktop nav (md+) — real anchors styled with HeroUI's button
             variants so their radius/size match the Sign out Button. */}
         <nav className="hidden items-center gap-1 text-sm font-medium md:flex">
+          <Link
+            href="/admin/authors"
+            className={buttonVariants({
+              variant: onAuthors ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Authors
+          </Link>
+          <Link
+            href="/admin/categories"
+            className={buttonVariants({
+              variant: onCategories ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Categories
+          </Link>
+          <Link
+            href="/admin/tags"
+            className={buttonVariants({
+              variant: onTags ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Tags
+          </Link>
           <Link
             href="/admin/manage-users"
             className={buttonVariants({
@@ -132,6 +162,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
                 <p className="truncate text-xs text-muted">{user.email}</p>
               </div>
               <Dropdown.Menu onAction={(key) => onMenuAction(String(key))}>
+                <Dropdown.Item id="/admin/authors" textValue="Authors">
+                  <Label>Authors</Label>
+                </Dropdown.Item>
+                <Dropdown.Item id="/admin/categories" textValue="Categories">
+                  <Label>Categories</Label>
+                </Dropdown.Item>
+                <Dropdown.Item id="/admin/tags" textValue="Tags">
+                  <Label>Tags</Label>
+                </Dropdown.Item>
                 <Dropdown.Item id="/admin/manage-users" textValue="Users">
                   <Label>Users</Label>
                 </Dropdown.Item>

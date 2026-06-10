@@ -364,4 +364,136 @@ export const adminApi = {
       return false;
     }
   },
+
+  // ---------------------------------------------------------------
+  // Authors CRUD
+  // ---------------------------------------------------------------
+
+  async getAuthor(id: string): Promise<Author | null> {
+    try {
+      return await fetchApi<Author>(`/api/posts/authors/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createAuthor(input: AuthorInput): Promise<Author> {
+    return fetchApi<Author>("/api/posts/authors", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateAuthor(id: string, input: Partial<AuthorInput>): Promise<Author> {
+    return fetchApi<Author>(`/api/posts/authors/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteAuthor(id: string): Promise<void> {
+    await fetchApi(`/api/posts/authors/${id}`, { method: "DELETE" });
+  },
+
+  // ---------------------------------------------------------------
+  // Categories CRUD
+  // ---------------------------------------------------------------
+
+  async getCategory(id: string): Promise<Category | null> {
+    try {
+      return await fetchApi<Category>(`/api/posts/categories/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createCategory(input: CategoryInput): Promise<Category> {
+    return fetchApi<Category>("/api/posts/categories", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateCategory(
+    id: string,
+    input: Partial<CategoryInput>,
+  ): Promise<Category> {
+    return fetchApi<Category>(`/api/posts/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteCategory(id: string): Promise<void> {
+    await fetchApi(`/api/posts/categories/${id}`, { method: "DELETE" });
+  },
+
+  // ---------------------------------------------------------------
+  // Tags CRUD
+  // ---------------------------------------------------------------
+
+  async getTag(id: string): Promise<Tag | null> {
+    try {
+      return await fetchApi<Tag>(`/api/posts/tags/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async createTag(input: TagInput): Promise<Tag> {
+    return fetchApi<Tag>("/api/posts/tags", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateTag(id: string, input: Partial<TagInput>): Promise<Tag> {
+    return fetchApi<Tag>(`/api/posts/tags/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteTag(id: string): Promise<void> {
+    await fetchApi(`/api/posts/tags/${id}`, { method: "DELETE" });
+  },
 };
+
+// ---------------------------------------------------------------
+// Input shapes for the new CRUD endpoints. Required fields only — the
+// backend fills in slug, timestamps, and any derived columns.
+// ---------------------------------------------------------------
+
+export interface AuthorInput {
+  name: string;
+  slug?: string;
+  avatarUrl?: string | null;
+  avatarAlt?: string | null;
+  avatarWidth?: number | null;
+  avatarHeight?: number | null;
+  bio?: string | null;
+  role?: string | null;
+  email?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+}
+
+export interface CategoryInput {
+  blog: "hive" | "learn";
+  name: string;
+  slug?: string;
+  description?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  iconUrl?: string | null;
+  color?: string | null;
+}
+
+export interface TagInput {
+  name: string;
+  /** Keep the existing slug stable on rename unless explicitly set. */
+  slug?: string;
+  description?: string | null;
+}
