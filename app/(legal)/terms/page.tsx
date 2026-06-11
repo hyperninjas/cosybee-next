@@ -157,8 +157,8 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>3.2</strong> To exercise your right to cancel, contact us at{" "}
-            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> with
-            your order details.
+            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            with your order details.
           </p>
           <p>
             <strong>3.3</strong> Returned Devices must be:
@@ -236,8 +236,8 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>5.2</strong> You agree to notify us immediately at{" "}
-            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> if
-            you suspect any unauthorised access to your Account.
+            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            if you suspect any unauthorised access to your Account.
           </p>
           <p>
             <strong>5.3</strong> We reserve the right to suspend or terminate
@@ -331,9 +331,9 @@ export default function TermsPage() {
           </ul>
           <p>
             <strong>8.3</strong> To make a warranty claim, contact us at{" "}
-            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> with
-            proof of purchase and a description of the defect. We may, at our
-            discretion, repair, replace, or refund the Device.
+            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            with proof of purchase and a description of the defect. We may, at
+            our discretion, repair, replace, or refund the Device.
           </p>
           <p>
             <strong>8.4</strong> Your statutory rights as a consumer under the
@@ -469,10 +469,10 @@ export default function TermsPage() {
             <strong>13.3 Alternative Dispute Resolution:</strong> We are
             committed to resolving disputes fairly. Before initiating legal
             proceedings, we encourage you to contact us directly at{" "}
-            <a href="mailto:hello@EnergieBee.com">hello@EnergieBee.com</a> to
-            seek an amicable resolution. If we are unable to resolve a dispute,
-            you may also have the right to use the Online Dispute Resolution
-            (ODR) platform provided by the European Commission at{" "}
+            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            to seek an amicable resolution. If we are unable to resolve a
+            dispute, you may also have the right to use the Online Dispute
+            Resolution (ODR) platform provided by the European Commission at{" "}
             <a
               href="https://ec.europa.eu/consumers/odr"
               target="_blank"

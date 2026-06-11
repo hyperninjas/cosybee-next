@@ -39,7 +39,7 @@ export const ORG_ADDRESS = {
   country: "GB",
 };
 
-export const ORG_CONTACT_EMAIL = "hello@EnergieBee.com";
+export const ORG_CONTACT_EMAIL = "support@energiebee.com";
 
 export const SOCIAL = {
   facebook: "https://www.facebook.com/EnergieBeeLtd/",

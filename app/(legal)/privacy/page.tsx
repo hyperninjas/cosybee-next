@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
           <p>
             For privacy-related enquiries:{" "}
-            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>
+            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
           </p>
           <p>
             This policy is governed by the UK General Data Protection Regulation
@@ -407,7 +407,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             To exercise any of these rights, please contact us at{" "}
-            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>.
+            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
             We will respond within 30 days. We may need to verify your identity
             before fulfilling a request.
           </p>
@@ -442,7 +442,7 @@ export default function PrivacyPage() {
             not knowingly collect personal data from anyone under 18. If you
             believe a child has provided us with personal data, please contact
             us at{" "}
-            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>{" "}
+            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>{" "}
             and we will delete the information promptly.
           </p>
         </LegalSection>
@@ -471,7 +471,7 @@ export default function PrivacyPage() {
           <p>
             If you have concerns about how we handle your personal data, please
             contact us first at{" "}
-            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>.
+            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
           </p>
           <p>
             If you remain unsatisfied, you have the right to lodge a complaint

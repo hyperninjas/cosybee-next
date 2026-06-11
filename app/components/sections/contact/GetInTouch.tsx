@@ -28,8 +28,8 @@ const CONTACT_INFO: ContactInfo[] = [
   {
     icon: <Envelope className="size-5" />,
     title: "Email Address",
-    detail: "info@energiebee.com",
-    href: "mailto:info@energiebee.com",
+    detail: "support@energiebee.com",
+    href: "mailto:support@energiebee.com",
   },
   {
     icon: <MapPin className="size-5" />,
@@ -59,7 +59,15 @@ export default function GetInTouch() {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // TODO: wire to server action / API route / form handler
-    console.log({ firstName, lastName, email, phone, company, message, agreed });
+    console.log({
+      firstName,
+      lastName,
+      email,
+      phone,
+      company,
+      message,
+      agreed,
+    });
   };
 
   return (
@@ -74,8 +82,8 @@ export default function GetInTouch() {
             Get in touch
           </Heading>
           <Text variant="lead" tone="muted" className="mt-3">
-            Reach out to us anytime! We&rsquo;re here to help with your inquiries
-            and support.
+            Reach out to us anytime! We&rsquo;re here to help with your
+            inquiries and support.
           </Text>
         </div>
 

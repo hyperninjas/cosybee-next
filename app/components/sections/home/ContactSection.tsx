@@ -82,10 +82,10 @@ export default function ContactSection() {
             </span>
           </Hexagon>
           <a
-            href="mailto:info@EnergieBee.com"
+            href="mailto:support@energiebee.com"
             className="mt-6 text-base font-medium text-white transition-colors hover:text-[#EFDF18] sm:text-lg"
           >
-            info@EnergieBee.com
+            support@energiebee.com
           </a>
         </div>
 

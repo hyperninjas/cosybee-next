@@ -83,7 +83,7 @@ export default function CookiesPage() {
           <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
           <p>
             For cookie-related enquiries:{" "}
-            <a href="mailto:privacy@EnergieBee.com">privacy@EnergieBee.com</a>
+            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
           </p>
           <p>
             This policy applies to our website at{" "}
