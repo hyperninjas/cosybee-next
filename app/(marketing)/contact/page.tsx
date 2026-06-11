@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import ContactSection from "@/app/components/sections/home/ContactSection";
+import Hero from "@/app/components/sections/contact/Hero";
+import GetInTouch from "@/app/components/sections/contact/GetInTouch";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <main className="flex-1">
-      <ContactSection />
+      <Hero />
+      <GetInTouch />
     </main>
   );
 }
