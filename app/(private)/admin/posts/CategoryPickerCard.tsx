@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Button,
   Card,
+  Chip,
   ComboBox,
   Input,
   ListBox,
@@ -59,9 +60,9 @@ export function CategoryPickerCard({
       <Card>
         <Card.Header className="flex flex-row justify-between gap-2">
           <Card.Title className="text-sm font-semibold">Category</Card.Title>
-          <p className="text-xs text-muted">
+          <Chip size="sm" variant="soft" color="success">
             {blogCategories.length} in {blog}
-          </p>
+          </Chip>
         </Card.Header>
         <Card.Content className="space-y-3">
           <div className="flex items-stretch gap-2">

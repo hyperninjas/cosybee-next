@@ -7,6 +7,7 @@ import {
   ComboBox,
   Input,
   ListBox,
+  Chip,
   ListBoxItem,
   useOverlayState,
 } from "@heroui/react";
@@ -70,9 +71,9 @@ export function AuthorPickerCard({
       <Card>
         <Card.Header className="flex flex-row justify-between gap-2">
           <Card.Title className="text-sm font-semibold">Author</Card.Title>
-          <p className="text-xs text-muted">
+          <Chip size="sm" variant="soft" color="success">
             {authors.length} author{authors.length !== 1 ? "s" : ""}
-          </p>
+          </Chip>
         </Card.Header>
         <Card.Content className="space-y-4">
           <Labeled

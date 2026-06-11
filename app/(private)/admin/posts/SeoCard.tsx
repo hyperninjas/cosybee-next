@@ -1,11 +1,18 @@
 "use client";
 
-import { Card, Input, Switch, TextArea } from "@heroui/react";
+import { Card, Chip, Input, Switch, TextArea } from "@heroui/react";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { Labeled } from "./Labeled";
 
 function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
+}
+
+/** Lightweight on-page SEO heuristic — five equally weighted checks scored
+ *  out of 100. Not a substitute for a real audit, just an at-a-glance cue. */
+function seoScore(checks: boolean[]): number {
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
 }
 
 /** SEO & social card — Google SERP preview, SEO title/description override,
@@ -50,10 +57,29 @@ export function SeoCard({
   const metaTitle = (seoTitle || title || "Untitled").trim();
   const metaDesc = (seoDescription || description).trim();
 
+  // Mirrors Lighthouse's SEO audit signals (title, non-empty description,
+  // crawlable URL, indexable) rather than penalising on length or social tags.
+  const hasShareImage =
+    ogImage.trim().length > 0 && (ogImageAlt || coverImageAlt).trim().length > 0;
+  const score = seoScore([
+    metaTitle.length > 0 && metaTitle.length <= 60,
+    metaDesc.length > 0,
+    effectiveSlug.trim().length > 0,
+    !noindex,
+    hasShareImage, // social bonus — not part of Lighthouse SEO
+  ]);
+  const scoreColor =
+    score >= 80 ? "success" : score >= 50 ? "warning" : "danger";
+
   return (
     <Card>
-      <Card.Header>
-        <Card.Title className="text-sm font-semibold">SEO &amp; Search</Card.Title>
+      <Card.Header className="flex flex-row justify-between gap-2">
+        <Card.Title className="text-sm font-semibold">
+          SEO &amp; Search
+        </Card.Title>
+        <Chip size="sm" variant="soft" color={scoreColor}>
+          SEO score: {score}/100
+        </Chip>
       </Card.Header>
       <Card.Content className="space-y-3">
         {/* Google SERP preview — keeps Google's signature colours */}
@@ -134,7 +160,8 @@ export function SeoCard({
                 Hide from search engines
               </span>
               <span className="block text-xs text-muted">
-                Adds &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot; /&gt;
+                Adds &lt;meta name=&quot;robots&quot;
+                content=&quot;noindex&quot; /&gt;
               </span>
             </Switch.Content>
             <Switch.Control>
