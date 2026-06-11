@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import PostForm, { type FormPost } from "@/app/(private)/admin/posts/PostForm";
 import {
   getPost,
@@ -13,6 +14,9 @@ export default async function EditPostPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // Render per-request so fresh tags/categories/authors created in other
+  // admin pages show up in this form's suggestions without a hard reload.
+  await connection();
   const { id } = await params;
   const [post, categories, tags, authors, routes] = await Promise.all([
     getPost(id),

@@ -316,17 +316,17 @@ export const adminApi = {
     }
   },
 
-  /** Get all tags (full objects). */
+  /** Get every tag in the DB.
+   *
+   *  Note: `/api/posts/tags?blog=X` returns only tags *already used by a
+   *  post in that blog*, per the endpoint's "List tags (optionally used
+   *  within a blog)" contract. Omit the `blog` param to get every tag —
+   *  including newly created ones not yet attached to any post — which
+   *  is what the post-editor's TagInput autocomplete needs. */
   async getAllTags(): Promise<Tag[]> {
     try {
-      const [hive, learn] = await Promise.all([
-        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=hive"),
-        fetchApi<{ data: Tag[] }>("/api/posts/tags?blog=learn"),
-      ]);
-      // Dedupe by id
-      const tagMap = new Map<string, Tag>();
-      [...(hive.data || []), ...(learn.data || [])].forEach((t) => tagMap.set(t.id, t));
-      return Array.from(tagMap.values());
+      const response = await fetchApi<{ data: Tag[] }>("/api/posts/tags");
+      return response.data || [];
     } catch (e) {
       console.error("getAllTags error:", e);
       return [];

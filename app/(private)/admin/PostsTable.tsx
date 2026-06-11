@@ -287,23 +287,30 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
           default primary input variant is correct here). */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Tabs
-          variant="secondary"
+          // variant="primary"
           selectedKey={tab}
           onSelectionChange={(k) => {
             setTab(k as (typeof TABS)[number]["key"]);
             setPage(1);
           }}
+          className="h-10!"
         >
-          <Tabs.List>
-            {TABS.map((t) => (
-              <Tabs.Tab key={t.key} id={t.key}>
-                {t.label}
-                <span className="ml-1.5 text-xs opacity-70">
-                  {counts[t.key]}
-                </span>
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
+          <Tabs.ListContainer>
+            <Tabs.List
+              aria-label="Options"
+              className="w-fit *:h-7 *:w-fit *:px-3 *:text-sm *:font-normal *:data-[selected=true]:text-accent-foreground"
+            >
+              {TABS.map((t) => (
+                <Tabs.Tab key={t.key} id={t.key}>
+                  {t.label}
+                  <span className="ml-1.5 text-xs opacity-90">
+                    {counts[t.key]}
+                  </span>
+                  <Tabs.Indicator className="bg-accent rounded-xl" />
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
+          </Tabs.ListContainer>
         </Tabs>
 
         <div className="flex items-center gap-3">
