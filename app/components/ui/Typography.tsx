@@ -17,7 +17,7 @@ export const headingVariants = tv({
     variant: {
       /** Hero headline (~75px at lg). */
       display:
-        "text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px]",
+        "text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl min-[1000px]:text-[60px]! min-[1200px]:text-[75px]!",
       /** Section title (~40px at lg). */
       title:
         "text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[40px]",
@@ -33,13 +33,17 @@ export const headingVariants = tv({
 export type HeadingVariants = VariantProps<typeof headingVariants>;
 
 export interface HeadingProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
-    HeadingVariants {
+  extends React.HTMLAttributes<HTMLHeadingElement>, HeadingVariants {
   /** Semantic element to render. Defaults to `h2`. */
   as?: React.ElementType;
 }
 
-export function Heading({ as: Tag = "h2", variant, className, ...props }: HeadingProps) {
+export function Heading({
+  as: Tag = "h2",
+  variant,
+  className,
+  ...props
+}: HeadingProps) {
   return <Tag className={headingVariants({ variant, className })} {...props} />;
 }
 
@@ -68,12 +72,19 @@ export const textVariants = tv({
 export type TextVariants = VariantProps<typeof textVariants>;
 
 export interface TextProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
-    TextVariants {
+  extends React.HTMLAttributes<HTMLParagraphElement>, TextVariants {
   /** Semantic element to render. Defaults to `p`. */
   as?: React.ElementType;
 }
 
-export function Text({ as: Tag = "p", variant, tone, className, ...props }: TextProps) {
-  return <Tag className={textVariants({ variant, tone, className })} {...props} />;
+export function Text({
+  as: Tag = "p",
+  variant,
+  tone,
+  className,
+  ...props
+}: TextProps) {
+  return (
+    <Tag className={textVariants({ variant, tone, className })} {...props} />
+  );
 }

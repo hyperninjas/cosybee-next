@@ -13,7 +13,7 @@ export default function ReadyToReduce() {
     <Section
       spacing="none"
       overflow="visible"
-      className="max-w-360 mx-auto px-6 pb-20 sm:px-10 lg:px-30 lg:py-25"
+      className="max-w-360 mx-auto px-6 pb-20 sm:px-10 lg:px-30 lg:pb-25"
     >
       <div className="mx-auto relative flex max-w-360 flex-col items-center gap-8 rounded-3xl bg-surface-tertiary p-8 shadow-[0_30px_30px_-15px_rgba(0,0,0,0.15)] sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
         {/* phone */}

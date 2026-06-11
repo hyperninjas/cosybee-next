@@ -93,7 +93,7 @@ export default function GetInTouch() {
           className="mx-auto mt-12 flex max-w-2xl flex-col gap-5"
         >
           <fieldset className="flex flex-col gap-4">
-            <legend className="mb-1 text-sm font-bold text-foreground">
+            <legend className="mb-4 text-sm font-bold text-foreground">
               Personal Information
             </legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

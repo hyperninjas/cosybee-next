@@ -2,7 +2,7 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Section } from "@/app/components/ui/Section";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
-import heroBgImg from "@/public/Cover/energiebee-hive-cover.png";
+import heroBgImg from "@/public/Cover/energiebee-contact-cover.png";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -19,7 +19,7 @@ export default function Hero() {
     <Section
       spacing="none"
       surface="dark"
-      className="isolate flex flex-col justify-center min-h-[45vh] md:min-h-[55vh]"
+      className="isolate flex flex-col justify-center min-h-[50vh]"
     >
       {/* background photo + gradient */}
       <div aria-hidden className="absolute inset-0 -z-20">
@@ -40,7 +40,7 @@ export default function Hero() {
       <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="relative z-10">
           <Breadcrumbs items={CRUMBS} tone="dark" className="mb-5" />
-          <Heading as="h1" variant="display">
+          <Heading as="h1" variant="display" className="">
             We&rsquo;re Here to <span className="text-[#EFDF18]">Help</span>
           </Heading>
           <Text variant="heroLead" className="mt-5 max-w-129.5">
