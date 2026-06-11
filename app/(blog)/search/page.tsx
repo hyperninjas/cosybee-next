@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getAllArticles } from "@/app/lib/articles";
 import type { Article } from "@/app/lib/article-types";
-import { ArticleCard } from "@/app/components/sections/blog/BlogLatestArticles";
+import { ArticleCard } from "@/app/components/sections/blog/ArticleCard";
 
 export const metadata: Metadata = {
   title: "Search",

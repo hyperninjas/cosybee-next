@@ -5,7 +5,7 @@
  * parent (default `currentColor`).
  */
 export default function AppStoreBadge({
-  color = "currentColor",
+  color = "#8f8d8c",
   className = "",
 }: {
   /** Color applied to every fill and the border stroke. */

@@ -26,7 +26,11 @@ export default function BlogHero({
   crumbs,
 }: Props) {
   return (
-    <Section spacing="none" surface="dark" className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]">
+    <Section
+      spacing="none"
+      surface="dark"
+      className="isolate flex flex-col justify-center min-h-[45vh] md:min-h-[55vh]"
+    >
       {/* background photo */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image

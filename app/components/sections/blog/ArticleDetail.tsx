@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type Article, formatReadTime } from "@/app/lib/article-types";
+import {
+  type Article,
+  formatDate,
+  formatReadTime,
+  isExternalUrl,
+} from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
-import { ArticleCard } from "./BlogLatestArticles";
+import { ArticleCard } from "./ArticleCard";
 import { CtaButton } from "@/app/components/ui/Cta";
 import Dot from "@/app/components/ui/Dot";
 import Avatar from "@/app/components/ui/Avatar";
@@ -13,25 +18,6 @@ import ArticleToc from "./ArticleToc";
 import JsonLd from "@/app/components/JsonLd";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
-
-/** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
-function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
-}
-
-/** Format ISO date string to display format. */
-function formatDate(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return isoDate;
-  }
-}
 
 type Props = {
   /** Published article with rendered body HTML (caller handles notFound). */

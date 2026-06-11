@@ -6,28 +6,14 @@ import { useCallback, useEffect, useState } from "react";
 import Avatar from "@/app/components/ui/Avatar";
 import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
-import { type Article, formatReadTime } from "@/app/lib/article-types";
+import {
+  type Article,
+  formatDate,
+  formatReadTime,
+  isExternalUrl,
+} from "@/app/lib/article-types";
 import Dot from "@/app/components/ui/Dot";
 import { Button } from "@heroui/react";
-
-/** Check if URL is external (http/https) - these need unoptimized to bypass Next.js Image Optimization. */
-function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
-}
-
-/** Format ISO date string to display format. */
-function formatDate(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return isoDate;
-  }
-}
 
 function ChevronLeft({ className }: { className?: string }) {
   return (

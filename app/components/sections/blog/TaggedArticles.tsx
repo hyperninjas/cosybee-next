@@ -1,5 +1,5 @@
 import { AppLink as Link } from "@/app/components/ui/AppLink";
-import { ArticleCard } from "./BlogLatestArticles";
+import { ArticleCard } from "./ArticleCard";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
 import type { Article } from "@/app/lib/article-types";

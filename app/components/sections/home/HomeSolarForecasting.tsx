@@ -10,12 +10,12 @@ import sideImage from "@/public/energy-analytics-side.png";
  */
 export default function HomeSolarForecasting() {
   return (
-    <section className="relative overflow-hidden bg-surface-secondary py-10 text-foreground min-[1200px]:py-25">
+    <section className="relative overflow-hidden bg-surface-secondary py-10 text-foreground min-[1200px]:py-25!">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12  lg:gap-10">
         {/* left: phone — wrapper has explicit width, image fills it via
             w-full h-auto so it scales proportionally instead of rendering
             at intrinsic size */}
-        <div className="absolute -top-17 left-0 hidden w-[305.3px] min-[1200px]:block">
+        <div className="absolute -top-20 left-0 hidden w-[305.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="EnergieBee solar dashboard"
@@ -63,7 +63,7 @@ export default function HomeSolarForecasting() {
         {/* right: hive cluster — wrapper holds the absolute positioning
             and an explicit width so the inner `w-full` has something
             non-zero to resolve against */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-40 -top-10 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             cornerInset={4}

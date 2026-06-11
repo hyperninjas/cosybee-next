@@ -15,7 +15,7 @@ export default function ReadyToReduce() {
       overflow="visible"
       className="max-w-360 mx-auto px-6 pb-20 sm:px-10 lg:px-30 lg:py-25"
     >
-      <div className="mx-auto relative flex max-w-360 flex-col items-center gap-8 rounded-3xl bg-surface-secondary p-8 shadow-[0_30px_30px_-15px_rgba(0,0,0,0.15)] sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
+      <div className="mx-auto relative flex max-w-360 flex-col items-center gap-8 rounded-3xl bg-surface-tertiary p-8 shadow-[0_30px_30px_-15px_rgba(0,0,0,0.15)] sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
         {/* phone */}
         <div className="shrink-0 absolute bottom-0 hidden min-[1200px]:block">
           <Image
@@ -28,7 +28,7 @@ export default function ReadyToReduce() {
         </div>
         <div className="h-auto hidden min-[1200px]:block w-44 lg:w-59"></div>
         {/* text + buttons */}
-        <div className="flex-1 md:text-center min-[1200px]:text-left">
+        <div className="flex-1 md:text-center min-[1200px]:text-left!">
           <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
             EnergieBee helps you understand your home energy in a simple and
             connected way. One system. One view. Total clarity.
@@ -39,7 +39,7 @@ export default function ReadyToReduce() {
           <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
             More time for what matters.
           </p>
-          <div className="mt-6 flex flex-wrap items-center md:justify-center gap-4 min-[1200px]:justify-start">
+          <div className="mt-6 flex flex-wrap items-center md:justify-center gap-4 min-[1200px]:justify-start!">
             <CtaButton href="/download" size="md">
               Download Free App
             </CtaButton>

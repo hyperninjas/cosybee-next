@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAuthorProfile, getAuthorSlugs } from "@/app/lib/articles";
-import { ArticleCard } from "@/app/components/sections/blog/BlogLatestArticles";
+import { ArticleCard } from "@/app/components/sections/blog/ArticleCard";
 import Avatar from "@/app/components/ui/Avatar";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import JsonLd from "@/app/components/JsonLd";

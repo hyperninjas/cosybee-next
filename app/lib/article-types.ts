@@ -116,6 +116,28 @@ export function formatReadTime(minutes: number): string {
   return `${minutes} min read`;
 }
 
+/** Format an ISO date string for display (e.g. "5 Jun 2026"). */
+export function formatDate(isoDate: string): string {
+  try {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
+}
+
+/**
+ * External (http/https) URLs need Next's `unoptimized` to bypass the Image
+ * Optimization pipeline, since the cross-origin host serves its own derivatives.
+ */
+export function isExternalUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
 /**
  * Articles per page on the blog hubs. Used by both the server (to compute
  * total pages / rel prev-next for crawlable browse pagination) and the client

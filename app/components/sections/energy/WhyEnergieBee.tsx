@@ -28,7 +28,9 @@ export default function WhyEnergieBee() {
 
         {/* middle: title + lead + feature cards */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
-          <SectionTitle align="center">Why Choose EnergieBee Energy?</SectionTitle>
+          <SectionTitle align="center">
+            Why Choose EnergieBee Energy?
+          </SectionTitle>
           <SectionLead className="text-center">
             Part of the EnergieBee app — one dashboard for every kilowatt-hour,
             every device, every cost.
@@ -65,7 +67,7 @@ export default function WhyEnergieBee() {
         {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
             absolute positioning + explicit width so the inner `w-full`
             has a definite reference */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-40 top-15 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

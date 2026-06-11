@@ -7,7 +7,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 export default function EnergyAnalytics() {
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32 px-6 lg:px-0">
+    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32! px-6 lg:px-0">
       {/* decorative light hex bleeding from left edge */}
       {/* <Hexagon
         color="#E5E7EB"
@@ -18,7 +18,7 @@ export default function EnergyAnalytics() {
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
             against a non-zero containing block */}
-        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -left-50 -top-5 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}
@@ -29,7 +29,9 @@ export default function EnergyAnalytics() {
         </div>
         {/* middle: title + features */}
         <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
-          <SectionTitle align="center">Energy &amp; Savings Analytics</SectionTitle>
+          <SectionTitle align="center">
+            Energy &amp; Savings Analytics
+          </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="Bill Forecasting"
@@ -57,7 +59,7 @@ export default function EnergyAnalytics() {
         </div>
         {/* right: analytics phone — wrapper has explicit width, image
             fills it via w-full h-auto so it scales proportionally */}
-        <div className="absolute -top-20 right-0 hidden w-75 min-[1200px]:block">
+        <div className="absolute -top-15 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy analytics dashboard"

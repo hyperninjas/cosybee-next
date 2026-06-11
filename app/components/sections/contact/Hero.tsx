@@ -1,7 +1,13 @@
 import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Section } from "@/app/components/ui/Section";
+import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import heroBgImg from "@/public/Cover/energiebee-hive-cover.png";
+
+const CRUMBS = [
+  { name: "Home", path: "/" },
+  { name: "Contact", path: "/contact" },
+];
 
 /**
  * Contact hero — dark band over the bee/hive cover, mirroring the marketing
@@ -31,8 +37,9 @@ export default function Hero() {
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-360 pt-16 pb-20 px-6 lg:px-30 lg:pt-15 lg:pb-16">
+      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="relative z-10">
+          <Breadcrumbs items={CRUMBS} tone="dark" className="mb-5" />
           <Heading as="h1" variant="display">
             We&rsquo;re Here to <span className="text-[#EFDF18]">Help</span>
           </Heading>

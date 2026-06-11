@@ -55,7 +55,7 @@ export default function SmarterUnderstanding() {
         </div>
 
         {/* right: 3-hex hive cluster (mirrored) */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-40 top-5 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

@@ -7,10 +7,10 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 
 export default function UnderstandOptimise() {
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32 px-6 lg:px-0">
+    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32! px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster */}
-        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -left-50 -top-4 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}
@@ -50,7 +50,7 @@ export default function UnderstandOptimise() {
           </div>
         </div>
         {/* right: phone mockup */}
-        <div className="absolute -top-20 right-0 hidden w-75 min-[1200px]:block">
+        <div className="absolute -top-12 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy dashboard"

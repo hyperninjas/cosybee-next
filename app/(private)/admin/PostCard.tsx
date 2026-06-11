@@ -10,11 +10,8 @@ import {
 } from "@gravity-ui/icons";
 import { Button, Chip, Modal, Tooltip } from "@heroui/react";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { isExternalUrl } from "@/app/lib/article-types";
 import { type Row } from "./PostsTable";
-
-function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
-}
 
 /** http(s) URL → as-is; `/images/*` (legacy seed) → placeholder;
  *  empty → placeholder; everything else → as-is. */
