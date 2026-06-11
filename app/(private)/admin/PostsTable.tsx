@@ -328,9 +328,15 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
             </Select.Trigger>
             <Select.Popover>
               <ListBox>
-                <ListBoxItem id="all">All blogs</ListBoxItem>
-                <ListBoxItem id="hive">Hive</ListBoxItem>
-                <ListBoxItem id="learn">Learn</ListBoxItem>
+                <ListBoxItem textValue="All blogs" id="all">
+                  All blogs
+                </ListBoxItem>
+                <ListBoxItem textValue="Hive" id="hive">
+                  Hive
+                </ListBoxItem>
+                <ListBoxItem textValue="Learn" id="learn">
+                  Learn
+                </ListBoxItem>
               </ListBox>
             </Select.Popover>
           </Select>

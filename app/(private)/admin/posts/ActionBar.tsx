@@ -62,8 +62,12 @@ export function ActionBar({
           </Select.Trigger>
           <Select.Popover>
             <ListBox>
-              <ListBoxItem id="hive">Hive</ListBoxItem>
-              <ListBoxItem id="learn">Learn</ListBoxItem>
+              <ListBoxItem textValue="Hive" id="hive">
+                Hive
+              </ListBoxItem>
+              <ListBoxItem textValue="Learn" id="learn">
+                Learn
+              </ListBoxItem>
             </ListBox>
           </Select.Popover>
         </Select>

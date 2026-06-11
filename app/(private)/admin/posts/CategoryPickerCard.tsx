@@ -13,7 +13,7 @@ import {
 import { Pencil, Plus } from "@gravity-ui/icons";
 import type { Category } from "@/app/lib/article-types";
 import { CategoryFormModal } from "@/app/(private)/admin/categories/CategoryFormModal";
-import { Labeled } from "./Labeled";
+// import { Labeled } from "./Labeled";
 
 /**
  * Category picker card. Mirrors AuthorPickerCard's shape — ComboBox over
