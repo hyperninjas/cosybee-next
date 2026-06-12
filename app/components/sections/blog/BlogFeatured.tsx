@@ -149,10 +149,13 @@ export default function BlogFeatured({
   if (slides.length === 0) return null;
 
   return (
-    <Section spacing="none" className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30">
+    <Section
+      spacing="none"
+      className="mx-auto max-w-360 px-6 py-12 sm:px-10 lg:px-30"
+    >
       {/* embla viewport */}
       <div
-        className="overflow-hidden border border-border rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+        className="overflow-hidden border border-border rounded-3xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
@@ -204,7 +207,7 @@ export default function BlogFeatured({
             variant="tertiary"
             aria-label="Previous slide"
             onPress={scrollPrev}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-2xl border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronLeft />
           </Button>
@@ -213,7 +216,7 @@ export default function BlogFeatured({
             variant="tertiary"
             aria-label="Next slide"
             onPress={scrollNext}
-            className="flex h-13 w-13 items-center justify-center rounded-lg border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
+            className="flex h-13 w-13 items-center justify-center rounded-2xl border border-border bg-surface text-foreground shadow-[0_2.88px_5.32px_0_rgba(0,0,0,0.02),0_12.58px_17.87px_0_rgba(0,0,0,0.04),0_24px_40px_0_rgba(0,0,0,0.07)] transition-colors hover:bg-neutral-50"
           >
             <ChevronRight />
           </Button>

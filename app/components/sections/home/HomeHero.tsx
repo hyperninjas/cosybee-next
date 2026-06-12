@@ -15,7 +15,7 @@ export default function HomeHero() {
     <Section
       spacing="none"
       surface="dark"
-      className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[85vh]"
+      className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[93vh]"
     >
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">

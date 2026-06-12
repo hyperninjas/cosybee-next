@@ -35,7 +35,7 @@ export default function PageHero({
     <Section
       surface="dark"
       spacing="none"
-      className="isolate flex flex-col justify-center min-h-[50vh] md:min-h-[70vh]"
+      className="isolate flex flex-col justify-center min-h-[50vh] md:min-h-[73vh]"
     >
       {/* background photo + gradient */}
       <div aria-hidden className="absolute inset-0 -z-20">

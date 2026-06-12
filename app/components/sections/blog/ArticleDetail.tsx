@@ -74,9 +74,12 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
           breadcrumbSchema(crumbs),
         ]}
       />
-      <ReadingProgress />
+      <ReadingProgress targetSelector="#article-body" />
       <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
-        <article className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20">
+        <article
+          id="article-body"
+          className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20"
+        >
           {/* breadcrumb trail (replaces the old "Back to Blog" button) */}
           <Breadcrumbs items={crumbs} />
 

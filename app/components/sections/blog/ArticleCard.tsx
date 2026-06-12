@@ -54,10 +54,14 @@ function TagList({ tags }: { tags: Tag[] }) {
 function AuthorByline({ author }: { author: Article["author"] }) {
   const name = author?.name ?? "energiebee";
   return (
-    <div className="mt-auto pt-4">
+    <div className="mt-auto pt-3">
       <Divider />
-      <div className="mt-4 flex items-center gap-3">
-        <Avatar name={name} avatarUrl={author?.avatarUrl} className="h-10 w-10" />
+      <div className="mt-3 flex items-center gap-3">
+        <Avatar
+          name={name}
+          avatarUrl={author?.avatarUrl}
+          className="h-10 w-10"
+        />
         <span className="text-sm font-semibold text-foreground">{name}</span>
       </div>
     </div>
@@ -76,9 +80,9 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
       <link rel="preconnect" href={apiURL} />
       <Link
         href={`${basePath}/${a.slug}`}
-        className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:border-accent/30 hover:shadow-lg"
+        className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl"
       >
-        <div className="relative h-48">
+        <div className="relative h-43">
           <Image
             src={a.coverImage}
             alt={a.coverImageAlt}
@@ -91,7 +95,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         </div>
         <div className="flex flex-1 flex-col p-6">
           <ArticleMeta readTime={a.readTime} date={a.authorDate} />
-          <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-foreground">
+          <h3 className="mt-3 line-clamp-2 text-xl font-extrabold leading-snug text-foreground">
             {a.title}
           </h3>
           <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">
