@@ -78,7 +78,11 @@ export default function BlogBrowse({
       <Divider />
       {featured.length > 0 && page === 1 && (
         <div
-          aria-hidden={isFiltered}
+          // `inert` (not just aria-hidden) so the collapsed carousel's links
+          // and controls drop out of the tab order too — otherwise Tab lands
+          // on the hidden featured slides before the filtered results. Doesn't
+          // affect the CSS transition below.
+          inert={isFiltered}
           className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
             isFiltered
               ? "grid-rows-[0fr] opacity-0"

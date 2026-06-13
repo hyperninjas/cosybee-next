@@ -16,7 +16,8 @@ import { type Row } from "./PostsTable";
 /** http(s) URL → as-is; `/images/*` (legacy seed) → placeholder;
  *  empty → placeholder; everything else → as-is. */
 function coverSrc(coverImage: string): string {
-  if (!coverImage || coverImage.startsWith("/images/")) return "/bee-flower.png";
+  if (!coverImage || coverImage.startsWith("/images/"))
+    return "/bee-flower.png";
   return coverImage;
 }
 
@@ -72,7 +73,10 @@ export function PostCard({
 
   return (
     <>
-      <article className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:border-accent/30 hover:shadow-lg">
+      <article
+        title={row.title}
+        className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:border-accent/30 hover:shadow-lg"
+      >
         <div className="relative h-40 bg-default">
           <Image
             src={imageUrl}

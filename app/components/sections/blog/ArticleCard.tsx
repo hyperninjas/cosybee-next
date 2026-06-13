@@ -79,6 +79,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
       {/* Warm up the cross-origin media host (React 19 hoists + dedups this). */}
       <link rel="preconnect" href={apiURL} />
       <Link
+        title={a.title}
         href={`${basePath}/${a.slug}`}
         className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl"
       >
