@@ -18,7 +18,9 @@ function VerifyEmailForm() {
   const router = useRouter();
   const params = useSearchParams();
   const { data } = useSession();
-  const redirectTo = safeRedirect(params.get("redirect"));
+  // Mirror login/register: fall back to /post-login (role-based routing) when
+  // no explicit ?redirect= was carried through.
+  const redirectTo = safeRedirect(params.get("redirect"), "/post-login");
   const email = params.get("email") ?? data?.user?.email ?? "";
 
   const [otp, setOtp] = useState("");

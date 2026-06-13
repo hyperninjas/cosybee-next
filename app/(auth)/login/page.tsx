@@ -23,7 +23,11 @@ import { SocialButtons } from "@/app/(auth)/_components/SocialButtons";
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const redirectTo = safeRedirect(params.get("redirect"));
+  // Honour a valid explicit ?redirect= (e.g. bounced from a protected page);
+  // otherwise hand off to /post-login, which routes admins to the dashboard
+  // and everyone else home based on the validated session role. This default
+  // also feeds the social `callbackURL` below, so OAuth sign-in lands the same.
+  const redirectTo = safeRedirect(params.get("redirect"), "/post-login");
   const resetSuccess = params.get("reset") === "success";
 
   // "credentials" → email+password; "twofa" → the second-factor challenge that

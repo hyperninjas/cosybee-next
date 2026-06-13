@@ -4,10 +4,14 @@
  * protocol-relative (`//evil.com`), or backslash tricks (`/\evil.com`) — is
  * rejected in favour of the fallback. Prevents open-redirect abuse on the
  * login/register flows.
+ *
+ * The default fallback is `/post-login`, the server route that routes admins to
+ * the dashboard and everyone else home — so a missing/invalid redirect never
+ * lands an admin on `/account`. Pass an explicit fallback to override.
  */
 export function safeRedirect(
   target: string | null | undefined,
-  fallback = "/account",
+  fallback = "/post-login",
 ): string {
   if (!target) return fallback;
   // Must be a single-slash absolute path on this origin.

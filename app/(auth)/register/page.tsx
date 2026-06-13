@@ -14,7 +14,10 @@ import { SocialButtons } from "@/app/(auth)/_components/SocialButtons";
 function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const redirectTo = safeRedirect(params.get("redirect"));
+  // Default to /post-login (role-based: admins → dashboard, others → home) when
+  // there's no explicit ?redirect= to honour. Carried through to verify-email
+  // and used as the social `callbackURL`, so every sign-up path lands the same.
+  const redirectTo = safeRedirect(params.get("redirect"), "/post-login");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

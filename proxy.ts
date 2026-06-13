@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { safeRedirect } from "@/app/lib/safe-redirect";
 
 /**
  * Optimistic auth gate (Next.js 16 "Proxy", formerly Middleware).
@@ -36,7 +37,14 @@ export function proxy(request: NextRequest) {
     )
   ) {
     if (authed) {
-      return NextResponse.redirect(new URL("/account", request.url));
+      // Honour an explicit, on-site ?redirect=; otherwise hand off to
+      // /post-login, which routes admins to the dashboard and everyone else
+      // home. Never default an authed user to /account.
+      const target = safeRedirect(
+        request.nextUrl.searchParams.get("redirect"),
+        "/post-login",
+      );
+      return NextResponse.redirect(new URL(target, request.url));
     }
     return NextResponse.next();
   }
