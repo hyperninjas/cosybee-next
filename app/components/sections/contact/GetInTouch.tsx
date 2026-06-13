@@ -72,19 +72,19 @@ export default function GetInTouch() {
   };
 
   return (
-    <Section spacing="lg" surface="base">
+    <Section spacing="md" surface="base">
       <Container size="wide">
         {/* heading */}
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+          {/* <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
             Contact
-          </p>
+          </p> */}
           <Heading variant="title" className="mt-2 text-foreground">
             Get in touch
           </Heading>
           <Text variant="lead" tone="muted" className="mt-3">
             Reach out to us anytime! We&rsquo;re here to help with your
-            inquiries and support.
+            enquiries and support.
           </Text>
         </div>
 
