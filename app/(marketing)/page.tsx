@@ -6,6 +6,8 @@ import HomeSolarForecasting from "@/app/components/sections/home/HomeSolarForeca
 import HomeEnergyManagement from "@/app/components/sections/home/HomeEnergyManagement";
 // import WhyThousands from "@/app/components/sections/home/WhyThousands";
 import ReadyToReduce from "@/app/components/sections/home/ReadyToReduce";
+import Faq from "@/app/components/sections/Faq";
+import { GENERAL_FAQ } from "@/app/lib/faq-data";
 import JsonLd from "@/app/components/JsonLd";
 import { softwareApplicationSchema } from "@/app/lib/structured-data";
 
@@ -35,6 +37,7 @@ export default function Home() {
       <HomeSolarForecasting />
       <HomeEnergyManagement />
       {/* <WhyThousands /> */}
+      <Faq items={GENERAL_FAQ} />
       <ReadyToReduce />
     </main>
   );

@@ -10,7 +10,7 @@ import WorksWithAnySystem from "@/app/components/sections/energy/WorksWithAnySys
 import JsonLd from "@/app/components/JsonLd";
 import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
-import { ENERGY_FAQ } from "@/app/lib/faq-data";
+import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Total Energy Control",
@@ -50,7 +50,7 @@ export default function EnergyPage() {
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
       {/* <EnergyForecasting /> */}
-      <Faq items={ENERGY_FAQ} />
+      <Faq items={GENERAL_FAQ} />
     </main>
   );
 }

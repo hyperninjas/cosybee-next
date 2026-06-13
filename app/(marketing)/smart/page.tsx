@@ -10,7 +10,7 @@ import WorksWithAnySystem from "@/app/components/sections/smart/WorksWithAnySyst
 import JsonLd from "@/app/components/JsonLd";
 import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
-import { SMART_FAQ } from "@/app/lib/faq-data";
+import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = {
   title: "Smart Home Integration",
@@ -50,7 +50,7 @@ export default function SmartPage() {
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
       {/* <EnergyForecasting /> */}
-      <Faq items={SMART_FAQ} />
+      <Faq items={GENERAL_FAQ} />
     </main>
   );
 }
