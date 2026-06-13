@@ -18,6 +18,7 @@ export function PublicImageUpload({
   title,
   caption,
   credit,
+  previewHeight = "h-48",
 }: {
   context:
     | "blog-cover"
@@ -28,6 +29,10 @@ export function PublicImageUpload({
   onChange: (url: string | null) => void;
   /** Block uploads (e.g. unverified email — the backend would 403 anyway). */
   disabled?: boolean;
+  /** Tailwind height class for the (non-avatar) preview image. Defaults to
+   *  `h-48`; pass e.g. `h-56`/`h-64` for a taller preview. Avatars ignore this
+   *  (they render fixed square). */
+  previewHeight?: string;
   /** Forwarded to /storage/confirm so the asset lands in the media registry
    *  with proper accessibility metadata. Width/height are auto-derived from
    *  the file — no need to pass them. */
@@ -121,7 +126,7 @@ export function PublicImageUpload({
             className={
               isAvatar
                 ? "absolute inset-0 h-full w-full object-cover"
-                : "h-40 w-full object-cover"
+                : `${previewHeight} w-full object-cover`
             }
           />
 

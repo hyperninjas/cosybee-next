@@ -1,18 +1,12 @@
 "use client";
 
-import { Card, Chip, Input, Switch, TextArea } from "@heroui/react";
+import { Card, Chip, Input, Switch, TextArea, Tooltip } from "@heroui/react";
+import { CircleCheckFill, CircleXmarkFill } from "@gravity-ui/icons";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { Labeled } from "./Labeled";
 
 function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
-}
-
-/** Lightweight on-page SEO heuristic — five equally weighted checks scored
- *  out of 100. Not a substitute for a real audit, just an at-a-glance cue. */
-function seoScore(checks: boolean[]): number {
-  const passed = checks.filter(Boolean).length;
-  return Math.round((passed / checks.length) * 100);
 }
 
 /** SEO & social card — Google SERP preview, SEO title/description override,
@@ -35,6 +29,7 @@ export function SeoCard({
   setCanonicalUrl,
   noindex,
   setNoindex,
+  coverImage,
 }: {
   blog: string;
   title: string;
@@ -53,23 +48,59 @@ export function SeoCard({
   setCanonicalUrl: (v: string) => void;
   noindex: boolean;
   setNoindex: (v: boolean) => void;
+  coverImage: string;
 }) {
   const metaTitle = (seoTitle || title || "Untitled").trim();
   const metaDesc = (seoDescription || description).trim();
 
-  // Mirrors Lighthouse's SEO audit signals (title, non-empty description,
-  // crawlable URL, indexable) rather than penalising on length or social tags.
+  // Lightweight on-page SEO heuristic — five equally weighted checks. Mirrors
+  // Lighthouse's SEO audit signals (title, non-empty description, crawlable
+  // URL, indexable) plus a social-card bonus. Each check carries a fix hint
+  // surfaced in the score chip's tooltip. Not a substitute for a real audit.
   const hasShareImage =
-    ogImage.trim().length > 0 && (ogImageAlt || coverImageAlt).trim().length > 0;
-  const score = seoScore([
-    metaTitle.length > 0 && metaTitle.length <= 60,
-    metaDesc.length > 0,
-    effectiveSlug.trim().length > 0,
-    !noindex,
-    hasShareImage, // social bonus — not part of Lighthouse SEO
-  ]);
+    ogImage.trim().length > 0 &&
+    (ogImageAlt || coverImageAlt).trim().length > 0;
+  const checks = [
+    {
+      label: "Title set, 60 characters or fewer",
+      passed: metaTitle.length > 0 && metaTitle.length <= 60,
+      fix:
+        metaTitle.length > 60
+          ? `Title is ${metaTitle.length} characters — trim to 60 or fewer so search results don't truncate it.`
+          : "Add a page title — it's the strongest on-page SEO signal.",
+    },
+    {
+      label: "Meta description present",
+      passed: metaDesc.length > 0,
+      fix: "Add an SEO description (or article excerpt) so search engines can show a snippet.",
+    },
+    {
+      label: "Crawlable URL slug",
+      passed: effectiveSlug.trim().length > 0,
+      fix: "Set a URL slug so the page has a stable, crawlable address.",
+    },
+    {
+      label: "Indexable (not noindex)",
+      passed: !noindex,
+      fix: "“Hide from search engines” is on — turn it off to let this page be indexed.",
+    },
+    {
+      label: "Social share image with alt text",
+      passed: hasShareImage,
+      fix: "Add a social share image and its alt text for richer link previews (recommended).",
+    },
+  ];
+  const passedCount = checks.filter((c) => c.passed).length;
+  const score = Math.round((passedCount / checks.length) * 100);
+  // Gradient across the score: red → orange → amber → green as more checks pass.
   const scoreColor =
-    score >= 80 ? "success" : score >= 50 ? "warning" : "danger";
+    score >= 80
+      ? "success"
+      : score >= 60
+        ? "warning"
+        : score >= 40
+          ? "accent"
+          : "danger";
 
   return (
     <Card>
@@ -77,9 +108,40 @@ export function SeoCard({
         <Card.Title className="text-sm font-semibold">
           SEO &amp; Search
         </Card.Title>
-        <Chip size="sm" variant="soft" color={scoreColor}>
-          SEO score: {score}/100
-        </Chip>
+        <Tooltip delay={150}>
+          <Tooltip.Trigger>
+            <Chip
+              size="sm"
+              variant="soft"
+              color={scoreColor}
+              className="cursor-help"
+            >
+              SEO score: {score}/100
+            </Chip>
+          </Tooltip.Trigger>
+          <Tooltip.Content className="max-w-72 break-normal text-left">
+            <p className="mb-1.5 font-semibold">
+              SEO checklist · {passedCount}/{checks.length} passed
+            </p>
+            <ul className="space-y-1.5">
+              {checks.map((c) => (
+                <li key={c.label} className="flex gap-1.5">
+                  {c.passed ? (
+                    <CircleCheckFill className="mt-px size-3.5 shrink-0 text-success" />
+                  ) : (
+                    <CircleXmarkFill className="mt-px size-3.5 shrink-0 text-danger" />
+                  )}
+                  <span>
+                    {c.label}
+                    {!c.passed && (
+                      <span className="mt-0.5 block text-muted">{c.fix}</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Tooltip.Content>
+        </Tooltip>
       </Card.Header>
       <Card.Content className="space-y-3">
         {/* Google SERP preview — keeps Google's signature colours */}
@@ -119,7 +181,7 @@ export function SeoCard({
         >
           <PublicImageUpload
             context="blog-cover"
-            value={ogImage || null}
+            value={ogImage || coverImage || null}
             onChange={(url) => setOgImage(url ?? "")}
             alt={ogImageAlt || title}
           />

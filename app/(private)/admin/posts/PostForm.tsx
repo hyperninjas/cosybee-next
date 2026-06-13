@@ -380,6 +380,7 @@ export default function PostForm({
                 value={coverUrl || null}
                 onChange={(url) => setCoverUrl(url ?? "")}
                 alt={coverImageAlt || title}
+                previewHeight="h-60"
               />
             </div>
 
@@ -521,6 +522,7 @@ export default function PostForm({
               setCanonicalUrl={setCanonicalUrl}
               noindex={noindex}
               setNoindex={setNoindex}
+              coverImage={coverUrl}
             />
 
             <ScheduleCard
