@@ -34,12 +34,13 @@ const CONTACT_INFO: ContactInfo[] = [
   {
     icon: <MapPin className="size-5" />,
     title: "Location",
-    detail: "123 Sunnyvale Park, Springfield, IL, USA",
+    detail:
+      "Energiebee Limited c/o Schofield House, Lion Mill Yard, Fitton Street, Royton, Lancashire, OL2 5JX",
   },
 ];
 
 const MAP_SRC =
-  "https://www.google.com/maps?q=Old+Trafford,+Manchester,+UK&output=embed";
+  "https://www.google.com/maps?q=Schofield+House,+Lion+Mill+Yard,+Fitton+Street,+Royton,+Lancashire,+OL2+5JX&output=embed";
 
 /**
  * Get-in-touch section — eyebrow + title, a multi-field enquiry form, a row of
