@@ -1,13 +1,17 @@
 import "server-only";
 import { ServerBlockNoteEditor } from "@blocknote/server-util";
 import type { PartialBlock } from "@blocknote/core";
+import { blockNoteSchema } from "./blocknoteSchema";
 
 /**
  * Convert BlockNote JSON blocks to HTML string.
  * Uses server-side rendering for generating the HTML.
+ *
+ * Uses the same schema as the client editor (including multi-column blocks)
+ * so custom block types render instead of throwing on a missing propSchema.
  */
 export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
-  const editor = ServerBlockNoteEditor.create();
+  const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
   const html = await editor.blocksToFullHTML(blocks);
   return html;
 }
