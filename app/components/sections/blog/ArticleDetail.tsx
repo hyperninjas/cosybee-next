@@ -191,7 +191,7 @@ export default async function ArticleDetail({
 
           {/* body — server-rendered HTML from the BlockNote document */}
           <div
-            className="article-body mt-10 px-2 md:px-10 lg:px-20 text-muted wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 px-2 md:px-10 lg:px-20 text-foreground wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
