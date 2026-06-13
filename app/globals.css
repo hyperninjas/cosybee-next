@@ -158,6 +158,10 @@
 .article-body img {
   border-radius: 1.5rem;
   margin-top: 1.5rem;
+  /* The lossy export sets an explicit `width` (the author's resized preview
+     width); cap it to the column and keep the aspect ratio on small screens. */
+  max-width: 100%;
+  height: auto;
 }
 /* offset anchor jumps so headings clear the sticky navbar */
 .article-body h1,
@@ -202,14 +206,59 @@
 }
 .article-body figcaption {
   margin-top: 0.5rem;
-  text-align: center;
   font-size: 0.85rem;
   color: var(--muted);
+}
+/* Honour BlockNote's per-block image alignment. The lossy export emits
+   `data-text-alignment` on the <figure> (captioned image) or the bare <img>;
+   default (no attribute) is left, matching BlockNote. Images are block-level
+   (Tailwind preflight resets `img` to display:block), so `text-align` alone
+   can't move them — the image itself is centred/pushed with auto margins,
+   while `text-align` handles the caption text. */
+.article-body figure[data-text-alignment="center"] {
+  text-align: center;
+}
+.article-body figure[data-text-alignment="center"] img {
+  margin-inline: auto;
+}
+.article-body figure[data-text-alignment="right"] {
+  text-align: right;
+}
+.article-body figure[data-text-alignment="right"] img {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+.article-body img[data-text-alignment="center"] {
+  margin-inline: auto;
+}
+.article-body img[data-text-alignment="right"] {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
 }
 .article-body hr {
   margin: 2rem 0;
   border: 0;
   border-top: 1px solid var(--separator);
+}
+/* Multi-column blocks (BlockNote `columnList`). The lossy HTML export hardcodes
+   `display:flex` + per-column `flex-grow` inline, so columns lay out with no
+   extra CSS — we only add a gap, top spacing to match other blocks, and a
+   mobile stack so narrow columns don't get squished. The inline `display:flex`
+   is overridden with `!important` on small screens. */
+.article-body .bn-block-column-list {
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+.article-body .bn-block-column > * + * {
+  margin-top: 1rem;
+}
+@media (max-width: 640px) {
+  .article-body .bn-block-column-list {
+    display: block !important;
+  }
+  .article-body .bn-block-column + .bn-block-column {
+    margin-top: 1rem;
+  }
 }
 
 /* --- Admin editor (Medium / dev.to feel) ------------------------- */

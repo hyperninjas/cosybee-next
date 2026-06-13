@@ -8,6 +8,7 @@ import {
 } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
+import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { ArticleCard } from "./ArticleCard";
 import { CtaButton } from "@/app/components/ui/Cta";
 import Dot from "@/app/components/ui/Dot";
@@ -33,22 +34,25 @@ type Props = {
  * optional inline image and end-of-article CTA, plus a related rail.
  * Shared by /hive and /learn article routes.
  */
-export default function ArticleDetail({ article, related, basePath }: Props) {
-  // Use contentHtml if available, otherwise render legacy contentJson
-  let rawHtml = article.contentHtml ?? "";
-  if (
-    (!rawHtml || rawHtml.trim() === "") &&
-    isLegacyContent(article.contentJson)
-  ) {
-    rawHtml = renderLegacyContent(article.contentJson) ?? "";
-  }
-  // Also use legacy renderer if contentJson has sections with blocks that weren't rendered
+export default async function ArticleDetail({
+  article,
+  related,
+  basePath,
+}: Props) {
+  // Resolve the article body. The document is authored in BlockNote, so the
+  // BlockNote server renderer is the source of truth: render `contentJson`
+  // with the shared schema (multi-column included) for perfect fidelity.
+  // Older posts may instead carry the legacy `{ sections }` shape, and we keep
+  // the backend-rendered `contentHtml` as a last-resort fallback.
+  let rawHtml: string;
   if (isLegacyContent(article.contentJson)) {
-    const legacyHtml = renderLegacyContent(article.contentJson);
-    // If legacy HTML is longer, it likely has more content (blocks/items)
-    if (legacyHtml && legacyHtml.length > rawHtml.length) {
-      rawHtml = legacyHtml;
-    }
+    rawHtml =
+      renderLegacyContent(article.contentJson) ?? article.contentHtml ?? "";
+  } else {
+    const blockNoteHtml = article.contentJson
+      ? await contentJsonToHtml(article.contentJson)
+      : "";
+    rawHtml = blockNoteHtml || article.contentHtml || "";
   }
   const { html, items: toc } = buildToc(rawHtml);
   const path = `${basePath}/${article.slug}`;
@@ -149,7 +153,7 @@ export default function ArticleDetail({ article, related, basePath }: Props) {
               {...(article.coverImageTitle
                 ? { title: article.coverImageTitle }
                 : {})}
-              className="relative aspect-4/3 overflow-hidden rounded-3xl sm:aspect-16/10"
+              className="relative aspect-video overflow-hidden rounded-3xl sm:aspect-video"
             >
               <Image
                 src={article.coverImage}

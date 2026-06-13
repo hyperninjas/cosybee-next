@@ -9,10 +9,20 @@ import { blockNoteSchema } from "./blocknoteSchema";
  *
  * Uses the same schema as the client editor (including multi-column blocks)
  * so custom block types render instead of throwing on a missing propSchema.
+ *
+ * We use `blocksToHTMLLossy` (not `blocksToFullHTML`) on purpose: it emits
+ * clean semantic markup — real `<h2>`/`<p>`/`<ul>`/`<figure>`/`<blockquote>`
+ * — which the public `.article-body` prose styles and the TOC heading parser
+ * (`buildToc`) both expect. `blocksToFullHTML` instead wraps every block in
+ * nested `bn-*` container divs that would require shipping BlockNote's own
+ * editor CSS to the public page and would break the prose styling. Multi-column
+ * blocks survive the lossy export as `<div class="bn-block-column-list">` with
+ * inline `display:flex` / `flex-grow`, so they lay out with no extra CSS (see
+ * globals.css for the mobile-stacking rule).
  */
 export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
-  const html = await editor.blocksToFullHTML(blocks);
+  const html = await editor.blocksToHTMLLossy(blocks);
   return html;
 }
 
