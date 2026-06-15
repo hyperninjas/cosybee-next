@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input, Switch, TextArea, TextField } from "@heroui/react";
+import { Button, Input, Switch, TextArea, TextField, toast } from "@heroui/react";
 import { Envelope, MapPin, Smartphone } from "@gravity-ui/icons";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
+import { submitContact } from "@/app/lib/public-forms";
+import { NewsletterSignup } from "./NewsletterSignup";
 
 const FIELD_CLASS =
   "w-full rounded-lg border border-transparent bg-surface-secondary px-4 py-3 text-base text-foreground transition-colors placeholder:text-muted focus-within:border-accent";
@@ -55,20 +57,38 @@ export default function GetInTouch() {
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot — real users never fill this
   const [agreed, setAgreed] = useState(false);
+  const [pending, setPending] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: wire to server action / API route / form handler
-    console.log({
-      firstName,
-      lastName,
-      email,
-      phone,
-      company,
-      message,
-      agreed,
+    const name = `${firstName} ${lastName}`.trim();
+    if (!name || !email.trim() || !message.trim() || !agreed || pending) return;
+
+    setPending(true);
+    const result = await submitContact({
+      name,
+      email: email.trim(),
+      message: message.trim(),
+      phone: phone.trim() || undefined,
+      company: company.trim() || undefined,
+      website,
     });
+    setPending(false);
+
+    if (result.ok) {
+      toast.success("Thanks for reaching out — we'll be in touch soon.");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setCompany("");
+      setMessage("");
+      setAgreed(false);
+    } else {
+      toast.danger(result.error);
+    }
   };
 
   return (
@@ -142,7 +162,7 @@ export default function GetInTouch() {
           </fieldset>
 
           <fieldset className="flex flex-col gap-4">
-            <legend className="mb-1 text-sm font-bold text-foreground">
+            <legend className="mb-4 text-sm font-bold text-foreground">
               Purposes
             </legend>
             <TextArea
@@ -154,6 +174,18 @@ export default function GetInTouch() {
               className={`${FIELD_CLASS} resize-none`}
             />
           </fieldset>
+
+          {/* Honeypot: off-screen, not announced to AT, ignored by humans. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            className="sr-only"
+          />
 
           <Switch
             isSelected={agreed}
@@ -178,10 +210,11 @@ export default function GetInTouch() {
 
           <Button
             type="submit"
-            isDisabled={!agreed}
+            isPending={pending}
+            isDisabled={!agreed || pending}
             className="w-full rounded-lg bg-accent py-3 text-base font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
           >
-            Send Message
+            {pending ? "Sending…" : "Send Message"}
           </Button>
         </form>
 
@@ -226,6 +259,9 @@ export default function GetInTouch() {
             allowFullScreen
           />
         </div>
+
+        {/* newsletter sign-up */}
+        <NewsletterSignup />
       </Container>
     </Section>
   );
