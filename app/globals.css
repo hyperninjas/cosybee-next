@@ -105,26 +105,32 @@
   margin-top: 1rem;
 }
 .article-body p {
-  font-size: 1rem;
-  line-height: 1.625;
+  /* Match the editor's body text (.post-editor .bn-editor: 1.125rem / 1.7) so
+     the published article reads at the same size it was authored at. */
+  font-size: 1.125rem;
+  line-height: 1.7;
 }
 .article-body h1,
 .article-body h2,
 .article-body h3 {
   color: var(--foreground);
   font-weight: 700;
-  line-height: 1.25;
-  max-width: 36.875rem;
+  /* Match the editor: BlockNote headings inherit the .bn-editor 1.7
+     line-height and aren't width-constrained, so drop the article's tighter
+     line-height + max-width. */
+  line-height: 1.7;
   margin-top: 1.5rem;
 }
+/* Editor heading sizes are `--level`em × the 1.125rem editor base:
+   h1 3em, h2 2em, h3 1.3em — mirrored here in rem. */
 .article-body h1 {
-  font-size: 1.75rem;
+  font-size: 3.375rem;
 }
 .article-body h2 {
-  font-size: 1.25rem;
+  font-size: 2.25rem;
 }
 .article-body h3 {
-  font-size: 1.125rem;
+  font-size: 1.4625rem;
 }
 .article-body ul,
 .article-body ol {
@@ -137,7 +143,8 @@
   list-style: decimal;
 }
 .article-body li {
-  line-height: 1.625;
+  font-size: 1.125rem;
+  line-height: 1.7;
   margin-top: 0.5rem;
 }
 .article-body li::marker {
