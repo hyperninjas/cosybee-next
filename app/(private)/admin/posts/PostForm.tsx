@@ -7,7 +7,12 @@ import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "@/app/(private)/admin/actions";
 import { initialSaveState } from "@/app/(private)/admin/lib/form-state";
 import { slugify } from "@/app/lib/slug";
-import type { Author, Category, Tag } from "@/app/lib/article-types";
+import {
+  PLACEHOLDER_COVER,
+  type Author,
+  type Category,
+  type Tag,
+} from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
 import TagInput from "./TagInput";
@@ -222,7 +227,13 @@ export default function PostForm({
   const blogCategories = categories.filter((c) => c.blog === blog);
 
   // ── Cover image ─────────────────────────────────────────────────────
-  const [coverUrl, setCoverUrl] = useState(post?.coverImage ?? "");
+  // Treat the listing placeholder as "no cover" so the editor shows an empty
+  // dropzone (and re-saving clears it) rather than the bee-flower stand-in.
+  const [coverUrl, setCoverUrl] = useState(
+    post?.coverImage && post.coverImage !== PLACEHOLDER_COVER
+      ? post.coverImage
+      : "",
+  );
   const [coverImageAlt, setCoverImageAlt] = useState(post?.coverImageAlt ?? "");
   const [coverImageTitle, setCoverImageTitle] = useState(
     post?.coverImageTitle ?? "",

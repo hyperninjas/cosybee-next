@@ -60,7 +60,7 @@ export function CategoryPickerCard({
       <Card>
         <Card.Header className="flex flex-row justify-between gap-2">
           <Card.Title className="text-sm font-semibold">Category</Card.Title>
-          <Chip size="sm" variant="soft" color="success">
+          <Chip size="sm" variant="soft" color="success" className="px-2">
             {blogCategories.length} in {blog}
           </Chip>
         </Card.Header>

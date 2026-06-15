@@ -1,13 +1,16 @@
 import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
-import type { Article, Author, Category, Tag } from "./article-types";
+import {
+  PLACEHOLDER_COVER as PLACEHOLDER_IMAGE,
+  type Article,
+  type Author,
+  type Category,
+  type Tag,
+} from "./article-types";
 
 export type { Article, Author, Category, Tag } from "./article-types";
 export { formatReadTime } from "./article-types";
 export type { Blog } from "./api";
-
-/** Default placeholder image for posts without valid cover images. */
-const PLACEHOLDER_IMAGE = "/bee-flower.png";
 
 /** Check if image URL is valid (external URL or known local file). */
 function getValidImageUrl(coverImage: string | null | undefined): string {

@@ -71,7 +71,7 @@ export function AuthorPickerCard({
       <Card>
         <Card.Header className="flex flex-row justify-between gap-2">
           <Card.Title className="text-sm font-semibold">Author</Card.Title>
-          <Chip size="sm" variant="soft" color="success">
+          <Chip size="sm" variant="soft" color="success" className="px-2">
             {authors.length} author{authors.length !== 1 ? "s" : ""}
           </Chip>
         </Card.Header>
@@ -89,7 +89,7 @@ export function AuthorPickerCard({
                     src={authorAvatarUrl}
                     name={authorName || "?"}
                     size="sm"
-                    className="pointer-events-none absolute left-2 top-1/2 z-10 size-6 -translate-y-1/2"
+                    className="pointer-events-none absolute left-2 top-1/2 z-10 size-6 -translate-y-1/2 rounded-lg"
                   />
                 )}
                 <ComboBox

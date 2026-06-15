@@ -5,11 +5,13 @@ import {
   formatDate,
   formatReadTime,
   isExternalUrl,
+  PLACEHOLDER_COVER,
 } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { ArticleCard } from "./ArticleCard";
+import { MoreArticlesCard } from "./MoreArticlesCard";
 import { CtaButton } from "@/app/components/ui/Cta";
 import Dot from "@/app/components/ui/Dot";
 import Avatar from "@/app/components/ui/Avatar";
@@ -79,7 +81,7 @@ export default async function ArticleDetail({
         ]}
       />
       <ReadingProgress targetSelector="#article-body" />
-      <div className="mx-auto flex max-w-300 justify-center gap-8 px-0 xl:px-6">
+      <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
         <article
           id="article-body"
           className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 xl:px-0 lg:pt-18.5 lg:pb-20"
@@ -147,51 +149,55 @@ export default async function ArticleDetail({
           </header>
 
           {/* hero image — wrapped as <figure> so any caption/credit the
-              author entered renders semantically with the image. */}
-          <figure className="mt-10">
-            <div
-              {...(article.coverImageTitle
-                ? { title: article.coverImageTitle }
-                : {})}
-              className="relative aspect-video overflow-hidden rounded-3xl sm:aspect-video"
-            >
-              <Image
-                src={article.coverImage}
-                alt={article.coverImageAlt}
-                fill
-                priority
-                sizes="(min-width: 800px) 800px, 100vw"
-                className="object-cover"
-                unoptimized={isExternalUrl(article.coverImage)}
-              />
-            </div>
-            {(article.coverImageCaption || article.coverImageCredit) && (
-              <figcaption className="mt-3 px-2 text-sm text-[#545454] sm:px-0">
-                {article.coverImageCaption && (
-                  <span>{article.coverImageCaption}</span>
-                )}
-                {article.coverImageCaption && article.coverImageCredit && (
-                  <span aria-hidden> · </span>
-                )}
-                {article.coverImageCredit && (
-                  <span className="text-[#787878]">
-                    {article.coverImageCredit}
-                  </span>
-                )}
-              </figcaption>
-            )}
-          </figure>
+              author entered renders semantically with the image. Skipped
+              entirely for coverless posts: we don't show the listing
+              placeholder as an article hero. */}
+          {article.coverImage !== PLACEHOLDER_COVER && (
+            <figure className="mt-10">
+              <div
+                {...(article.coverImageTitle
+                  ? { title: article.coverImageTitle }
+                  : {})}
+                className="relative aspect-video overflow-hidden rounded-3xl sm:aspect-video"
+              >
+                <Image
+                  src={article.coverImage}
+                  alt={article.coverImageAlt}
+                  fill
+                  priority
+                  sizes="(min-width: 800px) 800px, 100vw"
+                  className="object-cover"
+                  unoptimized={isExternalUrl(article.coverImage)}
+                />
+              </div>
+              {(article.coverImageCaption || article.coverImageCredit) && (
+                <figcaption className="mt-3 px-2 text-sm text-[#545454] sm:px-0">
+                  {article.coverImageCaption && (
+                    <span>{article.coverImageCaption}</span>
+                  )}
+                  {article.coverImageCaption && article.coverImageCredit && (
+                    <span aria-hidden> · </span>
+                  )}
+                  {article.coverImageCredit && (
+                    <span className="text-[#787878]">
+                      {article.coverImageCredit}
+                    </span>
+                  )}
+                </figcaption>
+              )}
+            </figure>
+          )}
 
           {/* lede / subtitle */}
           {article.lede && (
-            <p className="mt-10 px-2 md:px-8 lg:px-15 text-lg font-bold leading-snug text-foreground sm:text-xl">
+            <p className="mt-10 text-lg font-bold leading-snug hidden text-foreground sm:text-xl">
               {article.lede}
             </p>
           )}
 
           {/* body — server-rendered HTML from the BlockNote document */}
           <div
-            className="article-body mt-10 px-2 md:px-8 lg:px-15 text-foreground wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 text-foreground wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
@@ -214,7 +220,7 @@ export default async function ArticleDetail({
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
-          <aside className="sticky top-24 mt-18 hidden max-h-full w-80 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex">
+          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex">
             {/* sticky={false}: the aside already pins it. */}
             {toc.length > 1 && <ArticleToc items={toc} sticky={false} />}
 
@@ -223,9 +229,9 @@ export default async function ArticleDetail({
                 <h2 className="text-lg font-extrabold text-foreground">
                   More blogs
                 </h2>
-                <div className="mt-4 flex flex-col gap-6">
+                <div className="mt-4 flex flex-col gap-1">
                   {related.map((a) => (
-                    <ArticleCard key={a.slug} a={a} basePath={basePath} />
+                    <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
                   ))}
                 </div>
               </div>

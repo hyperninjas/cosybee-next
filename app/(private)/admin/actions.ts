@@ -129,9 +129,11 @@ export async function savePost(
     console.log("[savePost] No editor content - preserving original post content");
   }
 
-  // Cover: upload new file or keep existing
+  // Cover: upload new file or keep existing. No upload + no existing cover →
+  // save it empty rather than persisting the "/bee-flower.png" placeholder
+  // (that stand-in is for listing display only, not real post data).
   const uploaded = await uploadToBackend(formData.get("coverFile") as File | null);
-  const coverImage = uploaded ?? (str(formData, "coverImage") || "/bee-flower.png");
+  const coverImage = uploaded ?? str(formData, "coverImage");
 
   // Validation
   const fieldErrors: Record<string, string> = {};

@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ComboBox, Input, ListBox, ListBoxItem } from "@heroui/react";
-import { Plus, Xmark } from "@gravity-ui/icons";
+import { Chip, ComboBox, Input, ListBox, ListBoxItem } from "@heroui/react";
+import { Plus, Xmark, TriangleExclamationFill } from "@gravity-ui/icons";
 import { normalizeTag } from "@/app/lib/slug";
 
 const MAX_TAGS = 8;
@@ -98,20 +98,17 @@ export default function TagInput({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {tags.map((t, i) => (
-            <span
-              key={t}
-              className="inline-flex items-center gap-1 rounded-md bg-background px-2 py-1 text-sm font-medium text-foreground"
-            >
+            <Chip key={t} size="md" variant="primary" className="gap-1 pr-1">
               #{t}
               <button
                 type="button"
                 onClick={() => removeAt(i)}
                 aria-label={`Remove ${t}`}
-                className="rounded p-0.5 text-muted transition-colors hover:bg-surface hover:text-foreground"
+                className="-mr-0.5 rounded-full p-0.5 text-muted cursor-pointer transition-colors hover:bg-foreground/10 hover:text-foreground"
               >
                 <Xmark className="size-3" />
               </button>
-            </span>
+            </Chip>
           ))}
         </div>
       )}
@@ -190,9 +187,29 @@ export default function TagInput({
         </ComboBox.Popover>
       </ComboBox>
 
-      <span className="block text-xs text-muted">
-        {tags.length}/{MAX_TAGS} tags{atMax && " — limit reached"}
-      </span>
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span
+          className={`inline-flex items-center gap-1 ${
+            atMax ? "font-medium text-warning" : "text-muted"
+          }`}
+        >
+          {atMax ? (
+            <>
+              <TriangleExclamationFill className="size-3.5 shrink-0" />
+              Tag limit reached — remove one to add another
+            </>
+          ) : (
+            `Add up to ${MAX_TAGS} tags to help readers find this post`
+          )}
+        </span>
+        <span
+          className={`shrink-0 font-medium tabular-nums ${
+            atMax ? "text-warning" : "text-muted"
+          }`}
+        >
+          {tags.length}/{MAX_TAGS}
+        </span>
+      </div>
     </div>
   );
 }

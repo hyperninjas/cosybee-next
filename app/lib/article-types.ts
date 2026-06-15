@@ -144,3 +144,10 @@ export function isExternalUrl(url: string): boolean {
  * grid (to slice the current page / Load-More step). Client-safe.
  */
 export const ARTICLES_PER_PAGE = 12;
+
+/**
+ * Placeholder cover used by listings (cards, carousel) when a post has no valid
+ * cover image. The article hero deliberately skips it — a coverless article
+ * shows no hero rather than a stand-in. Client-safe.
+ */
+export const PLACEHOLDER_COVER = "/bee-flower.png";

@@ -114,9 +114,9 @@ export function SeoCard({
               size="sm"
               variant="soft"
               color={scoreColor}
-              className="cursor-help"
+              className="cursor-help px-2"
             >
-              SEO score: {score}/100
+              SEO checklist · {passedCount}/{checks.length}
             </Chip>
           </Tooltip.Trigger>
           <Tooltip.Content className="max-w-72 break-normal text-left">

@@ -115,7 +115,9 @@ export function PublicImageUpload({
   if (shown) {
     return (
       <div className="space-y-2">
-        <div className={`relative overflow-hidden rounded-lg border border-border ${isAvatar ? "h-24 w-24" : "w-full"}`}>
+        <div
+          className={`relative overflow-hidden rounded-3xl border border-border ${isAvatar ? "h-24 w-24" : "w-full"}`}
+        >
           {/* Plain <img> on purpose: `shown` is often a `blob:` local-preview
               URL (and otherwise an ephemeral uploaded URL) which next/image
               cannot optimize — sending those through it breaks sizing. */}
@@ -137,14 +139,14 @@ export function PublicImageUpload({
                 type="button"
                 disabled={disabled}
                 onClick={() => inputRef.current?.click()}
-                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Replace
               </button>
               <button
                 type="button"
                 onClick={handleRemove}
-                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-accent shadow-sm hover:bg-[#FEF2F2]"
+                className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium cursor-pointer text-accent shadow-sm hover:bg-[#FEF2F2]"
               >
                 Remove
               </button>
@@ -176,7 +178,9 @@ export function PublicImageUpload({
         />
 
         {(clientError || error) && (
-          <p className="text-xs font-medium text-accent">{clientError ?? error}</p>
+          <p className="text-xs font-medium text-accent">
+            {clientError ?? error}
+          </p>
         )}
       </div>
     );
@@ -191,7 +195,7 @@ export function PublicImageUpload({
         onDragLeave={disabled ? undefined : handleDragLeave}
         onClick={() => !disabled && !isUploading && inputRef.current?.click()}
         aria-disabled={disabled}
-        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
+        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-6 transition-all ${
           disabled ? "pointer-events-none opacity-50" : ""
         } ${
           isDragging
@@ -222,7 +226,9 @@ export function PublicImageUpload({
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-foreground">Uploading... {progress}%</p>
+            <p className="text-sm font-medium text-foreground">
+              Uploading... {progress}%
+            </p>
             <div className="mt-2 h-1.5 w-32 overflow-hidden rounded-full bg-surface-secondary">
               <div
                 className="h-full rounded-full bg-accent transition-all duration-300"
@@ -248,7 +254,9 @@ export function PublicImageUpload({
               </svg>
             </div>
             <p className="text-sm font-medium text-foreground">
-              {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
+              {isDragging
+                ? "Drop image here"
+                : "Click to upload or drag and drop"}
             </p>
             <p className="mt-1 text-xs text-muted">
               PNG, JPG, WebP or AVIF (max {maxMB}MB)
@@ -267,7 +275,9 @@ export function PublicImageUpload({
       />
 
       {(clientError || error) && (
-        <p className="text-xs font-medium text-accent">{clientError ?? error}</p>
+        <p className="text-xs font-medium text-accent">
+          {clientError ?? error}
+        </p>
       )}
     </div>
   );
