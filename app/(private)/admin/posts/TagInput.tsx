@@ -115,12 +115,16 @@ export default function TagInput({
 
       <ComboBox
         aria-label="Add tag"
-        items={items}
+        // No items at max → the popover has nothing to show and won't open.
+        items={atMax ? [] : items}
         allowsCustomValue
         menuTrigger="input"
         inputValue={draft}
         onInputChange={setDraft}
-        isDisabled={atMax}
+        // Read-only (not disabled) at max: disabling the ComboBox while its
+        // popover is open strands the overlay (outside-click/selection can no
+        // longer dismiss it). Read-only locks input without breaking dismissal.
+        isReadOnly={atMax}
         onSelectionChange={(key) => {
           if (key == null) return;
           const found = items.find((it) => it.id === String(key));
