@@ -3,8 +3,18 @@
 import { useEffect, useState } from "react";
 import type { TocItem } from "@/app/lib/toc";
 
-/** Sticky table of contents with scroll-spy highlighting. */
-export default function ArticleToc({ items }: { items: TocItem[] }) {
+/**
+ * Table of contents with scroll-spy highlighting. Sticky by default; pass
+ * `sticky={false}` when an ancestor (e.g. a sticky sidebar) already pins it,
+ * to avoid a redundant nested sticky.
+ */
+export default function ArticleToc({
+  items,
+  sticky = true,
+}: {
+  items: TocItem[];
+  sticky?: boolean;
+}) {
   const [active, setActive] = useState<string>(items[0]?.id ?? "");
 
   useEffect(() => {
@@ -27,7 +37,7 @@ export default function ArticleToc({ items }: { items: TocItem[] }) {
   }, [items]);
 
   return (
-    <nav className="sticky top-24 text-sm">
+    <nav className={`text-sm ${sticky ? "sticky top-24" : ""}`}>
       <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">
         On this page
       </p>

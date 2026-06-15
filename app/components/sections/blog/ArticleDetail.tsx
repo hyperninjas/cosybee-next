@@ -79,10 +79,10 @@ export default async function ArticleDetail({
         ]}
       />
       <ReadingProgress targetSelector="#article-body" />
-      <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
+      <div className="mx-auto flex max-w-300 justify-center gap-8 px-0 xl:px-6">
         <article
           id="article-body"
-          className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 lg:pt-18.5 lg:pb-20"
+          className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 xl:px-0 lg:pt-18.5 lg:pb-20"
         >
           {/* breadcrumb trail (replaces the old "Back to Blog" button) */}
           <Breadcrumbs items={crumbs} />
@@ -184,14 +184,14 @@ export default async function ArticleDetail({
 
           {/* lede / subtitle */}
           {article.lede && (
-            <p className="mt-10 px-10 lg:px-20 text-lg font-bold leading-snug text-foreground sm:text-xl">
+            <p className="mt-10 px-2 md:px-8 lg:px-15 text-lg font-bold leading-snug text-foreground sm:text-xl">
               {article.lede}
             </p>
           )}
 
           {/* body — server-rendered HTML from the BlockNote document */}
           <div
-            className="article-body mt-10 px-2 md:px-10 lg:px-20 text-foreground wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 px-2 md:px-8 lg:px-15 text-foreground wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
@@ -210,16 +210,32 @@ export default async function ArticleDetail({
           )}
         </article>
 
-        {toc.length > 1 && (
-          <aside className="hidden w-60 shrink-0 pt-18.5 xl:block">
-            <ArticleToc items={toc} />
+        {(toc.length > 1 || related.length > 0) && (
+          // The whole sidebar is sticky: `self-start` keeps it content-height
+          // (a stretched flex item can't stick), and max-height + overflow let
+          // it scroll internally when the TOC + cards exceed the viewport.
+          <aside className="sticky top-24 mt-18 hidden max-h-full w-80 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex">
+            {/* sticky={false}: the aside already pins it. */}
+            {toc.length > 1 && <ArticleToc items={toc} sticky={false} />}
+
+            {related.length > 0 && (
+              <div>
+                <h2 className="text-lg font-extrabold text-foreground">
+                  More blogs
+                </h2>
+                <div className="mt-4 flex flex-col gap-6">
+                  {related.map((a) => (
+                    <ArticleCard key={a.slug} a={a} basePath={basePath} />
+                  ))}
+                </div>
+              </div>
+            )}
           </aside>
         )}
       </div>
-
       {/* more blogs */}
       {related.length > 0 && (
-        <section className="mx-auto max-w-225 px-6 pb-16 sm:px-5 lg:pb-24">
+        <section className="mx-auto max-w-225 px-6 pb-16 sm:px-5 lg:pb-24 xl:hidden">
           <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
             More blogs
           </h2>
