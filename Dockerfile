@@ -39,7 +39,7 @@ ENV API_URL=$API_URL
 # value as a build arg in Dokploy / `docker build --build-arg ...`. The SECRET
 # key (RECAPTCHA_SECRET_KEY) is read server-side at runtime — set it as a normal
 # runtime env var, not here.
-ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LcmPiItAAAAAE5uDGIHnes3xqU85BigNkL4cu_z
 ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
 COPY --from=deps /app/node_modules ./node_modules
