@@ -21,6 +21,7 @@ export default async function AdminDashboard() {
     status: p.status,
     featured: p.featured,
     coverImage: p.coverImage,
+    ogImage: p.ogImage ?? null,
     updatedAt: p.updatedAt,
   }));
 

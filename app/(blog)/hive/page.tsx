@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogHero from "@/app/components/sections/blog/BlogHero";
 import BlogBrowse from "@/app/components/sections/blog/BlogBrowse";
-import { getAllArticles, getFeatured, getCategoryNames } from "@/app/lib/articles";
+import {
+  getAllArticles,
+  getFeatured,
+  getCategoryNames,
+} from "@/app/lib/articles";
 import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
@@ -48,9 +52,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function HivePage({
-  searchParams,
-}: PageProps<"/hive">) {
+export default async function HivePage({ searchParams }: PageProps<"/hive">) {
   const sp = await searchParams;
   const filtered = Boolean(
     firstParam(sp.q) || firstParam(sp.category) || firstParam(sp.tag),
@@ -62,8 +64,10 @@ export default async function HivePage({
     getFeatured("hive"),
     getCategoryNames("hive"),
   ]);
-
-  const totalPages = Math.max(1, Math.ceil(articles.length / ARTICLES_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(articles.length / ARTICLES_PER_PAGE),
+  );
   // Out-of-range browse page → 404 rather than a thin, empty soft-404.
   if (!filtered && page > totalPages) notFound();
 
@@ -78,7 +82,10 @@ export default async function HivePage({
       {/* Crawlable prev/next hints for the browse pagination (React 19 hoists
           these to <head>). Omitted in filter/search mode. */}
       {!filtered && page > 1 && (
-        <link rel="prev" href={url(page === 2 ? "/hive" : `/hive?page=${page - 1}`)} />
+        <link
+          rel="prev"
+          href={url(page === 2 ? "/hive" : `/hive?page=${page - 1}`)}
+        />
       )}
       {!filtered && page < totalPages && (
         <link rel="next" href={url(`/hive?page=${page + 1}`)} />

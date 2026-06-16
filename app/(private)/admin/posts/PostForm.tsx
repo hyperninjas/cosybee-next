@@ -51,8 +51,8 @@ export type FormPost = {
   category: Category;
   tags: Tag[];
 
-  // Media
-  coverImage: string;
+  // Media — optional (a post can be coverless; the form normalises null → "").
+  coverImage: string | null;
   coverImageAlt: string;
   coverImageTitle?: string | null;
   coverImageCaption?: string | null;

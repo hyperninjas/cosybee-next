@@ -65,7 +65,7 @@ export function NewsletterSignup() {
           >
             <Input
               placeholder="you@example.com"
-              className="h-12 w-full rounded-lg border border-transparent bg-white/10 px-4 text-base text-white transition-colors placeholder:text-white/50 focus-within:border-accent"
+              className="h-12 w-full border border-transparent bg-white/10 px-4 text-base text-white transition-colors placeholder:text-white/50 focus-within:border-accent"
             />
           </TextField>
 
@@ -85,7 +85,7 @@ export function NewsletterSignup() {
             type="submit"
             isPending={pending}
             isDisabled={!email.trim() || !token || pending}
-            className="h-12 rounded-lg bg-accent px-6 text-base font-semibold text-white transition hover:brightness-110"
+            className="h-12 bg-accent px-6 text-base font-semibold text-white transition hover:brightness-110"
           >
             {pending ? "Subscribing…" : "Subscribe"}
           </Button>

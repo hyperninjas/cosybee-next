@@ -18,19 +18,7 @@ import {
 import { deletePost, setStatus } from "./actions";
 import { PostCard } from "./PostCard";
 import { RowActions } from "./RowActions";
-import type { Category } from "@/app/lib/article-types";
-
-/** Fallback for invalid local image paths (seeded placeholder data). */
-function getValidImageUrl(coverImage: string): string {
-  if (!coverImage) return "/bee-flower.png";
-  if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
-    return coverImage;
-  }
-  if (coverImage.startsWith("/images/")) {
-    return "/bee-flower.png";
-  }
-  return coverImage;
-}
+import { resolveCoverImage, type Category } from "@/app/lib/article-types";
 
 export type Row = {
   id: string;
@@ -40,7 +28,8 @@ export type Row = {
   category: Category;
   status: string;
   featured: boolean;
-  coverImage: string;
+  coverImage: string | null;
+  ogImage: string | null;
   updatedAt: string;
 };
 
@@ -143,7 +132,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
   // which runs outside render and would trip the React Compiler on the helpers).
   const items = shown.map((r) => ({
     ...r,
-    imageUrl: getValidImageUrl(r.coverImage),
+    imageUrl: resolveCoverImage(r.coverImage, r.ogImage),
     updatedLabel: relativeTime(r.updatedAt),
   }));
 
@@ -434,7 +423,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
         </EmptyState>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {items.map((row) => (
               <PostCard
                 key={row.id}

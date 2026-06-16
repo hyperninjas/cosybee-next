@@ -21,8 +21,8 @@ export interface AdminPost {
   category: Category;
   tags: Tag[];
 
-  // Media
-  coverImage: string;
+  // Media — optional (a post can be saved without a cover).
+  coverImage: string | null;
   coverImageAlt: string;
   coverImageTitle?: string | null;
   coverImageCaption?: string | null;
@@ -73,6 +73,7 @@ export type AdminPostRow = Pick<
   | "status"
   | "featured"
   | "coverImage"
+  | "ogImage"
   | "updatedAt"
 >;
 
@@ -227,6 +228,7 @@ export const adminApi = {
         status: p.status,
         featured: p.featured,
         coverImage: p.coverImage,
+        ogImage: p.ogImage ?? null,
         updatedAt: p.updatedAt,
       }));
     } catch (e) {

@@ -1,6 +1,12 @@
 import "server-only";
 import { ROUTES } from "@/app/lib/site";
-import type { Article, Author, Category, Tag } from "@/app/lib/article-types";
+import {
+  resolveCoverImage,
+  type Article,
+  type Author,
+  type Category,
+  type Tag,
+} from "@/app/lib/article-types";
 import { adminApi, type AdminPost, type AdminPostRow } from "./api";
 
 export type { AdminPostRow } from "./api";
@@ -41,7 +47,9 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     tags: row.tags ?? [],
 
     // Media
-    coverImage: row.coverImage,
+    // Resolve like the public mapper (cover → og → placeholder) so the draft
+    // preview never feeds a null cover to <ArticleDetail>'s <Image>.
+    coverImage: resolveCoverImage(row.coverImage, row.ogImage),
     coverImageAlt: row.coverImageAlt,
     coverImageTitle: row.coverImageTitle ?? null,
     coverImageCaption: row.coverImageCaption ?? null,

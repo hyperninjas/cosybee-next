@@ -1,7 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Button, Input, Switch, TextArea, TextField, toast } from "@heroui/react";
+import {
+  Button,
+  Input,
+  Switch,
+  TextArea,
+  TextField,
+  toast,
+} from "@heroui/react";
 import { Envelope, MapPin, Smartphone } from "@gravity-ui/icons";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Container } from "@/app/components/ui/Container";
@@ -13,7 +20,7 @@ import { TURNSTILE_SITE_KEY } from "@/app/lib/turnstile";
 import { NewsletterSignup } from "./NewsletterSignup";
 
 const FIELD_CLASS =
-  "w-full rounded-lg border border-transparent bg-surface-secondary px-4 py-3 text-base text-foreground transition-colors placeholder:text-muted focus-within:border-accent";
+  "w-full border border-transparent bg-surface-secondary px-4 py-3 text-base text-foreground transition-colors placeholder:text-muted focus-within:border-accent";
 
 type ContactInfo = {
   icon: React.ReactNode;
@@ -68,7 +75,14 @@ export default function GetInTouch() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const name = `${firstName} ${lastName}`.trim();
-    if (!name || !email.trim() || !message.trim() || !agreed || !token || pending)
+    if (
+      !name ||
+      !email.trim() ||
+      !message.trim() ||
+      !agreed ||
+      !token ||
+      pending
+    )
       return;
 
     setPending(true);
@@ -232,7 +246,7 @@ export default function GetInTouch() {
             type="submit"
             isPending={pending}
             isDisabled={!agreed || !token || pending}
-            className="w-full rounded-lg bg-accent py-3 text-base font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
+            className="w-full bg-accent py-3 text-base font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
           >
             {pending ? "Sending…" : "Send Message"}
           </Button>

@@ -8,18 +8,11 @@ import {
   EyeSlash,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Button, Chip, Modal, Tooltip } from "@heroui/react";
+import { Button, Card, Chip, Modal, Tooltip } from "@heroui/react";
+import { Focusable } from "react-aria-components";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { isExternalUrl } from "@/app/lib/article-types";
+import { isExternalUrl, resolveCoverImage } from "@/app/lib/article-types";
 import { type Row } from "./PostsTable";
-
-/** http(s) URL → as-is; `/images/*` (legacy seed) → placeholder;
- *  empty → placeholder; everything else → as-is. */
-function coverSrc(coverImage: string): string {
-  if (!coverImage || coverImage.startsWith("/images/"))
-    return "/bee-flower.png";
-  return coverImage;
-}
 
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -63,7 +56,7 @@ export function PostCard({
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const isPublished = row.status === "PUBLISHED";
-  const imageUrl = coverSrc(row.coverImage);
+  const imageUrl = resolveCoverImage(row.coverImage, row.ogImage);
 
   const statusPillClass = `absolute left-3 top-3 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium shadow-sm ring-1 ring-black/10 backdrop-blur ${
     isPublished
@@ -72,10 +65,10 @@ export function PostCard({
   }`;
 
   return (
-    <>
+    <Card className="p-0 overflow-hidden border border-border shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] hover:shadow-lg transition duration-300">
       <article
         title={row.title}
-        className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:border-accent/30 hover:shadow-lg"
+        className="group flex flex-col overflow-hidden rounded-3xl  bg-surface"
       >
         <div className="relative h-40 bg-default">
           <Image
@@ -119,18 +112,19 @@ export function PostCard({
           </div>
 
           <Tooltip delay={300}>
-            {/* next/link isn't React-Aria-focusable; wrap it so the
-                surrounding TooltipTrigger picks up its hover/focus. The
-                wrapper needs a real box (not `display:contents`) so the
-                popover has something to anchor to. */}
-            <Tooltip.Trigger className="mt-3 block">
+            {/* next/link isn't React-Aria-focusable on its own. `Focusable`
+                forwards the tooltip trigger's focus/hover onto the <a> itself
+                (it renders no DOM of its own), so the link is a SINGLE tab
+                stop — wrapping it in `Tooltip.Trigger` instead added a second
+                focusable element, double-focusing on keyboard nav. */}
+            <Focusable>
               <Link
                 href={`/admin/posts/${row.id}/edit`}
-                className="line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors hover:text-accent"
+                className="mt-3 block line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors hover:text-accent"
               >
                 {row.title}
               </Link>
-            </Tooltip.Trigger>
+            </Focusable>
             <Tooltip.Content>Click to edit</Tooltip.Content>
           </Tooltip>
 
@@ -232,6 +226,6 @@ export function PostCard({
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>
-    </>
+    </Card>
   );
 }

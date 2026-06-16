@@ -23,8 +23,9 @@ export interface ApiPost {
   category?: Category | string; // Can be string (old) or Category object (new)
   tags: (Tag | string)[];
 
-  // Media
-  coverImage: string;
+  // Media — cover is optional (a post can be coverless; the mapper falls back
+  // to the social image, then a placeholder).
+  coverImage: string | null;
   coverImageAlt: string;
   coverImageTitle?: string | null;
   coverImageCaption?: string | null;

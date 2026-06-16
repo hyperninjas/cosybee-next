@@ -151,3 +151,30 @@ export const ARTICLES_PER_PAGE = 12;
  * shows no hero rather than a stand-in. Client-safe.
  */
 export const PLACEHOLDER_COVER = "/bee-flower.png";
+
+/** A valid image URL, or null for a missing / stale-seed (`/images/…`) path. */
+export function validImageOrNull(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // External URLs (API media, https, etc.) are valid.
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // Local /images/ paths are seeded placeholder data that likely don't exist.
+  if (url.startsWith("/images/")) return null;
+  // Other local paths (like /bee-flower.png) are assumed valid.
+  return url;
+}
+
+/**
+ * Resolve the article cover for rendering, falling back in order:
+ * cover image → social share image (ogImage) → placeholder. Always returns a
+ * string, so consumers (hero, cards, og:image) never see null. Used by both the
+ * public article mapper and the admin draft-preview mapper, so they stay in
+ * sync. The backend's `coverImage` is nullable (a post can be coverless).
+ */
+export function resolveCoverImage(
+  coverImage: string | null | undefined,
+  ogImage: string | null | undefined,
+): string {
+  return (
+    validImageOrNull(coverImage) ?? validImageOrNull(ogImage) ?? PLACEHOLDER_COVER
+  );
+}

@@ -1,7 +1,7 @@
 import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
 import {
-  PLACEHOLDER_COVER as PLACEHOLDER_IMAGE,
+  resolveCoverImage,
   type Article,
   type Author,
   type Category,
@@ -12,28 +12,19 @@ export type { Article, Author, Category, Tag } from "./article-types";
 export { formatReadTime } from "./article-types";
 export type { Blog } from "./api";
 
-/** Check if image URL is valid (external URL or known local file). */
-function getValidImageUrl(coverImage: string | null | undefined): string {
-  if (!coverImage) return PLACEHOLDER_IMAGE;
-  // External URLs (API media, https, etc.) are valid
-  if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
-    return coverImage;
-  }
-  // Local paths starting with /images/ likely don't exist (seeded placeholder data)
-  if (coverImage.startsWith("/images/")) {
-    return PLACEHOLDER_IMAGE;
-  }
-  // Other local paths (like /bee-flower.png) are assumed valid
-  return coverImage;
-}
-
 /** Normalize category - handles both old (string) and new (object) formats. */
 function normalizeCategory(
   category: string | Category | undefined,
   blog: "hive" | "learn",
 ): Category {
   if (!category) {
-    return { id: "", blog, name: "Uncategorised", slug: "uncategorised", description: null };
+    return {
+      id: "",
+      blog,
+      name: "Uncategorised",
+      slug: "uncategorised",
+      description: null,
+    };
   }
   if (typeof category === "string") {
     // Old format: category is just a string name
@@ -106,7 +97,7 @@ function toArticle(post: ApiPost): Article {
     tags: normalizeTags(post.tags),
 
     // Media
-    coverImage: getValidImageUrl(post.coverImage),
+    coverImage: resolveCoverImage(post.coverImage, post.ogImage),
     coverImageAlt: post.coverImageAlt ?? "",
     coverImageTitle: post.coverImageTitle ?? null,
     coverImageCaption: post.coverImageCaption ?? null,
@@ -294,9 +285,8 @@ export async function getTagSlugs(blog: Blog): Promise<string[]> {
   for (const p of posts) {
     for (const t of p.tags ?? []) {
       // Handle both old (string) and new (Tag object) formats
-      const slug = typeof t === "string"
-        ? t.toLowerCase().replace(/\s+/g, "-")
-        : t.slug;
+      const slug =
+        typeof t === "string" ? t.toLowerCase().replace(/\s+/g, "-") : t.slug;
       if (slug) slugs.add(slug);
     }
   }
