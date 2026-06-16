@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Input, Switch, TextArea, TextField, toast } from "@heroui/react";
 import { Envelope, MapPin, Smartphone } from "@gravity-ui/icons";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { submitContact } from "@/app/lib/public-forms";
+import { TURNSTILE_SITE_KEY } from "@/app/lib/turnstile";
 import { NewsletterSignup } from "./NewsletterSignup";
 
 const FIELD_CLASS =
@@ -60,11 +62,14 @@ export default function GetInTouch() {
   const [website, setWebsite] = useState(""); // honeypot — real users never fill this
   const [agreed, setAgreed] = useState(false);
   const [pending, setPending] = useState(false);
+  const [token, setToken] = useState(""); // Turnstile token
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const name = `${firstName} ${lastName}`.trim();
-    if (!name || !email.trim() || !message.trim() || !agreed || pending) return;
+    if (!name || !email.trim() || !message.trim() || !agreed || !token || pending)
+      return;
 
     setPending(true);
     const result = await submitContact({
@@ -74,8 +79,13 @@ export default function GetInTouch() {
       phone: phone.trim() || undefined,
       company: company.trim() || undefined,
       website,
+      turnstileToken: token,
     });
     setPending(false);
+
+    // The token is single-use — reset the widget to get a fresh one either way.
+    turnstileRef.current?.reset();
+    setToken("");
 
     if (result.ok) {
       toast.success("Thanks for reaching out — we'll be in touch soon.");
@@ -208,10 +218,20 @@ export default function GetInTouch() {
             </Switch.Content>
           </Switch>
 
+          {/* Cloudflare Turnstile — bot detection (verified server-side). */}
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={TURNSTILE_SITE_KEY}
+            onSuccess={setToken}
+            onExpire={() => setToken("")}
+            onError={() => setToken("")}
+            options={{ theme: "auto" }}
+          />
+
           <Button
             type="submit"
             isPending={pending}
-            isDisabled={!agreed || pending}
+            isDisabled={!agreed || !token || pending}
             className="w-full rounded-lg bg-accent py-3 text-base font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
           >
             {pending ? "Sending…" : "Send Message"}

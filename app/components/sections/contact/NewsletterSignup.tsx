@@ -1,24 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Input, TextField, toast } from "@heroui/react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { subscribeNewsletter } from "@/app/lib/public-forms";
+import { TURNSTILE_SITE_KEY } from "@/app/lib/turnstile";
 
 /**
  * Newsletter sign-up band (single opt-in). Posts to the backend via the
- * `subscribeNewsletter` server action. Includes a honeypot field for spam.
+ * `subscribeNewsletter` server action. Protected by a honeypot field and a
+ * Cloudflare Turnstile token (verified server-side).
  */
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState(""); // honeypot — real users never fill this
   const [pending, setPending] = useState(false);
+  const [token, setToken] = useState(""); // Turnstile token
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email.trim() || pending) return;
+    if (!email.trim() || !token || pending) return;
     setPending(true);
-    const result = await subscribeNewsletter({ email: email.trim(), website });
+    const result = await subscribeNewsletter({
+      email: email.trim(),
+      website,
+      turnstileToken: token,
+    });
     setPending(false);
+
+    // The token is single-use — reset the widget to get a fresh one either way.
+    turnstileRef.current?.reset();
+    setToken("");
+
     if (result.ok) {
       toast.success("You're subscribed — thanks for joining!");
       setEmail("");
@@ -38,42 +52,56 @@ export function NewsletterSignup() {
       </p>
       <form
         onSubmit={onSubmit}
-        className="mx-auto mt-6 flex max-w-md flex-col gap-3 sm:flex-row"
+        className="mx-auto mt-6 flex max-w-md flex-col gap-3"
       >
-        <TextField
-          aria-label="Email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          isRequired
-          className="flex-1"
-        >
-          <Input
-            placeholder="you@example.com"
-            className="h-12 w-full rounded-lg border border-transparent bg-white/10 px-4 text-base text-white transition-colors placeholder:text-white/50 focus-within:border-accent"
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <TextField
+            aria-label="Email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            isRequired
+            className="flex-1"
+          >
+            <Input
+              placeholder="you@example.com"
+              className="h-12 w-full rounded-lg border border-transparent bg-white/10 px-4 text-base text-white transition-colors placeholder:text-white/50 focus-within:border-accent"
+            />
+          </TextField>
+
+          {/* Honeypot: off-screen, not announced to AT, ignored by humans. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            className="sr-only"
           />
-        </TextField>
 
-        {/* Honeypot: off-screen, not announced to AT, ignored by humans. */}
-        <input
-          type="text"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          className="sr-only"
-        />
+          <Button
+            type="submit"
+            isPending={pending}
+            isDisabled={!email.trim() || !token || pending}
+            className="h-12 rounded-lg bg-accent px-6 text-base font-semibold text-white transition hover:brightness-110"
+          >
+            {pending ? "Subscribing…" : "Subscribe"}
+          </Button>
+        </div>
 
-        <Button
-          type="submit"
-          isPending={pending}
-          isDisabled={!email.trim() || pending}
-          className="h-12 rounded-lg bg-accent px-6 text-base font-semibold text-white transition hover:brightness-110"
-        >
-          {pending ? "Subscribing…" : "Subscribe"}
-        </Button>
+        {/* Cloudflare Turnstile — bot detection (verified server-side). */}
+        <div className="flex justify-center">
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={TURNSTILE_SITE_KEY}
+            onSuccess={setToken}
+            onExpire={() => setToken("")}
+            onError={() => setToken("")}
+            options={{ theme: "dark" }}
+          />
+        </div>
       </form>
     </div>
   );
