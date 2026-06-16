@@ -33,6 +33,12 @@ ENV NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL
 # pages on demand at runtime instead.
 ARG API_URL=https://eb-api.technext.it
 ENV API_URL=$API_URL
+# Cloudflare Turnstile public site key — inlined into the client bundle, so it
+# MUST be passed at build time (a runtime env var is too late). Without it the
+# app falls back to Cloudflare's TEST key (the "Testing only" widget). Pass the
+# real value as a build arg in Dokploy / `docker build --build-arg ...`.
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
