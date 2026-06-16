@@ -31,7 +31,7 @@ ENV NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL
 # Backend API used during prerender (generateStaticParams / sitemap). If
 # unreachable at build time the app falls back gracefully and renders those
 # pages on demand at runtime instead.
-ARG API_URL=https://eb-api.technext.it
+ARG API_URL=https://api.energiebee.com
 ENV API_URL=$API_URL
 # Cloudflare Turnstile public site key — inlined into the client bundle, so it
 # MUST be passed at build time (a runtime env var is too late). Without it the
@@ -39,6 +39,8 @@ ENV API_URL=$API_URL
 # real value as a build arg in Dokploy / `docker build --build-arg ...`.
 ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ARG TURNSTILE_SECRET_KEY
+ENV TURNSTILE_SECRET_KEY=$TURNSTILE_SECRET_KEY
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
