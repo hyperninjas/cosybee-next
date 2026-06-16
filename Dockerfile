@@ -33,14 +33,14 @@ ENV NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL
 # pages on demand at runtime instead.
 ARG API_URL=https://api.energiebee.com
 ENV API_URL=$API_URL
-# Cloudflare Turnstile public site key — inlined into the client bundle, so it
+# Google reCAPTCHA v3 public site key — inlined into the client bundle, so it
 # MUST be passed at build time (a runtime env var is too late). Without it the
-# app falls back to Cloudflare's TEST key (the "Testing only" widget). Pass the
-# real value as a build arg in Dokploy / `docker build --build-arg ...`.
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
-ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
-ARG TURNSTILE_SECRET_KEY
-ENV TURNSTILE_SECRET_KEY=$TURNSTILE_SECRET_KEY
+# forms submit without a token and the server skips verification. Pass the real
+# value as a build arg in Dokploy / `docker build --build-arg ...`. The SECRET
+# key (RECAPTCHA_SECRET_KEY) is read server-side at runtime — set it as a normal
+# runtime env var, not here.
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

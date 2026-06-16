@@ -81,8 +81,10 @@ const nextConfig: NextConfig = {
     AWS_REGION: process.env.AWS_REGION,
     AWS_BUCKET: process.env.AWS_BUCKET,
 
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-    TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
+    // Public reCAPTCHA v3 site key (build-time inlined into the client bundle).
+    // The SECRET (RECAPTCHA_SECRET_KEY) is intentionally NOT here — it's read
+    // server-side at runtime in the form actions, so it never enters the build.
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
 
     GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
     BING_SITE_VERIFICATION: process.env.BING_SITE_VERIFICATION,

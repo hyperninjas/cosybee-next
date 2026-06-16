@@ -5,7 +5,7 @@
  * server-side and proxy to the eb-auth backend, so the browser never calls the
  * API cross-origin (no CORS) and the backend origin stays out of client code.
  *
- * Each action first verifies a Cloudflare Turnstile token (bot detection)
+ * Each action first verifies a Google reCAPTCHA v3 token (bot detection)
  * before touching the backend.
  */
 
@@ -13,41 +13,52 @@ import { headers } from "next/headers";
 
 const API_BASE = process.env.API_URL || "http://localhost:3000";
 
-// Falls back to Cloudflare's "always passes" TEST secret so local dev works
-// with zero config; set TURNSTILE_SECRET_KEY to the real value in production.
-const TURNSTILE_SECRET =
-  process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
-const TURNSTILE_VERIFY_URL =
-  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
+const RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+// v3 returns a 0–1 score; below this we treat the request as a likely bot.
+const RECAPTCHA_MIN_SCORE = 0.5;
 
 export type FormResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Verify a Turnstile token with Cloudflare. Returns false on a missing/invalid
- * token or any network error (fail-closed — a form submit should not slip
- * through if verification can't be completed).
+ * Verify a reCAPTCHA v3 token with Google. Checks success, the score
+ * threshold, and that the action matches the form. Fail-closed on a
+ * missing/invalid token or network error.
+ *
+ * When RECAPTCHA_SECRET_KEY is unset (local dev), verification is skipped so
+ * the forms work with zero config; set the secret in staging/production.
  */
-async function verifyTurnstile(token: string | undefined): Promise<boolean> {
+async function verifyRecaptcha(
+  token: string | undefined,
+  expectedAction: string,
+): Promise<boolean> {
+  if (!RECAPTCHA_SECRET) return true; // dev: not configured → skip
   if (!token) return false;
   try {
     const hdrs = await headers();
-    const ip =
-      hdrs.get("cf-connecting-ip") ??
-      hdrs.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim();
 
     const form = new URLSearchParams();
-    form.set("secret", TURNSTILE_SECRET);
+    form.set("secret", RECAPTCHA_SECRET);
     form.set("response", token);
     if (ip) form.set("remoteip", ip);
 
-    const res = await fetch(TURNSTILE_VERIFY_URL, {
+    const res = await fetch(RECAPTCHA_VERIFY_URL, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: form.toString(),
       cache: "no-store",
     });
-    const data = (await res.json()) as { success?: boolean };
-    return data.success === true;
+    const data = (await res.json()) as {
+      success?: boolean;
+      score?: number;
+      action?: string;
+    };
+    return (
+      data.success === true &&
+      (data.score ?? 0) >= RECAPTCHA_MIN_SCORE &&
+      data.action === expectedAction
+    );
   } catch {
     return false;
   }
@@ -88,15 +99,15 @@ export type ContactInput = {
   company?: string;
   /** Honeypot — must stay empty. */
   website?: string;
-  /** Cloudflare Turnstile token from the widget. */
-  turnstileToken?: string;
+  /** reCAPTCHA v3 token (action: "contact"). */
+  recaptchaToken?: string;
 };
 
 export async function submitContact(input: ContactInput): Promise<FormResult> {
-  if (!(await verifyTurnstile(input.turnstileToken))) {
+  if (!(await verifyRecaptcha(input.recaptchaToken, "contact"))) {
     return { ok: false, error: VERIFY_FAILED };
   }
-  // Forward only the enquiry fields — the Turnstile token stays server-side.
+  // Forward only the enquiry fields — the reCAPTCHA token stays server-side.
   return postJson("/api/contact", {
     name: input.name,
     email: input.email,
@@ -111,14 +122,14 @@ export type NewsletterInput = {
   email: string;
   /** Honeypot — must stay empty. */
   website?: string;
-  /** Cloudflare Turnstile token from the widget. */
-  turnstileToken?: string;
+  /** reCAPTCHA v3 token (action: "newsletter"). */
+  recaptchaToken?: string;
 };
 
 export async function subscribeNewsletter(
   input: NewsletterInput,
 ): Promise<FormResult> {
-  if (!(await verifyTurnstile(input.turnstileToken))) {
+  if (!(await verifyRecaptcha(input.recaptchaToken, "newsletter"))) {
     return { ok: false, error: VERIFY_FAILED };
   }
   return postJson("/api/newsletter/subscribe", {
