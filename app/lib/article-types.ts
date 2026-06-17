@@ -63,8 +63,14 @@ export type Article = {
   tags: Tag[];
 
   // Media
-  /** Public path to the cover image. */
+  /** Cover image resolved for LISTINGS (cards / carousel): cover → ogImage →
+   *  placeholder, so it's always a string. The article hero must NOT use this
+   *  — use `coverImageReal`, so a coverless post shows no hero (the og /
+   *  placeholder fallback is a listing concern only). */
   coverImage: string;
+  /** The post's genuine cover image, or null when it has none — no ogImage or
+   *  placeholder fallback. Used by the article hero / detail view. */
+  coverImageReal: string | null;
   coverImageAlt: string;
   coverImageTitle: string | null;
   coverImageCaption: string | null;

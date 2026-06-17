@@ -5,7 +5,6 @@ import {
   formatDate,
   formatReadTime,
   isExternalUrl,
-  PLACEHOLDER_COVER,
 } from "@/app/lib/article-types";
 import { buildToc } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
@@ -149,10 +148,10 @@ export default async function ArticleDetail({
           </header>
 
           {/* hero image — wrapped as <figure> so any caption/credit the
-              author entered renders semantically with the image. Skipped
-              entirely for coverless posts: we don't show the listing
-              placeholder as an article hero. */}
-          {article.coverImage !== PLACEHOLDER_COVER && (
+              author entered renders semantically with the image. Uses the
+              GENUINE cover (`coverImageReal`): a coverless post shows no hero,
+              never the listing og/placeholder fallback. */}
+          {article.coverImageReal && (
             <figure className="mt-10">
               <div
                 {...(article.coverImageTitle
@@ -161,13 +160,13 @@ export default async function ArticleDetail({
                 className="relative aspect-video overflow-hidden rounded-3xl sm:aspect-video"
               >
                 <Image
-                  src={article.coverImage}
+                  src={article.coverImageReal}
                   alt={article.coverImageAlt}
                   fill
                   priority
                   sizes="(min-width: 800px) 800px, 100vw"
                   className="object-cover"
-                  unoptimized={isExternalUrl(article.coverImage)}
+                  unoptimized={isExternalUrl(article.coverImageReal)}
                 />
               </div>
               {(article.coverImageCaption || article.coverImageCredit) && (

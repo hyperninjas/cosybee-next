@@ -2,6 +2,7 @@ import "server-only";
 import { ROUTES } from "@/app/lib/site";
 import {
   resolveCoverImage,
+  validImageOrNull,
   type Article,
   type Author,
   type Category,
@@ -47,9 +48,10 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     tags: row.tags ?? [],
 
     // Media
-    // Resolve like the public mapper (cover → og → placeholder) so the draft
-    // preview never feeds a null cover to <ArticleDetail>'s <Image>.
+    // Listings get the resolved value (cover → og → placeholder); the draft
+    // preview's hero uses `coverImageReal` so a coverless draft shows no hero.
     coverImage: resolveCoverImage(row.coverImage, row.ogImage),
+    coverImageReal: validImageOrNull(row.coverImage),
     coverImageAlt: row.coverImageAlt,
     coverImageTitle: row.coverImageTitle ?? null,
     coverImageCaption: row.coverImageCaption ?? null,

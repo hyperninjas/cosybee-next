@@ -2,6 +2,7 @@ import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
 import {
   resolveCoverImage,
+  validImageOrNull,
   type Article,
   type Author,
   type Category,
@@ -98,6 +99,8 @@ function toArticle(post: ApiPost): Article {
 
     // Media
     coverImage: resolveCoverImage(post.coverImage, post.ogImage),
+    // The genuine cover (no og/placeholder fallback) — the hero uses this.
+    coverImageReal: validImageOrNull(post.coverImage),
     coverImageAlt: post.coverImageAlt ?? "",
     coverImageTitle: post.coverImageTitle ?? null,
     coverImageCaption: post.coverImageCaption ?? null,
