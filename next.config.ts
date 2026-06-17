@@ -69,6 +69,26 @@ const nextConfig: NextConfig = {
   reactCompiler: {
     compilationMode: "all",
   },
+  env: {
+    API_URL: process.env.API_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
+
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+    ADMIN_SESSION_SECRET: process.env.ADMIN_SESSION_SECRET,
+
+    AWS_REGION: process.env.AWS_REGION,
+    AWS_BUCKET: process.env.AWS_BUCKET,
+
+    // Public reCAPTCHA v3 site key (build-time inlined into the client bundle).
+    // The SECRET (RECAPTCHA_SECRET_KEY) is intentionally NOT here — it's read
+    // server-side at runtime in the form actions, so it never enters the build.
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+
+    GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
+    BING_SITE_VERIFICATION: process.env.BING_SITE_VERIFICATION,
+  },
 
   experimental: {
     // Inline above-the-fold critical CSS to reduce the render-blocking
