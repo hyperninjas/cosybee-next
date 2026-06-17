@@ -63,7 +63,7 @@ export function PublicFileUpload({
           <iframe
             src={value}
             title="document"
-            className="h-[600px] w-full rounded border"
+            className="h-150 w-full rounded border"
           />
         </div>
       )}

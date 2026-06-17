@@ -38,6 +38,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
   const onAuthors = pathname?.startsWith("/admin/authors") ?? false;
   const onCategories = pathname?.startsWith("/admin/categories") ?? false;
   const onTags = pathname?.startsWith("/admin/tags") ?? false;
+  const onMedia = pathname?.startsWith("/admin/media") ?? false;
 
   // Drives the mobile dropdown: internal nav, external (new-tab) links, sign out.
   async function onMenuAction(key: string) {
@@ -94,6 +95,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             })}
           >
             Tags
+          </Link>
+          <Link
+            href="/admin/media"
+            className={buttonVariants({
+              variant: onMedia ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Media
           </Link>
           <Link
             href="/admin/manage-users"
@@ -170,6 +180,9 @@ export function AdminHeader({ user }: { user: AdminUser }) {
                 </Dropdown.Item>
                 <Dropdown.Item id="/admin/tags" textValue="Tags">
                   <Label>Tags</Label>
+                </Dropdown.Item>
+                <Dropdown.Item id="/admin/media" textValue="Media">
+                  <Label>Media</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="/admin/manage-users" textValue="Users">
                   <Label>Users</Label>

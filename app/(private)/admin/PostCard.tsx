@@ -68,7 +68,7 @@ export function PostCard({
     <Card className="p-0 overflow-hidden border border-border shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] hover:shadow-lg transition duration-300">
       <article
         title={row.title}
-        className="group flex flex-col overflow-hidden rounded-3xl  bg-surface"
+        className="group flex flex-col overflow-hidden  bg-surface"
       >
         <div className="relative h-40 bg-default">
           <Image

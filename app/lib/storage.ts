@@ -15,13 +15,18 @@ export type UploadContext =
   | "blog-content-image"
   | "blog-document"
   | "author-avatar"
-  | "user-avatar";
+  | "user-avatar"
+  // The WordPress-style admin media library (mixed images / video / docs).
+  | "media-library";
 
 /**
  * Optional metadata sent to `/api/storage/confirm`. Populates the media
  * registry so the asset shows up in the picker, gets dedup'd, and can be
  * cleaned up automatically when replaced/orphaned. Width/height also help
  * the reader render images without layout shift.
+ *
+ * `name`/`folderId` are media-library-only — the display name and the folder
+ * the file lands in; ignored by the single-purpose contexts (covers, avatars).
  */
 export interface ConfirmMetadata {
   alt?: string;
@@ -30,6 +35,8 @@ export interface ConfirmMetadata {
   credit?: string;
   width?: number;
   height?: number;
+  name?: string;
+  folderId?: string | null;
 }
 
 export interface PresignResponse {
@@ -258,7 +265,42 @@ export const LIMITS: Record<
     types: ["image/jpeg", "image/png", "image/webp", "image/avif"],
     maxBytes: 2 * 1024 * 1024,
   },
+  // The media library mixes kinds with different ceilings (video is large), so
+  // its single `maxBytes` here is the outer bound; `validateLibraryFile`
+  // applies the real per-kind caps that mirror the backend context.
+  "media-library": {
+    types: [
+      ...IMAGE_TYPES,
+      "video/mp4",
+      "video/webm",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    maxBytes: 500 * 1024 * 1024,
+  },
 };
+
+// Per-kind caps for the media library, matching the backend `media-library`
+// context (storage.contexts.ts): default 20 MB, video 500 MB.
+const LIBRARY_VIDEO_MAX = 500 * 1024 * 1024;
+const LIBRARY_DEFAULT_MAX = 20 * 1024 * 1024;
+
+/**
+ * Client-side pre-flight for a media-library upload: enforces the allowlist and
+ * the per-kind size cap. Returns an error string or null. The server + S3
+ * remain the source of truth — this just fails fast with a friendly message.
+ */
+export function validateLibraryFile(file: File): string | null {
+  if (!LIMITS["media-library"].types.includes(file.type)) {
+    return `Unsupported type: ${file.type || "unknown"}. Allowed: images, MP4/WebM video, PDF, DOC/DOCX.`;
+  }
+  const cap = file.type.startsWith("video/") ? LIBRARY_VIDEO_MAX : LIBRARY_DEFAULT_MAX;
+  if (file.size > cap) {
+    return `File too large (max ${Math.round(cap / 1024 / 1024)}MB for this type).`;
+  }
+  return null;
+}
 
 /** Derive the storage key from a public fileUrl by stripping the host/origin. */
 export function keyFromUrl(url: string): string {
@@ -276,4 +318,209 @@ export function validate(file: File, ctx: UploadContext): string | null {
   if (file.size > l.maxBytes)
     return `File too large (max ${l.maxBytes / 1024 / 1024}MB)`;
   return null;
+}
+
+// ===========================================================================
+// Media gallery — browser client for the admin media library
+// (`/api/storage/media`, `/api/storage/folders`). Mirrors the eb-auth DTOs.
+// ===========================================================================
+
+export type MediaKind = "image" | "video" | "pdf" | "document";
+
+export interface MediaTagRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface MediaUsage {
+  postId: string;
+  role: string; // "cover" | "og" | "content"
+  title: string;
+  slug: string;
+  status: string;
+}
+
+export interface MediaItem {
+  id: string;
+  key: string;
+  url: string | null;
+  context: string;
+  kind: MediaKind | null;
+  ext: string | null;
+  mimeType: string;
+  name: string | null;
+  alt: string | null;
+  title: string | null;
+  caption: string | null;
+  credit: string | null;
+  description: string | null;
+  sizeBytes: number | null;
+  width: number | null;
+  height: number | null;
+  durationMs: number | null;
+  pageCount: number | null;
+  blurDataUrl: string | null;
+  thumbnailUrl: string | null;
+  folderId: string | null;
+  visibility: string;
+  tags: MediaTagRef[];
+  usages: MediaUsage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaListResult {
+  items: MediaItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface MediaFolder {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  mediaCount: number;
+  childCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListMediaParams {
+  page?: number;
+  pageSize?: number;
+  kind?: MediaKind;
+  folderId?: string;
+  unfiled?: boolean;
+  q?: string;
+  tagId?: string;
+  /** Filter to media carrying ANY of these tag ids (OR). */
+  tagIds?: string[];
+}
+
+/** List gallery media (paginated, filterable). */
+export function listMedia(params: ListMediaParams = {}): Promise<MediaListResult> {
+  const qs = new URLSearchParams();
+  if (params.page) qs.set("page", String(params.page));
+  if (params.pageSize) qs.set("pageSize", String(params.pageSize));
+  if (params.kind) qs.set("kind", params.kind);
+  if (params.folderId) qs.set("folderId", params.folderId);
+  if (params.unfiled) qs.set("unfiled", "true");
+  if (params.q) qs.set("q", params.q);
+  if (params.tagId) qs.set("tagId", params.tagId);
+  if (params.tagIds?.length) qs.set("tagIds", params.tagIds.join(","));
+  const query = qs.toString();
+  return api<MediaListResult>(`/api/storage/media${query ? `?${query}` : ""}`, {
+    method: "GET",
+  });
+}
+
+/** Fetch a single media item with its tags + post usages. */
+export function getMedia(id: string): Promise<MediaItem> {
+  return api<MediaItem>(`/api/storage/media/${id}`, { method: "GET" });
+}
+
+export interface UpdateMediaInput {
+  name?: string;
+  alt?: string | null;
+  title?: string | null;
+  caption?: string | null;
+  credit?: string | null;
+  description?: string | null;
+  folderId?: string | null;
+  /** Existing tag ids to apply (replaces the set). */
+  tagIds?: string[];
+  /** New tag names to create-or-reuse and link; merged with tagIds. */
+  tagNames?: string[];
+}
+
+/** Edit a media item's editorial metadata / folder / tags. */
+export function updateMedia(id: string, patch: UpdateMediaInput): Promise<MediaItem> {
+  return api<MediaItem>(`/api/storage/media/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+}
+
+/** A tag applied to library media, with how many files carry it. */
+export interface MediaTagCount {
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+/** Tags used by library media (with file counts) — drives the gallery tag filter. */
+export function listMediaTags(): Promise<{ items: MediaTagCount[] }> {
+  return api<{ items: MediaTagCount[] }>("/api/storage/media-tags", { method: "GET" });
+}
+
+/** List the full folder tree (flat, with counts). */
+export function listFolders(): Promise<{ items: MediaFolder[] }> {
+  return api<{ items: MediaFolder[] }>("/api/storage/folders", { method: "GET" });
+}
+
+export function createFolder(input: {
+  name: string;
+  parentId?: string | null;
+}): Promise<MediaFolder> {
+  return api<MediaFolder>("/api/storage/folders", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateFolder(
+  id: string,
+  input: { name?: string; parentId?: string | null },
+): Promise<MediaFolder> {
+  return api<MediaFolder>(`/api/storage/folders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteFolder(id: string): Promise<{ deleted: boolean }> {
+  return api(`/api/storage/folders/${id}`, { method: "DELETE" });
+}
+
+/**
+ * Upload a file into the media library: presign → S3 → confirm, in the
+ * `media-library` context, recording the display name + folder placement.
+ * Returns the confirmed object; the caller re-lists to pick up the new row.
+ */
+export interface LibraryUploadMeta {
+  name?: string;
+  folderId?: string | null;
+  alt?: string;
+  title?: string;
+  caption?: string;
+  credit?: string;
+}
+
+export function uploadLibraryFile(
+  file: File,
+  meta: LibraryUploadMeta = {},
+  opts: UploadOptions = {},
+): Promise<ConfirmResponse> {
+  return uploadFile(file, "media-library", opts, {
+    // Auto-fill the display name from the filename (extension stripped) so a
+    // bulk upload still gets readable names; the rest stays blank for the admin
+    // to fill in later via the media detail editor.
+    name: meta.name ?? nameFromFilename(file.name),
+    folderId: meta.folderId ?? null,
+    alt: meta.alt,
+    title: meta.title,
+    caption: meta.caption,
+    credit: meta.credit,
+  });
+}
+
+/** Filename → display name: drop the extension, leave the rest as-is. */
+function nameFromFilename(filename: string): string {
+  const base = filename.replace(/\.[^./\\]+$/, "").trim();
+  return base || filename;
 }
