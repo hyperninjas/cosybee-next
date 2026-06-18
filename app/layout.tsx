@@ -6,10 +6,8 @@ import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
 import { HideOnAdmin } from "./components/layout/HideOnAdmin";
 import { Providers } from "./providers";
-import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
-import InstallPrompt from "./components/InstallPrompt";
 import Analytics from "./components/Analytics";
-import { Toaster } from "./components/ui/Toaster";
+import { DeferredClientLayer } from "./components/DeferredClientLayer";
 import {
   ORG_ADDRESS,
   ORG_CONTACT_EMAIL,
@@ -264,14 +262,18 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        {/* Consently cookie-consent banner. As a consent manager it must run
-         *  before any tracking scripts hydrate, so it uses the
-         *  `beforeInteractive` strategy (Next injects it into <head>). */}
+        {/* Consently cookie-consent banner. Loaded `afterInteractive` so its
+         *  ~5s of main-thread parse/banner work stays off the critical path
+         *  (it was the dominant Total Blocking Time contributor under
+         *  `beforeInteractive`). Tracking is still gated correctly without it
+         *  running first: Google Consent Mode defaults to `denied` (see
+         *  Analytics.tsx, with `wait_for_update: 500`) and GA stays cookieless
+         *  until Consently issues `gtag('consent','update',…)`. */}
         {process.env.NODE_ENV === "production" && (
           <Script
             src="https://app.consently.net/consently.js"
             data-bannerid="6a229f9186e4ca8d56f54ed0"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
         )}
         <Providers>
@@ -286,9 +288,7 @@ export default function RootLayout({
           <HideOnAdmin>
             <Footer />
           </HideOnAdmin>
-          <Toaster />
-          <ServiceWorkerRegistration />
-          <InstallPrompt />
+          <DeferredClientLayer />
         </Providers>
         <Analytics />
       </body>
