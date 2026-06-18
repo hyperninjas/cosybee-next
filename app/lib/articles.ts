@@ -185,7 +185,7 @@ export async function getArticleBySlug(
 export async function getRelated(
   blog: Blog,
   slug: string,
-  limit = 2,
+  limit = 4,
 ): Promise<Article[]> {
   const response = await api.getRelated(blog, slug, limit);
   return response.data.map(toArticle);
