@@ -41,7 +41,7 @@ export function TagFilter({
     <div className="flex items-center gap-1">
       <Dropdown>
         <Dropdown.Trigger
-          className={`${buttonVariants({ variant: "tertiary", size: "md" })} flex rounded-2xl gap-1.5`}
+          className={`${buttonVariants({ variant: "tertiary", size: "md" })} flex rounded-2xl gap-1.5 text-muted`}
         >
           Tags
           {count > 0 && (

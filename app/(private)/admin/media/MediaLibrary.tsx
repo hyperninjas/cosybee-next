@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Input,
+  ListBox,
+  ListBoxItem,
   Pagination,
+  Select,
   Spinner,
   Tabs,
   toast,
@@ -70,7 +73,8 @@ function ListIcon({ className }: { className?: string }) {
   );
 }
 
-const PAGE_SIZE = 40;
+const DEFAULT_PAGE_SIZE = 40;
+const PAGE_SIZE_OPTIONS = [20, 40, 60, 100] as const;
 
 const KIND_TABS = [
   { key: "ALL", label: "All" },
@@ -100,6 +104,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   const [tagFilter, setTagFilter] = useState<Set<string>>(() => new Set());
   const [view, setView] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   const [result, setResult] = useState<MediaListResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,7 +168,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
     setLoading(true);
     listMedia({
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
       kind: kind === "ALL" ? undefined : kind,
       q: debouncedQ || undefined,
       folderId:
@@ -194,7 +199,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
     return () => {
       cancelled = true;
     };
-  }, [page, kind, debouncedQ, selected, tagFilter, reloadKey]);
+  }, [page, pageSize, kind, debouncedQ, selected, tagFilter, reloadKey]);
 
   // Initial folder + tag-count load.
   useEffect(() => {
@@ -248,7 +253,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
         if (isTranscodableVideo(file)) {
           toUpload = await transcodeToMp4(file, (p) => setProgress(id, p));
           setUploads((u) =>
-            u.map((x) => (x.id === id ? { ...x, phase: "uploading", progress: 0 } : x)),
+            u.map((x) =>
+              x.id === id ? { ...x, phase: "uploading", progress: 0 } : x,
+            ),
           );
         }
         await uploadLibraryFile(
@@ -265,9 +272,13 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
         );
       } catch (e) {
         setUploads((u) =>
-          u.map((x) => (x.id === id ? { ...x, error: (e as Error).message } : x)),
+          u.map((x) =>
+            x.id === id ? { ...x, error: (e as Error).message } : x,
+          ),
         );
-        toast.danger(`${file.name}: ${(e as Error).message || "upload failed"}`);
+        toast.danger(
+          `${file.name}: ${(e as Error).message || "upload failed"}`,
+        );
       }
     }
 
@@ -330,6 +341,11 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   const totalPages = result?.totalPages ?? 1;
   const total = result?.total ?? 0;
 
+  // Pagination display helpers (mirror PostsTable's footer).
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, total);
+  const showNumbered = totalPages > 1 && totalPages <= 7;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -359,12 +375,16 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
       </div>
 
       <div className="flex flex-col gap-6 sm:flex-row">
-        <FolderSidebar
-          folders={folders}
-          selected={selected}
-          onSelect={selectScope}
-          onChanged={refreshFolders}
-        />
+        {/* Sticky on desktop so the folder tree stays in view while the grid
+            scrolls. `self-start` keeps it content-height inside the flex row. */}
+        <div className="sm:sticky sm:top-20 sm:max-h-[calc(100vh-6rem)] sm:self-start sm:overflow-y-auto">
+          <FolderSidebar
+            folders={folders}
+            selected={selected}
+            onSelect={selectScope}
+            onChanged={refreshFolders}
+          />
+        </div>
 
         <div className="min-w-0 flex-1 space-y-4">
           {/* Toolbar: kind filter + search + tag filter + view toggle */}
@@ -501,31 +521,82 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             )}
           </div>
 
-          {/* Pagination */}
-          {total > 0 && totalPages > 1 && (
-            <Pagination size="sm" className="w-full flex-wrap gap-2">
-              <Pagination.Summary>
-                Page {result?.page ?? 1} of {totalPages} · {total} files
-              </Pagination.Summary>
-              <Pagination.Content>
-                <Pagination.Item>
-                  <Pagination.Previous
-                    isDisabled={page <= 1}
-                    onPress={() => setPage((p) => Math.max(1, p - 1))}
+          {/* Footer: per-page selector + pagination. */}
+          {total > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-4">
+              <Pagination size="sm" className="flex-wrap gap-2">
+                <div className="flex items-center gap-2 text-sm text-muted">
+                  <span>Per page</span>
+                  <Select
+                    aria-label="Items per page"
+                    variant="secondary"
+                    selectedKey={String(pageSize)}
+                    onSelectionChange={(k) => {
+                      setPageSize(Number(k));
+                      setPage(1);
+                    }}
                   >
-                    <Pagination.PreviousIcon /> Prev
-                  </Pagination.Previous>
-                </Pagination.Item>
-                <Pagination.Item>
-                  <Pagination.Next
-                    isDisabled={page >= totalPages}
-                    onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    Next <Pagination.NextIcon />
-                  </Pagination.Next>
-                </Pagination.Item>
-              </Pagination.Content>
-            </Pagination>
+                    <Select.Trigger className="w-20">
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {PAGE_SIZE_OPTIONS.map((n) => (
+                          <ListBoxItem
+                            key={n}
+                            id={String(n)}
+                            textValue={String(n)}
+                          >
+                            {n}
+                          </ListBoxItem>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
+                <Pagination.Summary>
+                  {rangeStart}–{rangeEnd} of {total}
+                </Pagination.Summary>
+                {totalPages > 1 && (
+                  <Pagination.Content>
+                    <Pagination.Item>
+                      <Pagination.Previous
+                        isDisabled={page <= 1}
+                        onPress={() => setPage((p) => Math.max(1, p - 1))}
+                      >
+                        <Pagination.PreviousIcon /> Prev
+                      </Pagination.Previous>
+                    </Pagination.Item>
+
+                    {showNumbered &&
+                      Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (p) => (
+                          <Pagination.Item key={p} className="hidden sm:flex">
+                            <Pagination.Link
+                              isActive={p === page}
+                              onPress={() => setPage(p)}
+                            >
+                              {p}
+                            </Pagination.Link>
+                          </Pagination.Item>
+                        ),
+                      )}
+
+                    <Pagination.Item>
+                      <Pagination.Next
+                        isDisabled={page >= totalPages}
+                        onPress={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                      >
+                        Next <Pagination.NextIcon />
+                      </Pagination.Next>
+                    </Pagination.Item>
+                  </Pagination.Content>
+                )}
+              </Pagination>
+            </div>
           )}
         </div>
       </div>

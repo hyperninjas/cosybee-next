@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Dropdown, Input, Label, toast, useOverlayState } from "@heroui/react";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Label,
+  toast,
+  useOverlayState,
+} from "@heroui/react";
 import {
   createFolder,
   deleteFolder,
@@ -69,17 +76,26 @@ function ScopeButton({
   count?: number;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onPress}
-      className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors ${
-        active ? "bg-accent/10 font-semibold text-accent" : "text-foreground hover:bg-background"
+    <Button
+      variant="ghost"
+      fullWidth
+      onPress={onPress}
+      className={`h-auto justify-start gap-2 rounded-3xl px-2.5 py-2 text-left text-sm font-normal ${
+        active ? "bg-accent/10 font-semibold text-accent" : "text-foreground"
       }`}
     >
       {icon}
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      {count != null && <span className="text-xs text-muted">{count}</span>}
-    </button>
+      {count != null && (
+        <span
+          className={`text-xs ${
+            active ? "font-semibold text-accent" : "text-foreground"
+          }`}
+        >
+          {count}
+        </span>
+      )}
+    </Button>
   );
 }
 
@@ -113,9 +129,10 @@ export function FolderSidebar({
   const [deleting, setDeleting] = useState<MediaFolder | null>(null);
 
   // New folders nest under the currently-open folder (when one is selected).
-  const parentForNew = typeof selected === "string" && selected !== "all" && selected !== "unfiled"
-    ? selected
-    : null;
+  const parentForNew =
+    typeof selected === "string" && selected !== "all" && selected !== "unfiled"
+      ? selected
+      : null;
 
   async function handleCreate() {
     const name = newName.trim();
@@ -148,15 +165,25 @@ export function FolderSidebar({
   }
 
   return (
-    <aside className="flex w-full flex-col gap-1 sm:w-60 sm:shrink-0">
+    <aside className="flex w-full flex-col gap-1 sm:w-60 sm:shrink-0 pb-2">
       <div className="mb-1 flex items-center justify-between px-1">
-        <h2 className="text-xs font-bold uppercase tracking-wide text-muted">Folders</h2>
-        <Button size="sm" variant="ghost" onPress={() => setCreating((v) => !v)}>
+        <h2 className="text-xs font-bold uppercase tracking-wide text-muted">
+          Folders
+        </h2>
+        <Button
+          size="sm"
+          variant="ghost"
+          onPress={() => setCreating((v) => !v)}
+        >
           + New
         </Button>
       </div>
 
-      <ScopeButton active={selected === "all"} onPress={() => onSelect("all")} label="All media" />
+      <ScopeButton
+        active={selected === "all"}
+        onPress={() => onSelect("all")}
+        label="All media"
+      />
       <ScopeButton
         active={selected === "unfiled"}
         onPress={() => onSelect("unfiled")}
@@ -207,9 +234,14 @@ export function FolderSidebar({
                 <Dropdown>
                   <Dropdown.Trigger
                     aria-label={`Actions for ${node.name}`}
-                    className="rounded-md p-1 text-muted opacity-0 transition-opacity hover:bg-background hover:text-foreground group-hover:opacity-100"
+                    className="flex h-full shrink-0 cursor-pointer items-center justify-center rounded-xl  p-2 text-muted transition-colors hover:bg-background hover:text-foreground"
                   >
-                    <span aria-hidden className="text-lg leading-none">⋯</span>
+                    <span
+                      aria-hidden
+                      className="text-lg leading-0 text-center items-center"
+                    >
+                      ⋯
+                    </span>
                   </Dropdown.Trigger>
                   <Dropdown.Popover className="min-w-36">
                     <Dropdown.Menu
@@ -226,7 +258,11 @@ export function FolderSidebar({
                       <Dropdown.Item id="rename" textValue="Rename">
                         <Label>Rename</Label>
                       </Dropdown.Item>
-                      <Dropdown.Item id="delete" textValue="Delete" variant="danger">
+                      <Dropdown.Item
+                        id="delete"
+                        textValue="Delete"
+                        variant="danger"
+                      >
                         <Label>Delete</Label>
                       </Dropdown.Item>
                     </Dropdown.Menu>
@@ -239,7 +275,7 @@ export function FolderSidebar({
       </ul>
 
       {creating && (
-        <div className="mt-2 flex items-center gap-2 px-1">
+        <div className="mt-1 flex items-center gap-2 px-1 py-1">
           <Input
             autoFocus
             aria-label="New folder name"
@@ -254,9 +290,15 @@ export function FolderSidebar({
                 setNewName("");
               }
             }}
-            className="h-8 text-sm"
+            size={18.5}
+            className="rounded-3xl"
           />
-          <Button size="sm" variant="primary" onPress={handleCreate} isPending={busy}>
+          <Button
+            size="md"
+            variant="secondary"
+            onPress={handleCreate}
+            isPending={busy}
+          >
             Add
           </Button>
         </div>
