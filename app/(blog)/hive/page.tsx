@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/articles";
 import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
-import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
 import hiveCover from "@/public/Cover/energiebee-hive-cover.png";
@@ -70,10 +70,21 @@ export default async function HivePage({ searchParams }: PageProps<"/hive">) {
   return (
     <main className="flex-1">
       <JsonLd
-        data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "The Hive", path: "/hive" },
-        ])}
+        data={[
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "The Hive", path: "/hive" },
+          ]),
+          collectionPageSchema({
+            name: "The Hive — EnergieBee",
+            description: HIVE_DESCRIPTION,
+            path: "/hive",
+            items: articles.map((a) => ({
+              title: a.title,
+              path: `/hive/${a.slug}`,
+            })),
+          }),
+        ]}
       />
       {/* Crawlable prev/next hints for the browse pagination (React 19 hoists
           these to <head>). Omitted in filter/search mode. */}

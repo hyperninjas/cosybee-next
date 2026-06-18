@@ -5,7 +5,7 @@ import BlogBrowse from "@/app/components/sections/blog/BlogBrowse";
 import { getAllArticles, getFeatured, getCategoryNames } from "@/app/lib/articles";
 import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
-import { breadcrumbSchema } from "@/app/lib/structured-data";
+import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
 import learnCover from "@/public/Cover/energiebee-learn-cover.png";
@@ -65,10 +65,21 @@ export default async function LearnPage({
   return (
     <main className="flex-1">
       <JsonLd
-        data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Learn", path: "/learn" },
-        ])}
+        data={[
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Learn", path: "/learn" },
+          ]),
+          collectionPageSchema({
+            name: "Learn — EnergieBee",
+            description: LEARN_DESCRIPTION,
+            path: "/learn",
+            items: articles.map((a) => ({
+              title: a.title,
+              path: `/learn/${a.slug}`,
+            })),
+          }),
+        ]}
       />
       {/* Crawlable prev/next hints for the browse pagination (React 19 hoists
           these to <head>). Omitted in filter/search mode. */}
