@@ -73,6 +73,25 @@ function ListIcon({ className }: { className?: string }) {
   );
 }
 
+function RefreshIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+      <path d="M3 21v-5h5" />
+    </svg>
+  );
+}
+
 const DEFAULT_PAGE_SIZE = 40;
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100] as const;
 
@@ -150,6 +169,14 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
     setKind(k);
     setPage(1);
   }, []);
+
+  // Re-run the current query (same filters/page) and refresh the folder + tag
+  // counts. Bumping `reloadKey` re-triggers the fetch effect below.
+  const refresh = useCallback(() => {
+    setReloadKey((k) => k + 1);
+    refreshFolders();
+    refreshMediaTags();
+  }, [refreshFolders, refreshMediaTags]);
 
   // Debounce the search box; reset to page 1 with the new query.
   useEffect(() => {
@@ -387,16 +414,21 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
         </div>
 
         <div className="min-w-0 flex-1 space-y-4">
-          {/* Toolbar: kind filter + search + tag filter + view toggle */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
+          {/* Toolbar: kind filter + view toggle on one tier; tag filter,
+              refresh + search on another. Collapses to stacked rows on
+              narrow screens and lines up on a single row from xl up. */}
+          <div className="flex flex-col lg:flex-row gap-3 lg:flex-wrap lg:items-center lg:justify-between">
+            {/* Kind filter + grid/table toggle. Kind tabs scroll sideways if
+                they ever outgrow the row instead of wrapping mid-control. */}
+            <div className="flex items-center justify-between gap-3">
               <Tabs
                 selectedKey={kind}
                 onSelectionChange={(k) => selectKind(k as "ALL" | MediaKind)}
+                className="min-w-0"
               >
-                <Tabs.ListContainer>
+                <Tabs.ListContainer className="overflow-x-auto">
                   <Tabs.List
-                    aria-label="View mode"
+                    aria-label="Filter by type"
                     className="w-fit *:h-7 *:w-fit *:px-2 *:data-[selected=true]:text-accent-foreground"
                   >
                     {KIND_TABS.map((t) => (
@@ -432,7 +464,10 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 </Tabs.ListContainer>
               </Tabs>
             </div>
-            <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
+
+            {/* Tag filter + refresh + search. Search takes the full width on
+                its own row below the controls until there's room inline. */}
+            <div className="flex flex-wrap items-center gap-2 lg:flex-1 lg:justify-end">
               <TagFilter
                 tags={mediaTags}
                 selected={tagFilter}
@@ -441,13 +476,26 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                   setPage(1);
                 }}
               />
+              <Tooltip delay={300}>
+                <Button
+                  isIconOnly
+                  variant="secondary"
+                  aria-label="Refresh"
+                  onPress={refresh}
+                  isPending={loading}
+                  className="shrink-0"
+                >
+                  <RefreshIcon className="size-4" />
+                </Button>
+                <Tooltip.Content>Refresh</Tooltip.Content>
+              </Tooltip>
               <Input
                 aria-label="Search media"
                 variant="secondary"
                 placeholder="Search name, alt, file…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:w-56"
+                className="w-full min-w-40 flex-1 sm:w-56 lg:flex-none"
               />
             </div>
           </div>
@@ -460,7 +508,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
-            className={`relative rounded-xl border-2 border-dashed p-3 sm:p-0 transition-colors ${
+            className={`relative rounded-xl border-2 border-dashed p-0 sm:p-0 transition-colors ${
               dragging ? "border-accent bg-accent/5" : "border-transparent"
             }`}
           >
