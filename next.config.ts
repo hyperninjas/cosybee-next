@@ -7,6 +7,31 @@ import type { NextConfig } from "next";
 const CANONICAL_HOST = "energiebee.com";
 const REDIRECT_FROM_HOST = `www.${CANONICAL_HOST}`;
 
+// Content-Security-Policy, REPORT-ONLY for now. Report-only never blocks a
+// request — the browser only logs violations to the console — so shipping this
+// can't break the site. Watch the violation reports for a release or two, fix
+// any legitimate sources it flags, then promote it to the enforcing
+// `Content-Security-Policy` header. `'unsafe-inline'` is required for script
+// because we ship a handful of inline scripts (scroll restoration, JSON-LD,
+// next-themes, gtag bootstrap) and don't yet use per-request nonces — tighten
+// to a nonce strategy when promoting to enforcing.
+const CSP_REPORT_ONLY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "manifest-src 'self'",
+  "worker-src 'self' blob:",
+  "media-src 'self'",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://app.consently.net https://www.google.com https://www.gstatic.com https://www.googletagmanager.com",
+  "img-src 'self' data: blob: https://eb-api.technext.it https://energiebee.s3.eu-west-2.amazonaws.com https://www.google.com https://www.googletagmanager.com https://*.google-analytics.com",
+  "connect-src 'self' https://app.consently.net https://www.google.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://eb-api.technext.it",
+  "frame-src https://www.google.com https://app.consently.net",
+].join("; ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
@@ -88,6 +113,11 @@ const nextConfig: NextConfig = {
 
     GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
     BING_SITE_VERIFICATION: process.env.BING_SITE_VERIFICATION,
+
+    // GA4 measurement ID (e.g. "G-XXXXXXXXXX"). Public so it can be inlined for
+    // the client-side gtag bootstrap. Analytics is a no-op until this is set,
+    // so leaving it unset in dev/staging keeps those environments tracking-free.
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   },
 
   experimental: {
@@ -199,6 +229,21 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // HSTS: force HTTPS for two years, cover subdomains, and opt into the
+          // browser preload list. Safe here because the canonical site and its
+          // subdomains are HTTPS-only. To back out of `preload` later you must
+          // also remove the domain from hstspreload.org, so only ship this once
+          // every *.energiebee.com host is confirmed HTTPS.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          // CSP in report-only mode — logs violations without blocking. See the
+          // CSP_REPORT_ONLY note above before promoting to enforcing.
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: CSP_REPORT_ONLY,
+          },
         ],
       },
       {

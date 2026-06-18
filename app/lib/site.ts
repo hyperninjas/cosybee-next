@@ -32,10 +32,10 @@ export const SITE_KEYWORDS = [
 
 export const ORG_LEGAL_NAME = "EnergieBee Limited";
 export const ORG_ADDRESS = {
-  street: "4 Blackburn Road",
-  city: "Accrington",
+  street: "UK Electronics, Fitton St, Royton",
+  city: "Oldham",
   region: "England",
-  postalCode: "BB5 1HD",
+  postalCode: "OL2 5JX",
   country: "GB",
 };
 
@@ -47,6 +47,9 @@ export const SOCIAL = {
   youtube: "https://www.youtube.com/@EnergieBeeLtd",
   linkedin: "https://www.linkedin.com/company/energiebeeltd/",
 } as const;
+
+/** X/Twitter @handle used for twitter:site and twitter:creator card tags. */
+export const TWITTER_HANDLE = "@EnergieBee";
 
 /** All public routes — keep in sync with the page.tsx files under app/. Used by sitemap. */
 export const ROUTES: ReadonlyArray<{
@@ -61,6 +64,7 @@ export const ROUTES: ReadonlyArray<{
   { path: "/energy", changeFrequency: "monthly", priority: 0.9 },
   { path: "/hive", changeFrequency: "weekly", priority: 0.8 },
   { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
   { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },

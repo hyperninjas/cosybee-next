@@ -9,25 +9,21 @@ import illustration from "@/public/illustration-cookies.svg";
 import Image from "next/image";
 
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
   { name: "Cookie Policy", path: "/cookies" },
 ];
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Cookie Policy",
   description:
     "Exactly which cookies EnergieBee places on your device, why we place them, and how to stay in control.",
-  alternates: { canonical: "/cookies" },
-  robots: { index: true, follow: true },
-  openGraph: {
-    url: "/cookies",
-    title: "Cookie Policy — EnergieBee",
-    description:
-      "Small files, big transparency — which cookies we place, why, and how to stay in control.",
-  },
-};
+  ogDescription:
+    "Small files, big transparency — which cookies we place, why, and how to stay in control.",
+  path: "/cookies",
+});
 
 /** Inline monospace token used for cookie names like `session_id`. */
 function Cookie({ children }: { children: React.ReactNode }) {
@@ -50,7 +46,11 @@ export default function CookiesPage() {
         title="How We Use Cookies on Our Website"
         subtitle="Small files, big transparency, here's exactly what we place on your device, why, and how you stay in control."
         illustration={
-          <Image src={illustration} alt="" className="max-h-111.25 w-auto" />
+          <Image
+            src={illustration}
+            alt="Cookie policy illustration"
+            className="max-h-111.25 w-auto"
+          />
         }
       />
 
@@ -80,7 +80,7 @@ export default function CookiesPage() {
             This Cookie Policy is published by EnergieBee Limited, a company
             registered in England and Wales, with its registered office at:
           </p>
-          <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
+          <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
           <p>
             For cookie-related enquiries:{" "}
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 import Hero from "@/app/components/sections/smart/Hero";
 import EnergyMonitoring from "@/app/components/sections/smart/EnergyMonitoring";
 // import EnergyForecasting from "@/app/components/sections/smart/EnergyForecasting";
@@ -12,10 +13,13 @@ import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Smart Home Integration",
   description:
     "Connect every device in your home and let EnergieBee's AI orchestrate energy usage automatically. Works with Alexa, Google Home, and Apple HomeKit out of the box.",
+  ogDescription:
+    "Connect every device and let AI orchestrate your home's energy automatically. Reduce waste, save money, stay in control.",
+  path: "/smart",
   keywords: [
     "smart home energy",
     "Matter smart home",
@@ -24,14 +28,7 @@ export const metadata: Metadata = {
     "Google Home energy",
     "Apple HomeKit",
   ],
-  alternates: { canonical: "/smart" },
-  openGraph: {
-    url: "/smart",
-    title: "Smart Home Integration — EnergieBee",
-    description:
-      "Connect every device and let AI orchestrate your home's energy automatically. Reduce waste, save money, stay in control.",
-  },
-};
+});
 
 export default function SmartPage() {
   return (

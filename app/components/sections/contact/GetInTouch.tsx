@@ -16,6 +16,7 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { submitContact } from "@/app/lib/public-forms";
 import { getRecaptchaToken, preloadRecaptcha } from "@/app/lib/recaptcha";
+import { trackEvent } from "@/app/lib/analytics";
 import { NewsletterSignup } from "./NewsletterSignup";
 
 const FIELD_CLASS =
@@ -45,12 +46,12 @@ const CONTACT_INFO: ContactInfo[] = [
     icon: <MapPin className="size-5" />,
     title: "Location",
     detail:
-      "Energiebee Limited c/o Schofield House, Lion Mill Yard, Fitton Street, Royton, Lancashire, OL2 5JX",
+      "EnergieBee Limited, UK Electronics, Fitton St, Royton, Oldham, OL2 5JX",
   },
 ];
 
 const MAP_SRC =
-  "https://www.google.com/maps?q=Schofield+House,+Lion+Mill+Yard,+Fitton+Street,+Royton,+Lancashire,+OL2+5JX&output=embed";
+  "https://www.google.com/maps?q=UK+Electronics,+Fitton+St,+Royton,+Oldham+OL2+5JX&output=embed";
 
 /**
  * Get-in-touch section — eyebrow + title, a multi-field enquiry form, a row of
@@ -92,6 +93,7 @@ export default function GetInTouch() {
     setPending(false);
 
     if (result.ok) {
+      trackEvent("generate_lead", { form: "contact" });
       toast.success("Thanks for reaching out — we'll be in touch soon.");
       setFirstName("");
       setLastName("");

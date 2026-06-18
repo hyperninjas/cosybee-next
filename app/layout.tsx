@@ -8,6 +8,7 @@ import { HideOnAdmin } from "./components/layout/HideOnAdmin";
 import { Providers } from "./providers";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
 import InstallPrompt from "./components/InstallPrompt";
+import Analytics from "./components/Analytics";
 import { Toaster } from "./components/ui/Toaster";
 import {
   ORG_ADDRESS,
@@ -19,8 +20,10 @@ import {
   SITE_TAGLINE,
   SITE_URL,
   SOCIAL,
+  TWITTER_HANDLE,
   url,
 } from "./lib/site";
+import { DEFAULT_OG_IMAGE } from "./lib/seo";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -80,22 +83,16 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     // Next.js auto-injects /opengraph-image.{png,tsx} sitting at app/ root,
     // but listing it here also surfaces it for crawlers that probe metadata.
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: `${SITE_NAME} — ${SITE_TAGLINE}`,
-      },
-    ],
+    // Shared with per-page metadata via DEFAULT_OG_IMAGE (lib/seo.ts).
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    creator: "@EnergieBee",
-    site: "@EnergieBee",
-    images: ["/opengraph-image"],
+    creator: TWITTER_HANDLE,
+    site: TWITTER_HANDLE,
+    images: [DEFAULT_OG_IMAGE.url],
   },
   robots: {
     index: true,
@@ -151,6 +148,32 @@ const organizationSchema = {
   sameAs: Object.values(SOCIAL),
 };
 
+/** LocalBusiness schema — registered UK business location. Shares the same
+ *  NAP (name/address) as the Organization schema and the contact page; keep
+ *  all three in sync to reinforce the local-SEO trust signal. */
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${SITE_URL}/#localbusiness`,
+  name: ORG_LEGAL_NAME,
+  alternateName: SITE_NAME,
+  url: SITE_URL,
+  image: url("/opengraph-image"),
+  logo: url("/icon"),
+  description: SITE_DESCRIPTION,
+  email: ORG_CONTACT_EMAIL,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: ORG_ADDRESS.street,
+    addressLocality: ORG_ADDRESS.city,
+    addressRegion: ORG_ADDRESS.region,
+    postalCode: ORG_ADDRESS.postalCode,
+    addressCountry: ORG_ADDRESS.country,
+  },
+  areaServed: { "@type": "Country", name: "United Kingdom" },
+  sameAs: Object.values(SOCIAL),
+};
+
 /** Website schema with SearchAction — helps Google show a sitelinks
  *  search box for the brand. */
 const websiteSchema = {
@@ -172,7 +195,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en-GB"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${manrope.variable} h-full antialiased scroll-smooth`}
@@ -222,11 +245,25 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
+            __html: JSON.stringify(localBusinessSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteSchema),
           }}
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        {/* Skip link — first focusable element, visually hidden until focused,
+         *  so keyboard/screen-reader users can jump straight past the navbar. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-1000 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         {/* Consently cookie-consent banner. As a consent manager it must run
          *  before any tracking scripts hydrate, so it uses the
          *  `beforeInteractive` strategy (Next injects it into <head>). */}
@@ -241,7 +278,11 @@ export default function RootLayout({
           <HideOnAdmin>
             <Navbar />
           </HideOnAdmin>
-          {children}
+          {/* Skip-link target. A wrapper (not <main>, since each page renders
+           *  its own <main>) that keeps the sticky-footer flex layout intact. */}
+          <div id="main-content" tabIndex={-1} className="flex flex-1 flex-col">
+            {children}
+          </div>
           <HideOnAdmin>
             <Footer />
           </HideOnAdmin>
@@ -249,6 +290,7 @@ export default function RootLayout({
           <ServiceWorkerRegistration />
           <InstallPrompt />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

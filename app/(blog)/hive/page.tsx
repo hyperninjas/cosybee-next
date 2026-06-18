@@ -11,6 +11,7 @@ import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/seo";
 import hiveCover from "@/public/Cover/energiebee-hive-cover.png";
 
 const HIVE_DESCRIPTION =
@@ -39,17 +40,12 @@ export async function generateMetadata({
   // Filtered/search views are shareable but canonicalised to the clean hub and
   // marked noindex so they aren't indexed as thin, duplicate pages.
   const canonical = !filtered && page > 1 ? `/hive?page=${page}` : "/hive";
-  return {
+  return pageMetadata({
     title: "The Hive",
     description: HIVE_DESCRIPTION,
-    alternates: { canonical },
-    ...(filtered ? { robots: { index: false, follow: true } } : {}),
-    openGraph: {
-      url: canonical,
-      title: "The Hive — EnergieBee",
-      description: HIVE_DESCRIPTION,
-    },
-  };
+    path: canonical,
+    index: !filtered,
+  });
 }
 
 export default async function HivePage({ searchParams }: PageProps<"/hive">) {

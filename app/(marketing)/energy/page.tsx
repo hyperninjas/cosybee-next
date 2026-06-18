@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 import Hero from "@/app/components/sections/energy/Hero";
 import EnergyMonitoring from "@/app/components/sections/energy/EnergyMonitoring";
 // import EnergyForecasting from "@/app/components/sections/energy/EnergyForecasting";
@@ -12,10 +13,13 @@ import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Total Energy Control",
   description:
     "Track every watt your home uses across grid, solar, battery, and devices. AI-driven tariff shifting, bill forecasting, and battery arbitrage cut your bill up to 40%.",
+  ogDescription:
+    "Every watt your home uses, in one dashboard. AI-driven tariff shifting and bill forecasting that cuts your bill up to 40%.",
+  path: "/energy",
   keywords: [
     "home energy monitoring",
     "energy usage tracking",
@@ -24,14 +28,7 @@ export const metadata: Metadata = {
     "EV charging optimisation",
     "tariff comparison UK",
   ],
-  alternates: { canonical: "/energy" },
-  openGraph: {
-    url: "/energy",
-    title: "Total Energy Control — EnergieBee",
-    description:
-      "Every watt your home uses, in one dashboard. AI-driven tariff shifting and bill forecasting that cuts your bill up to 40%.",
-  },
-};
+});
 
 export default function EnergyPage() {
   return (

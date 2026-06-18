@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getAllArticles } from "@/app/lib/articles";
 import { slugify } from "@/app/lib/slug";
 import TaggedArticles from "@/app/components/sections/blog/TaggedArticles";
+import { pageMetadata } from "@/app/lib/seo";
 
 const BLOG = "learn" as const;
 const BASE = "/learn";
@@ -31,16 +32,12 @@ export async function generateMetadata({
     .find((t) => slugify(t.name) === tag);
   if (!tagObj) return { title: "Tag", robots: { index: false, follow: true } };
   const label = tagObj.name;
-  return {
+  return pageMetadata({
     title: `${label} — ${LABEL}`,
     description: `Articles about ${label} on ${LABEL} — EnergieBee.`,
-    alternates: { canonical: `${BASE}/tag/${tag}` },
-    openGraph: {
-      url: `${BASE}/tag/${tag}`,
-      title: `${label} — ${LABEL} — EnergieBee`,
-      description: `Articles about ${label} on ${LABEL}.`,
-    },
-  };
+    ogDescription: `Articles about ${label} on ${LABEL}.`,
+    path: `${BASE}/tag/${tag}`,
+  });
 }
 
 export default async function LearnTagPage({

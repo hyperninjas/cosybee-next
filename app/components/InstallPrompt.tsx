@@ -142,7 +142,7 @@ export default function InstallPrompt() {
       <div className="flex items-start gap-3 pr-6">
         <Image
           src="/icon"
-          alt=""
+          alt="EnergieBee app icon"
           width={40}
           height={40}
           className="h-10 w-10 shrink-0 rounded-xl"
