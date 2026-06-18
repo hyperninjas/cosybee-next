@@ -13,6 +13,14 @@ export function formatBytes(bytes: number | null | undefined): string {
   return `${i === 0 ? n : n.toFixed(1)} ${units[i]}`;
 }
 
+/** Coarse media kind from a MIME type — for the upload card before the row exists. */
+export function kindFromMime(mime: string): MediaKind {
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  if (mime === "application/pdf") return "pdf";
+  return "document";
+}
+
 /** mm:ss from a millisecond duration (for video). */
 export function formatDuration(ms: number | null | undefined): string | null {
   if (!ms || ms <= 0) return null;

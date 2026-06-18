@@ -86,15 +86,6 @@ export function MediaCard({
           <KindIcon kind={media.kind} className="size-10 text-muted" />
         )}
 
-        {/* Kind chip (top-left) */}
-        <Chip
-          size="sm"
-          color="default"
-          className="absolute left-1.5 top-1.5 uppercase shadow-sm"
-        >
-          {media.kind ?? "file"}
-        </Chip>
-
         {/* Usage badge (top-right) — how many places it's used */}
         {uses > 0 && (
           <Chip
@@ -167,8 +158,9 @@ export function MediaCard({
         <p className="truncate text-xs font-medium text-foreground">
           {media.name ?? media.key}
         </p>
-        <p className="text-[10px] uppercase tracking-wide text-muted">
-          {media.kind ?? "file"} · {formatBytes(media.sizeBytes)}
+        <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted">
+          <KindIcon kind={media.kind} className="size-3.5 shrink-0" />
+          <span>{formatBytes(media.sizeBytes)}</span>
         </p>
       </Card.Content>
 

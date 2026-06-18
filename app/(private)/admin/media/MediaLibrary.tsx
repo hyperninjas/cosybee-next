@@ -29,6 +29,7 @@ import { MediaDetailModal } from "./MediaDetailModal";
 import { MediaCard } from "./MediaCard";
 import { MediaTable } from "./MediaTable";
 import { MediaEmptyState } from "./MediaEmptyState";
+import { MediaUploadCard, type ActiveUpload } from "./MediaUploadCard";
 import { TagFilter } from "./TagFilter";
 
 type ViewMode = "grid" | "table";
@@ -82,13 +83,6 @@ const VIEW_MODES = [
   { key: "grid", label: "Grid view", icon: GridIcon },
   { key: "table", label: "Table view", icon: ListIcon },
 ] as const;
-
-interface ActiveUpload {
-  id: string;
-  name: string;
-  progress: number;
-  error?: string;
-}
 
 export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   // Tag vocabulary held in state so tags created from the detail editor appear
@@ -181,7 +175,13 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
       tagIds: tagFilter.size > 0 ? [...tagFilter] : undefined,
     })
       .then((r) => {
-        if (!cancelled) setResult(r);
+        if (!cancelled) {
+          setResult(r);
+          // The just-uploaded rows are now in the list — drop their finished
+          // upload placeholders in the SAME render so the swap is seamless
+          // (no lingering progress card overlapping the real one).
+          setUploads((u) => u.filter((x) => !x.done));
+        }
       })
       .catch((e) => {
         if (!cancelled)
@@ -220,7 +220,10 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
           toast.danger(`${file.name}: ${problem}`);
           return;
         }
-        setUploads((u) => [...u, { id, name: file.name, progress: 0 }]);
+        setUploads((u) => [
+          ...u,
+          { id, name: file.name, progress: 0, size: file.size, type: file.type },
+        ]);
         try {
           await uploadLibraryFile(
             file,
@@ -233,6 +236,12 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             },
           );
           completed += 1;
+          // Mark done (full ring) but keep the card — it's removed atomically
+          // when the post-upload refetch lands (see the fetch effect), so the
+          // placeholder swaps for the real card without a flicker.
+          setUploads((u) =>
+            u.map((x) => (x.id === id ? { ...x, progress: 100, done: true } : x)),
+          );
         } catch (e) {
           setUploads((u) =>
             u.map((x) =>
@@ -244,8 +253,6 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
           );
           return;
         }
-        // Drop the finished row after a short beat.
-        setTimeout(() => setUploads((u) => u.filter((x) => x.id !== id)), 800);
       }),
     );
 
@@ -432,7 +439,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
               <div className="flex items-center justify-center py-20">
                 <Spinner />
               </div>
-            ) : items.length === 0 ? (
+            ) : items.length === 0 && uploads.length === 0 ? (
               <MediaEmptyState
                 filtered={isFiltered}
                 onUpload={() => fileInputRef.current?.click()}
@@ -440,6 +447,12 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
               />
             ) : view === "grid" ? (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+                {/* In-flight uploads sit inline with the real cards. */}
+                {uploads.map((u) => (
+                  <li key={u.id}>
+                    <MediaUploadCard upload={u} />
+                  </li>
+                ))}
                 {items.map((m) => (
                   <li key={m.id}>
                     <MediaCard
@@ -451,41 +464,27 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 ))}
               </ul>
             ) : (
-              <MediaTable
-                items={items}
-                folders={folders}
-                onOpen={openDetail}
-                onDeleted={handleDeleted}
-              />
+              <div className="space-y-3">
+                {uploads.length > 0 && (
+                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+                    {uploads.map((u) => (
+                      <li key={u.id}>
+                        <MediaUploadCard upload={u} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {items.length > 0 && (
+                  <MediaTable
+                    items={items}
+                    folders={folders}
+                    onOpen={openDetail}
+                    onDeleted={handleDeleted}
+                  />
+                )}
+              </div>
             )}
           </div>
-
-          {/* Active upload progress */}
-          {uploads.length > 0 && (
-            <ul className="space-y-1.5">
-              {uploads.map((u) => (
-                <li
-                  key={u.id}
-                  className="rounded-lg border border-border bg-surface px-3 py-2"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="min-w-0 flex-1 truncate text-foreground">
-                      {u.name}
-                    </span>
-                    <span className="text-muted">
-                      {u.error ? "Failed" : `${u.progress}%`}
-                    </span>
-                  </div>
-                  <div className="mt-1 h-1 overflow-hidden rounded bg-background">
-                    <div
-                      className={`h-full transition-all ${u.error ? "bg-danger" : "bg-accent"}`}
-                      style={{ width: `${u.error ? 100 : u.progress}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
 
           {/* Pagination */}
           {total > 0 && totalPages > 1 && (
