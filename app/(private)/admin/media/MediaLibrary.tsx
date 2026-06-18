@@ -92,7 +92,7 @@ function RefreshIcon({ className }: { className?: string }) {
   );
 }
 
-const DEFAULT_PAGE_SIZE = 40;
+const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100] as const;
 
 const KIND_TABS = [
