@@ -15,7 +15,7 @@ import { GENERAL_FAQ } from "@/app/lib/faq-data";
 export const metadata: Metadata = pageMetadata({
   title: "Smart Heating Control",
   description:
-    "Intelligent heating that learns your routines and adapts in real time. Zone-based heating, geofencing, and AI boiler tuning. Cut your heating bill up to 35%.",
+    "Intelligent heating that learns your routines and adapts in real time. Zoning, geofencing, and AI boiler tuning cut your heating bill up to 35%.",
   ogDescription:
     "Heating that learns your routines and adapts in real time. Stay comfortable, cut your bill up to 35%.",
   path: "/heating",
