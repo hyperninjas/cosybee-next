@@ -9,25 +9,21 @@ import illustration from "@/public/illustration-cookies.svg";
 import Image from "next/image";
 
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
   { name: "Data Security", path: "/data-security" },
 ];
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Data Security",
   description:
     "How EnergieBee protects your data — encryption, device security, cloud infrastructure, monitoring, and incident response.",
-  alternates: { canonical: "/data-security" },
-  robots: { index: true, follow: true },
-  openGraph: {
-    url: "/data-security",
-    title: "Data Security — EnergieBee",
-    description:
-      "Encryption, device security, cloud infrastructure, monitoring, and incident response — how we keep your data safe.",
-  },
-};
+  ogDescription:
+    "Encryption, device security, cloud infrastructure, monitoring, and incident response — how we keep your data safe.",
+  path: "/data-security",
+});
 
 export default function DataSecurityPage() {
   return (
@@ -41,7 +37,11 @@ export default function DataSecurityPage() {
         title="Your Data Is Safe With Us"
         subtitle="We build security into everything we do, from the device in your home to the app on your phone."
         illustration={
-          <Image src={illustration} alt="" className="max-h-110.75 w-auto" />
+          <Image
+            src={illustration}
+            alt="Data security illustration"
+            className="max-h-110.75 w-auto"
+          />
         }
       />
 

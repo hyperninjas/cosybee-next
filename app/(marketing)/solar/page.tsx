@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 import Hero from "@/app/components/sections/solar/Hero";
 import EnergyMonitoring from "@/app/components/sections/solar/EnergyMonitoring";
 import EnergyForecasting from "@/app/components/sections/solar/EnergyForecasting";
@@ -12,10 +13,13 @@ import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Solar Forecasting & Optimisation",
   description:
     "95% accurate next-day solar forecasting. EnergieBee uses AI and weather data to predict generation, schedule loads, and maximise the return on your solar investment.",
+  ogDescription:
+    "95% accurate next-day solar forecasting. Plan your energy usage with confidence and maximise your solar investment.",
+  path: "/solar",
   keywords: [
     "solar forecasting",
     "solar production prediction",
@@ -23,14 +27,7 @@ export const metadata: Metadata = {
     "AI solar optimisation",
     "solar savings UK",
   ],
-  alternates: { canonical: "/solar" },
-  openGraph: {
-    url: "/solar",
-    title: "Solar Forecasting & Optimisation — EnergieBee",
-    description:
-      "95% accurate next-day solar forecasting. Plan your energy usage with confidence and maximise your solar investment.",
-  },
-};
+});
 
 export default function Home() {
   return (

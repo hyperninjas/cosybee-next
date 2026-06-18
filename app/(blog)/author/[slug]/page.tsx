@@ -11,6 +11,7 @@ import {
   collectionPageSchema,
 } from "@/app/lib/structured-data";
 import { SITE_NAME } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/seo";
 
 /** Prerender a page for every author that has published articles. */
 export async function generateStaticParams() {
@@ -28,17 +29,12 @@ export async function generateMetadata({
   const description =
     author.bio ??
     `Articles by ${author.name}${author.role ? `, ${author.role}` : ""} on ${SITE_NAME}.`;
-  return {
+  return pageMetadata({
     title: author.name,
     description,
-    alternates: { canonical: `/author/${slug}` },
-    openGraph: {
-      type: "profile",
-      url: `/author/${slug}`,
-      title: `${author.name} — ${SITE_NAME}`,
-      description,
-    },
-  };
+    path: `/author/${slug}`,
+    type: "profile",
+  });
 }
 
 export default async function AuthorPage({

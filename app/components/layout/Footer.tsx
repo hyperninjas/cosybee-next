@@ -27,6 +27,7 @@ const GET_STARTED_LINKS = [
     href: "/learn/is-solar-right-for-my-home",
   },
   { label: "About Us", href: "/learn/about-us" },
+  { label: "FAQs", href: "/faq" },
   { label: "Contact Support", href: "/contact" },
 ];
 

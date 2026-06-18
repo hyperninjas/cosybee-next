@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button, Input, TextField, toast } from "@heroui/react";
 import { subscribeNewsletter } from "@/app/lib/public-forms";
 import { getRecaptchaToken } from "@/app/lib/recaptcha";
+import { trackEvent } from "@/app/lib/analytics";
 
 /**
  * Newsletter sign-up band (single opt-in). Posts to the backend via the
@@ -28,6 +29,7 @@ export function NewsletterSignup() {
     setPending(false);
 
     if (result.ok) {
+      trackEvent("sign_up", { method: "newsletter" });
       toast.success("You're subscribed — thanks for joining!");
       setEmail("");
     } else {

@@ -9,25 +9,21 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 import illustration from "@/public/illustration-privacy-policy.svg";
 
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
   { name: "Privacy Policy", path: "/privacy" },
 ];
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
   description:
     "How EnergieBee collects, uses, and protects your personal data — clearly written, with full control over your own information.",
-  alternates: { canonical: "/privacy" },
-  robots: { index: true, follow: true },
-  openGraph: {
-    url: "/privacy",
-    title: "Privacy Policy — EnergieBee",
-    description:
-      "How we handle your data, with full control over your own information.",
-  },
-};
+  ogDescription:
+    "How we handle your data, with full control over your own information.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
@@ -41,7 +37,11 @@ export default function PrivacyPage() {
         title="Your Privacy Matters to Us"
         subtitle="We believe you should always know what data we collect, why we collect it, and how it's used, with full control over your own information."
         illustration={
-          <Image src={illustration} alt="" className="max-h-112.5 w-auto" />
+          <Image
+            src={illustration}
+            alt="Privacy policy illustration"
+            className="max-h-112.5 w-auto"
+          />
         }
       />
 
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             EnergieBee Limited is the data controller responsible for your
             personal data. Our registered office is:
           </p>
-          <p>4 Blackburn Road, Accrington, England, BB5 1HD</p>
+          <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
           <p>
             For privacy-related enquiries:{" "}
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 import Hero from "@/app/components/sections/heating/Hero";
 import AccurateIntelligence from "@/app/components/sections/heating/AccurateIntelligence";
 import UnderstandOptimise from "@/app/components/sections/heating/UnderstandOptimise";
@@ -11,10 +12,13 @@ import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Smart Heating Control",
   description:
     "Intelligent heating that learns your routines and adapts in real time. Zone-based heating, geofencing, and AI boiler tuning. Cut your heating bill up to 35%.",
+  ogDescription:
+    "Heating that learns your routines and adapts in real time. Stay comfortable, cut your bill up to 35%.",
+  path: "/heating",
   keywords: [
     "smart heating",
     "smart thermostat",
@@ -24,14 +28,7 @@ export const metadata: Metadata = {
     "tado alternative",
     "heat pump control",
   ],
-  alternates: { canonical: "/heating" },
-  openGraph: {
-    url: "/heating",
-    title: "Smart Heating Control — EnergieBee",
-    description:
-      "Heating that learns your routines and adapts in real time. Stay comfortable, cut your bill up to 35%.",
-  },
-};
+});
 
 export default function HeatingPage() {
   return (

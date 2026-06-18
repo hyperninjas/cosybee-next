@@ -7,6 +7,7 @@ import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/seo";
 import learnCover from "@/public/Cover/energiebee-learn-cover.png";
 
 const LEARN_DESCRIPTION =
@@ -34,17 +35,12 @@ export async function generateMetadata({
   // Browse pages are self-canonical; filtered/search views are shareable but
   // canonicalised to the clean hub and marked noindex (thin/duplicate).
   const canonical = !filtered && page > 1 ? `/learn?page=${page}` : "/learn";
-  return {
+  return pageMetadata({
     title: "Learn",
     description: LEARN_DESCRIPTION,
-    alternates: { canonical },
-    ...(filtered ? { robots: { index: false, follow: true } } : {}),
-    openGraph: {
-      url: canonical,
-      title: "Learn — EnergieBee",
-      description: LEARN_DESCRIPTION,
-    },
-  };
+    path: canonical,
+    index: !filtered,
+  });
 }
 
 export default async function LearnPage({

@@ -9,25 +9,21 @@ import illustration from "@/public/illustration-terms-conditions.svg";
 import Image from "next/image";
 
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
   { name: "Terms & Conditions", path: "/terms" },
 ];
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Terms & Conditions",
   description:
     "Everything you need to know before you begin: your rights, our responsibilities, and how EnergieBee works for you.",
-  alternates: { canonical: "/terms" },
-  robots: { index: true, follow: true },
-  openGraph: {
-    url: "/terms",
-    title: "Terms & Conditions — EnergieBee",
-    description:
-      "Your rights, our responsibilities, and how EnergieBee works for you.",
-  },
-};
+  ogDescription:
+    "Your rights, our responsibilities, and how EnergieBee works for you.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
@@ -41,7 +37,11 @@ export default function TermsPage() {
         title="Everything You Need to Know Before You Begin"
         subtitle="Understand your rights, our responsibilities, and how EnergieBee works for you, clearly written, no hidden surprises."
         illustration={
-          <Image src={illustration} alt="" className="max-h-90 w-auto" />
+          <Image
+            src={illustration}
+            alt="Terms and conditions illustration"
+            className="max-h-90 w-auto"
+          />
         }
       />
 
@@ -52,8 +52,8 @@ export default function TermsPage() {
             the products, services, mobile application, and website operated by
             EnergieBee Limited (&ldquo;EnergieBee&rdquo;, &ldquo;we&rdquo;,
             &ldquo;us&rdquo;, or &ldquo;our&rdquo;), a company registered in
-            England and Wales with its registered office at 6 Blackburn Road,
-            Accrington, England, BB5 1HD.
+            England and Wales with its registered office at UK Electronics,
+            Fitton St, Royton, Oldham, England, OL2 5JX.
           </p>
           <p>
             By purchasing an EnergieBee device, creating an account, or using

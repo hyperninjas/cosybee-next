@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 import HomeHero from "@/app/components/sections/home/HomeHero";
 import PerfectHarmony from "@/app/components/sections/home/PerfectHarmony";
 import HeatingSolutions from "@/app/components/sections/home/HeatingSolutions";
@@ -11,21 +12,16 @@ import { GENERAL_FAQ } from "@/app/lib/faq-data";
 import JsonLd from "@/app/components/JsonLd";
 import { softwareApplicationSchema } from "@/app/lib/structured-data";
 
-export const metadata: Metadata = {
-  // Use the layout's default title (no template) for the home page itself.
-  title: {
-    absolute: "EnergieBee — One App. Total Energy Clarity.",
-  },
+export const metadata: Metadata = pageMetadata({
+  // Use an absolute title (no brand template) for the home page itself.
+  title: "EnergieBee — One App. Total Energy Clarity.",
+  absoluteTitle: true,
   description:
     "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado — all from one app.",
-  alternates: { canonical: "/" },
-  openGraph: {
-    url: "/",
-    title: "EnergieBee — One App. Total Energy Clarity.",
-    description:
-      "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado.",
-  },
-};
+  ogDescription:
+    "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado.",
+  path: "/",
+});
 
 export default function Home() {
   return (

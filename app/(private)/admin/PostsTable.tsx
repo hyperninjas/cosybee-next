@@ -345,7 +345,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={row.imageUrl}
-                          alt=""
+                          alt={`Cover image for ${row.title}`}
                           className="hidden h-10 w-14 shrink-0 rounded-lg bg-default object-cover sm:block"
                         />
                         <div className="min-w-0">
