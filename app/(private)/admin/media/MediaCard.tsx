@@ -10,7 +10,7 @@ import {
   Tooltip,
   useOverlayState,
 } from "@heroui/react";
-import { deleteObject, type MediaItem } from "@/app/lib/storage";
+import { deleteLibraryMedia, type MediaItem } from "@/app/lib/storage";
 import {
   copyToClipboard,
   formatBytes,
@@ -48,6 +48,7 @@ export function MediaCard({
 }) {
   const uses = media.usages.length;
   const deleteOverlay = useOverlayState();
+  const thumbSrc = media.thumbnailUrl ?? (media.kind === "image" ? media.url : null);
 
   async function copyUrl() {
     if (!media.url) return;
@@ -69,16 +70,20 @@ export function MediaCard({
       }}
       className="group relative w-full cursor-pointer gap-0 overflow-hidden border border-border p-0 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      {/* Thumbnail */}
+      {/* Thumbnail — prefer the generated thumbnail/poster, fall back to the
+          original image, then the live video frame, then a kind icon. */}
       <div className="relative flex aspect-4/3 items-center justify-center overflow-hidden bg-background">
-        {media.kind === "image" && media.url ? (
+        {thumbSrc ? (
           <NextImage
-            src={media.url}
+            src={thumbSrc}
             alt={media.alt ?? media.name ?? ""}
             fill
             unoptimized
             sizes="(max-width: 640px) 50vw, 20vw"
             className="object-cover transition-transform group-hover:scale-[1.03]"
+            {...(media.blurDataUrl
+              ? { placeholder: "blur" as const, blurDataURL: media.blurDataUrl }
+              : {})}
           />
         ) : media.kind === "video" && media.url ? (
           <VideoThumb url={media.url} className="size-full object-cover" />
@@ -170,7 +175,7 @@ export function MediaCard({
         title={`Delete “${media.name ?? media.key}”?`}
         description="This permanently removes the file from storage. This cannot be undone."
         onConfirm={async () => {
-          await deleteObject(media.key);
+          await deleteLibraryMedia(media);
           onDeleted(media.id);
           toast.success("Media deleted");
         }}

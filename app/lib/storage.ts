@@ -7,6 +7,12 @@
 // Upload is always 3 steps: presign → upload to S3 → confirm.
 // Framework-agnostic — safe to call from any client component.
 
+import {
+  generateImageThumbnail,
+  generateVideoPoster,
+  kindFromMime,
+} from "./media-processing";
+
 const API =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.energiebee.com";
 
@@ -17,7 +23,9 @@ export type UploadContext =
   | "author-avatar"
   | "user-avatar"
   // The WordPress-style admin media library (mixed images / video / docs).
-  | "media-library";
+  | "media-library"
+  // Browser-generated thumbnails/posters for media-library items.
+  | "media-thumbnail";
 
 /**
  * Optional metadata sent to `/api/storage/confirm`. Populates the media
@@ -37,6 +45,11 @@ export interface ConfirmMetadata {
   height?: number;
   name?: string;
   folderId?: string | null;
+  // Browser-generated derivatives (Canvas / ffmpeg.wasm).
+  thumbnailKey?: string;
+  thumbnailUrl?: string;
+  blurDataUrl?: string;
+  durationMs?: number;
 }
 
 export interface PresignResponse {
@@ -109,39 +122,57 @@ export async function uploadFile(
   opts: UploadOptions = {},
   metadata: ConfirmMetadata = {},
 ): Promise<ConfirmResponse> {
-  // Browsers sometimes leave file.type empty — fall back so the presigned
-  // policy's exact Content-Type condition can still match.
-  const contentType = file.type || "application/octet-stream";
+  const key = await presignAndUpload(file, context, opts);
 
-  // 1) presign
-  const presign = await api<PresignResponse>("/api/storage/presign", {
-    method: "POST",
-    body: JSON.stringify({ context, filename: file.name, contentType }),
-  });
-
-  // 2) upload bytes straight to S3
-  await postToS3(presign.upload, file, contentType, opts);
-
-  // 3) auto-derive natural dimensions for images so the server doesn't have
-  // to fetch + decode the asset just to learn them. Only runs when the caller
-  // didn't supply explicit values.
+  // Auto-derive natural dimensions for images so the server doesn't have to
+  // fetch + decode the asset. Only when the caller didn't supply them.
   const dims =
     metadata.width == null && metadata.height == null && file.type.startsWith("image/")
       ? await readImageDimensions(file).catch(() => null)
       : null;
 
-  // 4) confirm → promotes out of pending/ and returns the live URL/key
+  return confirmObject(key, {
+    ...metadata,
+    width: metadata.width ?? dims?.width,
+    height: metadata.height ?? dims?.height,
+  });
+}
+
+/** presign → POST the bytes to S3. Returns the pending object key. */
+async function presignAndUpload(
+  file: File,
+  context: UploadContext,
+  opts: UploadOptions = {},
+): Promise<string> {
+  // Browsers sometimes leave type empty — fall back so the presigned policy's
+  // exact Content-Type condition can still match.
+  const contentType = file.type || "application/octet-stream";
+  const presign = await api<PresignResponse>("/api/storage/presign", {
+    method: "POST",
+    body: JSON.stringify({ context, filename: file.name, contentType }),
+  });
+  await postToS3(presign.upload, file, contentType, opts);
+  return presign.key;
+}
+
+/** confirm → promote out of pending/ and record the registry row. */
+function confirmObject(key: string, metadata: ConfirmMetadata): Promise<ConfirmResponse> {
   return api<ConfirmResponse>("/api/storage/confirm", {
     method: "POST",
-    body: JSON.stringify({
-      key: presign.key,
-      ...stripUndefined({
-        ...metadata,
-        width: metadata.width ?? dims?.width,
-        height: metadata.height ?? dims?.height,
-      }),
-    }),
+    body: JSON.stringify({ key, ...stripUndefined({ ...metadata }) }),
   });
+}
+
+/**
+ * Upload a browser-generated thumbnail/poster blob into the `media-thumbnail`
+ * context and return its stable key + public URL (to attach to the parent
+ * media row). These never appear in the gallery.
+ */
+async function uploadThumbnail(blob: Blob): Promise<{ key: string; url: string | null }> {
+  const file = new File([blob], "thumb.webp", { type: blob.type || "image/webp" });
+  const key = await presignAndUpload(file, "media-thumbnail");
+  const confirmed = await confirmObject(key, {});
+  return { key: confirmed.key, url: confirmed.fileUrl };
 }
 
 /** Drop keys whose value is undefined so the JSON body stays clean. */
@@ -279,11 +310,16 @@ export const LIMITS: Record<
     ],
     maxBytes: 500 * 1024 * 1024,
   },
+  "media-thumbnail": {
+    types: ["image/webp", "image/jpeg", "image/png"],
+    maxBytes: 2 * 1024 * 1024,
+  },
 };
 
 // Per-kind caps for the media library, matching the backend `media-library`
-// context (storage.contexts.ts): default 20 MB, video 500 MB.
-const LIBRARY_VIDEO_MAX = 500 * 1024 * 1024;
+// context (storage.contexts.ts): default 20 MB; video 100 MB (the browser
+// transcodes it client-side — ffmpeg.wasm can't handle much more).
+const LIBRARY_VIDEO_MAX = 100 * 1024 * 1024;
 const LIBRARY_DEFAULT_MAX = 20 * 1024 * 1024;
 
 /**
@@ -292,10 +328,13 @@ const LIBRARY_DEFAULT_MAX = 20 * 1024 * 1024;
  * remain the source of truth — this just fails fast with a friendly message.
  */
 export function validateLibraryFile(file: File): string | null {
-  if (!LIMITS["media-library"].types.includes(file.type)) {
-    return `Unsupported type: ${file.type || "unknown"}. Allowed: images, MP4/WebM video, PDF, DOC/DOCX.`;
+  const isVideo = file.type.startsWith("video/");
+  // Any video is allowed as INPUT — it's transcoded to a streamable MP4 in the
+  // browser before upload. Other kinds must match the allowlist exactly.
+  if (!isVideo && !LIMITS["media-library"].types.includes(file.type)) {
+    return `Unsupported type: ${file.type || "unknown"}. Allowed: images, video, PDF, DOC/DOCX.`;
   }
-  const cap = file.type.startsWith("video/") ? LIBRARY_VIDEO_MAX : LIBRARY_DEFAULT_MAX;
+  const cap = isVideo ? LIBRARY_VIDEO_MAX : LIBRARY_DEFAULT_MAX;
   if (file.size > cap) {
     return `File too large (max ${Math.round(cap / 1024 / 1024)}MB for this type).`;
   }
@@ -435,6 +474,10 @@ export interface UpdateMediaInput {
   tagIds?: string[];
   /** New tag names to create-or-reuse and link; merged with tagIds. */
   tagNames?: string[];
+  /** Replace the thumbnail/poster. */
+  thumbnailKey?: string | null;
+  thumbnailUrl?: string | null;
+  blurDataUrl?: string | null;
 }
 
 /** Edit a media item's editorial metadata / folder / tags. */
@@ -442,6 +485,21 @@ export function updateMedia(id: string, patch: UpdateMediaInput): Promise<MediaI
   return api<MediaItem>(`/api/storage/media/${id}`, {
     method: "PATCH",
     body: JSON.stringify(patch),
+  });
+}
+
+/**
+ * Replace a media item's thumbnail/poster with a user-supplied image: resize it
+ * to a WebP thumbnail + blur (Canvas), upload it, and patch the media row.
+ * Returns the updated item. (Used for "change video thumbnail".)
+ */
+export async function replaceMediaThumbnail(id: string, image: File): Promise<MediaItem> {
+  const d = await generateImageThumbnail(image);
+  const thumb = await uploadThumbnail(d.thumbBlob);
+  return updateMedia(id, {
+    thumbnailKey: thumb.key,
+    thumbnailUrl: thumb.url,
+    blurDataUrl: d.blurDataUrl,
   });
 }
 
@@ -499,24 +557,84 @@ export interface LibraryUploadMeta {
   title?: string;
   caption?: string;
   credit?: string;
+  // Pre-generated derivatives supplied by the caller (e.g. the video transcode
+  // path passes a poster thumbnail + duration). Images generate their own.
+  thumbnailKey?: string;
+  thumbnailUrl?: string;
+  blurDataUrl?: string;
+  durationMs?: number;
 }
 
-export function uploadLibraryFile(
+export async function uploadLibraryFile(
   file: File,
   meta: LibraryUploadMeta = {},
   opts: UploadOptions = {},
 ): Promise<ConfirmResponse> {
-  return uploadFile(file, "media-library", opts, {
-    // Auto-fill the display name from the filename (extension stripped) so a
-    // bulk upload still gets readable names; the rest stays blank for the admin
-    // to fill in later via the media detail editor.
+  // 1) Upload the original (this drives the progress bar).
+  const key = await presignAndUpload(file, "media-library", opts);
+
+  // 2) Derivatives — generated in the browser (Canvas). Images get a WebP
+  //    thumbnail + blur LQIP; videos get a captured poster frame + duration.
+  //    Best-effort: a failure just means no thumbnail.
+  let derived: Pick<
+    ConfirmMetadata,
+    "thumbnailKey" | "thumbnailUrl" | "blurDataUrl" | "width" | "height" | "durationMs"
+  > = {};
+  const kind = kindFromMime(file.type);
+  try {
+    if (kind === "image") {
+      const d = await generateImageThumbnail(file);
+      const thumb = await uploadThumbnail(d.thumbBlob);
+      derived = {
+        width: d.width,
+        height: d.height,
+        blurDataUrl: d.blurDataUrl,
+        thumbnailKey: thumb.key,
+        thumbnailUrl: thumb.url ?? undefined,
+      };
+    } else if (kind === "video") {
+      const v = await generateVideoPoster(file);
+      const thumb = await uploadThumbnail(v.posterBlob);
+      derived = {
+        width: v.width,
+        height: v.height,
+        durationMs: v.durationMs,
+        blurDataUrl: v.blurDataUrl,
+        thumbnailKey: thumb.key,
+        thumbnailUrl: thumb.url ?? undefined,
+      };
+    }
+  } catch {
+    /* upload the original without a generated thumbnail */
+  }
+
+  // 3) Confirm the original with name/folder + derivatives.
+  return confirmObject(key, {
     name: meta.name ?? nameFromFilename(file.name),
     folderId: meta.folderId ?? null,
     alt: meta.alt,
     title: meta.title,
     caption: meta.caption,
     credit: meta.credit,
+    thumbnailKey: meta.thumbnailKey,
+    thumbnailUrl: meta.thumbnailUrl,
+    blurDataUrl: meta.blurDataUrl,
+    durationMs: meta.durationMs,
+    ...derived,
   });
+}
+
+/**
+ * Delete a library item and its generated thumbnail (best-effort on the thumb).
+ */
+export async function deleteLibraryMedia(media: {
+  key: string;
+  thumbnailUrl?: string | null;
+}): Promise<void> {
+  await deleteObject(media.key);
+  if (media.thumbnailUrl) {
+    await deleteObject(keyFromUrl(media.thumbnailUrl)).catch(() => {});
+  }
 }
 
 /** Filename → display name: drop the extension, leave the rest as-is. */

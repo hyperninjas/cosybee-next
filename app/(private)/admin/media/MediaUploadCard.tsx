@@ -11,6 +11,8 @@ export interface ActiveUpload {
   error?: string;
   size: number;
   type: string;
+  /** Current stage: in-browser video transcode, or the S3 upload. */
+  phase?: "converting" | "uploading";
   /** Upload + confirm finished; the card is dropped when the refetch lands. */
   done?: boolean;
 }
@@ -45,6 +47,9 @@ function stripExt(name: string): string {
 export function MediaUploadCard({ upload }: { upload: ActiveUpload }) {
   const kind = kindFromMime(upload.type);
   const failed = Boolean(upload.error);
+  // "Compressing" = in-browser video transcode; "Uploading" = sending to S3.
+  const phaseLabel =
+    upload.phase === "converting" ? "Compressing" : "Uploading";
 
   return (
     <Card className="relative w-full gap-0 overflow-hidden border border-border p-0">
@@ -57,21 +62,33 @@ export function MediaUploadCard({ upload }: { upload: ActiveUpload }) {
             </span>
           </div>
         ) : (
-          <ProgressCircle
-            value={upload.progress}
-            aria-label={`Uploading ${upload.name}`}
-            size="lg"
-            color="accent"
-            className="relative"
-          >
-            <ProgressCircle.Track>
-              <ProgressCircle.TrackCircle />
-              <ProgressCircle.FillCircle />
-            </ProgressCircle.Track>
-            {/* <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground">
+          <div className="flex flex-col items-center gap-2">
+            <ProgressCircle
+              value={upload.progress}
+              aria-label={`${phaseLabel} ${upload.name}`}
+              size="lg"
+              color="accent"
+              className="relative"
+            >
+              <ProgressCircle.Track>
+                <ProgressCircle.TrackCircle />
+                <ProgressCircle.FillCircle />
+              </ProgressCircle.Track>
+            </ProgressCircle>
+            <p className="flex items-center justify-center text-sm font-semibold text-foreground">
               {upload.progress}%
-            </span> */}
-          </ProgressCircle>
+            </p>
+            {/* Make the current stage obvious: compressing vs uploading. */}
+            <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              {upload.phase === "converting" && (
+                <span
+                  className="size-1.5 animate-pulse rounded-full bg-accent"
+                  aria-hidden
+                />
+              )}
+              {phaseLabel}…
+            </span>
+          </div>
         )}
       </div>
 
@@ -83,7 +100,7 @@ export function MediaUploadCard({ upload }: { upload: ActiveUpload }) {
         <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted">
           <KindIcon kind={kind} className="size-3.5 shrink-0" />
           <span className="truncate">
-            {failed ? upload.error : `Uploading · ${formatBytes(upload.size)}`}
+            {failed ? upload.error : formatBytes(upload.size)}
           </span>
         </p>
       </Card.Content>

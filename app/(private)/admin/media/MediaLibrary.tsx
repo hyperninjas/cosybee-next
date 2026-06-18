@@ -23,6 +23,7 @@ import {
   type MediaListResult,
   type MediaTagCount,
 } from "@/app/lib/storage";
+import { isTranscodableVideo, transcodeToMp4 } from "@/app/lib/media-video";
 import type { Tag } from "@/app/lib/article-types";
 import { FolderSidebar, type FolderSelection } from "./FolderSidebar";
 import { MediaDetailModal } from "./MediaDetailModal";
@@ -211,50 +212,64 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
     const list = Array.from(files);
     if (list.length === 0) return;
 
+    // Validate + seed all cards upfront so the whole queue is visible.
+    const queue: { file: File; id: string }[] = [];
+    list.forEach((file, i) => {
+      const problem = validateLibraryFile(file);
+      if (problem) {
+        toast.danger(`${file.name}: ${problem}`);
+        return;
+      }
+      const id = `${Date.now()}-${i}-${file.name}`;
+      setUploads((u) => [
+        ...u,
+        {
+          id,
+          name: file.name,
+          progress: 0,
+          size: file.size,
+          type: file.type,
+          phase: isTranscodableVideo(file) ? "converting" : "uploading",
+        },
+      ]);
+      queue.push({ file, id });
+    });
+
+    const setProgress = (id: string, progress: number) =>
+      setUploads((u) => u.map((x) => (x.id === id ? { ...x, progress } : x)));
+
+    // Process sequentially — ffmpeg.wasm is a single shared instance, so video
+    // transcodes can't overlap.
     let completed = 0;
-    await Promise.all(
-      list.map(async (file, i) => {
-        const id = `${Date.now()}-${i}-${file.name}`;
-        const problem = validateLibraryFile(file);
-        if (problem) {
-          toast.danger(`${file.name}: ${problem}`);
-          return;
-        }
-        setUploads((u) => [
-          ...u,
-          { id, name: file.name, progress: 0, size: file.size, type: file.type },
-        ]);
-        try {
-          await uploadLibraryFile(
-            file,
-            { folderId: folderForUpload },
-            {
-              onProgress: (p) =>
-                setUploads((u) =>
-                  u.map((x) => (x.id === id ? { ...x, progress: p } : x)),
-                ),
-            },
-          );
-          completed += 1;
-          // Mark done (full ring) but keep the card — it's removed atomically
-          // when the post-upload refetch lands (see the fetch effect), so the
-          // placeholder swaps for the real card without a flicker.
+    for (const { file, id } of queue) {
+      try {
+        let toUpload = file;
+        // Videos are transcoded to a streamable MP4 in the browser first.
+        if (isTranscodableVideo(file)) {
+          toUpload = await transcodeToMp4(file, (p) => setProgress(id, p));
           setUploads((u) =>
-            u.map((x) => (x.id === id ? { ...x, progress: 100, done: true } : x)),
+            u.map((x) => (x.id === id ? { ...x, phase: "uploading", progress: 0 } : x)),
           );
-        } catch (e) {
-          setUploads((u) =>
-            u.map((x) =>
-              x.id === id ? { ...x, error: (e as Error).message } : x,
-            ),
-          );
-          toast.danger(
-            `${file.name}: ${(e as Error).message || "upload failed"}`,
-          );
-          return;
         }
-      }),
-    );
+        await uploadLibraryFile(
+          toUpload,
+          { folderId: folderForUpload },
+          { onProgress: (p) => setProgress(id, p) },
+        );
+        completed += 1;
+        // Mark done (full ring) but keep the card — it's removed atomically when
+        // the post-upload refetch lands, so the placeholder swaps for the real
+        // card without a flicker.
+        setUploads((u) =>
+          u.map((x) => (x.id === id ? { ...x, progress: 100, done: true } : x)),
+        );
+      } catch (e) {
+        setUploads((u) =>
+          u.map((x) => (x.id === id ? { ...x, error: (e as Error).message } : x)),
+        );
+        toast.danger(`${file.name}: ${(e as Error).message || "upload failed"}`);
+      }
+    }
 
     if (completed > 0) {
       toast.success(`Uploaded ${completed} file${completed === 1 ? "" : "s"}`);
@@ -328,7 +343,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             type="file"
             multiple
             hidden
-            accept="image/*,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={(e) => {
               if (e.target.files) handleFiles(e.target.files);
               e.target.value = "";

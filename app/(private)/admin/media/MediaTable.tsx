@@ -12,7 +12,7 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import {
-  deleteObject,
+  deleteLibraryMedia,
   type MediaFolder,
   type MediaItem,
 } from "@/app/lib/storage";
@@ -43,11 +43,12 @@ function CopyIcon({ className }: { className?: string }) {
 }
 
 function Thumb({ media }: { media: MediaItem }) {
+  const thumb = media.thumbnailUrl ?? (media.kind === "image" ? media.url : null);
   return (
     <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background">
-      {media.kind === "image" && media.url ? (
+      {thumb ? (
         <NextImage
-          src={media.url}
+          src={thumb}
           alt={media.alt ?? media.name ?? ""}
           fill
           unoptimized
@@ -109,8 +110,8 @@ export function MediaTable({
             <Table.Header>
               <Table.Column isRowHeader>File</Table.Column>
               <Table.Column>Type</Table.Column>
-              <Table.Column className="min-w-40">Alt text</Table.Column>
-              <Table.Column>Size</Table.Column>
+              <Table.Column className="min-w-25">Alt text</Table.Column>
+              <Table.Column className="min-w-25">Size</Table.Column>
               <Table.Column>Folder</Table.Column>
               <Table.Column>Tags</Table.Column>
               <Table.Column className="text-center">Used</Table.Column>
@@ -241,7 +242,7 @@ export function MediaTable({
         description="This permanently removes the file from storage. This cannot be undone."
         onConfirm={async () => {
           if (!deleting) return;
-          await deleteObject(deleting.key);
+          await deleteLibraryMedia(deleting);
           onDeleted(deleting.id);
           toast.success("Media deleted");
         }}

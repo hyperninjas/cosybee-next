@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Button,
   Input,
@@ -13,7 +13,8 @@ import {
 } from "@heroui/react";
 import NextImage from "next/image";
 import {
-  deleteObject,
+  deleteLibraryMedia,
+  replaceMediaThumbnail,
   updateMedia,
   type MediaFolder,
   type MediaItem,
@@ -53,6 +54,7 @@ function Preview({ media }: { media: MediaItem }) {
     return (
       <video
         src={media.url}
+        poster={media.thumbnailUrl ?? undefined}
         controls
         className="aspect-video w-full rounded-lg border border-border bg-black"
       />
@@ -110,6 +112,8 @@ function DetailContent({
   const [newTags, setNewTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [replacingThumb, setReplacingThumb] = useState(false);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
 
   const deleteOverlay = useOverlayState();
 
@@ -135,6 +139,19 @@ function DetailContent({
     setNewTags((prev) =>
       prev.some((n) => n.toLowerCase() === value.toLowerCase()) ? prev : [...prev, value],
     );
+  }
+
+  async function handleReplaceThumb(file: File) {
+    setReplacingThumb(true);
+    try {
+      const updated = await replaceMediaThumbnail(media.id, file);
+      onSaved(updated);
+      toast.success("Thumbnail updated");
+    } catch (e) {
+      toast.danger((e as Error).message || "Could not update thumbnail");
+    } finally {
+      setReplacingThumb(false);
+    }
   }
 
   async function handleSave() {
@@ -173,6 +190,34 @@ function DetailContent({
       </Modal.Header>
       <Modal.Body className="max-h-[72vh] space-y-5 overflow-y-auto">
         <Preview media={media} />
+
+        {/* Replace the poster/thumbnail (mainly for video — pick a custom image). */}
+        {media.kind === "video" && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2">
+            <span className="text-xs text-muted">
+              Custom poster image for this video.
+            </span>
+            <input
+              ref={thumbInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              hidden
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleReplaceThumb(f);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              isPending={replacingThumb}
+              onPress={() => thumbInputRef.current?.click()}
+            >
+              Replace thumbnail
+            </Button>
+          </div>
+        )}
 
         {/* Read-only facts */}
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
@@ -438,7 +483,7 @@ function DetailContent({
         title={`Delete “${media.name ?? media.key}”?`}
         description="This permanently removes the file from storage. This cannot be undone."
         onConfirm={async () => {
-          await deleteObject(media.key);
+          await deleteLibraryMedia(media);
           onDeleted(media.id);
           onClose();
           toast.success("Media deleted");
