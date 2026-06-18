@@ -356,7 +356,20 @@ export default function PostForm({
   }
 
   return (
-    <form action={formAction}>
+    <form
+      action={formAction}
+      onSubmit={(e) => {
+        // The BlockNote toolbar renders <button>s that portal INSIDE this form
+        // (into `.bn-container`). A <button> with no explicit type defaults to
+        // type="submit", so clicking e.g. Bold would submit the post instead of
+        // formatting. Swallow any submit whose submitter lives in the editor;
+        // real saves come from the ActionBar, which is outside `.bn-container`.
+        const submitter = (e.nativeEvent as SubmitEvent).submitter;
+        if (submitter instanceof Element && submitter.closest(".bn-container")) {
+          e.preventDefault();
+        }
+      }}
+    >
       {/* Hidden inputs — every editable field needs one so a stable
           field set reaches the server action regardless of what the
           drawer/cards happen to be showing. */}

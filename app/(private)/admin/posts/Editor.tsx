@@ -7,6 +7,10 @@ import {
   useCreateBlockNote,
   SuggestionMenuController,
   getDefaultReactSlashMenuItems,
+  FormattingToolbar,
+  FormattingToolbarController,
+  TextAlignButton,
+  getFormattingToolbarItems,
   type DefaultReactSuggestionItem,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -41,7 +45,15 @@ type Props = {
 /** Small image/library icon for the slash menu entry. */
 function MediaIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <circle cx="9" cy="9" r="2" />
       <path d="m21 15-3.5-3.5L9 20" />
@@ -62,16 +74,46 @@ function blockForMedia(media: MediaItem): SchemaPartialBlock {
   const url = media.url ?? "";
   const caption = media.alt ?? "";
   if (media.kind === "video") {
-    return { type: "video", props: { url, caption, name: media.name ?? "" } } as SchemaPartialBlock;
+    return {
+      type: "video",
+      props: { url, caption, name: media.name ?? "" },
+    } as SchemaPartialBlock;
   }
   if (media.kind === "image") {
-    return { type: "image", props: { url, caption, name: media.name ?? "" } } as SchemaPartialBlock;
+    return {
+      type: "image",
+      props: { url, caption, name: media.name ?? "" },
+    } as SchemaPartialBlock;
   }
   // pdf / document → a downloadable file block.
   return {
     type: "file",
     props: { url, caption, name: media.name ?? media.key },
   } as SchemaPartialBlock;
+}
+
+/**
+ * Formatting toolbar with an extra justify button (the default omits it even
+ * though the schema + CSS support it), inserted right after right-align.
+ *
+ * Used via FormattingToolbarController, with `formattingToolbar={false}` on
+ * BlockNoteView so this REPLACES the built-in toolbar rather than stacking a
+ * second one over it (two toolbars fight over focus/position and break clicks).
+ *
+ * `"use no memo"` is a defensive opt-out from the React Compiler
+ * (`compilationMode: "all"`) for this app-level render component — same reason
+ * as `blockForMedia` elsewhere in this file.
+ */
+function FormattingToolbarWithJustify() {
+  "use no memo";
+  const items = [...getFormattingToolbarItems()];
+  const justify = (
+    <TextAlignButton key="textAlignJustifyButton" textAlignment="justify" />
+  );
+  const rightIdx = items.findIndex((item) => item.key === "textAlignRightButton");
+  if (rightIdx >= 0) items.splice(rightIdx + 1, 0, justify);
+  else items.push(justify);
+  return <FormattingToolbar>{items}</FormattingToolbar>;
 }
 
 /**
@@ -129,12 +171,17 @@ export default function Editor({ initialContent, onChange }: Props) {
 
   function handlePick(media: MediaItem) {
     const block = blockForMedia(media);
-    const refId = insertAfterRef.current ?? editor.getTextCursorPosition().block.id;
+    const refId =
+      insertAfterRef.current ?? editor.getTextCursorPosition().block.id;
     editor.insertBlocks([block], refId, "after");
     // The slash trigger leaves an empty paragraph — drop it so the inserted
     // block takes its place cleanly.
     const ref = editor.getBlock(refId);
-    if (ref && ref.type === "paragraph" && (ref.content as unknown[]).length === 0) {
+    if (
+      ref &&
+      ref.type === "paragraph" &&
+      (ref.content as unknown[]).length === 0
+    ) {
       editor.removeBlocks([refId]);
     }
     insertAfterRef.current = null;
@@ -147,6 +194,11 @@ export default function Editor({ initialContent, onChange }: Props) {
         theme="light"
         onChange={() => onChange(editor.document as unknown as PartialBlock[])}
         slashMenu={false}
+        // Disable the built-in formatting toolbar — we render our own
+        // (with a justify button) via FormattingToolbarController below.
+        // Without this, BOTH toolbars mount and fight over focus/position,
+        // which blurs the editor on click and closes the toolbar.
+        formattingToolbar={false}
       >
         <SuggestionMenuController
           triggerCharacter="/"
@@ -160,6 +212,11 @@ export default function Editor({ initialContent, onChange }: Props) {
               query,
             )
           }
+        />
+        {/* Adds a justify button alongside the default left/center/right.
+            Component is React-Compiler-exempt (see its `"use no memo"`). */}
+        <FormattingToolbarController
+          formattingToolbar={FormattingToolbarWithJustify}
         />
       </BlockNoteView>
 

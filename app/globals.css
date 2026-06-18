@@ -301,6 +301,25 @@
 .post-editor .bn-container {
   background: transparent;
 }
+/* Text alignment. BlockNote applies a `data-text-alignment` attribute in the
+   editor and relies on CSS to render it — but those rules ship in
+   @blocknote/core/style.css, which we don't load (the editor imports only the
+   mantine theme stylesheet, and that omits them). Re-add them here, scoped to
+   the editor, so center / right / justify actually render. (The public article
+   needs no equivalent: the lossy HTML export emits inline `text-align`.)
+   Note: `justify` only visibly differs on text that wraps to multiple lines. */
+.post-editor [data-text-alignment="center"] {
+  text-align: center;
+  justify-content: center;
+}
+.post-editor [data-text-alignment="right"] {
+  text-align: right;
+  justify-content: flex-end;
+}
+.post-editor [data-text-alignment="justify"] {
+  text-align: justify;
+  justify-content: flex-start;
+}
 /* Multi-column blocks: make the resizable seam discoverable. BlockNote renders
    no handle element — it only shows a faint inline `box-shadow 4px 0 0 #ccc`
    within a ~20px hover zone at each column edge. We draw a persistent divider
