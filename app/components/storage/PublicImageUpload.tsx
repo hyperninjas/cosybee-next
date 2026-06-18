@@ -3,7 +3,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUpload } from "@/app/hooks/useUpload";
-import { validate, LIMITS } from "@/app/lib/storage";
+import {
+  validate,
+  validateLibraryFile,
+  LIMITS,
+  type MediaItem,
+} from "@/app/lib/storage";
+import { MediaPickerModal } from "@/app/(private)/admin/media/MediaPickerModal";
 
 /**
  * Modern image upload with drag-and-drop support.
@@ -19,6 +25,7 @@ export function PublicImageUpload({
   caption,
   credit,
   previewHeight = "h-48",
+  library = false,
 }: {
   context:
     | "blog-cover"
@@ -29,6 +36,10 @@ export function PublicImageUpload({
   onChange: (url: string | null) => void;
   /** Block uploads (e.g. unverified email — the backend would 403 anyway). */
   disabled?: boolean;
+  /** Route the upload into the managed media library so it shows up in the
+   *  gallery, gets a thumbnail, and is usage-tracked against the post. The
+   *  `context` is then used only for the file-type allowlist + size label. */
+  library?: boolean;
   /** Tailwind height class for the (non-avatar) preview image. Defaults to
    *  `h-48`; pass e.g. `h-56`/`h-64` for a taller preview. Avatars ignore this
    *  (they render fixed square). */
@@ -41,11 +52,26 @@ export function PublicImageUpload({
   caption?: string;
   credit?: string;
 }) {
-  const { upload, status, progress, error, reset } = useUpload(context);
+  const { upload, status, progress, error, reset } = useUpload(context, {
+    library,
+  });
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Pick an existing image from the media library instead of uploading a new
+  // one (library mode only). The chosen item's public URL becomes the value.
+  const handleLibraryPick = useCallback(
+    (media: MediaItem) => {
+      if (!media.url) return;
+      setClientError(null);
+      setLocalPreview(null);
+      onChange(media.url);
+    },
+    [onChange],
+  );
 
   // Revoke object URL on cleanup
   useEffect(
@@ -57,7 +83,7 @@ export function PublicImageUpload({
 
   const handleFile = useCallback(
     async (file: File) => {
-      const problem = validate(file, context);
+      const problem = library ? validateLibraryFile(file) : validate(file, context);
       if (problem) {
         setClientError(problem);
         return;
@@ -71,7 +97,7 @@ export function PublicImageUpload({
         setLocalPreview(null);
       }
     },
-    [context, upload, onChange, alt, title, caption, credit],
+    [context, library, upload, onChange, alt, title, caption, credit],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,8 +134,22 @@ export function PublicImageUpload({
 
   const shown = localPreview ?? value;
   const isUploading = status === "uploading";
-  const maxMB = LIMITS[context].maxBytes / 1024 / 1024;
+  // In library mode images are capped at 20MB (the library's per-image cap),
+  // otherwise the context's own ceiling applies.
+  const maxMB = library ? 20 : LIMITS[context].maxBytes / 1024 / 1024;
   const isAvatar = context === "user-avatar";
+
+  // Rendered in both the preview and empty states (library mode only) so the
+  // modal is mounted regardless of which branch returns.
+  const libraryPicker = library ? (
+    <MediaPickerModal
+      isOpen={pickerOpen}
+      onOpenChange={setPickerOpen}
+      onSelect={handleLibraryPick}
+      accept="image"
+      heading="Choose an image from your library"
+    />
+  ) : null;
 
   // If we have an image, show the preview
   if (shown) {
@@ -143,6 +183,16 @@ export function PublicImageUpload({
               >
                 Replace
               </button>
+              {library && (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => setPickerOpen(true)}
+                  className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-[#F5F5F5] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Library
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleRemove}
@@ -182,6 +232,7 @@ export function PublicImageUpload({
             {clientError ?? error}
           </p>
         )}
+        {libraryPicker}
       </div>
     );
   }
@@ -265,6 +316,31 @@ export function PublicImageUpload({
         )}
       </div>
 
+      {/* Reuse an existing library image instead of uploading a new one. */}
+      {library && !isUploading && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setPickerOpen(true)}
+          className="flex w-full items-center justify-center gap-1.5 rounded-3xl border border-border bg-surface px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-4"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.5-3.5L9 20" />
+          </svg>
+          Choose from media library
+        </button>
+      )}
+
       <input
         ref={inputRef}
         type="file"
@@ -279,6 +355,7 @@ export function PublicImageUpload({
           {clientError ?? error}
         </p>
       )}
+      {libraryPicker}
     </div>
   );
 }

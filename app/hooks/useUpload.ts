@@ -3,16 +3,28 @@
 import { useCallback, useRef, useState } from "react";
 import {
   uploadFile,
+  uploadLibraryFile,
   StorageError,
   type ConfirmMetadata,
   type ConfirmResponse,
+  type LibraryUploadMeta,
   type UploadContext,
 } from "@/app/lib/storage";
 import { handleAuthError } from "@/app/lib/api-error";
 
 type Status = "idle" | "uploading" | "done" | "error";
 
-export function useUpload(context: UploadContext) {
+/**
+ * @param options.library  Route the upload through the managed media library
+ *   (`media-library` context) instead of the single-purpose `context`. The file
+ *   then shows up in the admin gallery, gets a generated thumbnail, and is
+ *   usage-tracked against the post — while still returning the same public URL.
+ */
+export function useUpload(
+  context: UploadContext,
+  options: { library?: boolean } = {},
+) {
+  const { library = false } = options;
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -25,12 +37,17 @@ export function useUpload(context: UploadContext) {
       setProgress(0);
       setError(null);
       try {
-        const result = await uploadFile(
-          file,
-          context,
-          { onProgress: setProgress, signal: abortRef.current.signal },
-          metadata,
-        );
+        const transfer = {
+          onProgress: setProgress,
+          signal: abortRef.current.signal,
+        };
+        const result = library
+          ? await uploadLibraryFile(
+              file,
+              (metadata ?? {}) as LibraryUploadMeta,
+              transfer,
+            )
+          : await uploadFile(file, context, transfer, metadata);
         setStatus("done");
         return result;
       } catch (e) {
@@ -44,7 +61,7 @@ export function useUpload(context: UploadContext) {
         throw e;
       }
     },
-    [context],
+    [context, library],
   );
 
   const cancel = useCallback(() => abortRef.current?.abort(), []);

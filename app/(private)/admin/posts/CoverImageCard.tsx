@@ -38,6 +38,7 @@ export function CoverImageCard({
       <Card.Content className="space-y-3">
         <PublicImageUpload
           context="blog-cover"
+          library
           value={coverUrl || null}
           onChange={(url) => setCoverUrl(url ?? "")}
           alt={coverImageAlt || title}

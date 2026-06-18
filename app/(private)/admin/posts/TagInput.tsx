@@ -30,10 +30,13 @@ export default function TagInput({
   name,
   initial,
   suggestions = [],
+  onChange,
 }: {
   name: string;
   initial: string[];
   suggestions?: string[];
+  /** Notified with the new tag list whenever it changes (for dirty-tracking). */
+  onChange?: (tags: string[]) => void;
 }) {
   const [tags, setTags] = useState<string[]>(initial);
   const [draft, setDraft] = useState("");
@@ -49,12 +52,16 @@ export default function TagInput({
     if (!tag) return;
     const exists = tags.some((t) => t.toLowerCase() === tag.toLowerCase());
     if (exists || tags.length >= MAX_TAGS) return;
-    setTags([...tags, tag]);
+    const next = [...tags, tag];
+    setTags(next);
     setDraft("");
+    onChange?.(next);
   }
 
   function removeAt(i: number) {
-    setTags(tags.filter((_, j) => j !== i));
+    const next = tags.filter((_, j) => j !== i);
+    setTags(next);
+    onChange?.(next);
   }
 
   // Build the dropdown items: matching suggestions filtered against the

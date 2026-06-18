@@ -6,6 +6,7 @@ import { Alert, Spinner } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "@/app/(private)/admin/actions";
 import { initialSaveState } from "@/app/(private)/admin/lib/form-state";
+import { useUnsavedChangesWarning } from "@/app/hooks/useUnsavedChangesWarning";
 import { slugify } from "@/app/lib/slug";
 import {
   PLACEHOLDER_COVER,
@@ -194,7 +195,10 @@ export default function PostForm({
   authors = [],
   internalRoutes = [],
 }: Props) {
-  const [state, formAction] = useActionState(savePost, initialSaveState);
+  const [state, formAction, isPending] = useActionState(
+    savePost,
+    initialSaveState,
+  );
   const errors = state?.fieldErrors ?? {};
   const initialBlocks = parseInitialBlocks(post?.contentJson);
 
@@ -225,6 +229,12 @@ export default function PostForm({
   const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
   const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
   const blogCategories = categories.filter((c) => c.blog === blog);
+
+  // TagInput owns the canonical tag state (+ hidden input); this mirror exists
+  // only so tag edits register in the unsaved-changes snapshot below.
+  const [tagNames, setTagNames] = useState<string[]>(
+    post?.tags?.map((t) => t.name) ?? [],
+  );
 
   // ── Cover image ─────────────────────────────────────────────────────
   // Treat the listing placeholder as "no cover" so the editor shows an empty
@@ -289,6 +299,52 @@ export default function PostForm({
     [blocks],
   );
 
+  // Warn before leaving with unsaved edits. We snapshot every controlled field
+  // (+ the editor content) and compare against the first render's snapshot;
+  // any difference means the form is dirty. Disabled while a save is in flight
+  // so the post-save redirect isn't blocked. (Tag edits, owned by TagInput's
+  // own state, aren't covered by this snapshot.)
+  const snapshot = JSON.stringify({
+    title,
+    description,
+    lede,
+    blog,
+    slug,
+    slugTouched,
+    status,
+    authorId,
+    authorName,
+    authorAvatarUrl,
+    categoryId,
+    categoryName,
+    coverUrl,
+    coverImageAlt,
+    coverImageTitle,
+    coverImageCaption,
+    coverImageCredit,
+    authorDate,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    ogImageAlt,
+    canonicalUrl,
+    noindex,
+    publishedAt,
+    featured,
+    carouselIntro,
+    carouselBody,
+    ctaLabel,
+    ctaHref,
+    ctaExternal,
+    ctaEnabled,
+    tags: tagNames,
+    blocks,
+  });
+  // Capture the first render's snapshot as the baseline (lazy state init runs
+  // once); reading state during render is allowed, reading a ref isn't.
+  const [initialSnapshot] = useState(snapshot);
+  useUnsavedChangesWarning(snapshot !== initialSnapshot && !isPending);
+
   const liveHref =
     post && post.status === "PUBLISHED"
       ? `/${post.blog}/${post.slug}`
@@ -298,8 +354,6 @@ export default function PostForm({
     setStatus(s as PostStatus);
     if (statusRef.current) statusRef.current.value = s;
   }
-
-  const initialTagNames = post?.tags?.map((t) => t.name) ?? [];
 
   return (
     <form action={formAction}>
@@ -388,6 +442,7 @@ export default function PostForm({
             <div className="mb-6">
               <PublicImageUpload
                 context="blog-cover"
+                library
                 value={coverUrl || null}
                 onChange={(url) => setCoverUrl(url ?? "")}
                 alt={coverImageAlt || title}
@@ -425,8 +480,9 @@ export default function PostForm({
             <div className="mb-6">
               <TagInput
                 name="tags"
-                initial={initialTagNames}
+                initial={tagNames}
                 suggestions={tagSuggestions}
+                onChange={setTagNames}
               />
             </div>
 

@@ -181,6 +181,7 @@ export function SeoCard({
         >
           <PublicImageUpload
             context="blog-cover"
+            library
             value={ogImage || coverImage || null}
             onChange={(url) => setOgImage(url ?? "")}
             alt={ogImageAlt || title}
