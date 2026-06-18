@@ -37,9 +37,14 @@ export default function HomeHero() {
             alt="energiebee app preview"
             aria-hidden
             priority
-            fetchPriority="high"
             quality={90}
             placeholder="blur"
+            // Hidden below 968px; above it the mockup renders at most ~800px
+            // wide (h-full of the hero, w-auto). Without `sizes` Next ships the
+            // full 1605px source (~126 KiB wasted). Cap the srcset to the real
+            // display width. Not the LCP element (the bg photo is), so no
+            // fetchPriority — let the LCP image win the bandwidth race.
+            sizes="(min-width: 968px) 800px, 1px"
             className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto z-9"
           />
         </div>

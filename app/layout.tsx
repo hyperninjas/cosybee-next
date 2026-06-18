@@ -262,18 +262,19 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        {/* Consently cookie-consent banner. Loaded `afterInteractive` so its
-         *  ~5s of main-thread parse/banner work stays off the critical path
-         *  (it was the dominant Total Blocking Time contributor under
-         *  `beforeInteractive`). Tracking is still gated correctly without it
-         *  running first: Google Consent Mode defaults to `denied` (see
-         *  Analytics.tsx, with `wait_for_update: 500`) and GA stays cookieless
-         *  until Consently issues `gtag('consent','update',…)`. */}
+        {/* Consently cookie-consent banner. Loaded `lazyOnload` (during browser
+         *  idle, after the page has loaded) because at 66 KiB it's the single
+         *  largest script on the page and was the dominant Total Blocking Time
+         *  contributor. The banner appears a moment later, which is fine:
+         *  tracking stays gated regardless of load order — Google Consent Mode
+         *  defaults all signals to `denied` (see Analytics.tsx, with
+         *  `wait_for_update: 500`) and GA stays cookieless until Consently
+         *  issues `gtag('consent','update',…)`. */}
         {process.env.NODE_ENV === "production" && (
           <Script
             src="https://app.consently.net/consently.js"
             data-bannerid="6a229f9186e4ca8d56f54ed0"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
         )}
         <Providers>

@@ -20,6 +20,7 @@ export default function EnergyForecasting() {
               <Image
                 alt="Simulated Solar Forecasts"
                 src={deviceWeatherImg}
+                sizes="(min-width: 1024px) 256px, (min-width: 640px) 190px, 180px"
                 className="w-45 sm:w-47.5 lg:w-64"
               />
             }
@@ -36,6 +37,7 @@ export default function EnergyForecasting() {
               <Image
                 alt="Smart Energy Usage Recommendations"
                 src={deviceImg}
+                sizes="(min-width: 1024px) 256px, (min-width: 640px) 190px, 180px"
                 className="w-45 sm:w-47.5 lg:w-64"
               />
             }
