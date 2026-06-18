@@ -16,7 +16,7 @@ import { GENERAL_FAQ } from "@/app/lib/faq-data";
 export const metadata: Metadata = pageMetadata({
   title: "Total Energy Control",
   description:
-    "Track every watt your home uses across grid, solar, battery, and devices. AI-driven tariff shifting, bill forecasting, and battery arbitrage cut your bill up to 40%.",
+    "Track every watt across grid, solar, battery, and devices. AI tariff shifting, bill forecasting, and battery arbitrage cut your bill up to 40%.",
   ogDescription:
     "Every watt your home uses, in one dashboard. AI-driven tariff shifting and bill forecasting that cuts your bill up to 40%.",
   path: "/energy",

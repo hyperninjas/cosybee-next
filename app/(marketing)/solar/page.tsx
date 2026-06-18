@@ -16,7 +16,7 @@ import { GENERAL_FAQ } from "@/app/lib/faq-data";
 export const metadata: Metadata = pageMetadata({
   title: "Solar Forecasting & Optimisation",
   description:
-    "95% accurate next-day solar forecasting. EnergieBee uses AI and weather data to predict generation, schedule loads, and maximise the return on your solar investment.",
+    "95% accurate next-day solar forecasting. EnergieBee uses AI and weather data to predict generation, schedule loads, and grow your solar returns.",
   ogDescription:
     "95% accurate next-day solar forecasting. Plan your energy usage with confidence and maximise your solar investment.",
   path: "/solar",

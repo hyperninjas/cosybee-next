@@ -16,7 +16,7 @@ import { GENERAL_FAQ } from "@/app/lib/faq-data";
 export const metadata: Metadata = pageMetadata({
   title: "Smart Home Integration",
   description:
-    "Connect every device in your home and let EnergieBee's AI orchestrate energy usage automatically. Works with Alexa, Google Home, and Apple HomeKit out of the box.",
+    "Connect every device and let EnergieBee's AI orchestrate energy automatically. Works with Alexa, Google Home, and Apple HomeKit out of the box.",
   ogDescription:
     "Connect every device and let AI orchestrate your home's energy automatically. Reduce waste, save money, stay in control.",
   path: "/smart",

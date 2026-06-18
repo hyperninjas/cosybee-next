@@ -49,12 +49,12 @@ export default function OpenGraphImage() {
         {/* headline */}
         <div
           style={{
-            marginTop: "60px",
-            fontSize: 84,
+            marginTop: "44px",
+            fontSize: 66,
             fontWeight: 800,
-            lineHeight: 1.05,
+            lineHeight: 1.1,
             letterSpacing: -2,
-            maxWidth: "900px",
+            maxWidth: "1000px",
           }}
         >
           {SITE_TAGLINE}
@@ -63,13 +63,30 @@ export default function OpenGraphImage() {
         {/* accent line */}
         <div
           style={{
-            marginTop: "40px",
+            marginTop: "36px",
             fontSize: 32,
             color: "#D7C638",
             fontWeight: 500,
           }}
         >
           Save up to £300 a year vs tado.
+        </div>
+
+        {/* call to action — drives click-through from social previews */}
+        <div
+          style={{
+            marginTop: "36px",
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#EE3D1A",
+            color: "white",
+            fontSize: 30,
+            fontWeight: 700,
+            padding: "18px 40px",
+            borderRadius: "9999px",
+          }}
+        >
+          Start saving today →
         </div>
       </div>
     ),

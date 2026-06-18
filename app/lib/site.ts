@@ -15,7 +15,7 @@ export const SITE_NAME = "EnergieBee";
 export const SITE_TAGLINE = "Smart home energy control that pays for itself";
 
 export const SITE_DESCRIPTION =
-  "EnergieBee connects every device in your home to one intelligent app — solar forecasting, smart heating, energy analytics, and automated optimisation. Save up to £300/year vs tado.";
+  "EnergieBee connects every device in your home — solar forecasting, smart heating, and energy analytics in one app. Save up to £300/year vs tado.";
 
 export const SITE_KEYWORDS = [
   "smart home energy",
