@@ -184,6 +184,11 @@ export function SeoCard({
             library
             value={ogImage || coverImage || null}
             onChange={(url) => setOgImage(url ?? "")}
+            onPickFromLibrary={(m) => {
+              // OG only has an alt field — fill it from the asset's best text.
+              const a = m.alt || m.caption || m.title;
+              if (a) setOgImageAlt(a);
+            }}
             alt={ogImageAlt || title}
           />
         </Labeled>

@@ -26,6 +26,7 @@ export function PublicImageUpload({
   credit,
   previewHeight = "h-48",
   library = false,
+  onPickFromLibrary,
 }: {
   context:
     | "blog-cover"
@@ -40,6 +41,10 @@ export function PublicImageUpload({
    *  gallery, gets a thumbnail, and is usage-tracked against the post. The
    *  `context` is then used only for the file-type allowlist + size label. */
   library?: boolean;
+  /** Called (in addition to `onChange`) when an existing asset is chosen from
+   *  the library, so the caller can pull the asset's alt/title/caption/credit
+   *  into its own fields. Only fires in `library` mode. */
+  onPickFromLibrary?: (media: MediaItem) => void;
   /** Tailwind height class for the (non-avatar) preview image. Defaults to
    *  `h-48`; pass e.g. `h-56`/`h-64` for a taller preview. Avatars ignore this
    *  (they render fixed square). */
@@ -69,8 +74,10 @@ export function PublicImageUpload({
       setClientError(null);
       setLocalPreview(null);
       onChange(media.url);
+      // Let the caller copy the asset's editorial metadata into its fields.
+      onPickFromLibrary?.(media);
     },
-    [onChange],
+    [onChange, onPickFromLibrary],
   );
 
   // Revoke object URL on cleanup

@@ -41,6 +41,13 @@ export function CoverImageCard({
           library
           value={coverUrl || null}
           onChange={(url) => setCoverUrl(url ?? "")}
+          onPickFromLibrary={(m) => {
+            // Fill from the asset only when it has the value; keep typed text otherwise.
+            if (m.alt) setCoverImageAlt(m.alt);
+            if (m.title) setCoverImageTitle(m.title);
+            if (m.caption) setCoverImageCaption(m.caption);
+            if (m.credit) setCoverImageCredit(m.credit);
+          }}
           alt={coverImageAlt || title}
         />
         <Labeled

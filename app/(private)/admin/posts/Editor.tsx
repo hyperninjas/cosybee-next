@@ -72,7 +72,10 @@ function MediaIcon() {
 function blockForMedia(media: MediaItem): SchemaPartialBlock {
   "use no memo";
   const url = media.url ?? "";
-  const caption = media.alt ?? "";
+  // BlockNote's image/video/file blocks have no separate alt field — `caption`
+  // is shown AND used as alt. Pull the richest text the asset has so inserted
+  // images arrive already-captioned (and satisfy the "image needs alt" guard).
+  const caption = media.caption || media.alt || media.title || "";
   if (media.kind === "video") {
     return {
       type: "video",
