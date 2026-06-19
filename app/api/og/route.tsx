@@ -1,16 +1,25 @@
 import { ImageResponse } from "next/og";
-import { SITE_NAME, SITE_TAGLINE } from "./lib/site";
+import { SITE_NAME, SITE_TAGLINE } from "@/app/lib/site";
 
-export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`;
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+// Statically generated at build time and cached — the card never changes.
+export const dynamic = "force-static";
+
+const size = { width: 1200, height: 630 };
 
 /**
- * Default Open Graph image served at /opengraph-image, used by Twitter,
- * Facebook, LinkedIn, iMessage, Slack, etc. when the site URL is shared.
- * Per-route pages can override by adding their own opengraph-image.tsx.
+ * Default Open Graph card, served at /api/og and referenced by
+ * `DEFAULT_OG_IMAGE` (lib/seo.ts) + the root layout's metadata. Used by
+ * Twitter, Facebook, LinkedIn, iMessage, Slack, etc. when a page without its
+ * own social image is shared.
+ *
+ * Why a route handler and NOT the `app/opengraph-image.tsx` file convention:
+ * file-based metadata OUTRANKS `generateMetadata`, so a root-level
+ * `opengraph-image` would override every page — including blog articles that
+ * deliberately set `og:image` to their cover / specified OG image. Serving the
+ * card from a plain route keeps it as a metadata-level default that per-page
+ * `openGraph.images` can override.
  */
-export default function OpenGraphImage() {
+export function GET() {
   return new ImageResponse(
     (
       <div

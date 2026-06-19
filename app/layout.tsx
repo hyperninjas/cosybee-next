@@ -79,9 +79,9 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    // Next.js auto-injects /opengraph-image.{png,tsx} sitting at app/ root,
-    // but listing it here also surfaces it for crawlers that probe metadata.
-    // Shared with per-page metadata via DEFAULT_OG_IMAGE (lib/seo.ts).
+    // Default card served from /api/og (a route, not the opengraph-image file
+    // convention, which would outrank per-page og:image). Shared with per-page
+    // metadata via DEFAULT_OG_IMAGE (lib/seo.ts).
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
@@ -156,7 +156,7 @@ const localBusinessSchema = {
   name: ORG_LEGAL_NAME,
   alternateName: SITE_NAME,
   url: SITE_URL,
-  image: url("/opengraph-image"),
+  image: url("/api/og"),
   logo: url("/icon"),
   description: SITE_DESCRIPTION,
   email: ORG_CONTACT_EMAIL,

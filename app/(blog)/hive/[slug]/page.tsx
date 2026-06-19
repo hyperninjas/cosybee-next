@@ -32,9 +32,10 @@ export async function generateMetadata({
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // Per spec: og:image is the explicit override when set, otherwise the
-      // raw cover image. Setting images here overrides any file-based
-      // opengraph-image.tsx at the route.
+      // og:image is the specified OG image when set, otherwise the (resolved)
+      // cover image. This per-page metadata takes effect because there's no
+      // root opengraph-image file convention — that would outrank it (the
+      // default card is served from /api/og as plain metadata instead).
       images: [
         {
           url: article.ogImage ?? article.coverImage,

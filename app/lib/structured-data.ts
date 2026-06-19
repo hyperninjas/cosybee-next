@@ -82,7 +82,7 @@ export function softwareApplicationSchema() {
     applicationCategory: "LifestyleApplication",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
-    image: url("/opengraph-image"),
+    image: url("/api/og"),
     // Free app — a truthful zero-price Offer. No aggregateRating: we have no
     // verifiable reviews, and fabricated ratings risk a Google penalty.
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
