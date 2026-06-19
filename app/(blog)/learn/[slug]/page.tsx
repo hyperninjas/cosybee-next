@@ -32,13 +32,17 @@ export async function generateMetadata({
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // og:image is the specified OG image when set, otherwise the (resolved)
-      // cover image. This per-page metadata takes effect because there's no
-      // root opengraph-image file convention — that would outrank it (the
-      // default card is served from /api/og as plain metadata instead).
+      // og:image is the article's specified OG image, else its cover —
+      // served through /api/og/article/* which crops to 1200×630 and
+      // compresses under WhatsApp's ~300 KB limit (raw covers are too big, so
+      // WhatsApp would show no preview). Width/height help crawlers pick the
+      // large-image card. Works as per-page metadata because there's no root
+      // opengraph-image file convention to outrank it.
       images: [
         {
-          url: article.ogImage ?? article.coverImage,
+          url: `/api/og/article/learn/${article.slug}`,
+          width: 1200,
+          height: 630,
           alt: article.ogImageAlt ?? article.coverImageAlt,
         },
       ],
