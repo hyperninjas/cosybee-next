@@ -141,7 +141,8 @@ async function fetchApi<T>(
 
   // Forward cookies from the incoming request for auth
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore.getAll()
+  const cookieHeader = cookieStore
+    .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
@@ -172,8 +173,17 @@ async function fetchApi<T>(
     throw new Error(`API error ${res.status}: ${error}`);
   }
 
-  const json = await res.json();
-  console.log(`[adminApi] Response from ${path}:`, JSON.stringify(json).slice(0, 200));
+  // No-content responses (e.g. 204 from DELETE) have no body to parse —
+  // calling res.json() on them throws "Unexpected end of JSON input".
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  if (!text) return undefined as T;
+
+  const json = JSON.parse(text) as T;
+  console.log(
+    `[adminApi] Response from ${path}:`,
+    JSON.stringify(json).slice(0, 200),
+  );
   return json;
 }
 
@@ -204,20 +214,17 @@ export const adminApi = {
     try {
       // One call per blog so we can paginate independently if needed.
       const [hiveResponse, learnResponse] = await Promise.all([
-        fetchApi<{ data: AdminPost[] }>(
-          "/api/admin/posts?blog=hive&limit=50",
-        ),
-        fetchApi<{ data: AdminPost[] }>(
-          "/api/admin/posts?blog=learn&limit=50",
-        ),
+        fetchApi<{ data: AdminPost[] }>("/api/admin/posts?blog=hive&limit=50"),
+        fetchApi<{ data: AdminPost[] }>("/api/admin/posts?blog=learn&limit=50"),
       ]);
       const allPosts = [
         ...(hiveResponse.data || []),
         ...(learnResponse.data || []),
       ];
       // Sort by updatedAt descending
-      allPosts.sort((a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      allPosts.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
       return allPosts.map((p) => ({
         id: p.id,
@@ -444,6 +451,93 @@ export const adminApi = {
   async deleteTag(id: string): Promise<void> {
     await fetchApi(`/api/admin/posts/tags/${id}`, { method: "DELETE" });
   },
+
+  // ---------------------------------------------------------------
+  // Tariff catalog (read: public /api/tariffs, write: /api/admin/tariffs)
+  // ---------------------------------------------------------------
+
+  /** Search/list tariffs. Each item carries provider + region rates. */
+  async listTariffs(
+    params: {
+      q?: string;
+      providerId?: string;
+      type?: string;
+      fuel?: string;
+      regionId?: number;
+      limit?: number;
+    } = {},
+  ): Promise<TariffDTO[]> {
+    const qs = new URLSearchParams();
+    if (params.q) qs.set("q", params.q);
+    if (params.providerId) qs.set("providerId", params.providerId);
+    if (params.type) qs.set("type", params.type);
+    if (params.fuel) qs.set("fuel", params.fuel);
+    if (params.regionId != null) qs.set("regionId", String(params.regionId));
+    qs.set("limit", String(params.limit ?? 50));
+    try {
+      const res = await fetchApi<{ data: TariffDTO[] }>(
+        `/api/tariffs?${qs.toString()}`,
+      );
+      return res.data ?? [];
+    } catch (e) {
+      console.error("listTariffs error:", e);
+      return [];
+    }
+  },
+
+  async getTariff(id: string): Promise<TariffDTO | null> {
+    try {
+      return await fetchApi<TariffDTO>(`/api/tariffs/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  async getTariffProviders(): Promise<TariffProviderDTO[]> {
+    try {
+      return await fetchApi<TariffProviderDTO[]>("/api/tariffs/providers");
+    } catch (e) {
+      console.error("getTariffProviders error:", e);
+      return [];
+    }
+  },
+
+  async getTariffRegions(): Promise<TariffRegionDTO[]> {
+    try {
+      return await fetchApi<TariffRegionDTO[]>("/api/tariffs/regions");
+    } catch (e) {
+      console.error("getTariffRegions error:", e);
+      return [];
+    }
+  },
+
+  async createTariff(input: CreateTariffInput): Promise<TariffDTO> {
+    return fetchApi<TariffDTO>("/api/admin/tariffs", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateTariff(id: string, input: UpdateTariffInput): Promise<TariffDTO> {
+    return fetchApi<TariffDTO>(`/api/admin/tariffs/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteTariff(id: string): Promise<void> {
+    await fetchApi(`/api/admin/tariffs/${id}`, { method: "DELETE" });
+  },
+
+  async updateProvider(
+    id: string,
+    input: UpdateProviderInput,
+  ): Promise<TariffProviderDTO> {
+    return fetchApi<TariffProviderDTO>(`/api/admin/tariffs/providers/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
 };
 
 // ---------------------------------------------------------------
@@ -484,3 +578,122 @@ export interface TagInput {
   slug?: string;
   description?: string | null;
 }
+
+// ---------------------------------------------------------------
+// Tariff catalog shapes — mirror the eb-auth tariffs module DTOs.
+// All rate values are pence (p/kWh unit rates, p/day standing charges).
+// ---------------------------------------------------------------
+
+export const TARIFF_TYPES = [
+  "fixed",
+  "variable",
+  "tracker",
+  "agile",
+  "economy_7",
+  "time_of_use",
+  "ev",
+  "heat_pump",
+  "export",
+] as const;
+export type TariffType = (typeof TARIFF_TYPES)[number];
+
+export const TARIFF_PAYMENTS = ["direct_debit", "on_receipt"] as const;
+export type TariffPayment = (typeof TARIFF_PAYMENTS)[number];
+
+export const TARIFF_FUELS = ["dual_fuel", "electricity_only"] as const;
+export type TariffFuel = (typeof TARIFF_FUELS)[number];
+
+export interface TariffRegionRateDTO {
+  regionId: number;
+  region: string;
+  sourceName: string;
+  electricity?: { unitRate?: number; standingCharge?: number };
+  economy7?: { dayRate?: number; nightRate?: number; standingCharge?: number };
+  timeOfUse?: { peakRate?: number; offPeakRate?: number };
+  gas?: { unitRate?: number; standingCharge?: number };
+}
+
+export interface TariffProviderRefDTO {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active" | "acquired";
+  isPopular: boolean;
+  acquiredBy?: string;
+}
+
+export interface TariffDTO {
+  id: string;
+  name: string;
+  type: TariffType;
+  payment: TariffPayment;
+  fuel?: TariffFuel;
+  term?: string;
+  effectiveDate?: string;
+  exitFee?: string;
+  offPeakHours?: string;
+  note?: string;
+  smartMeterRequired: boolean;
+  provider: TariffProviderRefDTO;
+  regions: TariffRegionRateDTO[];
+}
+
+export interface TariffProviderDTO {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active" | "acquired";
+  isPopular: boolean;
+  acquiredBy?: string;
+  note?: string;
+  tariffCount: number;
+}
+
+/** Editable provider fields (PATCH /api/admin/tariffs/providers/:id). */
+export interface UpdateProviderInput {
+  name?: string;
+  isActive?: boolean;
+  isPopular?: boolean;
+  acquiredBy?: string | null;
+  note?: string | null;
+}
+
+export interface TariffRegionDTO {
+  id: number;
+  name: string;
+}
+
+/** Flat per-region rate row, as edited in the table and sent to the backend. */
+export interface TariffRegionRateInput {
+  regionId: number;
+  sourceName?: string;
+  elecUnit?: number | null;
+  elecStanding?: number | null;
+  e7Day?: number | null;
+  e7Night?: number | null;
+  e7Standing?: number | null;
+  peakUnit?: number | null;
+  offPeakUnit?: number | null;
+  gasUnit?: number | null;
+  gasStanding?: number | null;
+}
+
+export interface CreateTariffInput {
+  /** Existing provider id; omit and pass `providerName` to create a new one. */
+  providerId?: string;
+  /** New provider to find-or-create by name (used when `providerId` is absent). */
+  providerName?: string;
+  name: string;
+  type: TariffType;
+  payment: TariffPayment;
+  fuel?: TariffFuel | null;
+  term?: string | null;
+  effectiveDate?: string | null;
+  exitFee?: string | null;
+  offPeakHours?: string | null;
+  note?: string | null;
+  smartMeterRequired?: boolean;
+  regions?: TariffRegionRateInput[];
+}
+
+export type UpdateTariffInput = Partial<Omit<CreateTariffInput, "providerId">>;

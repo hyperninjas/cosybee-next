@@ -38,6 +38,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
   const onAuthors = pathname?.startsWith("/admin/authors") ?? false;
   const onCategories = pathname?.startsWith("/admin/categories") ?? false;
   const onTags = pathname?.startsWith("/admin/tags") ?? false;
+  const onTariffs = pathname?.startsWith("/admin/tariffs") ?? false;
   const onMedia = pathname?.startsWith("/admin/media") ?? false;
 
   // Drives the mobile dropdown: internal nav, external (new-tab) links, sign out.
@@ -57,7 +58,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-360 items-center justify-between gap-4 px-4 sm:px-6">
         {/* Brand → dashboard */}
         <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
           <CosybeeLogo className="h-8 w-auto shrink-0" />
@@ -95,6 +96,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             })}
           >
             Tags
+          </Link>
+          <Link
+            href="/admin/tariffs"
+            className={buttonVariants({
+              variant: onTariffs ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Tariffs
           </Link>
           <Link
             href="/admin/media"
@@ -181,6 +191,9 @@ export function AdminHeader({ user }: { user: AdminUser }) {
                 <Dropdown.Item id="/admin/tags" textValue="Tags">
                   <Label>Tags</Label>
                 </Dropdown.Item>
+                <Dropdown.Item id="/admin/tariffs" textValue="Tariffs">
+                  <Label>Tariffs</Label>
+                </Dropdown.Item>
                 <Dropdown.Item id="/admin/media" textValue="Media">
                   <Label>Media</Label>
                 </Dropdown.Item>
@@ -194,7 +207,11 @@ export function AdminHeader({ user }: { user: AdminUser }) {
                   <Label>View Learn</Label>
                 </Dropdown.Item>
                 <Separator />
-                <Dropdown.Item id="signout" textValue="Sign out" variant="danger">
+                <Dropdown.Item
+                  id="signout"
+                  textValue="Sign out"
+                  variant="danger"
+                >
                   <Label>Sign out</Label>
                 </Dropdown.Item>
               </Dropdown.Menu>
