@@ -7,6 +7,7 @@ import {
   ListBox,
   ListBoxItem,
   Pagination,
+  Popover,
   Select,
   Spinner,
   Tabs,
@@ -29,6 +30,7 @@ import {
 import { isTranscodableVideo, transcodeToMp4 } from "@/app/lib/media-video";
 import type { Tag } from "@/app/lib/article-types";
 import { FolderSidebar, type FolderSelection } from "./FolderSidebar";
+import { FolderIcon } from "./media-utils";
 import { MediaDetailModal } from "./MediaDetailModal";
 import { MediaCard } from "./MediaCard";
 import { MediaTable } from "./MediaTable";
@@ -92,6 +94,23 @@ function RefreshIcon({ className }: { className?: string }) {
   );
 }
 
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
 const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100] as const;
 
@@ -107,6 +126,14 @@ const VIEW_MODES = [
   { key: "grid", label: "Grid view", icon: GridIcon },
   { key: "table", label: "Table view", icon: ListIcon },
 ] as const;
+
+// Card grid: `auto-fill` packs as many fixed-min columns as fit and only the
+// COUNT changes on resize — cards stay a near-constant width (stretching at most
+// by the leftover before another column fits) and the row always fills, so no
+// ragged trailing gap. The min grows by breakpoint to keep ~2 up on phones and
+// larger cards on desktop. Tune the `minmax(...)` mins to taste.
+const CARD_GRID_CLASS =
+  "grid gap-3 grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(12rem,1fr))]";
 
 export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   // Tag vocabulary held in state so tags created from the detail editor appear
@@ -134,6 +161,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
 
   const detailOverlay = useOverlayState();
   const [detail, setDetail] = useState<MediaItem | null>(null);
+
+  // Mobile (<sm) folder picker — the sidebar collapses into a sticky popover.
+  const mobileFolders = useOverlayState();
 
   // Bumping this forces the media list to refetch (e.g. after an upload),
   // without smuggling the fetch through a callback's identity.
@@ -401,10 +431,48 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 sm:flex-row">
-        {/* Sticky on desktop so the folder tree stays in view while the grid
-            scrolls. `self-start` keeps it content-height inside the flex row. */}
-        <div className="sm:sticky sm:top-20 sm:max-h-[calc(100vh-6rem)] sm:self-start sm:overflow-y-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+        {/* Mobile (<sm): the folder tree collapses into a sticky picker so
+            switching folders never means scrolling back to the top. Tapping it
+            opens the full sidebar in a popover; picking a folder closes it. */}
+        <div className="sticky top-16 z-30 bg-background py-2 sm:hidden">
+          <Popover
+            isOpen={mobileFolders.isOpen}
+            onOpenChange={mobileFolders.setOpen}
+          >
+            <Popover.Trigger className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm transition-colors hover:bg-background">
+              <span className="flex min-w-0 items-center gap-2">
+                <FolderIcon className="size-4 shrink-0 text-muted" />
+                <span className="truncate font-medium text-foreground">
+                  {selected === "all"
+                    ? "All media"
+                    : selected === "unfiled"
+                      ? "Unfiled"
+                      : (folders.find((f) => f.id === selected)?.name ??
+                        "Folder")}
+                </span>
+              </span>
+              <ChevronDownIcon className="size-4 shrink-0 text-muted" />
+            </Popover.Trigger>
+            <Popover.Content className="w-[min(20rem,calc(100vw-2rem))]">
+              <Popover.Dialog className="max-h-[60vh] overflow-y-auto p-3">
+                <FolderSidebar
+                  folders={folders}
+                  selected={selected}
+                  onSelect={(key) => {
+                    selectScope(key);
+                    mobileFolders.close();
+                  }}
+                  onChanged={refreshFolders}
+                />
+              </Popover.Dialog>
+            </Popover.Content>
+          </Popover>
+        </div>
+
+        {/* Desktop (sm+): inline sticky sidebar so the tree stays in view while
+            the grid scrolls. `self-start` keeps it content-height in the row. */}
+        <div className="hidden sm:sticky sm:top-20 sm:block sm:max-h-[calc(100vh-6rem)] sm:self-start sm:overflow-y-auto">
           <FolderSidebar
             folders={folders}
             selected={selected}
@@ -529,7 +597,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 onClear={clearFilters}
               />
             ) : view === "grid" ? (
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+              <ul className={CARD_GRID_CLASS}>
                 {/* In-flight uploads sit inline with the real cards. */}
                 {uploads.map((u) => (
                   <li key={u.id}>
@@ -549,7 +617,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             ) : (
               <div className="space-y-3">
                 {uploads.length > 0 && (
-                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+                  <ul className={CARD_GRID_CLASS}>
                     {uploads.map((u) => (
                       <li key={u.id}>
                         <MediaUploadCard upload={u} />
