@@ -100,6 +100,7 @@ export function ProviderForm({
           name="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={100}
           placeholder="e.g. Octopus Energy"
         />
       </Labeled>
@@ -114,6 +115,7 @@ export function ProviderForm({
           name="acquiredBy"
           value={acquiredBy}
           onChange={(e) => setAcquiredBy(e.target.value)}
+          maxLength={150}
           placeholder="e.g. Octopus Energy"
         />
       </Labeled>

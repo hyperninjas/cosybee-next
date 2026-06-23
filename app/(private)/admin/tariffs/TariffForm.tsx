@@ -223,6 +223,7 @@ export function TariffForm({
                 <Input
                   variant="secondary"
                   fullWidth
+                  maxLength={150}
                   placeholder="Search or type a new provider…"
                 />
               </ComboBox.InputGroup>
@@ -250,6 +251,7 @@ export function TariffForm({
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              maxLength={200}
               placeholder="e.g. Agile Octopus"
             />
           </Labeled>
@@ -293,6 +295,7 @@ export function TariffForm({
                 variant="secondary"
                 fullWidth
                 name="term"
+                maxLength={100}
                 placeholder="12 months"
               />
             </Labeled>
@@ -301,6 +304,7 @@ export function TariffForm({
                 variant="secondary"
                 fullWidth
                 name="effectiveDate"
+                maxLength={50}
                 placeholder="2026"
               />
             </Labeled>
@@ -310,6 +314,7 @@ export function TariffForm({
               variant="secondary"
               fullWidth
               name="exitFee"
+              maxLength={150}
               placeholder="None"
             />
           </Labeled>
@@ -318,6 +323,7 @@ export function TariffForm({
               variant="secondary"
               fullWidth
               name="offPeakHours"
+              maxLength={200}
               placeholder="00:00–05:00"
             />
           </Labeled>

@@ -337,12 +337,23 @@ export function TariffRatesTable({
     const parsed = {} as FlatRow;
     for (const c of COLS) {
       const v = (draft[c.key] ?? "").trim();
-      const n = v === "" ? undefined : Number(v);
-      if (n != null && (Number.isNaN(n) || n < 0)) {
+      if (v === "") {
+        parsed[c.key] = undefined;
+        continue;
+      }
+      const n = Number(v);
+      if (Number.isNaN(n) || n < 0) {
         setError("Rates must be non-negative numbers (leave blank to clear).");
         return;
       }
-      parsed[c.key] = n;
+      // DB stores Decimal(7,3): max 9999.999, 3 decimal places. Enforce the
+      // bound and round to 3dp so the saved value matches what's shown (the DB
+      // would otherwise round silently).
+      if (n > 9999.999) {
+        setError("Rates must be 9999.999 or less.");
+        return;
+      }
+      parsed[c.key] = Math.round(n * 1000) / 1000;
     }
 
     const input: TariffRegionRateInput = {
@@ -409,7 +420,11 @@ export function TariffRatesTable({
               <Input
                 id={`rate-${c.key}`}
                 variant="secondary"
+                type="number"
                 inputMode="decimal"
+                min={0}
+                max={9999.999}
+                step={0.001}
                 value={draft[c.key] ?? ""}
                 onChange={(e) => setField(c.key, e.target.value)}
                 className="w-24 text-end"
