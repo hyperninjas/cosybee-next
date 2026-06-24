@@ -48,6 +48,13 @@ ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 # real value as a build arg in Dokploy / `docker build --build-arg ...`.
 ARG GOOGLE_SITE_VERIFICATION=IkbRUvZoQ374l00SnYUZNvnwHq-2oGHxHWUpOiNN0aE
 ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
+# Google Analytics 4 measurement ID — public value, inlined into the client
+# bundle at build time, so it MUST be set at build (a runtime env var is too
+# late). Defaults to the real property; override per-env with
+# `docker build --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXX` (empty
+# disables GA).
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=G-PK4VWZC7B2
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 # Google Tag Manager container ID — public value, inlined into the client
 # bundle at build time, so it MUST be set at build (a runtime env var is too
 # late). Defaults to the real container; override per-env with
