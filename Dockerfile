@@ -48,6 +48,12 @@ ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 # real value as a build arg in Dokploy / `docker build --build-arg ...`.
 ARG GOOGLE_SITE_VERIFICATION=IkbRUvZoQ374l00SnYUZNvnwHq-2oGHxHWUpOiNN0aE
 ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
+# Google Tag Manager container ID — public value, inlined into the client
+# bundle at build time, so it MUST be set at build (a runtime env var is too
+# late). Defaults to the real container; override per-env with
+# `docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXX` (empty disables GTM).
+ARG NEXT_PUBLIC_GTM_ID=GTM-523NBRHQ
+ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
