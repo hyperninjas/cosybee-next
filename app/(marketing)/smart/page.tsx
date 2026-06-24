@@ -6,7 +6,7 @@ import EnergyMonitoring from "@/app/components/sections/smart/EnergyMonitoring";
 import EnergyAnalytics from "@/app/components/sections/smart/EnergyAnalytics";
 import SmartEnergyManagement from "@/app/components/sections/smart/SmartEnergyManagement";
 import WhyEnergieBee from "@/app/components/sections/smart/WhyEnergieBee";
-import WhyEnergieBeeSolar from "@/app/components/sections/smart/WhyEnergiebeeSolar";
+// import WhyEnergieBeeSolar from "@/app/components/sections/smart/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "@/app/components/sections/smart/WorksWithAnySystem";
 import JsonLd from "@/app/components/JsonLd";
 import Faq from "@/app/components/sections/Faq";
@@ -44,7 +44,7 @@ export default function SmartPage() {
       <EnergyAnalytics />
       <SmartEnergyManagement />
       <WhyEnergieBee />
-      <WhyEnergieBeeSolar />
+      {/* <WhyEnergieBeeSolar /> */}
       <WorksWithAnySystem />
       {/* <EnergyForecasting /> */}
       <Faq items={GENERAL_FAQ} />
