@@ -107,8 +107,8 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  // icons / manifest links are auto-injected by Next from app/icon.tsx,
-  // app/apple-icon.tsx, and app/manifest.ts — no need to repeat them here.
+  // icons are auto-injected by Next from app/icon.tsx and app/apple-icon.tsx
+  // — no need to repeat them here.
   referrer: "origin-when-cross-origin",
 };
 
