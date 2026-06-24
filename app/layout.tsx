@@ -7,6 +7,9 @@ import Navbar from "./components/layout/Navbar";
 import { HideOnAdmin } from "./components/layout/HideOnAdmin";
 import { Providers } from "./providers";
 import Analytics from "./components/Analytics";
+import GoogleTagManager, {
+  GoogleTagManagerNoScript,
+} from "./components/GoogleTagManager";
 import { DeferredClientLayer } from "./components/DeferredClientLayer";
 import {
   ORG_ADDRESS,
@@ -104,8 +107,8 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  // icons / manifest links are auto-injected by Next from app/icon.tsx,
-  // app/apple-icon.tsx, and app/manifest.ts — no need to repeat them here.
+  // icons are auto-injected by Next from app/icon.tsx and app/apple-icon.tsx
+  // — no need to repeat them here.
   referrer: "origin-when-cross-origin",
 };
 
@@ -254,6 +257,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        {/* GTM <noscript> fallback — Google requires this immediately after the
+         *  opening <body> tag. No-op outside production / without a container ID. */}
+        <GoogleTagManagerNoScript />
         {/* Skip link — first focusable element, visually hidden until focused,
          *  so keyboard/screen-reader users can jump straight past the navbar. */}
         <a
@@ -292,6 +298,7 @@ export default function RootLayout({
           <DeferredClientLayer />
         </Providers>
         <Analytics />
+        <GoogleTagManager />
       </body>
     </html>
   );

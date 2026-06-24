@@ -41,6 +41,26 @@ ENV API_URL=$API_URL
 # runtime env var, not here.
 ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LcmPiItAAAAAE5uDGIHnes3xqU85BigNkL4cu_z
 ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+# Google Search Console verification token. The marketing home page is
+# statically prerendered, so the root-layout verification meta tag is baked
+# into the HTML at build time — this must be a build arg (a runtime env var is
+# too late for the already-built static pages). Left empty by default; pass the
+# real value as a build arg in Dokploy / `docker build --build-arg ...`.
+ARG GOOGLE_SITE_VERIFICATION=IkbRUvZoQ374l00SnYUZNvnwHq-2oGHxHWUpOiNN0aE
+ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
+# Google Analytics 4 measurement ID — public value, inlined into the client
+# bundle at build time, so it MUST be set at build (a runtime env var is too
+# late). Defaults to the real property; override per-env with
+# `docker build --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXX` (empty
+# disables GA).
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=G-PK4VWZC7B2
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+# Google Tag Manager container ID — public value, inlined into the client
+# bundle at build time, so it MUST be set at build (a runtime env var is too
+# late). Defaults to the real container; override per-env with
+# `docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXX` (empty disables GTM).
+ARG NEXT_PUBLIC_GTM_ID=GTM-523NBRHQ
+ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
