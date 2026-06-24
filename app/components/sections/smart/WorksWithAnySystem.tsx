@@ -8,7 +8,7 @@ import { Section } from "@/app/components/ui/Section";
  */
 export default function WorksWithAnySystem() {
   return (
-    <Section spacing="none" surface="surface">
+    <Section spacing="none">
       <div className="mx-auto max-w-360 pb-11 pt-4 px-4 lg:px-30">
         <CtaCard
           title="Works With Any Solar System"
