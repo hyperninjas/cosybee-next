@@ -41,6 +41,13 @@ ENV API_URL=$API_URL
 # runtime env var, not here.
 ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LcmPiItAAAAAE5uDGIHnes3xqU85BigNkL4cu_z
 ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+# Google Search Console verification token. The marketing home page is
+# statically prerendered, so the root-layout verification meta tag is baked
+# into the HTML at build time — this must be a build arg (a runtime env var is
+# too late for the already-built static pages). Left empty by default; pass the
+# real value as a build arg in Dokploy / `docker build --build-arg ...`.
+ARG GOOGLE_SITE_VERIFICATION=IkbRUvZoQ374l00SnYUZNvnwHq-2oGHxHWUpOiNN0aE
+ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
