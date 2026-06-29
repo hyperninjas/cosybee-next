@@ -3,6 +3,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Section } from "@/app/components/ui/Section";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import heroBgImg from "@/public/Cover/energiebee-contact-cover.png";
+import heroBgImgMobile from "@/public/Cover/energiebee-contact-cover-mobile.png";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -24,6 +25,17 @@ export default function Hero() {
       {/* background photo + gradient */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <Image
+          src={heroBgImgMobile}
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          quality={85}
+          placeholder="blur"
+          className="object-cover object-center sm:hidden"
+        />
+        <Image
           src={heroBgImg}
           alt=""
           fill
@@ -32,7 +44,7 @@ export default function Hero() {
           sizes="100vw"
           quality={85}
           placeholder="blur"
-          className="object-cover object-center"
+          className="hidden object-cover object-center sm:block"
         />
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>

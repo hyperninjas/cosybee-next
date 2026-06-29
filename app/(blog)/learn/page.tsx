@@ -9,6 +9,7 @@ import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-dat
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
 import learnCover from "@/public/Cover/energiebee-learn-cover.png";
+import learnCoverMobile from "@/public/Cover/energiebee-learn-cover-mobile.png";
 
 const LEARN_DESCRIPTION =
   "Guides, tutorials, and energy-saving tips from the EnergieBee team.";
@@ -93,6 +94,7 @@ export default async function LearnPage({
         title="Learn"
         description={LEARN_DESCRIPTION}
         bgImage={learnCover}
+        bgImageMobile={learnCoverMobile}
         crumbs={[
           { name: "Home", path: "/" },
           { name: "Learn", path: "/learn" },

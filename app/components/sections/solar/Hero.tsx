@@ -2,10 +2,11 @@ import { CtaButton } from "@/app/components/ui/Cta";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import PageHero from "@/app/components/ui/PageHero";
 import heroBgImg from "@/public/Cover/energiebee-solar-cover.png";
+import heroBgImgMobile from "@/public/Cover/energiebee-solar-cover-mobile.png";
 
 export default function Hero() {
   return (
-    <PageHero bgImage={heroBgImg}>
+    <PageHero bgImage={heroBgImg} bgImageMobile={heroBgImgMobile}>
       <Heading as="h1" variant="display">
         Solar Forecasting <span className="text-[#EFDF18]">95%</span>
         <br />

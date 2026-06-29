@@ -13,6 +13,7 @@ import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-dat
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
 import hiveCover from "@/public/Cover/energiebee-hive-cover.png";
+import hiveCoverMobile from "@/public/Cover/energiebee-hive-cover-mobile.png";
 
 const HIVE_DESCRIPTION =
   "Insights, stories, and expert advice on sustainable energy solutions for modern homes.";
@@ -101,6 +102,7 @@ export default async function HivePage({ searchParams }: PageProps<"/hive">) {
         title="The Hive"
         description={HIVE_DESCRIPTION}
         bgImage={hiveCover}
+        bgImageMobile={hiveCoverMobile}
         crumbs={[
           { name: "Home", path: "/" },
           { name: "The Hive", path: "/hive" },
