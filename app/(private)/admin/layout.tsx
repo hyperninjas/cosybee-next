@@ -23,7 +23,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AdminHeader user={user} />
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+      <main className="mx-auto max-w-360 px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
         <AdminBreadcrumbs />
         {children}
       </main>

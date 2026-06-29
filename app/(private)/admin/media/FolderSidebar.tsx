@@ -165,7 +165,7 @@ export function FolderSidebar({
   }
 
   return (
-    <aside className="flex w-full flex-col gap-1 sm:w-60 sm:shrink-0 pb-2">
+    <aside className="flex w-full flex-col gap-1 pb-2 sm:w-52 sm:shrink-0 lg:w-56 xl:w-60">
       <div className="mb-1 flex items-center justify-between px-1">
         <h2 className="text-xs font-bold uppercase tracking-wide text-muted">
           Folders
