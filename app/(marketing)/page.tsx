@@ -6,6 +6,7 @@ import HeatingSolutions from "@/app/components/sections/home/HeatingSolutions";
 import HomeSolarForecasting from "@/app/components/sections/home/HomeSolarForecasting";
 import HomeEnergyManagement from "@/app/components/sections/home/HomeEnergyManagement";
 // import WhyThousands from "@/app/components/sections/home/WhyThousands";
+import HomeFeaturedArticles from "@/app/components/sections/home/HomeFeaturedArticles";
 import ReadyToReduce from "@/app/components/sections/home/ReadyToReduce";
 import Faq from "@/app/components/sections/Faq";
 import { GENERAL_FAQ } from "@/app/lib/faq-data";
@@ -33,6 +34,7 @@ export default function Home() {
       <HomeSolarForecasting />
       <HomeEnergyManagement />
       {/* <WhyThousands /> */}
+      <HomeFeaturedArticles />
       <Faq items={GENERAL_FAQ} />
       <ReadyToReduce />
     </main>

@@ -164,6 +164,7 @@ export async function savePost(
   const description = str(formData, "description") || excerptFromJson(contentJsonStr) || title || "No description";
   const tags = parseTags(formData);
   const featured = formData.get("featured") === "on";
+  const homeFeatured = formData.get("homeFeatured") === "on";
 
   // CTA handling
   const ctaLabel = optStr(formData, "ctaLabel");
@@ -254,6 +255,7 @@ export async function savePost(
     carouselIntro,
     carouselBody,
     featured,
+    homeFeatured,
     status,
     // Only include content if editor has blocks - preserves legacy content on metadata-only edits
     ...(contentJson !== undefined ? { contentJson } : {}),
@@ -276,8 +278,11 @@ export async function savePost(
   redirect(`/admin?saved=${blog}/${slug}&status=${status}`);
 }
 
+/** Result of a dashboard quick-action — the caller toasts on this. */
+export type ActionResult = { ok: boolean; error?: string };
+
 /** Flip a post between DRAFT and PUBLISHED from the dashboard. */
-export async function setStatus(formData: FormData): Promise<void> {
+export async function setStatus(formData: FormData): Promise<ActionResult> {
   await assertAdmin();
   const id = str(formData, "id");
   const blog = str(formData, "blog");
@@ -286,7 +291,7 @@ export async function setStatus(formData: FormData): Promise<void> {
   const status = STATUSES.has(rawStatus)
     ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
     : "DRAFT";
-  if (!id || !blog || !slug) return;
+  if (!id || !blog || !slug) return { ok: false, error: "Missing post details." };
 
   try {
     await adminApi.setStatus(id, status);
@@ -294,18 +299,65 @@ export async function setStatus(formData: FormData): Promise<void> {
     revalidatePath("/admin");
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
+    return { ok: true };
   } catch (e) {
     console.error("setStatus failed:", e);
+    return { ok: false, error: (e as Error).message };
   }
 }
 
-/** Permanently delete a post. */
-export async function deletePost(formData: FormData): Promise<void> {
+/** Toggle a post's carousel-featured flag from the dashboard. */
+export async function setFeatured(formData: FormData): Promise<ActionResult> {
   await assertAdmin();
   const id = str(formData, "id");
   const blog = str(formData, "blog");
   const slug = str(formData, "slug");
-  if (!id || !blog || !slug) return;
+  const featured = formData.get("featured") === "on";
+  if (!id) return { ok: false, error: "Missing post id." };
+
+  try {
+    await adminApi.updatePost(id, { featured });
+
+    revalidatePath("/admin");
+    revalidatePath(`/${blog}`);
+    revalidatePath(`/${blog}/${slug}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("setFeatured failed:", e);
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+/** Toggle a post's home-page-featured flag from the dashboard. */
+export async function setHomeFeatured(formData: FormData): Promise<ActionResult> {
+  await assertAdmin();
+  const id = str(formData, "id");
+  const blog = str(formData, "blog");
+  const slug = str(formData, "slug");
+  const homeFeatured = formData.get("homeFeatured") === "on";
+  if (!id) return { ok: false, error: "Missing post id." };
+
+  try {
+    await adminApi.updatePost(id, { homeFeatured });
+
+    revalidatePath("/admin");
+    revalidatePath("/"); // home page featured-articles section
+    revalidatePath(`/${blog}`);
+    revalidatePath(`/${blog}/${slug}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("setHomeFeatured failed:", e);
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+/** Permanently delete a post. */
+export async function deletePost(formData: FormData): Promise<ActionResult> {
+  await assertAdmin();
+  const id = str(formData, "id");
+  const blog = str(formData, "blog");
+  const slug = str(formData, "slug");
+  if (!id || !blog || !slug) return { ok: false, error: "Missing post details." };
 
   try {
     await adminApi.deletePost(id);
@@ -313,8 +365,10 @@ export async function deletePost(formData: FormData): Promise<void> {
     revalidatePath("/admin");
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
+    return { ok: true };
   } catch (e) {
     console.error("deletePost failed:", e);
+    return { ok: false, error: (e as Error).message };
   }
 }
 

@@ -70,6 +70,7 @@ export async function getPostArticle(id: string): Promise<Article | null> {
 
     // Featured/Carousel
     featured: row.featured,
+    homeFeatured: row.homeFeatured,
     carouselIntro: row.carouselIntro,
     carouselBody: row.carouselBody,
 

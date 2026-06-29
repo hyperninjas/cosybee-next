@@ -2,7 +2,7 @@
 
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
-import { Bars, LayoutCellsLarge } from "@gravity-ui/icons";
+import { Bars, HouseFill, LayoutCellsLarge, StarFill } from "@gravity-ui/icons";
 import {
   Chip,
   EmptyState,
@@ -14,11 +14,16 @@ import {
   Table,
   Tabs,
   Tooltip,
+  toast,
 } from "@heroui/react";
-import { deletePost, setStatus } from "./actions";
+import { deletePost, setFeatured, setHomeFeatured, setStatus } from "./actions";
 import { PostCard } from "./PostCard";
 import { RowActions } from "./RowActions";
-import { resolveCoverImage, type Category } from "@/app/lib/article-types";
+import {
+  resolveCoverImage,
+  type Category,
+  type Tag,
+} from "@/app/lib/article-types";
 
 export type Row = {
   id: string;
@@ -26,12 +31,70 @@ export type Row = {
   slug: string;
   title: string;
   category: Category;
+  tags: Tag[];
   status: string;
   featured: boolean;
+  homeFeatured: boolean;
   coverImage: string | null;
   ogImage: string | null;
   updatedAt: string;
 };
+
+type Option = { id: string; label: string };
+
+type SortKey = "updated-desc" | "updated-asc" | "title-asc" | "title-desc";
+
+const BLOG_OPTIONS: Option[] = [
+  { id: "all", label: "All blogs" },
+  { id: "hive", label: "Hive" },
+  { id: "learn", label: "Learn" },
+];
+
+/** Sort options for the posts list. */
+const SORT_OPTIONS: Option[] = [
+  { id: "updated-desc", label: "Recently updated" },
+  { id: "updated-asc", label: "Oldest updated" },
+  { id: "title-asc", label: "Title A–Z" },
+  { id: "title-desc", label: "Title Z–A" },
+];
+
+/** Compact labelled <Select> used for the blog / category / tag / sort
+ *  filters — mirrors the HeroUI Select composition so they all match. */
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  triggerClassName = "w-40",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  triggerClassName?: string;
+}) {
+  return (
+    <Select
+      aria-label={label}
+      selectedKey={value}
+      onSelectionChange={(k) => onChange(String(k))}
+    >
+      <Select.Trigger className={triggerClassName}>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {options.map((o) => (
+            <ListBoxItem key={o.id} id={o.id} textValue={o.label}>
+              {o.label}
+            </ListBoxItem>
+          ))}
+        </ListBox>
+      </Select.Popover>
+    </Select>
+  );
+}
 
 /** Page sizes per view. Card view picks 12 so the grid lays out cleanly on
  *  every breakpoint (12 = 1×12, 2×6, 3×4 — no orphan card on the last row).
@@ -58,6 +121,8 @@ function relativeTime(iso: string): string {
 
 type OptimisticAction =
   | { type: "status"; id: string; status: string }
+  | { type: "featured"; id: string; featured: boolean }
+  | { type: "homeFeatured"; id: string; homeFeatured: boolean }
   | { type: "delete"; id: string };
 
 const TABS = [
@@ -78,17 +143,30 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
   // instantly, then reconcile when the server action revalidates `rows`.
   const [optimisticRows, applyOptimistic] = useOptimistic(
     rows,
-    (state, action: OptimisticAction) =>
-      action.type === "delete"
-        ? state.filter((r) => r.id !== action.id)
-        : state.map((r) =>
-            r.id === action.id ? { ...r, status: action.status } : r,
-          ),
+    (state, action: OptimisticAction) => {
+      if (action.type === "delete") {
+        return state.filter((r) => r.id !== action.id);
+      }
+      return state.map((r) => {
+        if (r.id !== action.id) return r;
+        switch (action.type) {
+          case "status":
+            return { ...r, status: action.status };
+          case "featured":
+            return { ...r, featured: action.featured };
+          case "homeFeatured":
+            return { ...r, homeFeatured: action.homeFeatured };
+        }
+      });
+    },
   );
   const [, startTransition] = useTransition();
 
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("ALL");
   const [blog, setBlog] = useState<"all" | "hive" | "learn">("all");
+  const [category, setCategory] = useState("all");
+  const [tag, setTag] = useState("all");
+  const [sort, setSort] = useState<SortKey>("updated-desc");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("card");
@@ -108,21 +186,71 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
     [optimisticRows],
   );
 
+  // Filter option lists derived from the loaded rows (scoped to the active
+  // blog so the category/tag choices match what's actually selectable).
+  const categoryNames = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of optimisticRows) {
+      if (blog !== "all" && r.blog !== blog) continue;
+      if (r.category?.name) set.add(r.category.name);
+    }
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [optimisticRows, blog]);
+
+  const tagNames = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of optimisticRows) {
+      if (blog !== "all" && r.blog !== blog) continue;
+      for (const t of r.tags ?? []) set.add(t.name);
+    }
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [optimisticRows, blog]);
+
+  const categoryOptions: Option[] = [
+    { id: "all", label: "All categories" },
+    ...categoryNames.map((n) => ({ id: n, label: n })),
+  ];
+  const tagOptions: Option[] = [
+    { id: "all", label: "All tags" },
+    ...tagNames.map((n) => ({ id: n, label: `#${n}` })),
+  ];
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return optimisticRows.filter((r) => {
+    const matched = optimisticRows.filter((r) => {
       if (tab !== "ALL" && r.status !== tab) return false;
       if (blog !== "all" && r.blog !== blog) return false;
+      if (category !== "all" && r.category?.name !== category) return false;
+      if (tag !== "all" && !(r.tags ?? []).some((t) => t.name === tag))
+        return false;
       if (
         q &&
-        !`${r.title} ${r.slug} ${r.category?.name ?? ""}`
+        !`${r.title} ${r.slug} ${r.category?.name ?? ""} ${(r.tags ?? [])
+          .map((t) => t.name)
+          .join(" ")}`
           .toLowerCase()
           .includes(q)
       )
         return false;
       return true;
     });
-  }, [optimisticRows, tab, blog, query]);
+
+    const byUpdated = (a: Row, b: Row) =>
+      new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+    return matched.sort((a, b) => {
+      switch (sort) {
+        case "updated-asc":
+          return byUpdated(a, b);
+        case "title-asc":
+          return a.title.localeCompare(b.title);
+        case "title-desc":
+          return b.title.localeCompare(a.title);
+        case "updated-desc":
+        default:
+          return byUpdated(b, a);
+      }
+    });
+  }, [optimisticRows, tab, blog, category, tag, query, sort]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, pageCount);
@@ -149,7 +277,50 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
     fd.append("status", next);
     startTransition(async () => {
       applyOptimistic({ type: "status", id: row.id, status: next });
-      await setStatus(fd);
+      const res = await setStatus(fd);
+      if (res.ok) {
+        toast.success(next === "PUBLISHED" ? "Post published" : "Moved to drafts");
+      } else {
+        toast.danger(res.error || "Couldn't update status");
+      }
+    });
+  }
+
+  function onToggleFeatured(row: Row) {
+    const next = !row.featured;
+    const fd = new FormData();
+    fd.append("id", row.id);
+    fd.append("blog", row.blog);
+    fd.append("slug", row.slug);
+    fd.append("featured", next ? "on" : "");
+    startTransition(async () => {
+      applyOptimistic({ type: "featured", id: row.id, featured: next });
+      const res = await setFeatured(fd);
+      if (res.ok) {
+        toast.success(next ? "Added to carousel" : "Removed from carousel");
+      } else {
+        toast.danger(res.error || "Couldn't update featured");
+      }
+    });
+  }
+
+  function onToggleHomeFeatured(row: Row) {
+    const next = !row.homeFeatured;
+    const fd = new FormData();
+    fd.append("id", row.id);
+    fd.append("blog", row.blog);
+    fd.append("slug", row.slug);
+    fd.append("homeFeatured", next ? "on" : "");
+    startTransition(async () => {
+      applyOptimistic({ type: "homeFeatured", id: row.id, homeFeatured: next });
+      const res = await setHomeFeatured(fd);
+      if (res.ok) {
+        toast.success(
+          next ? "Added to home page" : "Removed from home page",
+        );
+      } else {
+        toast.danger(res.error || "Couldn't update home feature");
+      }
     });
   }
 
@@ -160,7 +331,12 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
     fd.append("slug", row.slug);
     startTransition(async () => {
       applyOptimistic({ type: "delete", id: row.id });
-      await deletePost(fd);
+      const res = await deletePost(fd);
+      if (res.ok) {
+        toast.success("Post deleted");
+      } else {
+        toast.danger(res.error || "Couldn't delete post");
+      }
     });
   }
 
@@ -267,33 +443,49 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
             </Tabs.ListContainer>
           </Tabs>
         </div>
-        <div className="flex items-center gap-3">
-          <Select
-            aria-label="Filter by blog"
-            selectedKey={blog}
-            onSelectionChange={(k) => {
-              setBlog(String(k) as typeof blog);
+        <div className="flex flex-wrap items-center gap-3">
+          <FilterSelect
+            label="Filter by blog"
+            value={blog}
+            onChange={(v) => {
+              setBlog(v as typeof blog);
+              // Category/tag choices are blog-scoped — reset them so a stale
+              // selection from the previous blog doesn't hide every row.
+              setCategory("all");
+              setTag("all");
               setPage(1);
             }}
-          >
-            <Select.Trigger className="w-32">
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
-                <ListBoxItem textValue="All blogs" id="all">
-                  All blogs
-                </ListBoxItem>
-                <ListBoxItem textValue="Hive" id="hive">
-                  Hive
-                </ListBoxItem>
-                <ListBoxItem textValue="Learn" id="learn">
-                  Learn
-                </ListBoxItem>
-              </ListBox>
-            </Select.Popover>
-          </Select>
+            options={BLOG_OPTIONS}
+            triggerClassName="w-32"
+          />
+          <FilterSelect
+            label="Filter by category"
+            value={category}
+            onChange={(v) => {
+              setCategory(v);
+              setPage(1);
+            }}
+            options={categoryOptions}
+          />
+          {tagNames.length > 0 && (
+            <FilterSelect
+              label="Filter by tag"
+              value={tag}
+              onChange={(v) => {
+                setTag(v);
+                setPage(1);
+              }}
+              options={tagOptions}
+              triggerClassName="w-36"
+            />
+          )}
+          <FilterSelect
+            label="Sort posts"
+            value={sort}
+            onChange={(v) => setSort(v as SortKey)}
+            options={SORT_OPTIONS}
+            triggerClassName="w-44"
+          />
           <Input
             className="w-48"
             value={query}
@@ -355,7 +547,16 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                           >
                             {row.title}
                             {row.featured && (
-                              <span className="ml-1.5 text-warning">★</span>
+                              <StarFill
+                                aria-label="Featured in carousel"
+                                className="ml-1.5 inline size-3.5 align-text-top text-warning"
+                              />
+                            )}
+                            {row.homeFeatured && (
+                              <HouseFill
+                                aria-label="Featured on home page"
+                                className="ml-1.5 inline size-3.5 align-text-top text-warning"
+                              />
                             )}
                           </Link>
                           <p className="truncate text-xs text-muted">
@@ -429,6 +630,8 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                 key={row.id}
                 row={row}
                 onToggle={onToggleStatus}
+                onToggleFeatured={onToggleFeatured}
+                onToggleHomeFeatured={onToggleHomeFeatured}
                 onDelete={onDelete}
               />
             ))}

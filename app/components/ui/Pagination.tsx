@@ -1,91 +1,95 @@
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+"use client";
 
-/** Build the href for a page — page 1 is the bare hub URL (clean canonical). */
-function hrefFor(basePath: string, page: number): string {
-  return page <= 1 ? basePath : `${basePath}?page=${page}`;
-}
+import { useMemo } from "react";
+import { Pagination as HeroPagination } from "@heroui/react";
 
 /**
- * Compact page list with ellipses: always first/last, plus a window around the
- * current page.
- */
-function pageList(page: number, totalPages: number): (number | "…")[] {
-  const out: (number | "…")[] = [];
-  const window = 1;
-  for (let p = 1; p <= totalPages; p++) {
-    if (p === 1 || p === totalPages || (p >= page - window && p <= page + window)) {
-      out.push(p);
-    } else if (out[out.length - 1] !== "…") {
-      out.push("…");
-    }
-  }
-  return out;
-}
-
-/**
- * Crawlable numbered pagination for the unfiltered "browse" view of a blog hub.
- * Renders real <a> links to ?page=N so search engines can reach every article;
- * pair with rel="prev"/"next" <link>s in the hub page head. Only used when no
- * filter/search is active — filtered views paginate client-side instead.
+ * Numbered pagination for the unfiltered "browse" view of a blog hub, styled
+ * with the shared HeroUI Pagination primitive so it matches the admin table.
+ *
+ * Paging is client-side: `onPageChange` updates the owner's page state (which
+ * re-slices the already-loaded article set instantly and mirrors `?page=N` into
+ * the URL via replaceState — no server round-trip, no full re-render).
+ * Crawlability is preserved by the `rel="prev"/"next"` hints the hub page emits
+ * into <head>: a crawler loading `?page=N` directly gets the server-rendered
+ * slice, and `parsePage` seeds this control's initial page from that URL.
+ *
+ * Note: the page-list logic is kept inline (not a module-level helper) because
+ * the React Compiler instruments standalone functions with their own memo
+ * cache — invoking one from an event handler then throws "invalid hook call".
  */
 export default function Pagination({
-  basePath,
   page,
   totalPages,
+  onPageChange,
 }: {
-  basePath: string;
   page: number;
   totalPages: number;
+  onPageChange: (page: number) => void;
 }) {
+  // Compact page list with ellipses: always first/last, plus a window around
+  // the current page.
+  const pages = useMemo<(number | "ellipsis")[]>(() => {
+    const out: (number | "ellipsis")[] = [];
+    const window = 1;
+    for (let p = 1; p <= totalPages; p++) {
+      if (
+        p === 1 ||
+        p === totalPages ||
+        (p >= page - window && p <= page + window)
+      ) {
+        out.push(p);
+      } else if (out[out.length - 1] !== "ellipsis") {
+        out.push("ellipsis");
+      }
+    }
+    return out;
+  }, [page, totalPages]);
+
   if (totalPages <= 1) return null;
 
-  const linkCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-accent";
-  const currentCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-accent bg-[#FFF5F2] px-3 text-sm font-bold text-accent";
-  const disabledCls =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted";
+  const go = (p: number) => {
+    if (p < 1 || p > totalPages || p === page) return;
+    onPageChange(p);
+  };
 
   return (
-    <nav
-      aria-label="Pagination"
-      className="mx-auto flex max-w-360 flex-wrap items-center justify-center gap-2 px-6 pb-16 sm:px-10 lg:px-30"
-    >
-      {page > 1 ? (
-        <Link href={hrefFor(basePath, page - 1)} rel="prev" className={linkCls}>
-          ← Previous
-        </Link>
-      ) : (
-        <span aria-disabled className={disabledCls}>
-          ← Previous
-        </span>
-      )}
+    <HeroPagination className="mx-auto w-full max-w-360 flex-wrap justify-center gap-2 px-6 pb-16 sm:px-10 lg:px-30">
+      <HeroPagination.Content>
+        <HeroPagination.Item>
+          <HeroPagination.Previous
+            isDisabled={page <= 1}
+            onPress={() => go(page - 1)}
+          >
+            <HeroPagination.PreviousIcon />
+            <span>Previous</span>
+          </HeroPagination.Previous>
+        </HeroPagination.Item>
 
-      {pageList(page, totalPages).map((p, i) =>
-        p === "…" ? (
-          <span key={`gap-${i}`} className="px-1 text-sm text-muted">
-            …
-          </span>
-        ) : p === page ? (
-          <span key={p} aria-current="page" className={currentCls}>
-            {p}
-          </span>
-        ) : (
-          <Link key={p} href={hrefFor(basePath, p)} className={linkCls}>
-            {p}
-          </Link>
-        ),
-      )}
+        {pages.map((p, i) =>
+          p === "ellipsis" ? (
+            <HeroPagination.Item key={`ellipsis-${i}`}>
+              <HeroPagination.Ellipsis />
+            </HeroPagination.Item>
+          ) : (
+            <HeroPagination.Item key={p}>
+              <HeroPagination.Link isActive={p === page} onPress={() => go(p)}>
+                {p}
+              </HeroPagination.Link>
+            </HeroPagination.Item>
+          ),
+        )}
 
-      {page < totalPages ? (
-        <Link href={hrefFor(basePath, page + 1)} rel="next" className={linkCls}>
-          Next →
-        </Link>
-      ) : (
-        <span aria-disabled className={disabledCls}>
-          Next →
-        </span>
-      )}
-    </nav>
+        <HeroPagination.Item>
+          <HeroPagination.Next
+            isDisabled={page >= totalPages}
+            onPress={() => go(page + 1)}
+          >
+            <span>Next</span>
+            <HeroPagination.NextIcon />
+          </HeroPagination.Next>
+        </HeroPagination.Item>
+      </HeroPagination.Content>
+    </HeroPagination>
   );
 }

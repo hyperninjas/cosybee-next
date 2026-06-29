@@ -41,6 +41,7 @@ export interface AdminPost {
 
   // Featured/Carousel
   featured: boolean;
+  homeFeatured: boolean;
   carouselIntro: string | null;
   carouselBody: string | null;
 
@@ -70,8 +71,10 @@ export type AdminPostRow = Pick<
   | "slug"
   | "title"
   | "category"
+  | "tags"
   | "status"
   | "featured"
+  | "homeFeatured"
   | "coverImage"
   | "ogImage"
   | "updatedAt"
@@ -114,6 +117,7 @@ export interface PostInput {
 
   // Featured/Carousel
   featured?: boolean;
+  homeFeatured?: boolean;
   carouselIntro?: string | null;
   carouselBody?: string | null;
 
@@ -232,8 +236,10 @@ export const adminApi = {
         slug: p.slug,
         title: p.title,
         category: p.category,
+        tags: p.tags ?? [],
         status: p.status,
         featured: p.featured,
+        homeFeatured: p.homeFeatured,
         coverImage: p.coverImage,
         ogImage: p.ogImage ?? null,
         updatedAt: p.updatedAt,

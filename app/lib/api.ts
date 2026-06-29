@@ -47,6 +47,7 @@ export interface ApiPost {
 
   // Featured/Carousel
   featured: boolean;
+  homeFeatured: boolean;
   carouselIntro: string | null;
   carouselBody: string | null;
 
@@ -136,6 +137,11 @@ export const api = {
   /** Featured posts for carousel. */
   async getFeatured(blog: Blog): Promise<DataResponse<ApiPost[]>> {
     return fetchJson(`/api/posts/featured?blog=${blog}`, { data: [] });
+  },
+
+  /** Posts flagged for the home-page featured section. */
+  async getHomeFeatured(blog: Blog): Promise<DataResponse<ApiPost[]>> {
+    return fetchJson(`/api/posts/home-featured?blog=${blog}`, { data: [] });
   },
 
   /** Distinct categories for filter bar (now returns full Category objects). */

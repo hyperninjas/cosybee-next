@@ -81,9 +81,9 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
       <Link
         title={a.title}
         href={`${basePath}/${a.slug}`}
-        className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl"
+        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl"
       >
-        <div className="relative h-43">
+        <div className="relative h-50">
           <Image
             src={a.coverImage}
             alt={a.coverImageAlt}

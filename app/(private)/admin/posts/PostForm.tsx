@@ -23,6 +23,7 @@ import { CategoryPickerCard } from "./CategoryPickerCard";
 import { CoverImageCard } from "./CoverImageCard";
 import { CtaCard } from "./CtaCard";
 import { FeaturedCarouselCard } from "./FeaturedCarouselCard";
+import { HomeFeaturedCard } from "./HomeFeaturedCard";
 import { PostDetailsCard } from "./PostDetailsCard";
 import { ScheduleCard } from "./ScheduleCard";
 import { SeoCard } from "./SeoCard";
@@ -71,6 +72,7 @@ export type FormPost = {
 
   // Featured/Carousel
   featured: boolean;
+  homeFeatured: boolean;
   carouselIntro: string | null;
   carouselBody: string | null;
 
@@ -284,6 +286,7 @@ export default function PostForm({
 
   // ── Featured / Carousel ─────────────────────────────────────────────
   const [featured, setFeatured] = useState(post?.featured ?? false);
+  const [homeFeatured, setHomeFeatured] = useState(post?.homeFeatured ?? false);
   const [carouselIntro, setCarouselIntro] = useState(post?.carouselIntro ?? "");
   const [carouselBody, setCarouselBody] = useState(post?.carouselBody ?? "");
 
@@ -331,6 +334,7 @@ export default function PostForm({
     noindex,
     publishedAt,
     featured,
+    homeFeatured,
     carouselIntro,
     carouselBody,
     ctaLabel,
@@ -409,6 +413,11 @@ export default function PostForm({
       <input type="hidden" name="seoTitle" value={seoTitle} />
       <input type="hidden" name="seoDescription" value={seoDescription} />
       <input type="hidden" name="featured" value={featured ? "on" : ""} />
+      <input
+        type="hidden"
+        name="homeFeatured"
+        value={homeFeatured ? "on" : ""}
+      />
       <input type="hidden" name="carouselIntro" value={carouselIntro} />
       <input type="hidden" name="carouselBody" value={carouselBody} />
       <input type="hidden" name="ctaLabel" value={ctaEnabled ? ctaLabel : ""} />
@@ -624,6 +633,11 @@ export default function PostForm({
               setCarouselIntro={setCarouselIntro}
               carouselBody={carouselBody}
               setCarouselBody={setCarouselBody}
+            />
+
+            <HomeFeaturedCard
+              homeFeatured={homeFeatured}
+              setHomeFeatured={setHomeFeatured}
             />
 
             <CtaCard

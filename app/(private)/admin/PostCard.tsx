@@ -6,6 +6,10 @@ import {
   ArrowUpRightFromSquare,
   Eye,
   EyeSlash,
+  House,
+  HouseFill,
+  Star,
+  StarFill,
   TrashBin,
 } from "@gravity-ui/icons";
 import { Button, Card, Chip, Modal, Tooltip } from "@heroui/react";
@@ -45,13 +49,57 @@ const BLOG_CHIP_COLOR: Record<
  * + footer below, plus three inline action buttons (Preview / Publish-toggle
  * / Delete) instead of the table view's three-dot menu.
  */
+/** Circular cover toggle that doubles as a status indicator (filled when on,
+ *  outline when off). Click flips the flag via the supplied handler. */
+function CoverToggle({
+  active,
+  label,
+  ActiveIcon,
+  InactiveIcon,
+  onPress,
+}: {
+  active: boolean;
+  label: string;
+  ActiveIcon: React.ComponentType<{ className?: string }>;
+  InactiveIcon: React.ComponentType<{ className?: string }>;
+  onPress: () => void;
+}) {
+  return (
+    <Tooltip delay={300}>
+      <Button
+        isIconOnly
+        variant="ghost"
+        aria-label={label}
+        aria-pressed={active}
+        onPress={onPress}
+        className={`size-7 min-h-0 min-w-0 rounded-full p-0 shadow-sm ring-1 ring-black/10 backdrop-blur transition-colors ${
+          active
+            ? "bg-warning text-white hover:bg-warning/90"
+            : "bg-surface/95 text-muted hover:bg-surface hover:text-foreground"
+        }`}
+      >
+        {active ? (
+          <ActiveIcon className="size-3.5" />
+        ) : (
+          <InactiveIcon className="size-3.5" />
+        )}
+      </Button>
+      <Tooltip.Content>{label}</Tooltip.Content>
+    </Tooltip>
+  );
+}
+
 export function PostCard({
   row,
   onToggle,
+  onToggleFeatured,
+  onToggleHomeFeatured,
   onDelete,
 }: {
   row: Row;
   onToggle: (row: Row) => void;
+  onToggleFeatured: (row: Row) => void;
+  onToggleHomeFeatured: (row: Row) => void;
   onDelete: (row: Row) => void;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -84,15 +132,30 @@ export function PostCard({
             {isPublished ? "Published" : "Draft"}
           </span>
 
-          {row.featured && (
-            <span
-              aria-label="Featured"
-              title="Featured"
-              className="absolute right-3 top-3 inline-flex size-6 items-center justify-center rounded-full bg-surface/95 text-sm text-warning shadow-sm ring-1 ring-black/10 backdrop-blur"
-            >
-              ★
-            </span>
-          )}
+          <div className="absolute right-3 top-3 flex items-center gap-1.5">
+            <CoverToggle
+              active={row.homeFeatured}
+              label={
+                row.homeFeatured
+                  ? "Featured on home page — click to remove"
+                  : "Feature on home page"
+              }
+              ActiveIcon={HouseFill}
+              InactiveIcon={House}
+              onPress={() => onToggleHomeFeatured(row)}
+            />
+            <CoverToggle
+              active={row.featured}
+              label={
+                row.featured
+                  ? "Featured in carousel — click to remove"
+                  : "Feature in carousel"
+              }
+              ActiveIcon={StarFill}
+              InactiveIcon={Star}
+              onPress={() => onToggleFeatured(row)}
+            />
+          </div>
         </div>
 
         <div className="flex flex-1 flex-col p-4">

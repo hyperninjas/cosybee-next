@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { type Article, ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import { Section } from "@/app/components/ui/Section";
 import Pagination from "@/app/components/ui/Pagination";
@@ -34,6 +34,13 @@ type Props = {
   tag?: string;
   /** Current browse page (1-based). Only used when no filter is active. */
   page?: number;
+  /** Change the browse page (client-side; owner mirrors it to the URL). */
+  onPageChange?: (page: number) => void;
+  /** Whether the featured carousel is visible directly above this section.
+   *  When true the top padding collapses so the heading tucks under it; when
+   *  the carousel is hidden (no featured, page > 1, or filtering) the normal
+   *  top padding is kept so the section isn't flush against what's above. */
+  showFeatured?: boolean;
 };
 
 /**
@@ -54,7 +61,10 @@ export default function BlogLatestArticles({
   category = "All",
   tag = "",
   page = 1,
+  onPageChange,
+  showFeatured = false,
 }: Props) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
   const [visible, setVisible] = useState(ARTICLES_PER_PAGE);
 
@@ -89,12 +99,22 @@ export default function BlogLatestArticles({
 
   const heading = deriveHeading(query, category, tag);
 
+  // Page client-side, then bring the list heading back into view (mirrors the
+  // scroll-to-top a full navigation used to give) without re-rendering the page.
+  function handlePageChange(p: number) {
+    onPageChange?.(p);
+    headingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <Section
       spacing="none"
-      className={`mx-auto max-w-360 px-6 py-6 sm:px-10 lg:px-30 lg:py-8 ${heading === "Latest Articles" ? "pt-0 lg:pt-0" : ""} `}
+      className={`mx-auto max-w-360 px-6 py-6 sm:px-10 lg:px-30 lg:py-8 ${showFeatured ? "pt-0 lg:pt-0" : ""} `}
     >
-      <h2 className="text-2xl font-bold text-foreground sm:text-[32px]">
+      <h2
+        ref={headingRef}
+        className="scroll-mt-28 text-2xl font-bold text-foreground sm:text-[32px]"
+      >
         {heading}
       </h2>
       {filtered.length === 0 ? (
@@ -123,7 +143,11 @@ export default function BlogLatestArticles({
       )}
       {!isFiltered && (
         <div className="mt-12">
-          <Pagination basePath={basePath} page={page} totalPages={totalPages} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
     </Section>
