@@ -119,6 +119,7 @@ function toArticle(post: ApiPost): Article {
 
     // Featured/Carousel
     featured: post.featured ?? false,
+    homeFeatured: post.homeFeatured ?? false,
     carouselIntro: post.carouselIntro,
     carouselBody: post.carouselBody,
 
@@ -151,6 +152,26 @@ export async function getArticles(blog: Blog): Promise<Article[]> {
 export async function getFeatured(blog: Blog): Promise<Article[]> {
   const response = await api.getFeatured(blog);
   return response.data.map(toArticle);
+}
+
+/**
+ * Articles flagged for the home-page featured section. Pulls from both blogs
+ * (the home page isn't blog-scoped) and returns them newest-first. Each
+ * article keeps its own `blog`, so the card link resolves to `/hive` or
+ * `/learn` accordingly.
+ */
+export async function getHomeFeatured(): Promise<Article[]> {
+  const [hive, learn] = await Promise.all([
+    api.getHomeFeatured("hive"),
+    api.getHomeFeatured("learn"),
+  ]);
+  return [...hive.data, ...learn.data]
+    .map(toArticle)
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt ?? b.authorDate).getTime() -
+        new Date(a.publishedAt ?? a.authorDate).getTime(),
+    );
 }
 
 /** Distinct categories for a blog's filter bar (full Category objects). */

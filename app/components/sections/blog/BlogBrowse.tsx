@@ -41,11 +41,15 @@ export default function BlogBrowse({
   initialQuery = "",
   initialCategory = "All",
   initialTag = "",
-  page = 1,
+  page: initialPage = 1,
 }: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [tag, setTag] = useState(initialTag);
+  // Browse page is client state (seeded from the server-parsed ?page=). Paging
+  // re-slices the already-loaded set instantly; the effect below mirrors it
+  // into the URL via replaceState, so there's no server round-trip / re-render.
+  const [page, setPage] = useState(initialPage);
   const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
 
   // Mirror state into the URL so the view is shareable. replaceState keeps it
@@ -115,6 +119,11 @@ export default function BlogBrowse({
         category={category}
         tag={tag}
         page={page}
+        onPageChange={setPage}
+        // The carousel only occupies space (and warrants tucking the grid up
+        // under it) when there are featured posts, we're on page 1, and no
+        // filter is collapsing it.
+        showFeatured={featured.length > 0 && page === 1 && !isFiltered}
       />
     </>
   );

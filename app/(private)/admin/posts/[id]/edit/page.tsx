@@ -65,6 +65,7 @@ export default async function EditPostPage({
 
     // Featured/Carousel
     featured: post.featured,
+    homeFeatured: post.homeFeatured,
     carouselIntro: post.carouselIntro,
     carouselBody: post.carouselBody,
 

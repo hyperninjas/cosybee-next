@@ -2,10 +2,15 @@ import { CtaButton } from "@/app/components/ui/Cta";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import PageHero from "@/app/components/ui/PageHero";
 import heroBgImg from "@/public/Cover/energiebee-smart-cover.png";
+import heroBgImgMobile from "@/public/Cover/energiebee-smart-cover-mobile.png";
 
 export default function Hero() {
   return (
-    <PageHero bgImage={heroBgImg} imageAlt="hero image of smart ">
+    <PageHero
+      bgImage={heroBgImg}
+      bgImageMobile={heroBgImgMobile}
+      imageAlt="hero image of smart "
+>
       <Heading as="h1" variant="display" className="whitespace-pre-line">
         {"Works With \n Your "}
         <span className="text-[#EFDF18]">Smart Home</span>

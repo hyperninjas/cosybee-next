@@ -5,6 +5,8 @@ type Props = {
   title: string;
   description: string;
   bgImage: StaticImageData;
+  /** Optional mobile (under-sm) crop forwarded to PageHero. */
+  bgImageMobile?: StaticImageData;
   /** Optional breadcrumb trail rendered above the title (dark-tone). */
   crumbs?: { name: string; path: string }[];
 };
@@ -17,10 +19,11 @@ export default function BlogHero({
   title,
   description,
   bgImage,
+  bgImageMobile,
   crumbs,
 }: Props) {
   return (
-    <PageHero bgImage={bgImage} crumbs={crumbs}>
+    <PageHero bgImage={bgImage} bgImageMobile={bgImageMobile} crumbs={crumbs}>
       <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px] ">
         {title}
       </h1>

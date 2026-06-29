@@ -9,6 +9,10 @@ type Crumb = { name: string; path: string };
 type Props = {
   /** Full-bleed background cover. Static import so the blur placeholder works. */
   bgImage: StaticImageData;
+  /** Optional portrait/mobile crop shown below the `sm` breakpoint. When given,
+   *  `bgImage` is shown from `sm` up. next/image still serves viewport-sized
+   *  derivatives, so this is art direction (composition), not a size hack. */
+  bgImageMobile?: StaticImageData;
   /** Decorative by default (empty alt); pass a value only when meaningful. */
   imageAlt?: string;
   /** Optional dark-tone breadcrumb trail rendered above the content. */
@@ -27,6 +31,7 @@ type Props = {
  */
 export default function PageHero({
   bgImage,
+  bgImageMobile,
   imageAlt = "",
   crumbs,
   children,
@@ -39,6 +44,19 @@ export default function PageHero({
     >
       {/* background photo + gradient */}
       <div aria-hidden className="absolute inset-0 -z-20">
+        {bgImageMobile && (
+          <Image
+            src={bgImageMobile}
+            alt={imageAlt}
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={85}
+            placeholder="blur"
+            className="object-cover object-center sm:hidden"
+          />
+        )}
         <Image
           src={bgImage}
           alt={imageAlt}
@@ -48,7 +66,7 @@ export default function PageHero({
           sizes="100vw"
           quality={85}
           placeholder="blur"
-          className="object-cover object-center"
+          className={`object-cover object-center ${bgImageMobile ? "hidden sm:block" : ""}`}
         />
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
       </div>

@@ -93,6 +93,9 @@ export type Article = {
 
   // Featured/Carousel
   featured: boolean;
+  /** Marks the article for the dedicated featured section on the home page
+   *  (independent of `featured`, which drives the blog carousel). */
+  homeFeatured: boolean;
   carouselIntro: string | null;
   carouselBody: string | null;
 
