@@ -86,10 +86,12 @@ function SelectField({
   return (
     <Select
       aria-label={ariaLabel}
+      variant="secondary"
+      fullWidth
       selectedKey={value}
       onSelectionChange={(k) => onChange(String(k))}
     >
-      <Select.Trigger className="w-full">
+      <Select.Trigger>
         <Select.Value />
         <Select.Indicator />
       </Select.Trigger>

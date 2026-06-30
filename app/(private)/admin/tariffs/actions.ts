@@ -26,12 +26,16 @@ function optStr(form: FormData, key: string): string | null {
 }
 
 /**
- * Autocomplete search. Returns full tariffs (provider + all region rates), so
- * selecting a result needs no extra fetch.
+ * All tariffs for one provider — populates the tariff autocomplete after a
+ * provider is picked. Returns full tariffs (provider + all region rates) so
+ * selecting one needs no extra fetch.
  */
-export async function searchTariffsAction(q: string): Promise<TariffDTO[]> {
+export async function listTariffsByProviderAction(
+  providerId: string,
+): Promise<TariffDTO[]> {
   await assertAdmin();
-  return adminApi.listTariffs({ q: q.trim() || undefined, limit: 20 });
+  // 100 is the API's max page size; a single provider won't exceed it.
+  return adminApi.listTariffs({ providerId, limit: 100 });
 }
 
 /**
