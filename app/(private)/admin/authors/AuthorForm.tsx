@@ -170,8 +170,14 @@ export default function AuthorForm({
         <Card.Content className="space-y-3">
           <PublicImageUpload
             context="author-avatar"
+            library
+            libraryFolderSlug="author-avatars"
             value={avatarUrl || null}
             onChange={(url) => setAvatarUrl(url ?? "")}
+            onPickFromLibrary={(m) => {
+              // Prefill alt from the chosen asset when the field is empty.
+              if (m.alt) setAvatarAlt((prev) => prev || m.alt || "");
+            }}
             alt={avatarAlt || name}
           />
           <input type="hidden" name="avatarUrl" value={avatarUrl} />

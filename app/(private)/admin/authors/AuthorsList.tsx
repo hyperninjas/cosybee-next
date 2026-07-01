@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, useOverlayState } from "@heroui/react";
 import type { Author } from "@/app/lib/article-types";
 import { AppAvatar } from "@/app/components/ui/AppAvatar";
@@ -28,6 +28,28 @@ export function AuthorsList({ authors }: { authors: Author[] }) {
     setEditing(a);
     overlay.open();
   };
+
+  // Deep link: /admin/authors?edit={authorId} (e.g. the media library's
+  // "used by author" link) auto-opens that author's edit modal once on mount.
+  // Reads the URL directly (no useSearchParams → no Suspense requirement).
+  const didAutoEdit = useRef(false);
+  useEffect(() => {
+    if (didAutoEdit.current) return;
+    const editId = new URLSearchParams(window.location.search).get("edit");
+    if (!editId) return;
+    const author = authors.find((a) => a.id === editId);
+    if (!author) return;
+    didAutoEdit.current = true;
+    // Defined inline (like useIsDesktop elsewhere) so this reads as a one-off
+    // sync from the URL, not a cascading in-effect setState.
+    const openForDeepLink = () => {
+      setEditing(author);
+      overlay.open();
+    };
+    openForDeepLink();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authors]);
+
   const openDelete = (a: Author) => {
     setDeleting(a);
     deleteOverlay.open();

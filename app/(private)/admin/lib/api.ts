@@ -615,8 +615,16 @@ export interface TariffRegionRateDTO {
   sourceName: string;
   electricity?: { unitRate?: number; standingCharge?: number };
   economy7?: { dayRate?: number; nightRate?: number; standingCharge?: number };
-  timeOfUse?: { peakRate?: number; offPeakRate?: number };
+  timeOfUse?: {
+    peakRate?: number;
+    offPeakRate?: number;
+    /** Peak-window start/end hour (0–23). */
+    peakStartHour?: number;
+    peakEndHour?: number;
+  };
   gas?: { unitRate?: number; standingCharge?: number };
+  /** Smart Export Guarantee export rate (p/kWh). */
+  segExport?: number;
 }
 
 export interface TariffProviderRefDTO {
@@ -682,6 +690,10 @@ export interface TariffRegionRateInput {
   offPeakUnit?: number | null;
   gasUnit?: number | null;
   gasStanding?: number | null;
+  /** Peak-window hours (0–23) + SEG export rate (p/kWh). */
+  peakStartHour?: number | null;
+  peakEndHour?: number | null;
+  segExportUnit?: number | null;
 }
 
 export interface CreateTariffInput {

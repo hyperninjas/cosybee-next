@@ -124,6 +124,8 @@ export function MediaTable({
             >
               {(row) => {
                 const m = row.media;
+                // In use by any post OR author avatar — blocks deletion.
+                const inUse = m.usages.length + m.authorUsages.length;
                 return (
                   <Table.Row
                     id={row.id}
@@ -176,13 +178,9 @@ export function MediaTable({
                       </div>
                     </Table.Cell>
                     <Table.Cell className="text-center">
-                      {m.usages.length > 0 ? (
-                        <Chip
-                          size="sm"
-                          color="accent"
-                          title={`Used in ${m.usages.length} ${m.usages.length === 1 ? "post" : "posts"}`}
-                        >
-                          {m.usages.length}
+                      {inUse > 0 ? (
+                        <Chip size="sm" color="accent" title={`In use (${inUse})`}>
+                          {inUse}
                         </Chip>
                       ) : (
                         <span className="text-muted">—</span>
@@ -213,16 +211,14 @@ export function MediaTable({
                             size="sm"
                             variant="ghost"
                             aria-label="Delete"
-                            isDisabled={m.usages.length > 0}
+                            isDisabled={inUse > 0}
                             onPress={() => askDelete(m)}
                             className="hover:text-danger"
                           >
                             <TrashBin className="size-4" />
                           </Button>
                           <Tooltip.Content>
-                            {m.usages.length > 0
-                              ? "In use — can't delete"
-                              : "Delete"}
+                            {inUse > 0 ? "In use — can't delete" : "Delete"}
                           </Tooltip.Content>
                         </Tooltip>
                       </div>

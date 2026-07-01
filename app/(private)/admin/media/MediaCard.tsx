@@ -46,7 +46,8 @@ export function MediaCard({
   onOpen: (m: MediaItem) => void;
   onDeleted: (id: string) => void;
 }) {
-  const uses = media.usages.length;
+  // In use by any post OR author avatar — blocks deletion.
+  const uses = media.usages.length + media.authorUsages.length;
   const deleteOverlay = useOverlayState();
   const thumbSrc = media.thumbnailUrl ?? (media.kind === "image" ? media.url : null);
 

@@ -2,8 +2,23 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, Button, Chip, Input, Modal, Table } from "@heroui/react";
-import { Pencil, StarFill, TrashBin, Xmark } from "@gravity-ui/icons";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Chip,
+  Input,
+  Modal,
+  Popover,
+  Table,
+} from "@heroui/react";
+import {
+  LayoutColumns,
+  Pencil,
+  StarFill,
+  TrashBin,
+  Xmark,
+} from "@gravity-ui/icons";
 import type {
   TariffDTO,
   TariffRegionDTO,
@@ -67,6 +82,20 @@ const COLS = [
     group: "Time of use",
   },
   {
+    key: "peakStartHour",
+    short: "Peak start",
+    label: "Peak start",
+    hint: "0–23 h",
+    group: "Time of use",
+  },
+  {
+    key: "peakEndHour",
+    short: "Peak end",
+    label: "Peak end",
+    hint: "0–23 h",
+    group: "Time of use",
+  },
+  {
     key: "gasUnit",
     short: "Gas unit",
     label: "Unit rate",
@@ -80,10 +109,30 @@ const COLS = [
     hint: "p/day",
     group: "Gas",
   },
+  {
+    key: "segExportUnit",
+    short: "SEG export",
+    label: "Export rate",
+    hint: "p/kWh",
+    group: "Export",
+  },
 ] as const;
 type ColKey = (typeof COLS)[number]["key"];
 
-const GROUP_ORDER = ["Electricity", "Economy 7", "Time of use", "Gas"] as const;
+const GROUP_ORDER = [
+  "Electricity",
+  "Economy 7",
+  "Time of use",
+  "Gas",
+  "Export",
+] as const;
+
+/** Hour-of-day columns (integer 0–23) — validated + rendered differently from
+ *  the decimal p/kWh & p/day rate columns. */
+const HOUR_KEYS = new Set<ColKey>(["peakStartHour", "peakEndHour"]);
+
+/** localStorage key for the admin's per-browser column-visibility choice. */
+const COLS_STORAGE_KEY = "admin.tariffRates.hiddenCols";
 
 type FlatRow = Record<ColKey, number | undefined>;
 
@@ -106,8 +155,11 @@ function flatten(r?: TariffRegionRateDTO): FlatRow {
     e7Standing: r?.economy7?.standingCharge,
     peakUnit: r?.timeOfUse?.peakRate,
     offPeakUnit: r?.timeOfUse?.offPeakRate,
+    peakStartHour: r?.timeOfUse?.peakStartHour,
+    peakEndHour: r?.timeOfUse?.peakEndHour,
     gasUnit: r?.gas?.unitRate,
     gasStanding: r?.gas?.standingCharge,
+    segExportUnit: r?.segExport,
   };
 }
 
@@ -240,6 +292,67 @@ export function TariffRatesTable({
   const router = useRouter();
   const isDesktop = useIsDesktop();
 
+  // Read-only-table column visibility. The edit panel ALWAYS shows every field,
+  // so hiding a column never blocks editing that value. Persisted per browser;
+  // hydrated after mount so SSR/first paint render all columns (no mismatch).
+  const [hiddenCols, setHiddenCols] = useState<Set<ColKey>>(() => new Set());
+  useEffect(() => {
+    // Sync from the localStorage store once on mount. Wrapped in a helper (like
+    // useIsDesktop below) so it reads as an external-store read, not a
+    // cascading in-effect setState.
+    const hydrate = () => {
+      try {
+        const saved: unknown = JSON.parse(
+          window.localStorage.getItem(COLS_STORAGE_KEY) ?? "[]",
+        );
+        if (!Array.isArray(saved)) return;
+        const valid = new Set<string>(COLS.map((c) => c.key));
+        setHiddenCols(
+          new Set(saved.filter((k): k is ColKey => valid.has(k as string))),
+        );
+      } catch {
+        /* ignore malformed / unavailable storage */
+      }
+    };
+    hydrate();
+  }, []);
+
+  function applyHiddenCols(next: Set<ColKey>) {
+    setHiddenCols(next);
+    try {
+      window.localStorage.setItem(COLS_STORAGE_KEY, JSON.stringify([...next]));
+    } catch {
+      /* storage may be unavailable (private mode) */
+    }
+  }
+  function setColShown(key: ColKey, shown: boolean) {
+    const next = new Set(hiddenCols);
+    if (shown) next.delete(key);
+    else next.add(key);
+    applyHiddenCols(next);
+  }
+  function setGroupShown(group: string, shown: boolean) {
+    const next = new Set(hiddenCols);
+    for (const c of COLS) {
+      if (c.group !== group) continue;
+      if (shown) next.delete(c.key);
+      else next.add(c.key);
+    }
+    applyHiddenCols(next);
+  }
+
+  const visibleCols = COLS.filter((c) => !hiddenCols.has(c.key));
+  // Shrink the table's min-width as columns are hidden so hiding actually
+  // reclaims horizontal space (static classes so Tailwind can scan them).
+  const tableMinW =
+    visibleCols.length >= 9
+      ? "min-w-250"
+      : visibleCols.length >= 6
+        ? "min-w-200"
+        : visibleCols.length >= 3
+          ? "min-w-150"
+          : "min-w-100";
+
   // Keep transition duration (ms) in one place — must match `duration-300`.
   const ANIM_MS = 300;
 
@@ -343,12 +456,21 @@ export function TariffRatesTable({
       }
       const n = Number(v);
       if (Number.isNaN(n) || n < 0) {
-        setError("Rates must be non-negative numbers (leave blank to clear).");
+        setError("Values must be non-negative numbers (leave blank to clear).");
         return;
       }
-      // DB stores Decimal(7,3): max 9999.999, 3 decimal places. Enforce the
-      // bound and round to 3dp so the saved value matches what's shown (the DB
-      // would otherwise round silently).
+      if (HOUR_KEYS.has(c.key)) {
+        // Peak-window hours: whole numbers 0–23.
+        if (!Number.isInteger(n) || n > 23) {
+          setError("Peak hours must be whole numbers between 0 and 23.");
+          return;
+        }
+        parsed[c.key] = n;
+        continue;
+      }
+      // Rates: DB stores Decimal(7,3) — max 9999.999, 3 decimal places. Enforce
+      // the bound and round to 3dp so the saved value matches what's shown (the
+      // DB would otherwise round silently).
       if (n > 9999.999) {
         setError("Rates must be 9999.999 or less.");
         return;
@@ -421,10 +543,10 @@ export function TariffRatesTable({
                 id={`rate-${c.key}`}
                 variant="secondary"
                 type="number"
-                inputMode="decimal"
+                inputMode={HOUR_KEYS.has(c.key) ? "numeric" : "decimal"}
                 min={0}
-                max={9999.999}
-                step={0.001}
+                max={HOUR_KEYS.has(c.key) ? 23 : 9999.999}
+                step={HOUR_KEYS.has(c.key) ? 1 : 0.001}
                 value={draft[c.key] ?? ""}
                 onChange={(e) => setField(c.key, e.target.value)}
                 className="w-24 text-end"
@@ -481,17 +603,92 @@ export function TariffRatesTable({
             from its row action
           </p>
         </div>
-        {onDeleteTariff && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 text-danger"
-            onPress={onDeleteTariff}
-          >
-            <TrashBin className="size-4" />
-            Delete
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          <Popover>
+            <Popover.Trigger className="inline-flex items-center gap-1.5 rounded-3xl border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-white">
+              <LayoutColumns className="size-4" />
+              Columns
+            </Popover.Trigger>
+            <Popover.Content className="w-64">
+              <Popover.Dialog className="flex max-h-[min(60vh,28rem)] flex-col overflow-hidden p-0">
+                <div className="flex shrink-0 items-center justify-between border-b border-border px-3 py-2">
+                  <span className="text-xs font-semibold text-muted">
+                    Show columns
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => applyHiddenCols(new Set())}
+                    className="text-xs font-medium text-accent hover:underline"
+                  >
+                    Show all
+                  </button>
+                </div>
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
+                  {GROUP_ORDER.map((group) => {
+                    const groupCols = COLS.filter((c) => c.group === group);
+                    const shown = groupCols.filter(
+                      (c) => !hiddenCols.has(c.key),
+                    ).length;
+                    return (
+                      <div key={group} className="space-y-1.5">
+                        <Checkbox
+                          isSelected={shown === groupCols.length}
+                          isIndeterminate={
+                            shown > 0 && shown < groupCols.length
+                          }
+                          onChange={(v) => setGroupShown(group, v)}
+                          className="items-center gap-2"
+                        >
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          <Checkbox.Content>
+                            <span className="text-sm font-semibold text-foreground">
+                              {group}
+                            </span>
+                          </Checkbox.Content>
+                        </Checkbox>
+                        <div className="ml-6 flex flex-col gap-1.5">
+                          {groupCols.map((c) => (
+                            <Checkbox
+                              key={c.key}
+                              isSelected={!hiddenCols.has(c.key)}
+                              onChange={(v) => setColShown(c.key, v)}
+                              className="items-center gap-2"
+                            >
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                              <Checkbox.Content>
+                                <span className="text-sm text-foreground">
+                                  {c.label}{" "}
+                                  <span className="text-xs text-muted">
+                                    ({c.hint})
+                                  </span>
+                                </span>
+                              </Checkbox.Content>
+                            </Checkbox>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Popover.Dialog>
+            </Popover.Content>
+          </Popover>
+          {onDeleteTariff && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-danger"
+              onPress={onDeleteTariff}
+            >
+              <TrashBin className="size-4" />
+              Delete
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Table + inline edit panel. The grid ALWAYS has two tracks so only the
@@ -511,11 +708,11 @@ export function TariffRatesTable({
             <Table.ScrollContainer className="overflow-x-auto">
               <Table.Content
                 aria-label={`Regional rates for ${tariff.name}`}
-                className="min-w-250"
+                className={tableMinW}
               >
                 <Table.Header>
                   <Table.Column isRowHeader>Region</Table.Column>
-                  {COLS.map((c) => (
+                  {visibleCols.map((c) => (
                     <Table.Column key={c.key} className="text-end">
                       <span className="block">{c.short}</span>
                       <span className="block text-[10px] font-normal text-muted">
@@ -543,7 +740,7 @@ export function TariffRatesTable({
                           #{row.regionId}
                         </span>
                       </Table.Cell>
-                      {COLS.map((c) => (
+                      {visibleCols.map((c) => (
                         <Table.Cell
                           key={c.key}
                           className="text-end tabular-nums"

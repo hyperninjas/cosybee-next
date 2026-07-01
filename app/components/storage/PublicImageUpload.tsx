@@ -26,6 +26,7 @@ export function PublicImageUpload({
   credit,
   previewHeight = "h-48",
   library = false,
+  libraryFolderSlug,
   onPickFromLibrary,
 }: {
   context:
@@ -41,6 +42,10 @@ export function PublicImageUpload({
    *  gallery, gets a thumbnail, and is usage-tracked against the post. The
    *  `context` is then used only for the file-type allowlist + size label. */
   library?: boolean;
+  /** In `library` mode, new uploads are placed in this root folder (found or
+   *  created by slug, e.g. "author-avatars") instead of unfiled. Picking an
+   *  existing asset from the library is unaffected. */
+  libraryFolderSlug?: string;
   /** Called (in addition to `onChange`) when an existing asset is chosen from
    *  the library, so the caller can pull the asset's alt/title/caption/credit
    *  into its own fields. Only fires in `library` mode. */
@@ -98,13 +103,31 @@ export function PublicImageUpload({
       setClientError(null);
       setLocalPreview(URL.createObjectURL(file));
       try {
-        const { fileUrl } = await upload(file, { alt, title, caption, credit });
+        const { fileUrl } = await upload(file, {
+          alt,
+          title,
+          caption,
+          credit,
+          ...(library && libraryFolderSlug
+            ? { folderSlug: libraryFolderSlug }
+            : {}),
+        });
         onChange(fileUrl);
       } catch {
         setLocalPreview(null);
       }
     },
-    [context, library, upload, onChange, alt, title, caption, credit],
+    [
+      context,
+      library,
+      libraryFolderSlug,
+      upload,
+      onChange,
+      alt,
+      title,
+      caption,
+      credit,
+    ],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

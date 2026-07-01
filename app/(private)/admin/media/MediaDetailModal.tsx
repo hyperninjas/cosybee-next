@@ -12,6 +12,7 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import NextImage from "next/image";
+import { ArrowUpRightFromSquare } from "@gravity-ui/icons";
 import {
   deleteLibraryMedia,
   replaceMediaThumbnail,
@@ -20,12 +21,23 @@ import {
   type MediaItem,
 } from "@/app/lib/storage";
 import type { Tag } from "@/app/lib/article-types";
-import { formatBytes, formatDuration, KIND_LABEL, KindIcon } from "./media-utils";
+import {
+  formatBytes,
+  formatDuration,
+  KIND_LABEL,
+  KindIcon,
+} from "./media-utils";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 const UNFILED = "__unfiled__";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block space-y-1">
       <span className="text-xs font-semibold text-foreground">{label}</span>
@@ -131,13 +143,17 @@ function DetailContent({
     if (!value) return;
     setTagInput("");
     // If it already exists, just select it rather than creating a duplicate.
-    const existing = allTags.find((t) => t.name.toLowerCase() === value.toLowerCase());
+    const existing = allTags.find(
+      (t) => t.name.toLowerCase() === value.toLowerCase(),
+    );
     if (existing) {
       setTagIds((prev) => new Set(prev).add(existing.id));
       return;
     }
     setNewTags((prev) =>
-      prev.some((n) => n.toLowerCase() === value.toLowerCase()) ? prev : [...prev, value],
+      prev.some((n) => n.toLowerCase() === value.toLowerCase())
+        ? prev
+        : [...prev, value],
     );
   }
 
@@ -178,7 +194,8 @@ function DetailContent({
     }
   }
 
-  const dimensions = media.width && media.height ? `${media.width}×${media.height}` : null;
+  const dimensions =
+    media.width && media.height ? `${media.width}×${media.height}` : null;
   const duration = formatDuration(media.durationMs);
 
   return (
@@ -229,7 +246,9 @@ function DetailContent({
           </div>
           <div className="flex justify-between gap-2">
             <dt className="text-muted">Size</dt>
-            <dd className="font-medium text-foreground">{formatBytes(media.sizeBytes)}</dd>
+            <dd className="font-medium text-foreground">
+              {formatBytes(media.sizeBytes)}
+            </dd>
           </div>
           {dimensions && (
             <div className="flex justify-between gap-2">
@@ -380,7 +399,12 @@ function DetailContent({
               placeholder="Type a tag and press Enter"
               className="flex-1"
             />
-            <Button size="sm" variant="secondary" onPress={addTypedTag} isDisabled={!tagInput.trim()}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onPress={addTypedTag}
+              isDisabled={!tagInput.trim()}
+            >
               Add
             </Button>
           </div>
@@ -397,7 +421,9 @@ function DetailContent({
                   <button
                     type="button"
                     aria-label={`Remove ${n}`}
-                    onClick={() => setNewTags((prev) => prev.filter((x) => x !== n))}
+                    onClick={() =>
+                      setNewTags((prev) => prev.filter((x) => x !== n))
+                    }
                     className="text-accent/70 hover:text-accent"
                   >
                     ✕
@@ -409,7 +435,9 @@ function DetailContent({
 
           {/* Existing tag vocabulary — click to toggle */}
           {allTags.length === 0 ? (
-            <p className="text-xs text-muted">No saved tags yet — type above to create one.</p>
+            <p className="text-xs text-muted">
+              No saved tags yet — type above to create one.
+            </p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {allTags.map((t) => {
@@ -436,25 +464,63 @@ function DetailContent({
         {/* Usages */}
         <div className="space-y-1.5">
           <span className="text-xs font-semibold text-foreground">
-            Used in {media.usages.length} {media.usages.length === 1 ? "post" : "posts"}
+            Used in {media.usages.length}{" "}
+            {media.usages.length === 1 ? "post" : "posts"}
           </span>
           {media.usages.length > 0 && (
             <ul className="divide-y divide-border rounded-lg border border-border">
               {media.usages.map((u) => (
-                <li
-                  key={`${u.postId}-${u.role}`}
-                  className="flex items-center justify-between gap-3 px-3 py-2 text-xs"
-                >
-                  <span className="min-w-0 flex-1 truncate text-foreground">{u.title}</span>
-                  <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
-                    {u.role}
-                  </span>
-                  <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted">
-                    {u.status}
-                  </span>
+                <li key={`${u.postId}-${u.role}`}>
+                  <a
+                    href={`/admin/posts/${u.postId}/edit`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Edit post in a new tab"
+                    className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                      {u.title}
+                    </span>
+                    <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+                      {u.role}
+                    </span>
+                    <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted">
+                      {u.status}
+                    </span>
+                    <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
+                  </a>
                 </li>
               ))}
             </ul>
+          )}
+          {media.authorUsages.length > 0 && (
+            <>
+              <span className="text-xs font-semibold text-foreground ml-1">
+                Used by {media.authorUsages.length}{" "}
+                {media.authorUsages.length === 1 ? "author" : "authors"}
+              </span>
+              <ul className="divide-y divide-border rounded-lg border border-border">
+                {media.authorUsages.map((a) => (
+                  <li key={a.authorId}>
+                    <a
+                      href={`/admin/authors?edit=${a.authorId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Edit author in a new tab"
+                      className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                        {a.name}
+                      </span>
+                      <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+                        avatar
+                      </span>
+                      <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </Modal.Body>
@@ -463,7 +529,7 @@ function DetailContent({
           variant="ghost"
           className="text-danger"
           onPress={() => deleteOverlay.open()}
-          isDisabled={media.usages.length > 0}
+          isDisabled={media.usages.length > 0 || media.authorUsages.length > 0}
         >
           Delete
         </Button>

@@ -45,6 +45,8 @@ export interface ConfirmMetadata {
   height?: number;
   name?: string;
   folderId?: string | null;
+  /** Root folder slug to find-or-create for placement (e.g. "author-avatars"). */
+  folderSlug?: string | null;
   // Browser-generated derivatives (Canvas / ffmpeg.wasm).
   thumbnailKey?: string;
   thumbnailUrl?: string;
@@ -380,6 +382,13 @@ export interface MediaUsage {
   status: string;
 }
 
+/** An author whose avatar references this media (blocks library deletion). */
+export interface MediaAuthorUsage {
+  authorId: string;
+  name: string;
+  slug: string;
+}
+
 export interface MediaItem {
   id: string;
   key: string;
@@ -405,6 +414,7 @@ export interface MediaItem {
   visibility: string;
   tags: MediaTagRef[];
   usages: MediaUsage[];
+  authorUsages: MediaAuthorUsage[];
   createdAt: string;
   updatedAt: string;
 }
@@ -553,6 +563,8 @@ export function deleteFolder(id: string): Promise<{ deleted: boolean }> {
 export interface LibraryUploadMeta {
   name?: string;
   folderId?: string | null;
+  /** Root folder slug to find-or-create for placement (e.g. "author-avatars"). */
+  folderSlug?: string | null;
   alt?: string;
   title?: string;
   caption?: string;
@@ -612,6 +624,7 @@ export async function uploadLibraryFile(
   return confirmObject(key, {
     name: meta.name ?? nameFromFilename(file.name),
     folderId: meta.folderId ?? null,
+    folderSlug: meta.folderSlug ?? undefined,
     alt: meta.alt,
     title: meta.title,
     caption: meta.caption,
