@@ -114,6 +114,9 @@ function ChevronDownIcon({ className }: { className?: string }) {
 const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100] as const;
 
+/** Id of the scroll anchor at the top of the results (paging scrolls to it). */
+const LIST_TOP_ID = "media-list-top";
+
 const KIND_TABS = [
   { key: "ALL", label: "All" },
   { key: "image", label: "Images" },
@@ -403,6 +406,17 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   const rangeEnd = Math.min(page * pageSize, total);
   const showNumbered = totalPages > 1 && totalPages <= 7;
 
+  // Change page + scroll the results back into view (clamped to valid range).
+  // Uses an id anchor rather than a ref so the scroll stays out of render.
+  function goToPage(next: number) {
+    const clamped = Math.min(Math.max(1, next), totalPages);
+    if (clamped === page) return;
+    setPage(clamped);
+    document
+      .getElementById(LIST_TOP_ID)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -481,7 +495,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
           />
         </div>
 
-        <div className="min-w-0 flex-1 space-y-4">
+        {/* id + scroll-mt make this column the pagination scroll target
+            (scroll-mt clears the sticky admin header). */}
+        <div id={LIST_TOP_ID} className="min-w-0 flex-1 space-y-4 scroll-mt-24">
           {/* Toolbar: kind filter + view toggle on one tier; tag filter,
               refresh + search on another. Collapses to stacked rows on
               narrow screens and lines up on a single row from xl up. */}
@@ -679,7 +695,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                     <Pagination.Item>
                       <Pagination.Previous
                         isDisabled={page <= 1}
-                        onPress={() => setPage((p) => Math.max(1, p - 1))}
+                        onPress={() => goToPage(page - 1)}
                       >
                         <Pagination.PreviousIcon /> Prev
                       </Pagination.Previous>
@@ -691,7 +707,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                           <Pagination.Item key={p} className="hidden sm:flex">
                             <Pagination.Link
                               isActive={p === page}
-                              onPress={() => setPage(p)}
+                              onPress={() => goToPage(p)}
                             >
                               {p}
                             </Pagination.Link>
@@ -702,9 +718,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                     <Pagination.Item>
                       <Pagination.Next
                         isDisabled={page >= totalPages}
-                        onPress={() =>
-                          setPage((p) => Math.min(totalPages, p + 1))
-                        }
+                        onPress={() => goToPage(page + 1)}
                       >
                         Next <Pagination.NextIcon />
                       </Pagination.Next>

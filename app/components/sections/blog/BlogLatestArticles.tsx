@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type Article, ARTICLES_PER_PAGE } from "@/app/lib/article-types";
 import { Section } from "@/app/components/ui/Section";
 import Pagination from "@/app/components/ui/Pagination";
@@ -8,13 +8,6 @@ import { Button } from "@heroui/react";
 import { ArticleCard } from "./ArticleCard";
 
 const LOAD_STEP = 6;
-
-function matchesArticle(a: Article, q: string) {
-  if (!q) return true;
-  const haystack =
-    `${a.title} ${a.description} ${a.author?.name ?? ""} ${a.category?.name ?? ""} ${a.tags.map((t) => t.name).join(" ")}`.toLowerCase();
-  return haystack.includes(q);
-}
 
 /** Derive the section heading from the active filter, if any. */
 function deriveHeading(query: string, category: string, tag: string): string {
@@ -79,12 +72,20 @@ export default function BlogLatestArticles({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return articles.filter(
-      (a) =>
-        (category === "All" || a.category?.name === category) &&
-        (!tag || a.tags.some((t) => t.name === tag)) &&
-        matchesArticle(a, q),
-    );
+    // Matching is inlined (not a module-level helper) — the React Compiler
+    // instruments standalone functions with their own memo cache, and calling
+    // one inside `.filter` (a render-time loop) throws a useMemoCache size
+    // mismatch. See the react-compiler-helper-gotcha note.
+    return articles.filter((a) => {
+      if (category !== "All" && a.category?.name !== category) return false;
+      if (tag && !a.tags.some((t) => t.name === tag)) return false;
+      if (!q) return true;
+      const haystack =
+        `${a.title} ${a.description} ${a.author?.name ?? ""} ${a.category?.name ?? ""} ${a.tags
+          .map((t) => t.name)
+          .join(" ")}`.toLowerCase();
+      return haystack.includes(q);
+    });
   }, [articles, query, category, tag]);
 
   // Browse mode → slice to the current page; filter mode → Load-More reveal.
@@ -99,11 +100,23 @@ export default function BlogLatestArticles({
 
   const heading = deriveHeading(query, category, tag);
 
-  // Page client-side, then bring the list heading back into view (mirrors the
-  // scroll-to-top a full navigation used to give) without re-rendering the page.
+  // Scroll the heading into view after a page change — deferred to an effect
+  // (not run inline in the click handler) so it fires AFTER React commits the
+  // new layout. This matters because the parent renders the featured carousel
+  // only on page 1, so paging across the page-1 boundary mounts/unmounts that
+  // block above this section; scrolling synchronously would target the stale
+  // pre-shift position and overshoot. Skip the initial mount.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    headingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [page]);
+
   function handlePageChange(p: number) {
     onPageChange?.(p);
-    headingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
