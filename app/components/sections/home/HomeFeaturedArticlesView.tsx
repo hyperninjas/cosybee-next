@@ -71,7 +71,7 @@ const GRID_COLS: Record<number, string> = {
 function FeaturedGrid({ articles }: { articles: Article[] }) {
   return (
     <div
-      className={`mt-8 grid gap-6 ${GRID_COLS[articles.length] ?? GRID_COLS[4]}`}
+      className={`mt-8 mb-6 grid gap-6 ${GRID_COLS[articles.length] ?? GRID_COLS[4]}`}
     >
       {articles.map((a) => (
         <ArticleCard

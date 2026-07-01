@@ -59,7 +59,7 @@ function ClearButton({
       type="button"
       aria-label={label}
       onClick={onClear}
-      className="absolute inset-y-0 end-8 my-auto flex size-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-foreground/10 hover:text-foreground"
+      className="absolute inset-y-0 inset-e-8 my-auto flex size-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-foreground/10 hover:text-foreground"
     >
       <Xmark className="size-4" />
     </button>
