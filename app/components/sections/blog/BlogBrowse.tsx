@@ -52,6 +52,11 @@ export default function BlogBrowse({
   const [page, setPage] = useState(initialPage);
   const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
 
+  // Featured carousel visibility. Hidden when filtering or off page 1; the
+  // collapse is instant only for the pagination case (see the JSX comment).
+  const featuredHidden = isFiltered || page !== 1;
+  const featuredInstant = page !== 1 && !isFiltered;
+
   // Mirror state into the URL so the view is shareable. replaceState keeps it
   // instant (no server round-trip / no history spam). When filtering we encode
   // ?q/?category/?tag; when just browsing we keep ?page (set by the crawlable
@@ -80,15 +85,23 @@ export default function BlogBrowse({
         onCategoryChange={setCategory}
       />
       <Divider />
-      {featured.length > 0 && page === 1 && (
+      {featured.length > 0 && (
         <div
-          // `inert` (not just aria-hidden) so the collapsed carousel's links
-          // and controls drop out of the tab order too — otherwise Tab lands
-          // on the hidden featured slides before the filtered results. Doesn't
-          // affect the CSS transition below.
-          inert={isFiltered}
-          className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
-            isFiltered
+          // Kept mounted on every page and collapsed via the grid-rows
+          // transition (rather than conditionally rendered on page 1) so paging
+          // back to page 1 animates it open instead of popping it in at full
+          // height. `inert` (not just aria-hidden) drops the collapsed
+          // carousel's links/controls out of the tab order too.
+          inert={featuredHidden}
+          className={`grid transition-[grid-template-rows,opacity] ease-out ${
+            // Collapse INSTANTLY when it's the pagination boundary: the carousel
+            // is off screen there, and an animated collapse would shift the
+            // article heading AFTER the page-change scroll fires, overshooting.
+            // Filtering collapses it in view, and expanding back to page 1 —
+            // both stay animated.
+            featuredInstant ? "duration-0" : "duration-500"
+          } ${
+            featuredHidden
               ? "grid-rows-[0fr] opacity-0"
               : "grid-rows-[1fr] opacity-100"
           }`}
