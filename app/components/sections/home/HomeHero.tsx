@@ -34,7 +34,7 @@ export default function HomeHero() {
         <div className="pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-360 -translate-x-1/2">
           <Image
             src={heroDeviceImg}
-            alt="energiebee app preview"
+            alt="EnergieBee app preview"
             aria-hidden
             priority
             quality={90}

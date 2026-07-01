@@ -32,7 +32,7 @@ export default function WhyEnergieBee() {
             Works With Your Smart Home
           </SectionTitle>
           <SectionLead className="min-[550px]:text-center self-center">
-            Part of the energiebee app - everything you need to monitor and
+            Part of the EnergieBee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}

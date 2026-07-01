@@ -14,7 +14,11 @@ import { Section } from "@/app/components/ui/Section";
 
 export default function WhyEnergieBeeSolar() {
   return (
-    <Section surface="surface" spacing="none" className="py-12 pb-8 text-foreground lg:py-12 lg:pb-10">
+    <Section
+      surface="surface"
+      spacing="none"
+      className="py-12 pb-8 text-foreground lg:py-12 lg:pb-10"
+    >
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
@@ -25,7 +29,7 @@ export default function WhyEnergieBeeSolar() {
         <div className="min-[1200px]:max-w-163.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
           <SectionTitle>Automated Optimisation</SectionTitle>
           <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
-            Part of the energiebee app - everything you need to monitor and
+            Part of the EnergieBee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
           <div className="mt-6 md:mt-8 space-y-4">

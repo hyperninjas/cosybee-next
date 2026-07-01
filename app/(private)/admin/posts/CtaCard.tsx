@@ -66,7 +66,7 @@ export function CtaCard({
                 fullWidth
                 value={ctaLabel}
                 onChange={(e) => setCtaLabel(e.target.value)}
-                placeholder="Try energiebee for free"
+                placeholder="Try EnergieBee for free"
               />
             </Labeled>
 

@@ -82,7 +82,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
         <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
           <CosybeeLogo className="h-8 w-auto shrink-0" />
           <span className="truncate text-base font-extrabold tracking-tight text-foreground sm:text-lg">
-            energiebee <span className="text-accent">admin</span>
+            EnergieBee <span className="text-accent">admin</span>
           </span>
         </Link>
 
