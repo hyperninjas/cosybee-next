@@ -113,10 +113,10 @@ export function PostCard({
   }`;
 
   return (
-    <Card className="p-0 overflow-hidden border border-border shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] hover:shadow-lg transition duration-300">
+    <Card className="h-full p-0 overflow-hidden border border-border shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] hover:shadow-lg transition duration-300">
       <article
         title={row.title}
-        className="group flex flex-col overflow-hidden  bg-surface"
+        className="group flex h-full flex-col overflow-hidden bg-surface"
       >
         <div className="relative h-40 bg-default">
           <Image
@@ -183,7 +183,7 @@ export function PostCard({
             <Focusable>
               <Link
                 href={`/admin/posts/${row.id}/edit`}
-                className="mt-3 block line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors hover:text-accent"
+                className="mt-3 line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors hover:text-accent"
               >
                 {row.title}
               </Link>

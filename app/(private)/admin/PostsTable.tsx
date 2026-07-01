@@ -102,6 +102,9 @@ function FilterSelect({
 const PAGE_SIZE_TABLE = 10;
 const PAGE_SIZE_CARD = 12;
 
+/** Id of the scroll anchor at the top of the results (paging scrolls to it). */
+const LIST_TOP_ID = "posts-list-top";
+
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
   const diff = Date.now() - then;
@@ -268,6 +271,19 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
   const rangeStart = filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, filtered.length);
 
+  // Change page + scroll the results back into view (clamped to valid range).
+  // Uses an id anchor rather than a ref so the scroll stays out of render (the
+  // pagination JSX is built during render, and the compiler forbids reading a
+  // ref from anything reachable there).
+  function goToPage(next: number) {
+    const clamped = Math.min(Math.max(1, next), pageCount);
+    if (clamped === safePage) return;
+    setPage(clamped);
+    document
+      .getElementById(LIST_TOP_ID)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function onToggleStatus(row: Row) {
     const next = row.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
     const fd = new FormData();
@@ -352,7 +368,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
         <Pagination.Item>
           <Pagination.Previous
             isDisabled={safePage <= 1}
-            onPress={() => setPage(Math.max(1, safePage - 1))}
+            onPress={() => goToPage(safePage - 1)}
           >
             <Pagination.PreviousIcon />
             Prev
@@ -364,7 +380,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
             <Pagination.Item key={p} className="hidden sm:flex">
               <Pagination.Link
                 isActive={p === safePage}
-                onPress={() => setPage(p)}
+                onPress={() => goToPage(p)}
               >
                 {p}
               </Pagination.Link>
@@ -374,7 +390,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
         <Pagination.Item>
           <Pagination.Next
             isDisabled={safePage >= pageCount}
-            onPress={() => setPage(Math.min(pageCount, safePage + 1))}
+            onPress={() => goToPage(safePage + 1)}
           >
             Next
             <Pagination.NextIcon />
@@ -498,6 +514,9 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
           />
         </div>
       </div>
+
+      {/* Scroll target for pagination; scroll-mt clears the sticky admin header. */}
+      <div id={LIST_TOP_ID} aria-hidden className="scroll-mt-24" />
 
       {viewMode === "table" ? (
         <Table>
