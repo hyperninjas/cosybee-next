@@ -21,46 +21,41 @@ RUN npm ci
 FROM base AS builder
 ENV NODE_ENV=production
 
-# Public-facing values that get inlined into the client bundle at build time.
-# Override at build: `docker build --build-arg NEXT_PUBLIC_SITE_URL=...`.
-ARG NEXT_PUBLIC_SITE_URL=https://energiebee.com
+# Build-time values inlined into the build output. NOTHING is hardcoded here —
+# every value is supplied by Dokploy (build args) at `docker build`, so the same
+# Dockerfile builds any environment and no real URLs/keys live in the image
+# source. An arg left unpassed builds empty, which each consumer handles:
+# NEXT_PUBLIC_* → the client feature no-ops or uses its in-code fallback.
+#
+#   NEXT_PUBLIC_SITE_URL            canonical site origin (links, metadata)
+#   NEXT_PUBLIC_AUTH_URL            Better Auth backend URL for client auth
+#   NEXT_PUBLIC_API_URL            browser API base (presigned uploads, article images)
+#   NEXT_PUBLIC_RECAPTCHA_SITE_KEY  reCAPTCHA v3 public site key
+#   NEXT_PUBLIC_GA_MEASUREMENT_ID   GA4 measurement ID (empty disables GA)
+#   NEXT_PUBLIC_GTM_ID              GTM container ID (empty disables GTM)
+#   GOOGLE_SITE_VERIFICATION        Search Console token — baked into the
+#                                   statically-prerendered home HTML, so it must
+#                                   be a build arg (not a runtime env var)
+#   API_URL                         backend base used during prerender only; the
+#                                   standalone server re-reads it from the RUNTIME
+#                                   env (Dokploy) for every SSR request, so build
+#                                   and runtime targets can differ
+ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-# Better Auth backend URL for client-side auth requests.
-ARG NEXT_PUBLIC_AUTH_URL=https://api.energiebee.com
+ARG NEXT_PUBLIC_AUTH_URL
 ENV NEXT_PUBLIC_AUTH_URL=$NEXT_PUBLIC_AUTH_URL
-# Backend API used during prerender (generateStaticParams / sitemap). If
-# unreachable at build time the app falls back gracefully and renders those
-# pages on demand at runtime instead.
-ARG API_URL=https://api.energiebee.com
-ENV API_URL=$API_URL
-# Google reCAPTCHA v3 public site key — inlined into the client bundle, so it
-# MUST be passed at build time (a runtime env var is too late). Without it the
-# forms submit without a token and the server skips verification. Pass the real
-# value as a build arg in Dokploy / `docker build --build-arg ...`. The SECRET
-# key (RECAPTCHA_SECRET_KEY) is read server-side at runtime — set it as a normal
-# runtime env var, not here.
-ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LcmPiItAAAAAE5uDGIHnes3xqU85BigNkL4cu_z
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-# Google Search Console verification token. The marketing home page is
-# statically prerendered, so the root-layout verification meta tag is baked
-# into the HTML at build time — this must be a build arg (a runtime env var is
-# too late for the already-built static pages). Left empty by default; pass the
-# real value as a build arg in Dokploy / `docker build --build-arg ...`.
-ARG GOOGLE_SITE_VERIFICATION=IkbRUvZoQ374l00SnYUZNvnwHq-2oGHxHWUpOiNN0aE
-ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
-# Google Analytics 4 measurement ID — public value, inlined into the client
-# bundle at build time, so it MUST be set at build (a runtime env var is too
-# late). Defaults to the real property; override per-env with
-# `docker build --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXX` (empty
-# disables GA).
-ARG NEXT_PUBLIC_GA_MEASUREMENT_ID=G-PK4VWZC7B2
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
-# Google Tag Manager container ID — public value, inlined into the client
-# bundle at build time, so it MUST be set at build (a runtime env var is too
-# late). Defaults to the real container; override per-env with
-# `docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXX` (empty disables GTM).
-ARG NEXT_PUBLIC_GTM_ID=GTM-523NBRHQ
+ARG NEXT_PUBLIC_GTM_ID
 ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+ARG GOOGLE_SITE_VERIFICATION
+ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
+ARG API_URL
+ENV API_URL=$API_URL
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -71,6 +66,19 @@ FROM base AS runner
 ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
+
+# Server-side configuration is read live from the runtime environment by the
+# standalone server (there is no `env` block in next.config.ts to freeze it, and
+# .env is dockerignored). Provide these at runtime via Dokploy — do NOT bake them
+# into the image:
+#   API_URL                 backend base URL for SSR data fetching
+#   ADMIN_EMAIL             admin login
+#   ADMIN_PASSWORD          admin login
+#   ADMIN_SESSION_SECRET    signs the admin session cookie (rotating logs everyone out)
+#   AWS_REGION / AWS_BUCKET S3 storage
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY   S3 credentials (if used)
+#   RECAPTCHA_SECRET_KEY    server-side reCAPTCHA verification
+#   BING_SITE_VERIFICATION  optional webmaster token (dynamic pages)
 
 # Run as an unprivileged user.
 RUN addgroup --system --gid 1001 nodejs \

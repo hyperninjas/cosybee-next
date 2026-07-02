@@ -94,31 +94,23 @@ const nextConfig: NextConfig = {
   reactCompiler: {
     compilationMode: "all",
   },
-  env: {
-    API_URL: process.env.API_URL,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
-
-    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-    ADMIN_SESSION_SECRET: process.env.ADMIN_SESSION_SECRET,
-
-    AWS_REGION: process.env.AWS_REGION,
-    AWS_BUCKET: process.env.AWS_BUCKET,
-
-    // Public reCAPTCHA v3 site key (build-time inlined into the client bundle).
-    // The SECRET (RECAPTCHA_SECRET_KEY) is intentionally NOT here — it's read
-    // server-side at runtime in the form actions, so it never enters the build.
-    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-
-    GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
-    BING_SITE_VERIFICATION: process.env.BING_SITE_VERIFICATION,
-
-    // GA4 measurement ID (e.g. "G-XXXXXXXXXX"). Public so it can be inlined for
-    // the client-side gtag bootstrap. Analytics is a no-op until this is set,
-    // so leaving it unset in dev/staging keeps those environments tracking-free.
-    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
-  },
+  // NOTE: there is deliberately NO `env: {}` block here.
+  //
+  // Next's `env` config inlines each key as a build-time literal (like
+  // DefinePlugin), which FREEZES the value into the compiled output. That is
+  // wrong for this app because we run the `standalone` server and inject
+  // configuration at RUNTIME (Dokploy env vars). An `env` block would shadow
+  // those runtime values and — worse — bake server secrets into the image.
+  //
+  // The correct split, with no `env` block:
+  //   • Client values  — anything prefixed `NEXT_PUBLIC_` is auto-inlined into
+  //     the browser bundle at build time (no `env` block needed). These are the
+  //     only vars that truly must be present at `next build`, so they are passed
+  //     as Docker build args. See the Dockerfile.
+  //   • Server values  — `API_URL`, `ADMIN_*`, `AWS_*`, `RECAPTCHA_SECRET_KEY`,
+  //     `BING_SITE_VERIFICATION`, etc. are read live from `process.env` by the
+  //     standalone server at runtime, so Dokploy env changes take effect without
+  //     a rebuild. Do NOT list them here.
 
   experimental: {
     // Inline above-the-fold critical CSS to reduce the render-blocking
