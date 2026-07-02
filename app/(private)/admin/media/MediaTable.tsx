@@ -124,8 +124,11 @@ export function MediaTable({
             >
               {(row) => {
                 const m = row.media;
-                // In use by any post OR author avatar — blocks deletion.
-                const inUse = m.usages.length + m.authorUsages.length;
+                // In use by post, author avatar, or provider logo — blocks delete.
+                const inUse =
+                  m.usages.length +
+                  m.authorUsages.length +
+                  m.providerUsages.length;
                 return (
                   <Table.Row
                     id={row.id}

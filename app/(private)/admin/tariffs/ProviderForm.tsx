@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, Button, Input, Switch, TextArea } from "@heroui/react";
 import type { TariffProviderDTO } from "../lib/api";
+import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { updateProviderAction } from "./actions";
 import { initialSaveState, type EntitySaveState } from "../lib/form-state";
+
+const PNG_ONLY = ["image/png"] as const;
 
 function Labeled({
   label,
@@ -70,19 +73,30 @@ export function ProviderForm({
   >(updateProviderAction, initialSaveState);
   const errors = state?.fieldErrors ?? {};
 
+  // Fire onSaved exactly once per successful action result. Depending on
+  // `onSaved` (recreated every parent render) would re-fire while `state.ok`
+  // stays true — and since onSaved calls router.refresh()/setState, that parent
+  // re-render loops back here forever ("Maximum update depth exceeded"). A ref
+  // keeps the latest callback without making it a dependency.
+  const onSavedRef = useRef(onSaved);
   useEffect(() => {
-    if (state?.ok) onSaved?.(state.entity);
-  }, [state, onSaved]);
+    onSavedRef.current = onSaved;
+  });
+  useEffect(() => {
+    if (state?.ok) onSavedRef.current?.(state.entity);
+  }, [state]);
 
   const [name, setName] = useState(provider.name);
   const [acquiredBy, setAcquiredBy] = useState(provider.acquiredBy ?? "");
   const [note, setNote] = useState(provider.note ?? "");
   const [isPopular, setIsPopular] = useState(provider.isPopular);
+  const [logoUrl, setLogoUrl] = useState(provider.logoUrl ?? "");
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={provider.id} />
       <input type="hidden" name="isPopular" value={isPopular ? "on" : ""} />
+      <input type="hidden" name="logoUrl" value={logoUrl} />
 
       {state?.error && (
         <Alert status="danger">
@@ -117,6 +131,19 @@ export function ProviderForm({
           onChange={(e) => setAcquiredBy(e.target.value)}
           maxLength={150}
           placeholder="e.g. Octopus Energy"
+        />
+      </Labeled>
+
+      <Labeled label="Logo" hint="PNG only.">
+        <PublicImageUpload
+          context="provider-logo"
+          library
+          libraryFolderSlug="provider-logos"
+          acceptMime={PNG_ONLY}
+          value={logoUrl || null}
+          onChange={(url) => setLogoUrl(url ?? "")}
+          previewHeight="h-24"
+          alt={`${provider.name} logo`}
         />
       </Labeled>
 

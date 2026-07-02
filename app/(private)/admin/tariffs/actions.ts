@@ -71,6 +71,8 @@ export async function createTariffAction(
   const input: CreateTariffInput = {
     // Existing provider wins; otherwise create by name.
     ...(providerId ? { providerId } : { providerName }),
+    // Logo applies to the resolved provider (new or existing).
+    providerLogo: optStr(formData, "providerLogo"),
     name,
     type,
     payment,
@@ -149,6 +151,7 @@ export async function updateProviderAction(
       acquiredBy,
       note: optStr(formData, "note"),
       isActive: !acquiredBy,
+      logoUrl: optStr(formData, "logoUrl"),
     });
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };

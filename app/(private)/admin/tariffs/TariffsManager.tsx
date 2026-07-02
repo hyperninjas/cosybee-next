@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -154,12 +154,39 @@ export function TariffsManager({
   // Provider to edit = the full record from the loaded list (has note/isPopular);
   // fall back to the selected tariff's provider ref if it's not in the list yet
   // (e.g. just created inline, before the next refresh).
-  const editingProvider: TariffProviderDTO | null = selected
-    ? (providers.find((p) => p.id === selected.provider.id) ?? {
-        ...selected.provider,
-        tariffCount: 0,
-      })
-    : null;
+  // A provider chosen via the deep-link overrides the selected-tariff provider
+  // (so a logo's "used by provider" link can edit any provider directly).
+  const [providerOverride, setProviderOverride] =
+    useState<TariffProviderDTO | null>(null);
+
+  const editingProvider: TariffProviderDTO | null =
+    providerOverride ??
+    (selected
+      ? (providers.find((p) => p.id === selected.provider.id) ?? {
+          ...selected.provider,
+          tariffCount: 0,
+        })
+      : null);
+
+  // Deep link: /admin/tariffs?editProvider={id} opens that provider's edit modal
+  // once on mount (from the media library's "used by provider" link).
+  const didAutoEditProvider = useRef(false);
+  useEffect(() => {
+    if (didAutoEditProvider.current) return;
+    const editId = new URLSearchParams(window.location.search).get(
+      "editProvider",
+    );
+    if (!editId) return;
+    const p = providers.find((x) => x.id === editId);
+    if (!p) return;
+    didAutoEditProvider.current = true;
+    const openForDeepLink = () => {
+      setProviderOverride(p);
+      providerOverlay.open();
+    };
+    openForDeepLink();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [providers]);
 
   const onDeleted = () => {
     deleteOverlay.close();
@@ -171,6 +198,7 @@ export function TariffsManager({
 
   const onProviderSaved = (updated?: TariffProviderDTO) => {
     providerOverlay.close();
+    setProviderOverride(null);
     if (updated && selected && selected.provider.id === updated.id) {
       // Patch the selected tariff's provider in place (it's client state, so a
       // route refresh alone wouldn't update it). Keep the provider field label
@@ -184,6 +212,7 @@ export function TariffsManager({
           status: updated.status,
           isPopular: updated.isPopular,
           ...(updated.acquiredBy ? { acquiredBy: updated.acquiredBy } : {}),
+          ...(updated.logoUrl ? { logoUrl: updated.logoUrl } : {}),
         },
       });
       if (providerId === updated.id) setProviderQuery(updated.name);
@@ -352,7 +381,10 @@ export function TariffsManager({
 
       <ProviderFormModal
         isOpen={providerOverlay.isOpen}
-        onOpenChange={providerOverlay.setOpen}
+        onOpenChange={(open) => {
+          providerOverlay.setOpen(open);
+          if (!open) setProviderOverride(null);
+        }}
         provider={editingProvider}
         onSaved={onProviderSaved}
       />

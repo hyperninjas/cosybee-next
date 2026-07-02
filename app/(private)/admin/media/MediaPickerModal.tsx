@@ -95,9 +95,11 @@ function PickerTile({
  */
 function PickerBody({
   accept,
+  acceptMime,
   onPick,
 }: {
   accept?: MediaKind;
+  acceptMime?: readonly string[];
   onPick: (media: MediaItem) => void;
 }) {
   const [search, setSearch] = useState("");
@@ -156,7 +158,11 @@ function PickerBody({
     };
   }, [page, kind, debouncedQ, accept, tagFilter]);
 
-  const items = result?.items ?? [];
+  // Client-side MIME narrowing (e.g. PNG-only for logos). Server filters by
+  // kind; this trims the page to the exact types so a logo is always a PNG.
+  const items = (result?.items ?? []).filter(
+    (m) => !acceptMime || acceptMime.includes(m.mimeType),
+  );
   const total = result?.total ?? 0;
   const totalPages = result?.totalPages ?? 1;
   const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -290,12 +296,15 @@ export function MediaPickerModal({
   onOpenChange,
   onSelect,
   accept,
+  acceptMime,
   heading = "Insert from media library",
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (media: MediaItem) => void;
   accept?: MediaKind;
+  /** Further restrict to these exact MIME types (e.g. ["image/png"]). */
+  acceptMime?: readonly string[];
   heading?: string;
 }) {
   function pick(media: MediaItem) {
@@ -315,7 +324,9 @@ export function MediaPickerModal({
                 {heading}
               </Modal.Heading>
             </Modal.Header>
-            {isOpen && <PickerBody accept={accept} onPick={pick} />}
+            {isOpen && (
+              <PickerBody accept={accept} acceptMime={acceptMime} onPick={pick} />
+            )}
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

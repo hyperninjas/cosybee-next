@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Alert,
@@ -562,46 +563,65 @@ export function TariffRatesTable({
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h2 className="truncate text-lg font-bold text-foreground">
-              {tariff.name}
-            </h2>
-            <Chip size="sm" variant="soft">
-              {typeLabel}
-            </Chip>
-            {tariff.fuel && (
+        <div className="flex min-w-0 items-start gap-3">
+          {tariff.provider.logoUrl && (
+            // Fixed square (≈ the two-line header height). A dynamic
+            // "match the header height" square isn't reliable in pure CSS:
+            // flex resolves an item's width before its stretched height, so
+            // `aspect-square` + `self-stretch` collapses to 0 width.
+            // `unoptimized` skips next/image's domain allowlist (as the picker).
+            <NextImage
+              src={tariff.provider.logoUrl}
+              alt={`${tariff.provider.name} logo`}
+              width={45}
+              height={45}
+              unoptimized
+              className="size-12 shrink-0 rounded-lg border border-border bg-surface-secondary object-contain p-1"
+            />
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-lg font-bold text-foreground leading-[100%]">
+                {tariff.name}
+              </h2>
               <Chip size="sm" variant="soft">
-                {tariff.fuel === "dual_fuel" ? "Dual fuel" : "Electricity only"}
+                {typeLabel}
               </Chip>
-            )}
+              {tariff.fuel && (
+                <Chip size="sm" variant="soft">
+                  {tariff.fuel === "dual_fuel"
+                    ? "Dual fuel"
+                    : "Electricity only"}
+                </Chip>
+              )}
+            </div>
+            <p className="mt-0.5 text-sm text-muted">
+              {tariff.provider.isPopular && (
+                <StarFill
+                  className="mr-1 inline-block size-3.5 align-middle text-warning"
+                  role="img"
+                  aria-label="Popular provider"
+                >
+                  <title>Popular provider</title>
+                </StarFill>
+              )}
+              <span className="font-medium text-foreground">
+                {tariff.provider.name}
+              </span>
+              {onEditProvider && (
+                <button
+                  type="button"
+                  onClick={onEditProvider}
+                  className="ml-1.5 inline-flex items-center gap-1 align-middle text-xs font-medium text-accent transition-colors hover:underline"
+                >
+                  <Pencil className="size-3" />
+                  Edit provider
+                </button>
+              )}
+              {" · "}rates in pence (p/kWh unit, p/day standing) · edit a region
+              from its row action
+            </p>
           </div>
-          <p className="mt-0.5 text-sm text-muted">
-            {tariff.provider.isPopular && (
-              <StarFill
-                className="mr-1 inline-block size-3.5 align-middle text-warning"
-                role="img"
-                aria-label="Popular provider"
-              >
-                <title>Popular provider</title>
-              </StarFill>
-            )}
-            <span className="font-medium text-foreground">
-              {tariff.provider.name}
-            </span>
-            {onEditProvider && (
-              <button
-                type="button"
-                onClick={onEditProvider}
-                className="ml-1.5 inline-flex items-center gap-1 align-middle text-xs font-medium text-accent transition-colors hover:underline"
-              >
-                <Pencil className="size-3" />
-                Edit provider
-              </button>
-            )}
-            {" · "}rates in pence (p/kWh unit, p/day standing) · edit a region
-            from its row action
-          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Popover>

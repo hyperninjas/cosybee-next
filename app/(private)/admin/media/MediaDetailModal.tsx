@@ -522,6 +522,35 @@ function DetailContent({
               </ul>
             </>
           )}
+          {media.providerUsages.length > 0 && (
+            <>
+              <span className="ml-1 text-xs font-semibold text-foreground">
+                Used by {media.providerUsages.length}{" "}
+                {media.providerUsages.length === 1 ? "provider" : "providers"}
+              </span>
+              <ul className="divide-y divide-border rounded-lg border border-border">
+                {media.providerUsages.map((p) => (
+                  <li key={p.providerId}>
+                    <a
+                      href={`/admin/tariffs?editProvider=${p.providerId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Edit provider in a new tab"
+                      className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                        {p.name}
+                      </span>
+                      <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+                        logo
+                      </span>
+                      <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </Modal.Body>
       <Modal.Footer className="flex items-center justify-between">
@@ -529,7 +558,11 @@ function DetailContent({
           variant="ghost"
           className="text-danger"
           onPress={() => deleteOverlay.open()}
-          isDisabled={media.usages.length > 0 || media.authorUsages.length > 0}
+          isDisabled={
+            media.usages.length > 0 ||
+            media.authorUsages.length > 0 ||
+            media.providerUsages.length > 0
+          }
         >
           Delete
         </Button>

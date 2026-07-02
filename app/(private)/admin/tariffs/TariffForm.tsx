@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {
@@ -16,8 +16,11 @@ import {
   TextArea,
 } from "@heroui/react";
 import type { TariffDTO, TariffProviderDTO } from "../lib/api";
+import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { createTariffAction } from "./actions";
 import { initialSaveState, type EntitySaveState } from "../lib/form-state";
+
+const PNG_ONLY = ["image/png"] as const;
 
 const TYPE_OPTIONS: { key: string; label: string }[] = [
   { key: "fixed", label: "Fixed" },
@@ -137,9 +140,16 @@ export function TariffForm({
   >(createTariffAction, initialSaveState);
   const errors = state?.fieldErrors ?? {};
 
+  // Fire onSaved once per action result via a ref — see ProviderForm for why
+  // depending on `onSaved` here loops (router.refresh/setState → re-render →
+  // new onSaved identity → effect re-fires → "Maximum update depth exceeded").
+  const onSavedRef = useRef(onSaved);
   useEffect(() => {
-    if (state?.ok) onSaved?.(state.entity);
-  }, [state, onSaved]);
+    onSavedRef.current = onSaved;
+  });
+  useEffect(() => {
+    if (state?.ok) onSavedRef.current?.(state.entity);
+  }, [state]);
 
   // Provider: pick an existing one (sets `providerId`) or type a new name
   // (`providerId` stays empty and `providerQuery` is sent as `providerName`,
@@ -151,6 +161,7 @@ export function TariffForm({
   const [payment, setPayment] = useState("direct_debit");
   const [fuel, setFuel] = useState("");
   const [smartMeter, setSmartMeter] = useState(false);
+  const [providerLogo, setProviderLogo] = useState("");
 
   const q = providerQuery.trim().toLowerCase();
   const providerMatches = providers
@@ -178,6 +189,7 @@ export function TariffForm({
         name="smartMeterRequired"
         value={smartMeter ? "on" : ""}
       />
+      <input type="hidden" name="providerLogo" value={providerLogo} />
 
       {state?.error && (
         <Alert status="danger">
@@ -210,6 +222,11 @@ export function TariffForm({
               inputValue={providerQuery}
               onInputChange={(v) => {
                 setProviderQuery(v);
+                // Moving off a selected provider (typing to create a new one)
+                // drops that provider's auto-filled logo so it isn't attached
+                // to a different provider. A logo uploaded for the new provider
+                // (providerId already "") is left untouched.
+                if (providerId) setProviderLogo("");
                 setProviderId("");
               }}
               onSelectionChange={(key) => {
@@ -218,6 +235,8 @@ export function TariffForm({
                 if (p) {
                   setProviderId(p.id);
                   setProviderQuery(p.name);
+                  // Prefill the existing provider's logo (if it has one).
+                  setProviderLogo(p.logoUrl ?? "");
                 }
               }}
             >
@@ -245,6 +264,21 @@ export function TariffForm({
                 </ListBox>
               </ComboBox.Popover>
             </ComboBox>
+          </Labeled>
+          <Labeled
+            label="Provider logo"
+            hint="PNG only — applied to the selected/new provider."
+          >
+            <PublicImageUpload
+              context="provider-logo"
+              library
+              libraryFolderSlug="provider-logos"
+              acceptMime={PNG_ONLY}
+              value={providerLogo || null}
+              onChange={(url) => setProviderLogo(url ?? "")}
+              previewHeight="h-24"
+              alt="Provider logo"
+            />
           </Labeled>
           <Labeled label="Name" error={errors.name}>
             <Input

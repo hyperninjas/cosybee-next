@@ -22,6 +22,8 @@ export type UploadContext =
   | "blog-document"
   | "author-avatar"
   | "user-avatar"
+  // Energy-provider brand logo (tariff catalog) — PNG only.
+  | "provider-logo"
   // The WordPress-style admin media library (mixed images / video / docs).
   | "media-library"
   // Browser-generated thumbnails/posters for media-library items.
@@ -298,6 +300,10 @@ export const LIMITS: Record<
     types: ["image/jpeg", "image/png", "image/webp", "image/avif"],
     maxBytes: 2 * 1024 * 1024,
   },
+  "provider-logo": {
+    types: ["image/png"],
+    maxBytes: 1 * 1024 * 1024,
+  },
   // The media library mixes kinds with different ceilings (video is large), so
   // its single `maxBytes` here is the outer bound; `validateLibraryFile`
   // applies the real per-kind caps that mirror the backend context.
@@ -389,6 +395,13 @@ export interface MediaAuthorUsage {
   slug: string;
 }
 
+/** A provider whose logo references this media (blocks library deletion). */
+export interface MediaProviderUsage {
+  providerId: string;
+  name: string;
+  slug: string;
+}
+
 export interface MediaItem {
   id: string;
   key: string;
@@ -415,6 +428,7 @@ export interface MediaItem {
   tags: MediaTagRef[];
   usages: MediaUsage[];
   authorUsages: MediaAuthorUsage[];
+  providerUsages: MediaProviderUsage[];
   createdAt: string;
   updatedAt: string;
 }

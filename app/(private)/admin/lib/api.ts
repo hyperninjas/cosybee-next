@@ -634,6 +634,8 @@ export interface TariffProviderRefDTO {
   status: "active" | "acquired";
   isPopular: boolean;
   acquiredBy?: string;
+  /** Provider brand logo URL (PNG). */
+  logoUrl?: string;
 }
 
 export interface TariffDTO {
@@ -659,6 +661,8 @@ export interface TariffProviderDTO {
   status: "active" | "acquired";
   isPopular: boolean;
   acquiredBy?: string;
+  /** Provider brand logo URL (PNG). */
+  logoUrl?: string;
   note?: string;
   tariffCount: number;
 }
@@ -670,6 +674,7 @@ export interface UpdateProviderInput {
   isPopular?: boolean;
   acquiredBy?: string | null;
   note?: string | null;
+  logoUrl?: string | null;
 }
 
 export interface TariffRegionDTO {
@@ -701,6 +706,8 @@ export interface CreateTariffInput {
   providerId?: string;
   /** New provider to find-or-create by name (used when `providerId` is absent). */
   providerName?: string;
+  /** Brand logo (PNG URL) set on the resolved provider (new or existing). */
+  providerLogo?: string | null;
   name: string;
   type: TariffType;
   payment: TariffPayment;
