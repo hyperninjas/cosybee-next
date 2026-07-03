@@ -9,9 +9,9 @@ import WhyEnergieBee from "@/app/components/sections/smart/WhyEnergieBee";
 // import WhyEnergieBeeSolar from "@/app/components/sections/smart/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "@/app/components/sections/smart/WorksWithAnySystem";
 import JsonLd from "@/app/components/JsonLd";
-import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
-import { GENERAL_FAQ } from "@/app/lib/faq-data";
+// import Faq from "@/app/components/sections/Faq";
+// import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = pageMetadata({
   title: "Smart Home Integration",
@@ -47,7 +47,7 @@ export default function SmartPage() {
       {/* <WhyEnergieBeeSolar /> */}
       <WorksWithAnySystem />
       {/* <EnergyForecasting /> */}
-      <Faq items={GENERAL_FAQ} />
+      {/* <Faq items={GENERAL_FAQ} /> */}
     </main>
   );
 }

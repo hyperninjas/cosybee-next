@@ -9,9 +9,9 @@ import WhyEnergieBee from "@/app/components/sections/energy/WhyEnergieBee";
 import WhyEnergieBeeSolar from "@/app/components/sections/energy/WhyEnergiebeeSolar";
 import WorksWithAnySystem from "@/app/components/sections/energy/WorksWithAnySystem";
 import JsonLd from "@/app/components/JsonLd";
-import Faq from "@/app/components/sections/Faq";
+// import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
-import { GENERAL_FAQ } from "@/app/lib/faq-data";
+// import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = pageMetadata({
   title: "Total Energy Control",
@@ -47,7 +47,7 @@ export default function EnergyPage() {
       <WhyEnergieBeeSolar />
       <WorksWithAnySystem />
       {/* <EnergyForecasting /> */}
-      <Faq items={GENERAL_FAQ} />
+      {/* <Faq items={GENERAL_FAQ} /> */}
     </main>
   );
 }

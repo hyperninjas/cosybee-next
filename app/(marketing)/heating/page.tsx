@@ -8,9 +8,9 @@ import SmarterUnderstanding from "@/app/components/sections/heating/SmarterUnder
 import ConnectedEcosystem from "@/app/components/sections/heating/ConnectedEcosystem";
 import WhyChoose from "@/app/components/sections/heating/WhyChoose";
 import JsonLd from "@/app/components/JsonLd";
-import Faq from "@/app/components/sections/Faq";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
-import { GENERAL_FAQ } from "@/app/lib/faq-data";
+// import Faq from "@/app/components/sections/Faq";
+// import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = pageMetadata({
   title: "Smart Heating Control",
@@ -46,7 +46,7 @@ export default function HeatingPage() {
       <SmarterUnderstanding />
       <ConnectedEcosystem />
       <WhyChoose />
-      <Faq items={GENERAL_FAQ} />
+      {/* <Faq items={GENERAL_FAQ} /> */}
     </main>
   );
 }

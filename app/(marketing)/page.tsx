@@ -8,8 +8,8 @@ import HomeEnergyManagement from "@/app/components/sections/home/HomeEnergyManag
 // import WhyThousands from "@/app/components/sections/home/WhyThousands";
 import HomeFeaturedArticles from "@/app/components/sections/home/HomeFeaturedArticles";
 import ReadyToReduce from "@/app/components/sections/home/ReadyToReduce";
-import Faq from "@/app/components/sections/Faq";
-import { GENERAL_FAQ } from "@/app/lib/faq-data";
+// import Faq from "@/app/components/sections/Faq";
+// import { GENERAL_FAQ } from "@/app/lib/faq-data";
 import JsonLd from "@/app/components/JsonLd";
 import { softwareApplicationSchema } from "@/app/lib/structured-data";
 
@@ -35,7 +35,7 @@ export default function Home() {
       <HomeEnergyManagement />
       {/* <WhyThousands /> */}
       <HomeFeaturedArticles />
-      <Faq items={GENERAL_FAQ} />
+      {/* <Faq items={GENERAL_FAQ} /> */}
       <ReadyToReduce />
     </main>
   );
