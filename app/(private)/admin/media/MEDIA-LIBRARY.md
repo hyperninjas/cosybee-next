@@ -19,8 +19,10 @@ Notes:
 - **Multiple files** at once are supported.
 - **Allowed types:** images, video, and documents (PDF / Word). Other types are
   rejected with a message.
-- **Videos** are converted to a streamable MP4 in your browser before
-  uploading, so playback works everywhere (you'll see progress while it runs).
+- **Videos** get a thumbnail (poster frame) captured automatically. If a video
+  isn't already a web-ready MP4 it's converted to a streamable one in your
+  browser first (you'll see a **Compressing** step); videos that are already
+  web-ready skip conversion and upload as-is, so they finish much faster.
 - Files upload directly to storage; large files don't bog down the page.
 
 ## Finding things
@@ -43,15 +45,35 @@ Combine any of these — they all narrow the same list:
 Toggle between:
 
 - **Grid** — thumbnail cards. Hover a card for quick actions:
-  **Copy URL** and **Delete**. A badge shows **“Used in N posts.”**
+  **Copy URL** and **Delete**. A badge shows **“Used in N posts.”** A checkbox
+  (top-left of each card) selects it for batch actions.
 - **Table** — a dense list with columns: **File, Type, Alt text, Size, Folder,
-  Tags, Used, Updated, Actions** — better for scanning/editing metadata.
+  Tags, Used, Updated, Actions** — better for scanning/editing metadata. The
+  leading checkbox column selects rows, and its header checkbox selects/clears
+  the whole page.
+
+## Selecting multiple files (batch actions)
+
+Tick the checkboxes on cards (grid) or rows (table) to select several files at
+once. A floating action bar appears at the bottom of the screen showing how many
+are selected, with two actions:
+
+- **Change folder** — move every selected file into a folder (or **Unfiled**) in
+  one step.
+- **Delete selected** — delete them all at once. Files that are **in use** are
+  automatically **skipped** (the bar shows how many are in use), so a live
+  article never breaks; the confirmation tells you exactly how many will be
+  removed and how many are kept.
+
+**Clear** deselects everything. Selection is per page — changing folder, filter,
+search, or page starts a fresh selection.
 
 ## Organising with folders
 
 - Create, rename, and delete folders from the **Folders** sidebar.
 - **Unfiled** holds anything not in a folder; **All media** shows everything.
-- Move a file into a folder from its **detail panel** (below).
+- Move a file into a folder from its **detail panel** (below), or move several
+  at once with **Change folder** (see batch actions above).
 
 ## Tags
 
@@ -76,6 +98,8 @@ Click any file (card or row) to open its **detail panel**, where you can:
 - A file that's **in use can't be deleted** — the Delete action is disabled
   until it's no longer referenced, so you can't accidentally break a live
   article. Unused files delete freely (with a confirm).
+- The same rule applies to **batch delete** — in-use files are skipped, never
+  deleted, even when selected as part of a group.
 
 ## Using media in posts
 
@@ -93,3 +117,5 @@ editor guide for details.
 - Use **folders + tags** together: folders for broad grouping, tags for
   cross-cutting topics.
 - Give files clear **names** so search finds them later.
+- To tidy up fast, filter to a **folder** or **type**, tick the header checkbox
+  to select the page, then **Change folder** or **Delete selected** in one go.

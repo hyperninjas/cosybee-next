@@ -16,10 +16,11 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import {
+  bulkDeleteMedia,
+  bulkMoveMedia,
   listFolders,
   listMedia,
   listMediaTags,
-  uploadLibraryFile,
   validateLibraryFile,
   type MediaFolder,
   type MediaItem,
@@ -27,7 +28,9 @@ import {
   type MediaListResult,
   type MediaTagCount,
 } from "@/app/lib/storage";
-import { isTranscodableVideo, transcodeToMp4 } from "@/app/lib/media-video";
+import { uploadLibraryMedia } from "@/app/lib/media-upload";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { BatchMoveDialog } from "./BatchMoveDialog";
 import type { Tag } from "@/app/lib/article-types";
 import { FolderSidebar, type FolderSelection } from "./FolderSidebar";
 import { FolderIcon } from "./media-utils";
@@ -226,6 +229,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    // Selection is page-scoped — drop it whenever the query changes so it never
+    // holds ids that aren't on the freshly-loaded page.
+    setSelectedIds(new Set());
     listMedia({
       page,
       pageSize,
@@ -294,7 +300,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
           progress: 0,
           size: file.size,
           type: file.type,
-          phase: isTranscodableVideo(file) ? "converting" : "uploading",
+          // Neutral until we know: uploadLibraryMedia flips to "converting" only
+          // for videos that actually need transcoding (not already-web-ready MP4s).
+          phase: "uploading",
         },
       ]);
       queue.push({ file, id });
@@ -308,20 +316,27 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
     let completed = 0;
     for (const { file, id } of queue) {
       try {
-        let toUpload = file;
-        // Videos are transcoded to a streamable MP4 in the browser first.
-        if (isTranscodableVideo(file)) {
-          toUpload = await transcodeToMp4(file, (p) => setProgress(id, p));
-          setUploads((u) =>
-            u.map((x) =>
-              x.id === id ? { ...x, phase: "uploading", progress: 0 } : x,
-            ),
-          );
-        }
-        await uploadLibraryFile(
-          toUpload,
+        // Videos are transcoded to a streamable MP4 (with a poster captured from
+        // the source) before upload; other kinds fall straight through. All the
+        // per-kind logic lives in uploadLibraryMedia so no path can skip it.
+        await uploadLibraryMedia(
+          file,
           { folderId: folderForUpload },
-          { onProgress: (p) => setProgress(id, p) },
+          {
+            onProgress: (p) => setProgress(id, p),
+            onPhase: (phase) =>
+              setUploads((u) =>
+                u.map((x) =>
+                  x.id === id
+                    ? {
+                        ...x,
+                        phase,
+                        progress: phase === "uploading" ? 0 : x.progress,
+                      }
+                    : x,
+                ),
+              ),
+          },
         );
         completed += 1;
         // Mark done (full ring) but keep the card — it's removed atomically when
@@ -400,6 +415,97 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
   const items = result?.items ?? [];
   const totalPages = result?.totalPages ?? 1;
   const total = result?.total ?? 0;
+
+  // ── Batch selection ────────────────────────────────────────────────────────
+  // Page-scoped: the fetch effect clears it on any query change, so every id in
+  // the set is always present on the current page.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const batchDeleteOverlay = useOverlayState();
+  const batchMoveOverlay = useOverlayState();
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+  const selectAllOnPage = (select: boolean) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const m of items) {
+        if (select) next.add(m.id);
+        else next.delete(m.id);
+      }
+      return next;
+    });
+
+  const usesOf = (m: MediaItem) =>
+    m.usages.length + m.authorUsages.length + m.providerUsages.length;
+  const selectedItems = items.filter((m) => selectedIds.has(m.id));
+  // In-use files can't be deleted (same rule as the single-item delete) — they
+  // stay selected but are skipped by the batch delete.
+  const deletableSelected = selectedItems.filter((m) => usesOf(m) === 0);
+  const inUseSelectedCount = selectedItems.length - deletableSelected.length;
+
+  function askBatchDelete() {
+    if (deletableSelected.length === 0) {
+      toast.danger(
+        `All ${selectedItems.length} selected file${
+          selectedItems.length === 1 ? " is" : "s are"
+        } in use and can't be deleted.`,
+      );
+      return;
+    }
+    batchDeleteOverlay.open();
+  }
+
+  async function confirmBatchDelete() {
+    // One request; the server deletes objects + thumbnails, enforces the in-use
+    // guard, and returns a per-id outcome.
+    const res = await bulkDeleteMedia(deletableSelected.map((m) => m.id));
+    const deletedIds = new Set(res.deleted);
+
+    setResult((r) =>
+      r
+        ? {
+            ...r,
+            items: r.items.filter((x) => !deletedIds.has(x.id)),
+            total: r.total - res.deleted.length,
+          }
+        : r,
+    );
+    clearSelection();
+    refreshFolders();
+    refreshMediaTags();
+
+    if (res.failed.length > 0) {
+      toast.danger(
+        `Deleted ${res.deleted.length}, ${res.failed.length} failed. Try again for the rest.`,
+      );
+    } else {
+      toast.success(
+        `Deleted ${res.deleted.length} file${res.deleted.length === 1 ? "" : "s"}`,
+      );
+    }
+  }
+
+  async function confirmBatchMove(folderId: string | null) {
+    // One request — an atomic updateMany on the server.
+    const res = await bulkMoveMedia(
+      selectedItems.map((m) => m.id),
+      folderId,
+    );
+
+    clearSelection();
+    // Moving can change which items belong to the current folder scope, so
+    // refetch rather than patch in place.
+    setReloadKey((k) => k + 1);
+    refreshFolders();
+    toast.success(`Moved ${res.moved} file${res.moved === 1 ? "" : "s"}`);
+  }
 
   // Pagination display helpers (mirror PostsTable's footer).
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -626,6 +732,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                       media={m}
                       onOpen={openDetail}
                       onDeleted={handleDeleted}
+                      isSelected={selectedIds.has(m.id)}
+                      selectionActive={selectedIds.size > 0}
+                      onToggleSelect={toggleSelect}
                     />
                   </li>
                 ))}
@@ -647,6 +756,9 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                     folders={folders}
                     onOpen={openDetail}
                     onDeleted={handleDeleted}
+                    selectedIds={selectedIds}
+                    onToggleSelect={toggleSelect}
+                    onSelectAll={selectAllOnPage}
                   />
                 )}
               </div>
@@ -731,6 +843,43 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
         </div>
       </div>
 
+      {/* Floating batch action bar — fixed to the viewport so appearing/hiding
+          never shifts the grid, and it stays reachable while scrolling. The
+          outer wrapper is click-through; only the bar itself is interactive. */}
+      {selectedItems.length > 0 && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-10 z-40 flex justify-center px-4">
+          <div className="batch-bar-glow pointer-events-auto relative flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-full border border-border bg-surface px-3 py-2 shadow-[0_10px_35px_-5px_rgba(0,0,0,0.30)] ring-1 ring-black/5 backdrop-blur dark:ring-white/10">
+            <span className="pl-2 text-sm font-semibold text-foreground">
+              {selectedItems.length} selected
+              {inUseSelectedCount > 0 && (
+                <span className="ml-1 font-normal text-muted">
+                  ({inUseSelectedCount} in use)
+                </span>
+              )}
+            </span>
+            <span
+              aria-hidden
+              className="hidden h-6 w-px bg-border sm:block"
+            />
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onPress={() => batchMoveOverlay.open()}
+              >
+                Change folder
+              </Button>
+              <Button size="sm" variant="danger" onPress={askBatchDelete}>
+                Delete selected
+              </Button>
+              <Button size="sm" variant="tertiary" onPress={clearSelection}>
+                Clear
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MediaDetailModal
         media={detail}
         isOpen={detailOverlay.isOpen}
@@ -769,6 +918,35 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
           });
         }}
         onDeleted={handleDeleted}
+      />
+
+      {/* Batch delete — only the deletable (not-in-use) selection is removed. */}
+      <ConfirmDialog
+        isOpen={batchDeleteOverlay.isOpen}
+        onOpenChange={batchDeleteOverlay.setOpen}
+        title={`Delete ${deletableSelected.length} file${
+          deletableSelected.length === 1 ? "" : "s"
+        }?`}
+        description={`This permanently removes ${
+          deletableSelected.length === 1 ? "this file" : "these files"
+        } from storage. This cannot be undone.${
+          inUseSelectedCount > 0
+            ? ` ${inUseSelectedCount} in-use file${
+                inUseSelectedCount === 1 ? " is" : "s are"
+              } selected and will be kept.`
+            : ""
+        }`}
+        confirmLabel={`Delete ${deletableSelected.length}`}
+        onConfirm={confirmBatchDelete}
+      />
+
+      {/* Batch move to a folder. */}
+      <BatchMoveDialog
+        isOpen={batchMoveOverlay.isOpen}
+        onOpenChange={batchMoveOverlay.setOpen}
+        folders={folders}
+        count={selectedItems.length}
+        onMove={confirmBatchMove}
       />
     </div>
   );

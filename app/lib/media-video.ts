@@ -38,9 +38,153 @@ function getFFmpeg(): Promise<FFmpeg> {
   return ffmpegPromise;
 }
 
-/** Whether a file should be run through the transcoder (any video). */
+/** Whether a file is a video we handle in the library at all. */
 export function isTranscodableVideo(file: File): boolean {
   return file.type.startsWith("video/");
+}
+
+// ── Fast pre-check: does the video actually need transcoding? ───────────────
+// A file is already web-ready (skip the expensive transcode, upload as-is) when
+// it's an MP4 container carrying H.264 video + AAC/no audio, with the `moov`
+// atom in front of the media data (faststart → progressive streaming). We
+// determine this by parsing the MP4 box structure straight from the bytes — a
+// handful of small `slice()` reads, and crucially NO ffmpeg.wasm download.
+
+/** ftyp brands that mean "MP4 family" (as opposed to QuickTime `qt  `, etc.). */
+const MP4_BRANDS = new Set([
+  "isom", "iso2", "iso4", "iso5", "iso6", "mp41", "mp42", "avc1", "dash",
+  "cmfc", "mmp4", "M4V ", "M4A ", "f4v ", "MSNV", "NDSC",
+]);
+const H264_FORMATS = new Set(["avc1", "avc3"]);
+const AAC_FORMATS = new Set(["mp4a"]);
+// Known sample-entry 4CCs, used to reject anything that ISN'T H.264 / AAC.
+// (Unknown 4CCs — e.g. timed-metadata tracks — are ignored, not treated as bad.)
+const KNOWN_VIDEO_FORMATS = new Set([
+  "avc1", "avc3", "hev1", "hvc1", "vp08", "vp09", "av01", "mp4v", "mjpg",
+  "jpeg", "dvav", "dvhe", "s263",
+]);
+const KNOWN_AUDIO_FORMATS = new Set([
+  "mp4a", "ac-3", "ec-3", "dtsc", "dtsh", "dtsl", "alac", "samr", "sawb",
+  "mlpa", "Opus", "fLaC", ".mp3",
+]);
+
+const fourcc = (b: Uint8Array, off: number) =>
+  String.fromCharCode(b[off], b[off + 1], b[off + 2], b[off + 3]);
+
+interface Box {
+  type: string;
+  start: number;
+  size: number;
+  dataStart: number;
+}
+
+/** Read a single box header at `offset` (handles 32/64-bit sizes). */
+async function readBoxHeader(file: File, offset: number): Promise<Box | null> {
+  const buf = new Uint8Array(await file.slice(offset, offset + 16).arrayBuffer());
+  if (buf.length < 8) return null;
+  const dv = new DataView(buf.buffer);
+  let size = dv.getUint32(0);
+  const type = fourcc(buf, 4);
+  let header = 8;
+  if (size === 1) {
+    if (buf.length < 16) return null;
+    size = dv.getUint32(8) * 2 ** 32 + dv.getUint32(12); // 64-bit largesize
+    header = 16;
+  } else if (size === 0) {
+    size = file.size - offset; // box runs to EOF
+  }
+  if (size < header) return null;
+  return { type, start: offset, size, dataStart: offset + header };
+}
+
+/** Collect every `stsd` sample-entry format 4CC inside an in-memory `moov`. */
+function stsdFormats(moov: ArrayBuffer): string[] {
+  const bytes = new Uint8Array(moov);
+  const dv = new DataView(moov);
+  const CONTAINERS = new Set(["trak", "mdia", "minf", "stbl", "edts", "dinf", "mvex"]);
+  const formats: string[] = [];
+  const walk = (start: number, end: number, depth: number) => {
+    let off = start;
+    while (off + 8 <= end && depth <= 8) {
+      let size = dv.getUint32(off);
+      const type = fourcc(bytes, off + 4);
+      let header = 8;
+      if (size === 1) {
+        size = dv.getUint32(off + 8) * 2 ** 32 + dv.getUint32(off + 12);
+        header = 16;
+      } else if (size === 0) {
+        size = end - off;
+      }
+      if (size < header) break;
+      const dataEnd = Math.min(off + size, end);
+      if (type === "stsd") {
+        // 4 bytes version/flags + 4 bytes entry count, then sized entries.
+        let p = off + header + 8;
+        while (p + 8 <= dataEnd) {
+          const entrySize = dv.getUint32(p);
+          formats.push(fourcc(bytes, p + 4));
+          if (entrySize < 8) break;
+          p += entrySize;
+        }
+      } else if (CONTAINERS.has(type)) {
+        walk(off + header, dataEnd, depth + 1);
+      }
+      off += size;
+    }
+  };
+  walk(0, bytes.byteLength, 0);
+  return formats;
+}
+
+async function inspectVideo(file: File): Promise<boolean> {
+  // 1) Walk the top-level boxes (ftyp, moov, mdat/moof, …).
+  const boxes: Box[] = [];
+  let off = 0;
+  for (let i = 0; i < 64 && off + 8 <= file.size; i++) {
+    const box = await readBoxHeader(file, off);
+    if (!box) break;
+    boxes.push(box);
+    off = box.start + box.size;
+  }
+
+  // 2) Container must be MP4-family (a valid ftyp with an MP4 brand).
+  const ftyp = boxes.find((b) => b.type === "ftyp");
+  if (!ftyp) return true;
+  const fb = new Uint8Array(await file.slice(ftyp.dataStart, ftyp.start + ftyp.size).arrayBuffer());
+  const brands: string[] = [];
+  for (let p = 0; p + 4 <= fb.length; p += 4) {
+    if (p === 4) continue; // skip minor_version (between major + compatible brands)
+    brands.push(fourcc(fb, p));
+  }
+  if (!brands.some((b) => MP4_BRANDS.has(b))) return true;
+
+  // 3) Faststart: `moov` must sit before the media payload.
+  const moov = boxes.find((b) => b.type === "moov");
+  const media = boxes.find((b) => b.type === "mdat" || b.type === "moof");
+  if (!moov || !media || moov.start > media.start) return true;
+
+  // 4) Codecs: read the (front-loaded, small) moov and check sample entries.
+  const moovBuf = await file.slice(moov.dataStart, moov.start + moov.size).arrayBuffer();
+  const formats = stsdFormats(moovBuf);
+  const hasH264 = formats.some((f) => H264_FORMATS.has(f));
+  const badVideo = formats.some((f) => KNOWN_VIDEO_FORMATS.has(f) && !H264_FORMATS.has(f));
+  const badAudio = formats.some((f) => KNOWN_AUDIO_FORMATS.has(f) && !AAC_FORMATS.has(f));
+
+  // Already a streamable H.264/AAC MP4 → no transcode needed.
+  return !hasH264 || badVideo || badAudio;
+}
+
+/**
+ * Whether `file` needs transcoding to a web-streamable MP4, or is already one.
+ * Parses the MP4 boxes directly — no ffmpeg.wasm. Any parse failure or unknown
+ * shape returns `true` (transcode), so we only skip when we're confident.
+ */
+export async function videoNeedsTranscode(file: File): Promise<boolean> {
+  try {
+    return await inspectVideo(file);
+  } catch {
+    return true;
+  }
 }
 
 /**

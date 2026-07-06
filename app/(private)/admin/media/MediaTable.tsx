@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import { TrashBin } from "@gravity-ui/icons";
 import {
   Button,
+  Checkbox,
   Chip,
   Table,
   toast,
@@ -69,15 +70,26 @@ export function MediaTable({
   folders,
   onOpen,
   onDeleted,
+  selectedIds,
+  onToggleSelect,
+  onSelectAll,
 }: {
   items: MediaItem[];
   folders: MediaFolder[];
   onOpen: (m: MediaItem) => void;
   onDeleted: (id: string) => void;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  /** Select or clear every row on the current page. */
+  onSelectAll: (select: boolean) => void;
 }) {
   const folderName = new Map(folders.map((f) => [f.id, f.name]));
   const deleteOverlay = useOverlayState();
   const [deleting, setDeleting] = useState<MediaItem | null>(null);
+
+  const allSelected =
+    items.length > 0 && items.every((m) => selectedIds.has(m.id));
+  const someSelected = items.some((m) => selectedIds.has(m.id));
 
   // Precompute display strings here (during render) — NOT inside the Table.Body
   // render prop, which runs outside render and trips the React Compiler when it
@@ -108,6 +120,23 @@ export function MediaTable({
         <Table.ScrollContainer className="overflow-x-auto">
           <Table.Content aria-label="Media library" className="min-w-200">
             <Table.Header>
+              <Table.Column className="w-10">
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <Checkbox
+                    aria-label="Select all on this page"
+                    isSelected={allSelected}
+                    isIndeterminate={someSelected && !allSelected}
+                    onChange={(v) => onSelectAll(v)}
+                  >
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                  </Checkbox>
+                </div>
+              </Table.Column>
               <Table.Column isRowHeader>File</Table.Column>
               <Table.Column>Type</Table.Column>
               <Table.Column className="min-w-25">Alt text</Table.Column>
@@ -135,6 +164,23 @@ export function MediaTable({
                     onAction={() => onOpen(m)}
                     className="cursor-pointer"
                   >
+                    <Table.Cell>
+                      {/* Stop pointer/click so toggling never opens the row. */}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          aria-label={`Select ${m.name ?? m.key}`}
+                          isSelected={selectedIds.has(m.id)}
+                          onChange={() => onToggleSelect(m.id)}
+                        >
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                        </Checkbox>
+                      </div>
+                    </Table.Cell>
                     <Table.Cell>
                       <div className="flex items-center gap-3">
                         <Thumb media={m} />

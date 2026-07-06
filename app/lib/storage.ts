@@ -589,6 +589,38 @@ export interface LibraryUploadMeta {
   thumbnailUrl?: string;
   blurDataUrl?: string;
   durationMs?: number;
+  width?: number;
+  height?: number;
+}
+
+/** Confirm-ready video derivatives (poster already uploaded as a thumbnail). */
+type VideoDerived = Pick<
+  LibraryUploadMeta,
+  "thumbnailKey" | "thumbnailUrl" | "blurDataUrl" | "durationMs" | "width" | "height"
+>;
+
+/**
+ * Capture a video's poster frame + blur/duration/dimensions and upload the
+ * poster as a stored thumbnail, returning confirm-ready derivatives.
+ *
+ * Capture this from the ORIGINAL file BEFORE any in-browser transcode: decoding
+ * a `<video>` right after ffmpeg.wasm has run — especially across a batch, where
+ * its heap stays allocated — frequently fails under memory pressure, which is
+ * what silently left videos with no thumbnail on multi-file uploads.
+ *
+ * Best-effort: throws are the caller's to tolerate (upload proceeds sans poster).
+ */
+export async function captureVideoPoster(file: File): Promise<VideoDerived> {
+  const v = await generateVideoPoster(file);
+  const thumb = await uploadThumbnail(v.posterBlob);
+  return {
+    thumbnailKey: thumb.key,
+    thumbnailUrl: thumb.url ?? undefined,
+    blurDataUrl: v.blurDataUrl,
+    durationMs: v.durationMs,
+    width: v.width,
+    height: v.height,
+  };
 }
 
 export async function uploadLibraryFile(
@@ -602,36 +634,32 @@ export async function uploadLibraryFile(
   // 2) Derivatives — generated in the browser (Canvas). Images get a WebP
   //    thumbnail + blur LQIP; videos get a captured poster frame + duration.
   //    Best-effort: a failure just means no thumbnail.
-  let derived: Pick<
-    ConfirmMetadata,
-    "thumbnailKey" | "thumbnailUrl" | "blurDataUrl" | "width" | "height" | "durationMs"
-  > = {};
-  const kind = kindFromMime(file.type);
-  try {
-    if (kind === "image") {
-      const d = await generateImageThumbnail(file);
-      const thumb = await uploadThumbnail(d.thumbBlob);
-      derived = {
-        width: d.width,
-        height: d.height,
-        blurDataUrl: d.blurDataUrl,
-        thumbnailKey: thumb.key,
-        thumbnailUrl: thumb.url ?? undefined,
-      };
-    } else if (kind === "video") {
-      const v = await generateVideoPoster(file);
-      const thumb = await uploadThumbnail(v.posterBlob);
-      derived = {
-        width: v.width,
-        height: v.height,
-        durationMs: v.durationMs,
-        blurDataUrl: v.blurDataUrl,
-        thumbnailKey: thumb.key,
-        thumbnailUrl: thumb.url ?? undefined,
-      };
+  let derived: VideoDerived = {};
+  // Skip in-here generation when the caller already supplied a poster — the
+  // video path captures it from the pre-transcode source (see captureVideoPoster
+  // in handleFiles), which is far more reliable than decoding a just-transcoded
+  // MP4. Otherwise generate as a best-effort fallback.
+  if (!meta.thumbnailKey) {
+    const kind = kindFromMime(file.type);
+    try {
+      if (kind === "image") {
+        const d = await generateImageThumbnail(file);
+        const thumb = await uploadThumbnail(d.thumbBlob);
+        derived = {
+          width: d.width,
+          height: d.height,
+          blurDataUrl: d.blurDataUrl,
+          thumbnailKey: thumb.key,
+          thumbnailUrl: thumb.url ?? undefined,
+        };
+      } else if (kind === "video") {
+        derived = await captureVideoPoster(file);
+      }
+    } catch (e) {
+      // Don't fail the upload, but don't hide it either — a swallowed error here
+      // is exactly why videos silently ended up with no thumbnail.
+      console.warn(`[media] thumbnail generation failed for ${file.name}`, e);
     }
-  } catch {
-    /* upload the original without a generated thumbnail */
   }
 
   // 3) Confirm the original with name/folder + derivatives.
@@ -647,6 +675,8 @@ export async function uploadLibraryFile(
     thumbnailUrl: meta.thumbnailUrl,
     blurDataUrl: meta.blurDataUrl,
     durationMs: meta.durationMs,
+    width: meta.width,
+    height: meta.height,
     ...derived,
   });
 }
@@ -662,6 +692,43 @@ export async function deleteLibraryMedia(media: {
   if (media.thumbnailUrl) {
     await deleteObject(keyFromUrl(media.thumbnailUrl)).catch(() => {});
   }
+}
+
+/** Per-id outcome of a batch delete — every requested id lands in one bucket. */
+export interface BulkDeleteResult {
+  /** Removed (object + thumbnail + row). */
+  deleted: string[];
+  /** Referenced by a post/author/provider — kept, not deleted. */
+  skippedInUse: string[];
+  /** Ids that weren't library items. */
+  notFound: string[];
+  /** Object-store deletion errored — retryable. */
+  failed: string[];
+}
+
+/**
+ * Delete many library items in one request. The server removes each object +
+ * its thumbnail, enforces the in-use protection, and reports a per-id outcome.
+ */
+export function bulkDeleteMedia(ids: string[]): Promise<BulkDeleteResult> {
+  return api<BulkDeleteResult>("/api/storage/media/bulk-delete", {
+    method: "POST",
+    body: JSON.stringify({ ids }),
+  });
+}
+
+/**
+ * Move many library items into a folder (or `null` to unfile) in one request.
+ * Returns how many rows actually changed.
+ */
+export function bulkMoveMedia(
+  ids: string[],
+  folderId: string | null,
+): Promise<{ moved: number }> {
+  return api<{ moved: number }>("/api/storage/media/bulk-move", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, folderId }),
+  });
 }
 
 /** Filename → display name: drop the extension, leave the rest as-is. */

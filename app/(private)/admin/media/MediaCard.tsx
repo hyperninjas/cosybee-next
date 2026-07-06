@@ -5,6 +5,7 @@ import { TrashBin } from "@gravity-ui/icons";
 import {
   Button,
   Card,
+  Checkbox,
   Chip,
   toast,
   Tooltip,
@@ -41,10 +42,18 @@ export function MediaCard({
   media,
   onOpen,
   onDeleted,
+  isSelected = false,
+  selectionActive = false,
+  onToggleSelect,
 }: {
   media: MediaItem;
   onOpen: (m: MediaItem) => void;
   onDeleted: (id: string) => void;
+  /** Whether this card is part of the current batch selection. */
+  isSelected?: boolean;
+  /** Any card is selected — keeps every checkbox visible, not just on hover. */
+  selectionActive?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   // In use by any post, author avatar, or provider logo — blocks deletion.
   const uses =
@@ -72,11 +81,37 @@ export function MediaCard({
           onOpen(media);
         }
       }}
-      className="group relative w-full cursor-pointer gap-0 overflow-hidden border border-border p-0 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className={`group relative w-full cursor-pointer gap-0 overflow-hidden border p-0 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+        isSelected ? "border-accent ring-2 ring-accent" : "border-border"
+      }`}
     >
       {/* Thumbnail — prefer the generated thumbnail/poster, fall back to the
           original image, then the live video frame, then a kind icon. */}
       <div className="relative flex aspect-4/3 items-center justify-center overflow-hidden bg-background">
+        {/* Batch-select checkbox (top-left). Visible on hover, or always once a
+            selection is active. Stops click/keydown so it never opens detail. */}
+        {onToggleSelect && (
+          <div
+            className={`absolute left-1.5 top-1.5 z-20 rounded-md bg-black/55 p-0.5 backdrop-blur-sm transition-opacity ${
+              isSelected || selectionActive
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              isSelected={isSelected}
+              onChange={() => onToggleSelect(media.id)}
+              aria-label={`Select ${media.name ?? media.key}`}
+            >
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox>
+          </div>
+        )}
+
         {thumbSrc ? (
           <NextImage
             src={thumbSrc}

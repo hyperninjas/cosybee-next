@@ -350,3 +350,56 @@
 .post-editor .bn-block-column[style*="box-shadow"]::after {
   background: var(--accent);
 }
+
+/* Entrance for the media-library batch action bar when it mounts (a selection
+   starts). A clear slide-up + settle makes it noticeable, paired with a one-shot
+   accent bloom. Both play a single time, then the bar stays quiet. The bloom is
+   a pseudo-element halo so it never fights the bar's own ring + drop shadow. */
+@keyframes batch-bar-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes batch-bar-glow {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.batch-bar-glow {
+  animation: batch-bar-in 340ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+.batch-bar-glow::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  /* Layered halo: a tight bright core + a wide bloom, at full accent, so the
+     glow reads clearly rather than as a faint edge tint. */
+  box-shadow:
+    0 0 14px 3px color-mix(in oklch, var(--accent) 95%, transparent),
+    0 0 34px 10px color-mix(in oklch, var(--accent) 80%, transparent),
+    0 0 60px 20px color-mix(in oklch, var(--accent) 55%, transparent);
+  animation: batch-bar-glow 1600ms ease-out 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .batch-bar-glow,
+  .batch-bar-glow::after {
+    animation: none;
+  }
+}

@@ -25,11 +25,8 @@ import {
   getMultiColumnSlashMenuItems,
   locales as multiColumnLocales,
 } from "@blocknote/xl-multi-column";
-import {
-  uploadLibraryFile,
-  validateLibraryFile,
-  type MediaItem,
-} from "@/app/lib/storage";
+import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
+import { uploadLibraryMedia } from "@/app/lib/media-upload";
 import { blockNoteSchema as schema } from "@/app/lib/blocknoteSchema";
 import { MediaPickerModal } from "@/app/(private)/admin/media/MediaPickerModal";
 
@@ -146,10 +143,11 @@ export default function Editor({ initialContent, onChange }: Props) {
       const error = validateLibraryFile(file);
       if (error) throw new Error(error);
 
-      // Route through the media library so dropped/pasted files land in the
-      // gallery (with a thumbnail + name) and are usage-tracked against the
-      // post, then hand the public URL back to BlockNote for the block.
-      const result = await uploadLibraryFile(file);
+      // Route through the shared library uploader so dropped/pasted files land
+      // in the gallery (with a thumbnail + name) and are usage-tracked against
+      // the post — and so videos are transcoded + poster-captured like every
+      // other path — then hand the public URL back to BlockNote for the block.
+      const result = await uploadLibraryMedia(file);
       if (!result.fileUrl) throw new Error("Upload failed - no URL returned");
       return result.fileUrl;
     },
