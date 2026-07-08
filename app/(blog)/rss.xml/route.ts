@@ -9,8 +9,13 @@ import {
   url,
 } from "@/app/lib/site";
 
-// Re-generate at most hourly; survives the backend being unreachable.
-export const revalidate = 3600;
+// Always reflect the latest published posts: render on every request and
+// refetch from the backend each time (no caching). `force-dynamic` also sets
+// this route's fetches to no-store, overriding the shared API client's default
+// 60s revalidate — but only for this route; the rest of the site keeps caching.
+// Trade-off: if the backend is unreachable the feed serves an empty list rather
+// than stale content, which is the intended "update on fetch" behaviour.
+export const dynamic = "force-dynamic";
 
 /** Escape a string for inclusion in XML text/attribute content. */
 function escapeXml(s: string): string {
@@ -81,8 +86,9 @@ ${articles.map(itemXml).join("\n")}
   return new Response(xml, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
-      "Cache-Control":
-        "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+      // No caching anywhere (browser, CDN/edge) — every request rebuilds the
+      // feed from the latest published posts.
+      "Cache-Control": "no-store, max-age=0",
     },
   });
 }
