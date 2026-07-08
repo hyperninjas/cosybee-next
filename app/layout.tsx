@@ -23,6 +23,7 @@ import {
   SOCIAL,
   TWITTER_HANDLE,
   url,
+  RSS_ALTERNATE_TYPES,
 } from "./lib/site";
 import { DEFAULT_OG_IMAGE } from "./lib/seo";
 
@@ -58,11 +59,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
     // Let feed readers and crawlers discover the blog RSS feed.
-    types: {
-      "application/rss+xml": [
-        { url: "/feed.xml", title: `${SITE_NAME} — Blog` },
-      ],
-    },
+    types: RSS_ALTERNATE_TYPES,
   },
   // Search-engine site verification. Tokens are read from server env so they
   // can differ per environment and aren't committed. Undefined values are

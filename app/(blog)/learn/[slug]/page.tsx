@@ -6,6 +6,7 @@ import {
   getRelated,
 } from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
+import { RSS_ALTERNATE_TYPES } from "@/app/lib/site";
 
 /** Prerender every routable article at build time. */
 export async function generateStaticParams() {
@@ -25,6 +26,7 @@ export async function generateMetadata({
     description: article.seoDescription ?? article.description,
     alternates: {
       canonical: article.canonicalUrl ?? `/learn/${article.slug}`,
+      types: RSS_ALTERNATE_TYPES,
     },
     robots: article.noindex ? { index: false, follow: true } : undefined,
     openGraph: {

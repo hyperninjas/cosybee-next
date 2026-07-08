@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { SITE_NAME, SITE_TAGLINE, TWITTER_HANDLE } from "./site";
+import {
+  SITE_NAME,
+  SITE_TAGLINE,
+  TWITTER_HANDLE,
+  RSS_ALTERNATE_TYPES,
+} from "./site";
 
 /**
  * Centralised page-metadata builder — the ONE place that assembles Open Graph
@@ -77,7 +82,7 @@ export function pageMetadata({
     title: absoluteTitle ? { absolute: title } : title,
     description,
     ...(keywords ? { keywords } : {}),
-    alternates: { canonical: path },
+    alternates: { canonical: path, types: RSS_ALTERNATE_TYPES },
     ...(index ? {} : { robots: { index: false, follow: true } }),
     openGraph: {
       type,

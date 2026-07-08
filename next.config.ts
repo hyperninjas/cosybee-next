@@ -147,6 +147,13 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // The blog RSS feed moved from /feed.xml to /rss.xml. 308 so any
+        // reader that already subscribed to the old path follows automatically.
+        source: "/feed.xml",
+        destination: "/rss.xml",
+        permanent: true,
+      },
+      {
         source: "/energy-monitoring-domestic",
         destination: "/energy",
         permanent: true,

@@ -77,3 +77,18 @@ export function url(path: string): string {
   const prefix = path.startsWith("/") ? "" : "/";
   return SITE_URL + prefix + path;
 }
+
+/**
+ * RSS auto-discovery entry for `metadata.alternates.types`.
+ *
+ * Next merges metadata *shallowly*, so any page that sets its own `alternates`
+ * (article pages, marketing pages via seo.ts) **replaces** the root layout's
+ * `alternates` wholesale — dropping this feed link. Spread this into every such
+ * page's `alternates` so the blog feed stays discoverable site-wide.
+ *
+ * Uses the documented string form (`{ type: url }`); the array-of-objects form
+ * silently renders nothing in this Next build.
+ */
+export const RSS_ALTERNATE_TYPES = {
+  "application/rss+xml": url("/rss.xml"),
+} as const;
