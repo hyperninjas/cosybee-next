@@ -105,13 +105,17 @@ export default function BlogLatestArticles({
   // new layout. This matters because the parent renders the featured carousel
   // only on page 1, so paging across the page-1 boundary mounts/unmounts that
   // block above this section; scrolling synchronously would target the stale
-  // pre-shift position and overshoot. Skip the initial mount.
-  const didMountRef = useRef(false);
+  // pre-shift position and overshoot.
+  //
+  // Guard on the page VALUE changing, not on mount timing: a mount ref gets
+  // flipped by React Strict Mode's setup→cleanup→setup double-invoke in dev,
+  // which then scrolls on first load. Seeding the ref with the current page
+  // means the initial mount (and any remount at the same page) is a no-op, and
+  // only a genuine page change scrolls.
+  const scrolledPageRef = useRef(page);
   useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
+    if (scrolledPageRef.current === page) return;
+    scrolledPageRef.current = page;
     headingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [page]);
 
