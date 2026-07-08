@@ -212,7 +212,7 @@ export function HomeFeaturedArticlesView({
     <Section spacing="none" className="bg-linear-to-b from-white to-[#f6f5f4]">
       <div className="mx-auto max-w-360 px-6 pt-12 pb-2 sm:px-10 lg:px-30 ">
         <Header viewAllHref={viewAllHref} />
-        {articles.length > 4 ? (
+        {articles.length > 3 ? (
           <FeaturedCarousel articles={articles} />
         ) : (
           <FeaturedGrid articles={articles} />
