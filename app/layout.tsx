@@ -10,6 +10,7 @@ import Analytics from "./components/Analytics";
 import GoogleTagManager, {
   GoogleTagManagerNoScript,
 } from "./components/GoogleTagManager";
+import Clarity from "./components/Clarity";
 import { DeferredClientLayer } from "./components/DeferredClientLayer";
 import {
   ORG_ADDRESS,
@@ -296,6 +297,7 @@ export default function RootLayout({
         </Providers>
         <Analytics />
         <GoogleTagManager />
+        <Clarity />
       </body>
     </html>
   );

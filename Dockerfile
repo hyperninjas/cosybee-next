@@ -33,6 +33,7 @@ ENV NODE_ENV=production
 #   NEXT_PUBLIC_RECAPTCHA_SITE_KEY  reCAPTCHA v3 public site key
 #   NEXT_PUBLIC_GA_MEASUREMENT_ID   GA4 measurement ID (empty disables GA)
 #   NEXT_PUBLIC_GTM_ID              GTM container ID (empty disables GTM)
+#   NEXT_PUBLIC_CLARITY_PROJECT_ID  Clarity project ID (empty disables Clarity)
 #   GOOGLE_SITE_VERIFICATION        Search Console token — baked into the
 #                                   statically-prerendered home HTML, so it must
 #                                   be a build arg (not a runtime env var)
@@ -52,6 +53,8 @@ ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 ARG NEXT_PUBLIC_GTM_ID
 ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+ARG NEXT_PUBLIC_CLARITY_PROJECT_ID
+ENV NEXT_PUBLIC_CLARITY_PROJECT_ID=$NEXT_PUBLIC_CLARITY_PROJECT_ID
 ARG GOOGLE_SITE_VERIFICATION
 ENV GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION
 ARG API_URL
