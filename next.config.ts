@@ -38,6 +38,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
 
+  // Dev-only: allow phones/tablets on the local network to load dev resources
+  // (HMR, chunks) when browsing via the machine's LAN IP — otherwise Next
+  // blocks them cross-origin and client JS (hydration, device detection)
+  // never runs on those devices. No effect on production builds.
+  allowedDevOrigins: ["10.10.10.83", "10.10.10.*", "*.local"],
+
   // Generate unique build ID for each deployment to help with Server Action cache invalidation
   generateBuildId: async () => {
     return `build-${Date.now()}`;

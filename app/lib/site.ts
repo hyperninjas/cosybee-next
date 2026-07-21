@@ -62,6 +62,7 @@ export const ROUTES: ReadonlyArray<{
   { path: "/heating", changeFrequency: "monthly", priority: 0.9 },
   { path: "/solar", changeFrequency: "monthly", priority: 0.9 },
   { path: "/energy", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/download", changeFrequency: "monthly", priority: 0.8 },
   { path: "/hive", changeFrequency: "weekly", priority: 0.8 },
   { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
   { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
