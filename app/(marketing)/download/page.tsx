@@ -12,7 +12,7 @@ import Benefits from "@/app/components/sections/download/Benefits";
 import DownloadHero from "@/app/components/sections/download/DownloadHero";
 import GettingStarted from "@/app/components/sections/download/GettingStarted";
 import GettingStartedV2 from "@/app/components/sections/download/GettingStartedV2";
-import MobileAppPromo from "@/app/components/sections/download/MobileAppPromo";
+// import MobileAppPromo from "@/app/components/sections/download/MobileAppPromo";
 import MobileAppPromoV2 from "@/app/components/sections/download/MobileAppPromoV2";
 
 export const metadata: Metadata = pageMetadata({
@@ -57,7 +57,7 @@ export default async function DownloadPage() {
       <DownloadHero qrSvg={qrSvg} />
       <GettingStarted />
       <GettingStartedV2 />
-      <MobileAppPromo />
+      {/* <MobileAppPromo /> */}
       <MobileAppPromoV2 />
       <Benefits />
       <AppFeatureCards />

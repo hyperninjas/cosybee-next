@@ -6,9 +6,9 @@ import { Section } from "@/app/components/ui/Section";
 import { Heading } from "@/app/components/ui/Typography";
 import { APP_STORE_URL, PLAY_STORE_URL } from "@/app/lib/app-links";
 // Placeholders — swap for the final app screenshots when ready.
-import frontImg from "@/public/download/app_home-full.png";
-import backLeftImg from "@/public/download/connect_home-full.png";
-import backRightImg from "@/public/download/create_account-full.png";
+import frontImg from "@/public/download/energiebee_app_download.png";
+// import backLeftImg from "@/public/download/connect_home-full.png";
+// import backRightImg from "@/public/download/create_account-full.png";
 
 /**
  * "Manage your energy on the go", v2 — two-column layout: a fanned cluster of
@@ -22,43 +22,19 @@ export default function MobileAppPromoV2() {
   return (
     <Section spacing="lg" surface="tertiary">
       <Container className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        {/* left: fanned three-phone cluster */}
-        <div className="flex justify-center">
-          <div
-            aria-hidden
-            className="relative mx-auto flex h-95 w-full max-w-md items-center justify-center sm:h-110 lg:mx-0"
-          >
-            {/* back-left screen — rotated out and tucked behind */}
-            <Image
-              src={backLeftImg}
-              alt=""
-              aria-hidden
-              quality={85}
-              placeholder="blur"
-              sizes="180px"
-              className="absolute left-[6%] top-1/2 w-36 -translate-y-1/2 rotate-[-8deg] drop-shadow-xl sm:w-44"
-            />
-            {/* back-right screen — mirrored to the other side */}
-            <Image
-              src={backRightImg}
-              alt=""
-              aria-hidden
-              quality={85}
-              placeholder="blur"
-              sizes="180px"
-              className="absolute right-[6%] top-1/2 w-36 -translate-y-1/2 rotate-[8deg] drop-shadow-xl sm:w-44"
-            />
-            {/* front screen — the dashboard, sitting proud of the cluster */}
-            <Image
-              src={frontImg}
-              alt="EnergieBee app dashboard"
-              quality={90}
-              placeholder="blur"
-              sizes="(min-width: 640px) 240px, 200px"
-              className="relative z-10 w-48 drop-shadow-2xl sm:w-56"
-            />
-          </div>
-        </div>
+        {/* left: composite two-phone app image, filling the column */}
+        <Image
+          src={frontImg}
+          alt="EnergieBee app shown on two phones"
+          // 90 is the max in next.config's `qualities` list; 100 isn't allowed.
+          quality={90}
+          placeholder="blur"
+          // Full-column width per breakpoint: ~1 column of the max-w-6xl grid
+          // on lg, near-viewport-width single column below it. Match these to
+          // the real render or Next under-serves and the image softens.
+          sizes="(min-width: 1024px) 560px, 92vw"
+          className="h-auto w-full"
+        />
 
         {/* right: copy + badges */}
         <div className="text-center lg:text-left">
