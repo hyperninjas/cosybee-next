@@ -7,13 +7,13 @@ import {
   breadcrumbSchema,
   softwareApplicationSchema,
 } from "@/app/lib/structured-data";
-import AppFeatureCards from "@/app/components/sections/download/AppFeatureCards";
-import Benefits from "@/app/components/sections/download/Benefits";
-import DownloadHero from "@/app/components/sections/download/DownloadHero";
-import GettingStarted from "@/app/components/sections/download/GettingStarted";
-import GettingStartedV2 from "@/app/components/sections/download/GettingStartedV2";
-// import MobileAppPromo from "@/app/components/sections/download/MobileAppPromo";
-import MobileAppPromoV2 from "@/app/components/sections/download/MobileAppPromoV2";
+import AppFeatureCards from "@/app/components/sections/download-app/AppFeatureCards";
+import Benefits from "@/app/components/sections/download-app/Benefits";
+import DownloadHero from "@/app/components/sections/download-app/DownloadHero";
+import GettingStarted from "@/app/components/sections/download-app/GettingStarted";
+import GettingStartedV2 from "@/app/components/sections/download-app/GettingStartedV2";
+// import MobileAppPromo from "@/app/components/sections/download-app/MobileAppPromo";
+import MobileAppPromoV2 from "@/app/components/sections/download-app/MobileAppPromoV2";
 
 export const metadata: Metadata = pageMetadata({
   // Absolute title (no brand-suffix template) so the primary keywords lead the
