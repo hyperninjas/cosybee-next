@@ -33,14 +33,12 @@ const AI_CRAWLERS = [
  * header (see their layouts and next.config.ts).
  */
 export default function robots(): MetadataRoute.Robots {
-  // Non-production hosts (sandbox, previews) must stay out of search. Crucially
-  // we ALLOW crawling here rather than `Disallow: /`: de-indexing relies on the
-  // site-wide `X-Robots-Tag: noindex` header (next.config.ts), and Google can
-  // only act on that header if it's allowed to fetch the page. A blanket
-  // Disallow would block the crawl and leave already-indexed URLs stuck in the
-  // index as URL-only results. Omit the sitemap so we don't advertise URLs.
+  // Non-production hosts (sandbox, previews) must stay out of search entirely.
+  // Block every crawler from every path and omit the sitemap. Backed by the
+  // site-wide `X-Robots-Tag: noindex` header in next.config.ts, which is the
+  // authoritative de-indexing signal for URLs discovered via external links.
   if (!IS_PRODUCTION) {
-    return { rules: [{ userAgent: "*", allow: "/" }] };
+    return { rules: [{ userAgent: "*", disallow: "/" }] };
   }
 
   const disallow = ["/api/", "/admin", "/account"];
