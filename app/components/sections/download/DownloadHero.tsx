@@ -5,7 +5,7 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import HeroDownloadCta from "./HeroDownloadCta";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 // Placeholder — swap for the download-page device mockup when it's ready.
-import heroDeviceImg from "@/public/download/Hand-Holding-iPhone-17-Pro-Free-psd-Mockup.png";
+import heroDeviceImg from "@/public/download-app/Hand-Holding-iPhone-17-Pro-Free-psd-Mockup.png";
 
 /**
  * Download page hero — same construction as HomeHero: background photo of a

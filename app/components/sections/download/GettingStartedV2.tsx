@@ -7,10 +7,10 @@ import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import { HEX_PATH } from "@/app/lib/hex";
 import type { StaticImageData } from "next/image";
-import downloadImg from "@/public/download/download_app-full.png";
-import accountImg from "@/public/download/create_account-full.png";
-import connectImg from "@/public/download/connect_home-full.png";
-import homeImg from "@/public/download/app_home-full.png";
+import downloadImg from "@/public/download-app/download_app-full.png";
+import accountImg from "@/public/download-app/create_account-full.png";
+import connectImg from "@/public/download-app/connect_home-full.png";
+import homeImg from "@/public/download-app/app_home-full.png";
 
 // A real sequence the user performs in order — numbering carries information.
 const STEPS: ReadonlyArray<{

@@ -174,6 +174,14 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // The app download page moved from /download to /download-app. It was
+        // already indexable and in the sitemap, so redirect rather than 404 —
+        // this also covers any QR code printed against the old URL.
+        source: "/download",
+        destination: "/download-app",
+        permanent: true,
+      },
+      {
         source: "/energy-monitoring-domestic",
         destination: "/energy",
         permanent: true,

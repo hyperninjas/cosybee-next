@@ -3,9 +3,9 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import type { StaticImageData } from "next/image";
-import heatingImg from "@/public/download/heating-solution.png";
-import solarImg from "@/public/download/solar-forcasting.png";
-import energyImg from "@/public/download/energy-management.png";
+import heatingImg from "@/public/download-app/heating-solution.png";
+import solarImg from "@/public/download-app/solar-forcasting.png";
+import energyImg from "@/public/download-app/energy-management.png";
 
 const CARDS: ReadonlyArray<{
   title: string;

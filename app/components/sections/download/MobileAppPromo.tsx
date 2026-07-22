@@ -6,7 +6,7 @@ import { Section } from "@/app/components/ui/Section";
 import { Heading } from "@/app/components/ui/Typography";
 import { APP_STORE_URL, PLAY_STORE_URL } from "@/app/lib/app-links";
 // Placeholder — swap for the final App Store screenshot mockup when ready.
-import phoneImg from "@/public/download/download_app-full.png";
+import phoneImg from "@/public/download-app/download_app-full.png";
 
 /**
  * "Manage your energy on the go" — centered phone shot on the cream band

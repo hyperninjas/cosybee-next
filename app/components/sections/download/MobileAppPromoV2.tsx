@@ -6,9 +6,9 @@ import { Section } from "@/app/components/ui/Section";
 import { Heading } from "@/app/components/ui/Typography";
 import { APP_STORE_URL, PLAY_STORE_URL } from "@/app/lib/app-links";
 // Placeholders — swap for the final app screenshots when ready.
-import frontImg from "@/public/download/energiebee_app_download.png";
-// import backLeftImg from "@/public/download/connect_home-full.png";
-// import backRightImg from "@/public/download/create_account-full.png";
+import frontImg from "@/public/download-app/energiebee_app_download.png";
+// import backLeftImg from "@/public/download-app/connect_home-full.png";
+// import backRightImg from "@/public/download-app/create_account-full.png";
 
 /**
  * "Manage your energy on the go", v2 — two-column layout: a fanned cluster of

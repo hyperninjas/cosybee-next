@@ -24,7 +24,7 @@ export const metadata: Metadata = pageMetadata({
     "Download EnergieBee free for iPhone and Android — smart heating, solar forecasting, and energy analytics for your whole home in one app.",
   ogDescription:
     "One free app for your whole home's energy — heating, solar, and analytics. Get EnergieBee on iOS and Android.",
-  path: "/download",
+  path: "/download-app",
   keywords: [
     "download EnergieBee",
     "EnergieBee app",
@@ -39,7 +39,7 @@ export default async function DownloadPage() {
   // The QR points at this page rather than a store: scanning on a phone lands
   // on the device-aware buttons above, so the same code stays correct before
   // and after launch and for both platforms.
-  const qrSvg = await QRCode.toString(url("/download"), {
+  const qrSvg = await QRCode.toString(url("/download-app"), {
     type: "svg",
     margin: 0,
     color: { dark: "#000000", light: "#ffffff" },
@@ -50,7 +50,7 @@ export default async function DownloadPage() {
       <JsonLd
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
-          { name: "Download", path: "/download" },
+          { name: "Download", path: "/download-app" },
         ])}
       />
       <JsonLd data={softwareApplicationSchema()} />

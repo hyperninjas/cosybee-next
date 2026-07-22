@@ -43,7 +43,7 @@ export async function GET() {
     `- [Smart Heating Control](${url("/heating")}): Heating that learns your routines and adapts in real time — zone heating, geofencing, and AI boiler tuning.`,
     `- [Solar Forecasting & Optimisation](${url("/solar")}): 95% accurate next-day solar forecasting to schedule loads and maximise solar return.`,
     `- [Total Energy Control](${url("/energy")}): Track every watt across grid, solar, battery, and devices, with AI tariff shifting and bill forecasting.`,
-    `- [Download the app](${url("/download")}): Get EnergieBee on iOS and Android.`,
+    `- [Download the app](${url("/download-app")}): Get EnergieBee on iOS and Android.`,
     "",
     "## Company",
     `- [Contact](${url("/contact")}): Get in touch with the EnergieBee team.`,
