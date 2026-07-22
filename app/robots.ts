@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "./lib/site";
+import { IS_PRODUCTION, SITE_URL } from "./lib/site";
 
 /**
  * Known AI / LLM crawlers. We explicitly ALLOW them so EnergieBee content
@@ -33,6 +33,16 @@ const AI_CRAWLERS = [
  * header (see their layouts and next.config.ts).
  */
 export default function robots(): MetadataRoute.Robots {
+  // Non-production hosts (sandbox, previews) must stay out of search. Crucially
+  // we ALLOW crawling here rather than `Disallow: /`: de-indexing relies on the
+  // site-wide `X-Robots-Tag: noindex` header (next.config.ts), and Google can
+  // only act on that header if it's allowed to fetch the page. A blanket
+  // Disallow would block the crawl and leave already-indexed URLs stuck in the
+  // index as URL-only results. Omit the sitemap so we don't advertise URLs.
+  if (!IS_PRODUCTION) {
+    return { rules: [{ userAgent: "*", allow: "/" }] };
+  }
+
   const disallow = ["/api/", "/admin", "/account"];
   return {
     rules: [
