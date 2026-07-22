@@ -58,8 +58,15 @@ const STEPS: ReadonlyArray<{
  * the scroll listener never attaches.
  */
 export default function GettingStartedV2() {
-  const [active, setActive] = useState(0);
+  // Continuous scroll progress through the runway (0–1). It drives the
+  // connector fill directly; its floored value is the active step (which
+  // screenshot shows, which hex is "current").
+  const [progress, setProgress] = useState(0);
   const runwayRef = useRef<HTMLDivElement | null>(null);
+  const active = Math.min(
+    STEPS.length - 1,
+    Math.floor(progress * STEPS.length),
+  );
 
   useEffect(() => {
     if (!window.matchMedia("(min-width: 1024px)").matches) return;
@@ -73,10 +80,8 @@ export default function GettingStartedV2() {
       const distance = rect.height - window.innerHeight;
       if (distance <= 0) return;
       // 0 when the section pins, 1 when the runway ends and it unpins.
-      const progress = Math.min(1, Math.max(0, -rect.top / distance));
-      setActive(
-        Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length)),
-      );
+      const next = Math.min(1, Math.max(0, -rect.top / distance));
+      setProgress(next);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -145,15 +150,30 @@ export default function GettingStartedV2() {
                     aria-current={i === active ? "step" : undefined}
                     className="relative pb-10 last:pb-0 lg:pb-9"
                   >
-                    {/* dotted connector to the next step — desktop only (on
-                        mobile the inline image sits between steps instead) */}
+                    {/* connector doubling as a scroll-progress bar — desktop
+                        only (on mobile the inline image sits between steps).
+                        A grey dotted track with a yellow fill whose height
+                        tracks how far scroll has moved through this segment. */}
                     {i < STEPS.length - 1 && (
                       <span
                         aria-hidden
-                        className={`absolute left-8 top-15 hidden h-[calc(100%-4.25rem)] w-0 -translate-x-1/2 border-l-2 border-dotted transition-colors duration-300 lg:block ${
-                          i === active ? "border-[#EFDF18]" : "border-border"
-                        }`}
-                      />
+                        className="absolute left-8 top-15 hidden h-[calc(100%-4.25rem)] w-0 -translate-x-1/2 lg:block"
+                      >
+                        <span className="absolute inset-y-0 left-0 border-l-2 border-dotted border-border" />
+                        {/* No CSS transition: the fill follows scroll frame by
+                            frame, so any easing would only add lag. */}
+                        <span
+                          className="absolute left-0 top-0 border-l-2 border-dotted border-[#EFDF18]"
+                          style={{
+                            height: `${
+                              Math.min(
+                                1,
+                                Math.max(0, progress * STEPS.length - i),
+                              ) * 100
+                            }%`,
+                          }}
+                        />
+                      </span>
                     )}
 
                     <div className="flex items-start gap-6">
@@ -163,11 +183,13 @@ export default function GettingStartedV2() {
                         aria-hidden
                       >
                         {/* Below lg every hex stays solid yellow (no scroll
-                            tracking there); at lg+ only the active step does. */}
+                            tracking there); at lg+ a hex lights up once scroll
+                            reaches it and stays lit — a cumulative progress
+                            stepper that matches the connector fill. */}
                         <path
                           d={HEX_PATH}
                           className={`transition-[fill] duration-300 ${
-                            i === active
+                            progress * STEPS.length >= i
                               ? "fill-[#EFDF18]"
                               : "fill-[#EFDF18] lg:fill-[#F7F0CE]"
                           }`}
@@ -180,7 +202,7 @@ export default function GettingStartedV2() {
                           fontSize="30"
                           fontWeight="800"
                           className={
-                            i === active
+                            progress * STEPS.length >= i
                               ? "fill-[#26272B]"
                               : "fill-[#26272B] lg:fill-[#BFAC2A]"
                           }
