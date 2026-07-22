@@ -13,6 +13,7 @@ import DownloadHero from "@/app/components/sections/download/DownloadHero";
 import GettingStarted from "@/app/components/sections/download/GettingStarted";
 import GettingStartedV2 from "@/app/components/sections/download/GettingStartedV2";
 import MobileAppPromo from "@/app/components/sections/download/MobileAppPromo";
+import MobileAppPromoV2 from "@/app/components/sections/download/MobileAppPromoV2";
 
 export const metadata: Metadata = pageMetadata({
   // Absolute title (no brand-suffix template) so the primary keywords lead the
@@ -57,6 +58,7 @@ export default async function DownloadPage() {
       <GettingStarted />
       <GettingStartedV2 />
       <MobileAppPromo />
+      <MobileAppPromoV2 />
       <Benefits />
       <AppFeatureCards />
     </main>
