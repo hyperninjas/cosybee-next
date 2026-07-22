@@ -7,6 +7,18 @@ import type { NextConfig } from "next";
 const CANONICAL_HOST = "energiebee.com";
 const REDIRECT_FROM_HOST = `www.${CANONICAL_HOST}`;
 
+// Only the canonical production host may be indexed. Every other deployment
+// (sandbox, previews) gets a site-wide `X-Robots-Tag: noindex` header below.
+// Derived from the per-environment NEXT_PUBLIC_SITE_URL build arg — mirrors
+// IS_PRODUCTION in app/lib/site.ts (kept inline here so the config has no app
+// imports). headers() is evaluated at build, and this var is a build arg, so
+// each environment bakes in the right policy.
+const IS_PRODUCTION_HOST =
+  (process.env.NEXT_PUBLIC_SITE_URL ?? `https://${CANONICAL_HOST}`).replace(
+    /\/$/,
+    "",
+  ) === `https://${CANONICAL_HOST}`;
+
 // Content-Security-Policy, REPORT-ONLY for now. Report-only never blocks a
 // request — the browser only logs violations to the console — so shipping this
 // can't break the site. Watch the violation reports for a release or two, fix
@@ -229,6 +241,20 @@ const nextConfig: NextConfig = {
 
   async headers() {
     return [
+      // Non-production hosts: keep the ENTIRE deployment out of search. This
+      // X-Robots-Tag is the authoritative de-indexing signal (applies to every
+      // route and response type, and is seen even for URLs reached via external
+      // links). Paired with the block-all robots.txt (app/robots.ts).
+      ...(!IS_PRODUCTION_HOST
+        ? [
+            {
+              source: "/(.*)",
+              headers: [
+                { key: "X-Robots-Tag", value: "noindex, nofollow" },
+              ],
+            },
+          ]
+        : []),
       {
         // Baseline hardening for every route.
         source: "/(.*)",

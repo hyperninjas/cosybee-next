@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "./lib/site";
+import { IS_PRODUCTION, SITE_URL } from "./lib/site";
 
 /**
  * Known AI / LLM crawlers. We explicitly ALLOW them so EnergieBee content
@@ -33,6 +33,14 @@ const AI_CRAWLERS = [
  * header (see their layouts and next.config.ts).
  */
 export default function robots(): MetadataRoute.Robots {
+  // Non-production hosts (sandbox, previews) must stay out of search entirely.
+  // Block every crawler from every path and omit the sitemap. Backed by the
+  // site-wide `X-Robots-Tag: noindex` header in next.config.ts, which is the
+  // authoritative de-indexing signal for URLs discovered via external links.
+  if (!IS_PRODUCTION) {
+    return { rules: [{ userAgent: "*", disallow: "/" }] };
+  }
+
   const disallow = ["/api/", "/admin", "/account"];
   return {
     rules: [

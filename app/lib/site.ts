@@ -6,9 +6,24 @@
  * and canonicals point at the right host on staging vs production.
  */
 
+/** Canonical production origin. Any deployment whose SITE_URL differs
+ *  (sandbox, previews, local) is treated as non-indexable — see IS_PRODUCTION. */
+export const PRODUCTION_URL = "https://energiebee.com";
+
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://energiebee.com"
+  process.env.NEXT_PUBLIC_SITE_URL ?? PRODUCTION_URL
 ).replace(/\/$/, "");
+
+/**
+ * True only on the canonical production host. Everything else — the sandbox,
+ * preview deploys, local dev — is non-production and must stay out of search.
+ * Gate indexing (robots.txt + the site-wide X-Robots-Tag header in
+ * next.config.ts) on this so only production is ever crawled/indexed.
+ *
+ * Derived from SITE_URL, which each environment already sets via the
+ * NEXT_PUBLIC_SITE_URL build arg, so no extra configuration is required.
+ */
+export const IS_PRODUCTION = SITE_URL === PRODUCTION_URL;
 
 export const SITE_NAME = "EnergieBee";
 
