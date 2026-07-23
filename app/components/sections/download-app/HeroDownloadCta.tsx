@@ -11,10 +11,10 @@ import { APP_STORE_ID, PLAY_STORE_PACKAGE_NAME } from "@/app/lib/app-links";
  * platform is detected only the matching badge remains — and desktop visitors
  * (Mac/Windows) get a QR code instead, since they can't install from here.
  *
- * `qrSvg` is the QR markup pre-rendered on the server (see the page), so no
- * QR library ships to the client. It points at /download: scanning on a phone
- * lands on this page's device-aware CTA, so the same code stays correct
- * before and after launch and for both platforms.
+ * `qrSvg` is the QR markup pre-rendered on the server (see downloadQrSvg in
+ * app/lib/download-qr.ts), so no QR library ships to the client. It points at
+ * /download-app: scanning on a phone lands on that page's device-aware CTA, so
+ * the same code stays correct before and after launch and for both platforms.
  */
 export default function HeroDownloadCta({ qrSvg }: { qrSvg: string }) {
   const platform = useDevicePlatform();

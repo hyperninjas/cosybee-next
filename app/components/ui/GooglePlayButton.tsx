@@ -1,11 +1,25 @@
-"use client";
-
+/**
+ * "Get it on Google Play" badge, sized to pair with AppStoreButton (same
+ * `h-12 lg:h-[58.66px]` rhythm). The play triangle is inline SVG; the text is
+ * HTML so it stays crisp and picks up the site font.
+ *
+ * Takes the bare Android application ID (see app/lib/app-links.ts) and builds
+ * the https listing URL from it. No `market://` deep link on purpose:
+ * play.google.com is a verified app link, so Android opens the Play Store app
+ * directly from the https URL — and unlike a custom scheme it still works in
+ * WebViews, on Play-less devices and on desktop instead of failing with
+ * ERR_UNKNOWN_URL_SCHEME.
+ *
+ * Pass `packageName={null}` (the pre-launch default from app-links.ts) to
+ * render the badge inert — visible but not a link — until the listing exists.
+ */
 export default function GooglePlayButton({
   packageName,
   className = "",
   bgColor = "black",
 }: {
-  /** Android application ID. Omit/null → inert "coming soon" badge. */
+  /** Android application ID, e.g. `com.energiebee.app`. `null`/missing →
+   *  inert "coming soon" badge. */
   packageName?: string | null;
   className?: string;
   /** Rounded-rectangle background fill. Defaults to black to match AppStoreBadge. */
@@ -62,22 +76,9 @@ export default function GooglePlayButton({
     );
   }
 
-  const webUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
-  const marketUrl = `market://details?id=${packageName}`;
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const isAndroid = /Android/i.test(navigator.userAgent);
-
-    if (isAndroid) {
-      e.preventDefault();
-      window.location.href = marketUrl;
-    }
-  };
-
   return (
     <a
-      href={webUrl}
-      onClick={handleClick}
+      href={`https://play.google.com/store/apps/details?id=${packageName}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Get it on Google Play"

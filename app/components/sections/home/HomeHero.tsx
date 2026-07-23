@@ -1,23 +1,19 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-// import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import heroDeviceImg from "@/public/energibee-hero-device.png";
 import HeroDownloadCta from "../download-app/HeroDownloadCta";
-import QRCode from "qrcode";
-import { url } from "@/app/lib/site";
+import { downloadQrSvg } from "@/app/lib/download-qr";
 
 /**
- * Home hero — "One app. Total energy clarity." Background photo of
- * a hand holding a phone, with two CTAs (free trial + App Store).
+ * Home hero — "One app. Total energy clarity." Background photo of a hand
+ * holding a phone, with the device-aware download CTA (store badge on phones,
+ * QR on desktop — see HeroDownloadCta).
  */
 export default async function HomeHero() {
-  const qrSvg = await QRCode.toString(url("/download-app"), {
-    type: "svg",
-    margin: 0,
-    color: { dark: "#000000", light: "#ffffff" },
-  });
+  const qrSvg = await downloadQrSvg();
+
   return (
     <Section
       spacing="none"
@@ -69,7 +65,7 @@ export default async function HomeHero() {
             <strong>EnergieBee</strong> shows how your home uses energy day by
             day. Understand heating, solar and energy balance in one place.
           </Text>
-          <div className="mt-14 flex flex-col flex-wrap w-fit gap-4">
+          <div className="mt-14 w-fit">
             <HeroDownloadCta qrSvg={qrSvg} />
           </div>
         </div>

@@ -34,8 +34,11 @@ ENV NODE_ENV=production
 #   NEXT_PUBLIC_GA_MEASUREMENT_ID   GA4 measurement ID (empty disables GA)
 #   NEXT_PUBLIC_GTM_ID              GTM container ID (empty disables GTM)
 #   NEXT_PUBLIC_CLARITY_PROJECT_ID  Clarity project ID (empty disables Clarity)
-#   NEXT_PUBLIC_APP_STORE_ID       App Store listing URL (empty → "coming soon")
-#   NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME      Google Play listing URL (empty → "coming soon")
+#   NEXT_PUBLIC_APP_STORE_ID        App Store ID, bare digits e.g. 6771356608
+#                                   — NOT a URL (empty → "coming soon")
+#   NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME
+#                                   Android application ID e.g. com.energiebee.app
+#                                   — NOT a URL (empty → "coming soon")
 #   GOOGLE_SITE_VERIFICATION        Search Console token — baked into the
 #                                   statically-prerendered home HTML, so it must
 #                                   be a build arg (not a runtime env var)

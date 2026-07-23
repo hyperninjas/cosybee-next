@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import QRCode from "qrcode";
 import { pageMetadata } from "@/app/lib/seo";
-import { url } from "@/app/lib/site";
+import { downloadQrSvg } from "@/app/lib/download-qr";
 import JsonLd from "@/app/components/JsonLd";
 import {
   breadcrumbSchema,
@@ -36,14 +35,8 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function DownloadPage() {
-  // The QR points at this page rather than a store: scanning on a phone lands
-  // on the device-aware buttons above, so the same code stays correct before
-  // and after launch and for both platforms.
-  const qrSvg = await QRCode.toString(url("/download-app"), {
-    type: "svg",
-    margin: 0,
-    color: { dark: "#000000", light: "#ffffff" },
-  });
+  // The QR points at this page rather than a store — see downloadQrSvg.
+  const qrSvg = await downloadQrSvg();
 
   return (
     <main className="flex-1">
