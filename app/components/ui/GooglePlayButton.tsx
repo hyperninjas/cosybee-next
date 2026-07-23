@@ -1,18 +1,12 @@
-/**
- * "Get it on Google Play" badge, sized to pair with AppStoreButton (same
- * `h-12 lg:h-[58.66px]` rhythm). The play triangle is inline SVG; the text is
- * HTML so it stays crisp and picks up the site font.
- *
- * Pass `href={null}` (the pre-launch default from app-links.ts) to render the
- * badge inert — visible but not a link — until the Play listing exists.
- */
+"use client";
+
 export default function GooglePlayButton({
-  href = null,
+  packageName,
   className = "",
   bgColor = "black",
 }: {
-  /** Play Store listing URL. `null`/missing → inert "coming soon" badge. */
-  href?: string | null;
+  /** Android application ID. Omit/null → inert "coming soon" badge. */
+  packageName?: string | null;
   className?: string;
   /** Rounded-rectangle background fill. Defaults to black to match AppStoreBadge. */
   bgColor?: string;
@@ -45,6 +39,7 @@ export default function GooglePlayButton({
           d="m17.1 15.5 4.7-4.7 5.1 2.9c1.7.95 1.7 2.65 0 3.6l-5.1 2.9-4.7-4.7Z"
         />
       </svg>
+
       <span className="flex flex-col items-start leading-none text-white">
         <span className="text-[9px] font-medium uppercase tracking-[0.08em] lg:text-[11px]">
           Get it on
@@ -56,7 +51,7 @@ export default function GooglePlayButton({
     </span>
   );
 
-  if (!href) {
+  if (!packageName) {
     return (
       <span
         aria-label="Get it on Google Play — coming soon"
@@ -67,9 +62,22 @@ export default function GooglePlayButton({
     );
   }
 
+  const webUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
+  const marketUrl = `market://details?id=${packageName}`;
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      e.preventDefault();
+      window.location.href = marketUrl;
+    }
+  };
+
   return (
     <a
-      href={href}
+      href={webUrl}
+      onClick={handleClick}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Get it on Google Play"

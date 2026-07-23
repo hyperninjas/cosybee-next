@@ -1,31 +1,22 @@
+"use client";
+
 import AppStoreBadge from "./AppStoreBadge";
 
-/**
- * "Download on the App Store" badge wrapped in an external link. The
- * badge color is driven by the `color` prop on AppStoreBadge — defaults
- * to `currentColor`, so you can also restyle via a Tailwind `text-*`
- * class on the wrapper.
- *
- * Until the app ships, `href` is `null` (see app/lib/app-links.ts) and the
- * badge renders inert — visible but not a dead link.
- */
 export default function AppStoreButton({
-  href = null,
+  appId,
   className = "",
   color,
 }: {
-  /** App Store listing URL. `null`/missing → inert "coming soon" badge. */
-  href?: string | null;
+  /** Apple App Store ID. Omit/null → inert "coming soon" badge. */
+  appId?: string | null;
   className?: string;
-  /** Override the badge color. Defaults to `currentColor` (inherits
-   *  from the surrounding text color). */
   color?: string;
 }) {
   const badge = (
-    <AppStoreBadge color={color} className="h-12 lg:h-[58.66px] w-auto" />
+    <AppStoreBadge color={color} className="h-12 w-auto lg:h-[58.66px]" />
   );
 
-  if (!href) {
+  if (!appId) {
     return (
       <span
         aria-label="Download on the App Store — coming soon"
@@ -36,9 +27,24 @@ export default function AppStoreButton({
     );
   }
 
+  const webUrl = `https://apps.apple.com/app/id${appId}`;
+  const appUrl = `itms-apps://itunes.apple.com/app/id${appId}`;
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const isiOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+
+    if (isiOS) {
+      e.preventDefault();
+      window.location.href = appUrl;
+    }
+  };
+
   return (
     <a
-      href={href}
+      href={webUrl}
+      onClick={handleClick}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Download on the App Store"

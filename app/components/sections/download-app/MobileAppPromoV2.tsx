@@ -4,7 +4,7 @@ import GooglePlayButton from "@/app/components/ui/GooglePlayButton";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { Heading } from "@/app/components/ui/Typography";
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/app/lib/app-links";
+import { APP_STORE_ID, PLAY_STORE_PACKAGE_NAME } from "@/app/lib/app-links";
 // Placeholders — swap for the final app screenshots when ready.
 import frontImg from "@/public/download-app/energiebee_app_download.png";
 // import backLeftImg from "@/public/download-app/connect_home-full.png";
@@ -55,8 +55,8 @@ export default function MobileAppPromoV2() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-            <AppStoreButton href={APP_STORE_URL} />
-            <GooglePlayButton href={PLAY_STORE_URL} />
+            <AppStoreButton appId={APP_STORE_ID} />
+            <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} />
           </div>
         </div>
       </Container>

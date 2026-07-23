@@ -3,7 +3,7 @@
 import AppStoreButton from "@/app/components/ui/AppStoreButton";
 import GooglePlayButton from "@/app/components/ui/GooglePlayButton";
 import { useDevicePlatform } from "@/app/hooks/useDevicePlatform";
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/app/lib/app-links";
+import { APP_STORE_ID, PLAY_STORE_PACKAGE_NAME } from "@/app/lib/app-links";
 
 /**
  * Device-aware download CTA for the hero. SSR renders a neutral state (both
@@ -38,8 +38,8 @@ export default function HeroDownloadCta({ qrSvg }: { qrSvg: string }) {
         {/* both store badges, so desktop visitors can go straight to their
             store as well as scan */}
         <div className="flex flex-col justify-center gap-2.5">
-          <AppStoreButton href={APP_STORE_URL} />
-          <GooglePlayButton href={PLAY_STORE_URL} />
+          <AppStoreButton appId={APP_STORE_ID} />
+          <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} />
         </div>
       </div>
     );
@@ -47,8 +47,10 @@ export default function HeroDownloadCta({ qrSvg }: { qrSvg: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      {platform !== "android" && <AppStoreButton href={APP_STORE_URL} />}
-      {platform !== "ios" && <GooglePlayButton href={PLAY_STORE_URL} />}
+      {platform !== "android" && <AppStoreButton appId={APP_STORE_ID} />}
+      {platform !== "ios" && (
+        <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} />
+      )}
     </div>
   );
 }
