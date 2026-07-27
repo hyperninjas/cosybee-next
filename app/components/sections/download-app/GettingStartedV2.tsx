@@ -33,7 +33,7 @@ const STEPS: ReadonlyArray<{
   {
     title: "Connect Your Home",
     description:
-      "Follow the guided setup to connect your heating system, solar panels, or energy tariff for personalized insights.",
+      "Follow the guided setup to connect your heating system, solar panels, or energy tariff for personalised insights.",
     image: connectImg,
   },
   {

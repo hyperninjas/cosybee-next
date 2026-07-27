@@ -33,7 +33,7 @@ const STEPS: ReadonlyArray<{
   },
   {
     title: "Everything in One Place",
-    description: "Monitor, manage, and optimize your home's energy with ease.",
+    description: "Monitor, manage, and optimise your home's energy with ease.",
     image: homeImg,
   },
 ];

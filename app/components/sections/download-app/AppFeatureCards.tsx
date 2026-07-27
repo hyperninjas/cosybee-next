@@ -21,13 +21,13 @@ const CARDS: ReadonlyArray<{
   {
     title: "Solar Forecasting",
     description:
-      "Predict solar generation to maximize savings and energy independence.",
+      "Predict solar generation to maximise savings and energy independence.",
     image: solarImg,
   },
   {
     title: "Energy Management",
     description:
-      "Monitor, optimize, and reduce your home's overall energy consumption.",
+      "Monitor, optimise, and reduce your home's overall energy consumption.",
     image: energyImg,
   },
 ];
