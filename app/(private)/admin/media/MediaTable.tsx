@@ -126,6 +126,12 @@ export function MediaTable({
                   onPointerDown={(e) => e.stopPropagation()}
                 >
                   <Checkbox
+                    // RAC's TableHeaderRow publishes a CheckboxContext with a
+                    // single "selection" slot and NO default slot, so an
+                    // unslotted Checkbox in the header throws "A slot prop is
+                    // required". Selection here is our own `selectedIds` state,
+                    // not the table's, so opt out of that context entirely.
+                    slot={null}
                     aria-label="Select all on this page"
                     isSelected={allSelected}
                     isIndeterminate={someSelected && !allSelected}
