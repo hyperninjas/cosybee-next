@@ -4,6 +4,7 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "@/app/components/ui/Avatar";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
 import {
@@ -51,6 +52,11 @@ function Slide({
   basePath: string;
   priority: boolean;
 }) {
+  const authorName = slide.author?.name ?? "energiebee";
+  // Null for authors with no slug — there's no profile page to link to.
+  const authorHref = slide.author?.slug
+    ? `/author/${slide.author.slug}`
+    : null;
   return (
     <article className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[1fr_1fr]">
       <div className="relative aspect-4/3 lg:aspect-auto lg:h-full">
@@ -88,15 +94,48 @@ function Slide({
             {slide.carouselBody}
           </p>
         )}
+        {slide.tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {slide.tags.slice(0, 3).map((t) => (
+              <Link
+                key={t.id}
+                href={`${basePath}/tag/${t.slug}`}
+                className="inline-flex items-center rounded-full bg-[#F3F3F3] px-2.5 py-1 text-xs font-medium text-muted transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
+              >
+                {`#${t.name}`}
+              </Link>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-3 mt-auto pt-4">
-          <Avatar
-            name={slide.author?.name ?? "energiebee"}
-            avatarUrl={slide.author?.avatarUrl}
-          />
+          {/* Same destination as the name link beside it — hidden from
+              assistive tech and tab order so the profile isn't announced
+              twice. */}
+          {authorHref ? (
+            <Link
+              href={authorHref}
+              aria-hidden
+              tabIndex={-1}
+              className="shrink-0 rounded-full transition-opacity hover:opacity-80"
+            >
+              <Avatar name={authorName} avatarUrl={slide.author?.avatarUrl} />
+            </Link>
+          ) : (
+            <Avatar name={authorName} avatarUrl={slide.author?.avatarUrl} />
+          )}
           <div className="text-base">
-            <div className="font-bold text-foreground text-lg">
-              {slide.author?.name ?? "energiebee"}
-            </div>
+            {authorHref ? (
+              <Link
+                href={authorHref}
+                className="font-bold text-foreground text-lg transition-colors hover:text-[#FF8A7A]"
+              >
+                {authorName}
+              </Link>
+            ) : (
+              <div className="font-bold text-foreground text-lg">
+                {authorName}
+              </div>
+            )}
             <div className="text-muted mt-1 font-medium text-[15px]">
               {formatDate(slide.authorDate)}
             </div>

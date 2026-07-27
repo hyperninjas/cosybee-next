@@ -33,36 +33,58 @@ function ArticleMeta({ readTime, date }: { readTime: number; date: string }) {
   );
 }
 
-/** Up to three `#tag` chips. */
-function TagList({ tags }: { tags: Tag[] }) {
+/**
+ * Up to three `#tag` chips, each linking to its tag listing. `relative z-10`
+ * lifts every chip above the title's stretched-link overlay (see ArticleCard)
+ * — on the chips themselves, not the row, so the gaps between them still
+ * belong to the card link.
+ */
+function TagList({ tags, basePath }: { tags: Tag[]; basePath: string }) {
   if (tags.length === 0) return null;
   return (
     <div className="mt-4 flex flex-wrap gap-1.5">
       {tags.slice(0, 3).map((t) => (
-        <span
+        <Link
           key={t.id}
-          className="rounded-md bg-background px-2 py-0.5 text-xs font-medium text-muted"
+          href={`${basePath}/tag/${t.slug}`}
+          className="relative z-10 rounded-md bg-background px-2 py-0.5 text-xs font-medium text-muted transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
         >
           #{t.name}
-        </span>
+        </Link>
       ))}
     </div>
   );
 }
 
-/** Avatar + author name byline pinned to the bottom of the card. */
+/**
+ * Avatar + author name byline pinned to the bottom of the card, linking to
+ * the author profile. Avatar and name share ONE link so the card carries no
+ * duplicate route to the same page. Falls back to plain text when the author
+ * has no slug.
+ */
 function AuthorByline({ author }: { author: Article["author"] }) {
   const name = author?.name ?? "energiebee";
+  const avatar = (
+    <Avatar name={name} avatarUrl={author?.avatarUrl} className="h-10 w-10" />
+  );
   return (
     <div className="mt-auto pt-3">
       <Divider />
-      <div className="mt-3 flex items-center gap-3">
-        <Avatar
-          name={name}
-          avatarUrl={author?.avatarUrl}
-          className="h-10 w-10"
-        />
-        <span className="text-sm font-semibold text-foreground">{name}</span>
+      <div className="mt-3 flex items-center">
+        {author?.slug ? (
+          <Link
+            href={`/author/${author.slug}`}
+            className="relative z-10 flex items-center gap-3 text-sm font-semibold text-foreground transition-colors hover:text-[#FF8A7A]"
+          >
+            {avatar}
+            {name}
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            {avatar}
+            <span className="text-sm font-semibold text-foreground">{name}</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -78,11 +100,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
     <>
       {/* Warm up the cross-origin media host (React 19 hoists + dedups this). */}
       <link rel="preconnect" href={apiURL} />
-      <Link
-        title={a.title}
-        href={`${basePath}/${a.slug}`}
-        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl"
-      >
+      <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl">
         <div className="relative h-50">
           <Image
             src={a.coverImage}
@@ -97,15 +115,24 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         <div className="flex flex-1 flex-col p-6">
           <ArticleMeta readTime={a.readTime} date={a.authorDate} />
           <h3 className="mt-3 line-clamp-3 text-lg font-extrabold leading-snug text-foreground">
-            {a.title}
+            {/* Stretched link: the pseudo-element covers the whole card, so
+                the card is still one big click target for the article while
+                the tag/author links inside it stay individually clickable. */}
+            <Link
+              title={a.title}
+              href={`${basePath}/${a.slug}`}
+              className="after:absolute after:inset-0 after:content-['']"
+            >
+              {a.title}
+            </Link>
           </h3>
           <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">
             {a.description}
           </p>
-          <TagList tags={a.tags} />
+          <TagList tags={a.tags} basePath={basePath} />
           <AuthorByline author={a.author} />
         </div>
-      </Link>
+      </article>
     </>
   );
 }
