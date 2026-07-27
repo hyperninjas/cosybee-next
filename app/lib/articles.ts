@@ -302,17 +302,46 @@ export async function getSitemapArticles(
   }));
 }
 
-/** Unique tag slugs used by a blog's published articles (for tag pages). */
-export async function getTagSlugs(blog: Blog): Promise<string[]> {
+/**
+ * Minimum published articles a tag needs before its landing page earns a spot
+ * in the sitemap and an `index` directive.
+ *
+ * A tag page has no content of its own — it's a heading plus links to articles
+ * Google already indexed under their own URLs. Below this threshold there's
+ * nothing unique to rank, so Google crawls the page and files it under
+ * "Crawled – currently not indexed": wasted crawl budget, and dozens of phantom
+ * failures in the coverage report that bury the real ones.
+ *
+ * Thin tags still render and stay linked from articles — they just switch to
+ * `noindex, follow`, so the outbound links keep counting. Raise to 3 to be
+ * stricter; check the count distribution first, as each step strands more tags.
+ */
+export const MIN_TAG_ARTICLES = 2;
+
+/** A tag slug plus how many of a blog's published articles carry it. */
+export type TagCount = { slug: string; count: number };
+
+/**
+ * Tag slugs used by a blog's published articles, each with its article count.
+ *
+ * Slugs come from `t.slug` — the same field the tag chips on article pages link
+ * to (see ArticleDetail) — so the sitemap can only list URLs that are genuinely
+ * linked. A tag repeated on a single article counts once.
+ */
+export async function getTagCounts(blog: Blog): Promise<TagCount[]> {
   const posts = await getAllPublishedPosts(blog);
-  const slugs = new Set<string>();
+  const counts = new Map<string, number>();
   for (const p of posts) {
+    // A post listing the same tag twice shouldn't inflate that tag's count.
+    const seen = new Set<string>();
     for (const t of p.tags ?? []) {
       // Handle both old (string) and new (Tag object) formats
       const slug =
         typeof t === "string" ? t.toLowerCase().replace(/\s+/g, "-") : t.slug;
-      if (slug) slugs.add(slug);
+      if (!slug || seen.has(slug)) continue;
+      seen.add(slug);
+      counts.set(slug, (counts.get(slug) ?? 0) + 1);
     }
   }
-  return [...slugs];
+  return [...counts].map(([slug, count]) => ({ slug, count }));
 }

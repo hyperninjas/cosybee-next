@@ -96,7 +96,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         </div>
         <div className="flex flex-1 flex-col p-6">
           <ArticleMeta readTime={a.readTime} date={a.authorDate} />
-          <h3 className="mt-3 line-clamp-2 text-xl font-extrabold leading-snug text-foreground">
+          <h3 className="mt-3 line-clamp-3 text-lg font-extrabold leading-snug text-foreground">
             {a.title}
           </h3>
           <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">

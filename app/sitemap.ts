@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { ROUTES, SITE_URL } from "./lib/site";
-import { getSitemapArticles, getTagSlugs, getAuthorSlugs } from "./lib/articles";
+import {
+  getSitemapArticles,
+  getTagCounts,
+  getAuthorSlugs,
+  MIN_TAG_ARTICLES,
+} from "./lib/articles";
 
 /**
  * Generates /sitemap.xml.
@@ -24,8 +29,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     await Promise.all([
       getSitemapArticles("hive"),
       getSitemapArticles("learn"),
-      getTagSlugs("hive"),
-      getTagSlugs("learn"),
+      getTagCounts("hive"),
+      getTagCounts("learn"),
       getAuthorSlugs(),
     ]);
 
@@ -36,15 +41,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Only tags with enough articles to stand as their own search result — see
+  // MIN_TAG_ARTICLES. Thinner tags are marked noindex by the tag page itself,
+  // so listing them here would only advertise URLs we've asked Google to skip.
   const tagRoutes = [
-    ...hiveTags.map((t) => `/hive/tag/${t}`),
-    ...learnTags.map((t) => `/learn/tag/${t}`),
-  ].map((path) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.5,
-  }));
+    ...hiveTags.map((t) => ({ ...t, path: `/hive/tag/${t.slug}` })),
+    ...learnTags.map((t) => ({ ...t, path: `/learn/tag/${t.slug}` })),
+  ]
+    .filter((t) => t.count >= MIN_TAG_ARTICLES)
+    .map(({ path }) => ({
+      url: `${SITE_URL}${path}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
 
   const authorRoutes = authorSlugs.map((slug) => ({
     url: `${SITE_URL}/author/${slug}`,

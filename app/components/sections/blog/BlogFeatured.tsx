@@ -76,7 +76,7 @@ function Slide({
         </div>
         <h2
           title={slide.title}
-          className="text-2xl line-clamp-1 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[40px] mt-3"
+          className="text-2xl line-clamp-3 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[30px] mt-3"
         >
           {slide.title}
         </h2>
@@ -88,7 +88,7 @@ function Slide({
             {slide.carouselBody}
           </p>
         )}
-        <div className="flex items-center gap-3 mt-4">
+        <div className="flex items-center gap-3 mt-auto pt-4">
           <Avatar
             name={slide.author?.name ?? "energiebee"}
             avatarUrl={slide.author?.avatarUrl}
