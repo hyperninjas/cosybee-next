@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllArticles } from "@/app/lib/articles";
+import { getAllArticles, MIN_TAG_ARTICLES } from "@/app/lib/articles";
 import { slugify } from "@/app/lib/slug";
 import TaggedArticles from "@/app/components/sections/blog/TaggedArticles";
 import { pageMetadata } from "@/app/lib/seo";
@@ -27,16 +27,24 @@ export async function generateMetadata({
 }: PageProps<"/learn/tag/[tag]">): Promise<Metadata> {
   const { tag } = await params;
   const articles = await getAllArticles(BLOG);
-  const tagObj = articles
-    .flatMap((a) => a.tags)
-    .find((t) => slugify(t.name) === tag);
-  if (!tagObj) return { title: "Tag", robots: { index: false, follow: true } };
-  const label = tagObj.name;
+  // Match exactly as the page body does, so the count driving `index` is the
+  // set of articles this page actually renders.
+  const matches = articles.filter((a) =>
+    a.tags.some((t) => slugify(t.name) === tag),
+  );
+  if (matches.length === 0)
+    return { title: "Tag", robots: { index: false, follow: true } };
+  const label =
+    matches[0].tags.find((t) => slugify(t.name) === tag)?.name ?? tag;
   return pageMetadata({
     title: `${label} — ${LABEL}`,
     description: `Articles about ${label} on ${LABEL} — EnergieBee.`,
     ogDescription: `Articles about ${label} on ${LABEL}.`,
     path: `${BASE}/tag/${tag}`,
+    // A one-article tag page just restates the article it links to, so Google
+    // crawls it and declines to index. Say noindex up front and stop spending
+    // crawl budget on it — `follow` keeps the article link counting.
+    index: matches.length >= MIN_TAG_ARTICLES,
   });
 }
 
