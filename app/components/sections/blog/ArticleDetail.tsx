@@ -118,10 +118,27 @@ export default async function ArticleDetail({
 
             <div className="mt-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Avatar
-                  name={article.author?.name ?? "energiebee"}
-                  avatarUrl={article.author?.avatarUrl}
-                />
+                {/* Same destination as the name link below it. Hidden from
+                    assistive tech and tab order so the author profile isn't
+                    announced twice — the name link carries it. */}
+                {article.author?.slug ? (
+                  <Link
+                    href={`/author/${article.author.slug}`}
+                    aria-hidden
+                    tabIndex={-1}
+                    className="shrink-0 rounded-full transition-opacity hover:opacity-80"
+                  >
+                    <Avatar
+                      name={article.author.name}
+                      avatarUrl={article.author.avatarUrl}
+                    />
+                  </Link>
+                ) : (
+                  <Avatar
+                    name={article.author?.name ?? "energiebee"}
+                    avatarUrl={article.author?.avatarUrl}
+                  />
+                )}
                 <div className="text-sm">
                   {article.author?.slug ? (
                     <Link
