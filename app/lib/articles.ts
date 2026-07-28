@@ -422,7 +422,7 @@ export async function getSitemapArticles(
  * `noindex, follow`, so the outbound links keep counting. Raise to 3 to be
  * stricter; check the count distribution first, as each step strands more tags.
  */
-export const MIN_TAG_ARTICLES = 2;
+export const MIN_TAG_ARTICLES = 1;
 
 /**
  * Whether a tag landing page should be indexed *and* listed in the sitemap.
@@ -520,6 +520,7 @@ export async function getTagArticles(
   const matches = articles.filter((a) => a.tags.some((t) => t.slug === slug));
   if (matches.length === 0) return null;
   const label =
-    matches[0].tags.find((t) => t.slug === slug)?.name ?? slug.replace(/-/g, " ");
+    matches[0].tags.find((t) => t.slug === slug)?.name ??
+    slug.replace(/-/g, " ");
   return { label, articles: matches };
 }
