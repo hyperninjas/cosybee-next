@@ -2,16 +2,35 @@ import { Card } from "@heroui/react";
 import { type ReactNode } from "react";
 import { HexBadge, type InlineGlyphName } from "./SectionContent";
 
-type CtaSize = "md" | "lg";
+type CtaSize = "sm" | "md" | "lg";
 
-const SIZE_CLASSES: Record<CtaSize, string> = {
+/**
+ * The CTA's look, split from the component so a Next `<Link>` can wear it too.
+ *
+ * `CtaButton` renders a plain `<a>`, which is right for in-page CTAs but costs
+ * a full document load — unacceptable in the navbar, where every other item is
+ * a client-side `<Link>`. Exporting the classes lets the navbar keep Next
+ * routing while staying visually identical, instead of forking the styling.
+ *
+ * Plain constants rather than a `ctaClasses()` helper on purpose: this module
+ * is imported by client components, and the React Compiler instruments
+ * module-level helpers called from them with their own `useMemoCache`, which
+ * blows up as an invalid hook call. A string can't.
+ */
+export const CTA_BASE_CLASSES =
+  "inline-flex shrink-0 items-center justify-center rounded-lg bg-accent font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110";
+
+export const CTA_SIZE_CLASSES: Record<CtaSize, string> = {
+  // Navbar scale — has to clear the 64px mobile / 80px desktop header.
+  sm: "h-10 px-5 text-sm lg:h-11 lg:px-6",
   md: "h-12 lg:h-[58.66px] px-6 text-base lg:text-lg leading-[135%]",
   lg: "px-10 py-4 text-lg sm:px-12 sm:text-xl",
 };
 
 /**
  * The orange→red gradient call-to-action button used across the marketing
- * pages. `size="lg"` is the hero variant; `size="md"` is the banner variant.
+ * pages. `size="lg"` is the hero variant; `size="md"` is the banner variant;
+ * `size="sm"` is the navbar variant.
  */
 export function CtaButton({
   href,
@@ -31,7 +50,7 @@ export function CtaButton({
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`inline-flex shrink-0 items-center justify-center rounded-lg bg-accent font-semibold text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110 ${SIZE_CLASSES[size]} ${className}`}
+      className={`${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>

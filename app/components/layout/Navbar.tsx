@@ -4,6 +4,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
+import { CTA_BASE_CLASSES, CTA_SIZE_CLASSES } from "@/app/components/ui/Cta";
 // Hidden for now — restore alongside the nav cluster below.
 // import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
 // import { UserMenu } from "./UserMenu";
@@ -19,6 +20,9 @@ const NAV_LINKS = [
 ];
 
 const MENU_ID = "site-mobile-menu";
+
+/** The one place the header CTA's destination and wording are defined. */
+const DOWNLOAD_CTA = { label: "Download app", href: "/download-app" };
 
 // function SearchIcon() {
 //   return (
@@ -160,7 +164,7 @@ export default function Navbar({
                 <Link
                   href={link.href}
                   className={`text-[15px] font-medium tracking-wide transition-colors hover:text-white ${
-                    isActive ? "text-white" : "text-muted"
+                    isActive ? "text-white" : "text-border"
                   }`}
                 >
                   {link.label}
@@ -191,6 +195,21 @@ export default function Navbar({
           >
             <UserIcon />
           </button> */}
+          {/* Primary CTA. Hidden below `sm`, where the logo and the hamburger
+              already fill a 64px-tall bar — the mobile menu carries it instead,
+              so exactly one instance is reachable at every width.
+              `max-sm:hidden`, not `hidden sm:inline-flex`: the shared CTA
+              classes already set `inline-flex`, and between two unprefixed
+              display utilities Tailwind resolves the conflict by stylesheet
+              order, not class order — so the plain `hidden` lost and the button
+              overflowed the bar on a 375px screen. A media variant outranks it. */}
+          <Link
+            href={DOWNLOAD_CTA.href}
+            className={`max-sm:hidden ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
+          >
+            {DOWNLOAD_CTA.label}
+          </Link>
+
           <button
             type="button"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -238,6 +257,18 @@ export default function Navbar({
                 </li>
               );
             })}
+            {/* The CTA the header hides below `sm`. Full width here, matching
+                how the links above fill the panel. */}
+            <li className="mt-2 border-t border-neutral-800 px-2 pt-4 sm:hidden">
+              <Link
+                href={DOWNLOAD_CTA.href}
+                onClick={() => setOpen(false)}
+                tabIndex={open ? 0 : -1}
+                className={`w-full ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
+              >
+                {DOWNLOAD_CTA.label}
+              </Link>
+            </li>
             {/* <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 px-2 pt-4 sm:hidden">
               <button
                 type="button"
