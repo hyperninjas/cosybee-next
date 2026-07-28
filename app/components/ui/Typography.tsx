@@ -18,9 +18,10 @@ export const headingVariants = tv({
       /** Hero headline (~75px at lg). */
       display:
         "text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl min-[1000px]:text-[60px]! min-[1200px]:text-[75px]!",
-      /** Section title (~40px at lg). */
+      /** Section title (~40px at lg). 28px on small devices — between
+       *  cardTitle (24px) and display (36px) so the hierarchy holds. */
       title:
-        "text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[40px]",
+        "text-[28px] font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[40px]",
       /** Card / sub-section title (~24px). */
       cardTitle: "text-2xl font-extrabold leading-tight sm:text-[24px]",
     },

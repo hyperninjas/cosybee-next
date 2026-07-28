@@ -137,11 +137,14 @@ export function CtaCard({
   // HeroUI Card: `variant="secondary"` supplies the themed surface + border;
   // Card.Title / Card.Description give semantic, theme-aware text (no manual
   // colour classes). We keep the brand radius/shadow/padding + the hive bg and
-  // the horizontal-at-1200px layout via className.
+  // the horizontal-at-1200px layout via className. Cards without a glyph layer
+  // the hive pattern OVER the brand gradient (same stops as the home
+  // PerfectHarmony band) — the pattern's transparent areas let the colour show
+  // through; dark:bg-none drops both layers so the themed surface takes over.
   return (
     <Card
       variant="secondary"
-      className={`flex-col items-start gap-5 rounded-3xl ${!glyph ? "bg-[url(/bg-hive-grid.svg)]" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
+      className={`flex-col items-start gap-7 rounded-3xl ${!glyph ? "bg-[url(/bg-hive-grid.svg),linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] dark:bg-none" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
     >
       {glyph && (
         <HexBadge
@@ -152,12 +155,12 @@ export function CtaCard({
       )}
       <Card.Header className="flex-1 gap-0 p-0">
         <Card.Title
-          className={`text-xl font-extrabold leading-tight sm:text-2xl lg:text-[40px] ${titleClassName}`}
+          className={`text-2xl font-extrabold leading-tight tracking-tight text-balance sm:text-3xl lg:text-[40px] ${titleClassName}`}
         >
           {title}
         </Card.Title>
         <Card.Description
-          className={`mt-2 max-w-188.25 text-sm leading-relaxed sm:text-base ${descClassName}`}
+          className={`mt-2 max-w-188.25 text-sm leading-relaxed text-foreground/80 sm:text-base ${descClassName}`}
         >
           {description}
         </Card.Description>
