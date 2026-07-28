@@ -1,8 +1,10 @@
 import Image from "next/image";
-import AppStoreButton from "@/app/components/ui/AppStoreButton";
+// import AppStoreButton from "@/app/components/ui/AppStoreButton";
 import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy-download-app.png";
+// import { APP_STORE_ID, PLAY_STORE_PACKAGE_NAME } from "@/app/lib/app-links";
+// import GooglePlayButton from "../../ui/GooglePlayButton";
 
 /**
  * Final CTA — phone mockup on the left, headline + two download CTAs on
@@ -43,7 +45,8 @@ export default function ReadyToReduce() {
             <CtaButton href="/download-app" size="md">
               Download Free App
             </CtaButton>
-            <AppStoreButton color="#545454" />
+            {/* <AppStoreButton appId={APP_STORE_ID} />
+            <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} /> */}
           </div>
         </div>
       </div>
