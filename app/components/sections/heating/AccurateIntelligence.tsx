@@ -25,7 +25,9 @@ export default function AccurateIntelligence() {
         />
         {/* text */}
         <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
-          <SectionTitle>Accurate Intelligence for a Smarter, Greener Home</SectionTitle>
+          <SectionTitle>
+            Accurate Intelligence for a Smarter, Greener Home
+          </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">
             <FeatureItem
               title="High-Accuracy Energy Forecasting"

@@ -4,10 +4,17 @@ import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/smart/energiebee-app-weekly-energy-spend-overview.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Section } from "@/app/components/ui/Section";
 
 export default function EnergyAnalytics() {
+  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
+  // bleeding side images. Inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32! px-6 lg:px-0">
+    <Section
+      surface="base"
+      spacing="lg"
+      className="min-[1200px]:py-32! px-6 lg:px-0"
+    >
       {/* decorative light hex bleeding from left edge */}
       {/* <Hexagon
         color="#E5E7EB"
@@ -70,6 +77,6 @@ export default function EnergyAnalytics() {
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

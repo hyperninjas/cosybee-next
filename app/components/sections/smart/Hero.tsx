@@ -10,7 +10,7 @@ export default function Hero() {
       bgImage={heroBgImg}
       bgImageMobile={heroBgImgMobile}
       imageAlt="hero image of smart "
->
+    >
       <Heading as="h1" variant="display" className="whitespace-pre-line">
         {"Works With \n Your "}
         <span className="text-[#EFDF18]">Smart Home</span>

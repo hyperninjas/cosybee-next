@@ -8,7 +8,7 @@ import { Section } from "@/app/components/ui/Section";
 
 export default function SmartEnergyManagement() {
   return (
-    <Section surface="surface" spacing="sm" className="text-foreground">
+    <Section surface="surface" spacing="md" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon

@@ -8,10 +8,12 @@ import {
 import sideImage from "@/public/why-energieBee.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/energy/energiebee-app-weekly-energy-spend-graph.png";
+import { Section } from "@/app/components/ui/Section";
 
 export default function WhyEnergieBee() {
+  // Edge-bleed side images → inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 lg:py-20 px-6 lg:px-0">
+    <Section surface="base" spacing="lg" className="px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone — wrapper has explicit width, image fills it
             via w-full h-auto so it scales proportionally instead of
@@ -77,6 +79,6 @@ export default function WhyEnergieBee() {
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

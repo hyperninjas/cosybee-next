@@ -7,8 +7,8 @@ import { Section } from "../../ui/Section";
 
 export default function EnergyForecasting() {
   return (
-    <Section surface="surface" spacing="none">
-      <div className="bg-surface py-16 sm:py-16 lg:py-20 max-w-225 mx-auto px-4 lg:px-0">
+    <Section surface="surface" spacing="md" overflow="visible">
+      <div className="mx-auto max-w-225 px-4 lg:px-0">
         <SectionHeader
           title="Intelligent Energy Forecasting"
           description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"

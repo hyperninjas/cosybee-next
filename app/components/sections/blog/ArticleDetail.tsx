@@ -19,6 +19,8 @@ import ReadingProgress from "./ReadingProgress";
 import ArticleToc from "./ArticleToc";
 import JsonLd from "@/app/components/JsonLd";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
 
 type Props = {
@@ -80,7 +82,12 @@ export default async function ArticleDetail({
         ]}
       />
       <ReadingProgress targetSelector="#article-body" />
-      <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
+      {/* px-0 + xl:px-6 override the blog gutter: below xl the article body
+          carries its own padding. */}
+      <Container
+        size="blog"
+        className="flex justify-center gap-10 px-0 xl:px-6"
+      >
         <article
           id="article-body"
           className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 xl:px-0 lg:pt-18.5 lg:pb-20"
@@ -254,19 +261,21 @@ export default async function ArticleDetail({
             )}
           </aside>
         )}
-      </div>
+      </Container>
       {/* more blogs */}
       {related.length > 0 && (
-        <section className="mx-auto max-w-225 px-6 pb-16 sm:px-5 lg:pb-24 xl:hidden">
-          <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
-            More blogs
-          </h2>
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {related.map((a) => (
-              <ArticleCard key={a.slug} a={a} basePath={basePath} />
-            ))}
-          </div>
-        </section>
+        <Section spacing="none" overflow="visible" className="xl:hidden">
+          <Container size="prose" className="pb-16 sm:px-5 lg:pb-24">
+            <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
+              More blogs
+            </h2>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {related.map((a) => (
+                <ArticleCard key={a.slug} a={a} basePath={basePath} />
+              ))}
+            </div>
+          </Container>
+        </Section>
       )}
     </main>
   );

@@ -1,7 +1,12 @@
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { ArticleCard } from "./ArticleCard";
+import { Container } from "@/app/components/ui/Container";
+import { Section } from "@/app/components/ui/Section";
 import JsonLd from "@/app/components/JsonLd";
-import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
+import {
+  breadcrumbSchema,
+  collectionPageSchema,
+} from "@/app/lib/structured-data";
 import type { Article } from "@/app/lib/article-types";
 
 /**
@@ -49,30 +54,34 @@ export default function TaggedArticles({
         ]}
       />
 
-      <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-6">
-        <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
-          <Link href={basePath} className="hover:text-foreground">
-            {blogLabel}
-          </Link>
-          <span className="px-2">/</span>
-          <span className="text-foreground">#{label}</span>
-        </nav>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-          #{label}
-        </h1>
-        <p className="mt-2 text-base text-muted">
-          {articles.length} article{articles.length === 1 ? "" : "s"} tagged{" "}
-          <span className="font-medium text-foreground">{label}</span>.
-        </p>
-      </section>
+      <Section spacing="none" overflow="visible">
+        <Container size="blog" className="pt-16 pb-6">
+          <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
+            <Link href={basePath} className="hover:text-foreground">
+              {blogLabel}
+            </Link>
+            <span className="px-2">/</span>
+            <span className="text-foreground">#{label}</span>
+          </nav>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            #{label}
+          </h1>
+          <p className="mt-2 text-base text-muted">
+            {articles.length} article{articles.length === 1 ? "" : "s"} tagged{" "}
+            <span className="font-medium text-foreground">{label}</span>.
+          </p>
+        </Container>
+      </Section>
 
-      <section className="mx-auto w-full max-w-300 px-6 pb-20">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((a) => (
-            <ArticleCard key={a.slug} a={a} basePath={basePath} />
-          ))}
-        </div>
-      </section>
+      <Section spacing="none" overflow="visible">
+        <Container size="blog" className="pb-20">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((a) => (
+              <ArticleCard key={a.slug} a={a} basePath={basePath} />
+            ))}
+          </div>
+        </Container>
+      </Section>
     </main>
   );
 }

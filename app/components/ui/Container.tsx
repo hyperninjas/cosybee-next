@@ -21,6 +21,8 @@ export const containerVariants = tv({
       prose: "max-w-225 px-6 sm:px-8",
       /** Narrow column (legal, FAQ, simple forms). */
       narrow: "max-w-3xl px-6",
+      /** Blog listing/detail width (search, tag pages, article shell). */
+      blog: "max-w-300 px-6",
       /** Wide content grids that aren't full marketing width. */
       wide: "max-w-7xl px-6 sm:px-10",
     },

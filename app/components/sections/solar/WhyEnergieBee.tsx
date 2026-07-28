@@ -9,6 +9,7 @@ import {
 import sideImage from "@/public/why-energieBee.png";
 import Image, { type StaticImageData } from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";
+import { Section } from "@/app/components/ui/Section";
 
 export type FeatureCardContent = {
   glyph: GlyphName;
@@ -56,8 +57,9 @@ export default function WhyEnergieBee({
   deviceSrc = deviceImg,
   deviceAlt = "energy analytics dashboard",
 }: WhyEnergieBeeProps = {}) {
+  // Edge-bleed side images → inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-16 sm:py-20 lg:py-25 px-6 lg:px-0">
+    <Section surface="base" spacing="lg" className="px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone (absolute, bleeds into the section) — wrapper
             has explicit width, image fills it via w-full h-auto so it
@@ -111,6 +113,6 @@ export default function WhyEnergieBee({
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

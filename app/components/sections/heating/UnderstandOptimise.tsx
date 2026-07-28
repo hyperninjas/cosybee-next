@@ -4,10 +4,17 @@ import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/heating/energiebee-app-heating-system-overview.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Section } from "@/app/components/ui/Section";
 
 export default function UnderstandOptimise() {
+  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
+  // bleeding side images. Inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32! px-6 lg:px-0">
+    <Section
+      surface="base"
+      spacing="lg"
+      className="min-[1200px]:py-32! px-6 lg:px-0"
+    >
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster */}
         <div className="absolute -left-50 -top-4 hidden w-125.5 min-[1200px]:block">
@@ -60,6 +67,6 @@ export default function UnderstandOptimise() {
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

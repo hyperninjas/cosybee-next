@@ -5,6 +5,7 @@ import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-system-overview.png";
 import Image, { type StaticImageData } from "next/image";
 import type { FeatureItemContent } from "./EnergyMonitoring";
+import { Section } from "@/app/components/ui/Section";
 
 export type EnergyAnalyticsProps = {
   title?: string;
@@ -41,8 +42,14 @@ export default function EnergyAnalytics({
   deviceSrc = deviceImg,
   deviceAlt = "energy analytics dashboard",
 }: EnergyAnalyticsProps = {}) {
+  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
+  // bleeding side images. Inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 min-[1200px]:py-32! px-6 lg:px-0">
+    <Section
+      surface="base"
+      spacing="lg"
+      className="min-[1200px]:py-32! px-6 lg:px-0"
+    >
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
@@ -92,6 +99,6 @@ export default function EnergyAnalytics({
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

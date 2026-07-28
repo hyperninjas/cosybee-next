@@ -17,7 +17,7 @@ export default function WhyEnergieBeeSolar() {
     <Section
       surface="surface"
       spacing="none"
-      className="py-12 pb-8 text-foreground lg:py-12 lg:pb-10"
+      className="py-16 pb-8 text-foreground lg:py-20 lg:pb-10"
     >
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}

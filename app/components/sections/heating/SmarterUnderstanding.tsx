@@ -4,10 +4,12 @@ import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
 import sideImage from "@/public/why-energieBee.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";
+import { Section } from "@/app/components/ui/Section";
 
 export default function SmarterUnderstanding() {
+  // Edge-bleed side images → inner wrapper is bespoke, not Container.
   return (
-    <section className="relative overflow-hidden bg-background py-12 sm:py-16 lg:py-20 px-6 lg:px-0">
+    <Section surface="base" spacing="lg" className="px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone mockup */}
         <div className="absolute -top-17! left-0 hidden w-[345.3px] min-[1200px]:block">
@@ -65,6 +67,6 @@ export default function SmarterUnderstanding() {
           />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

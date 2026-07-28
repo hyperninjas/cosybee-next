@@ -48,7 +48,7 @@ export default async function HomeHero() {
             // display width. Not the LCP element (the bg photo is), so no
             // fetchPriority — let the LCP image win the bandwidth race.
             sizes="(min-width: 968px) 800px, 1px"
-            className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto z-9"
+            className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto"
           />
         </div>
         <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
