@@ -3,6 +3,8 @@
 // without dragging server code into their bundle. The API query layer
 // lives in `articles.ts` (server-only).
 
+import { slugify } from "./slug";
+
 export type Author = {
   id: string;
   name: string;
@@ -39,6 +41,22 @@ export type Tag = {
   slug: string;
   description?: string | null;
 };
+
+/**
+ * The one identifier a tag is addressed by — in `/hive/tag/<x>` URLs, in the
+ * chips that link to them, and in the sitemap.
+ *
+ * ALWAYS the stored `slug`, never something re-derived from `name`. The admin
+ * deliberately keeps a tag's slug fixed when it is renamed (see TagForm), so
+ * `slug` and `slugify(name)` diverge the moment anyone edits a tag — and a page
+ * that resolved by name would 404 on the very URL the sitemap advertises.
+ *
+ * The string branch is the legacy format only, where the API sent a bare tag
+ * name and there is no stored slug to honour.
+ */
+export function tagSlug(tag: Tag | string): string {
+  return typeof tag === "string" ? slugify(tag) : tag.slug;
+}
 
 export type Article = {
   id: string;

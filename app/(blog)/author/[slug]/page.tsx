@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAuthorProfile, getAuthorSlugs } from "@/app/lib/articles";
+import {
+  getAuthorProfile,
+  getAuthorSummaries,
+  isIndexableAuthor,
+} from "@/app/lib/articles";
 import { ArticleCard } from "@/app/components/sections/blog/ArticleCard";
 import Avatar from "@/app/components/ui/Avatar";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
@@ -15,8 +19,8 @@ import { pageMetadata } from "@/app/lib/seo";
 
 /** Prerender a page for every author that has published articles. */
 export async function generateStaticParams() {
-  const slugs = await getAuthorSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const authors = await getAuthorSummaries();
+  return authors.map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({
@@ -34,6 +38,11 @@ export async function generateMetadata({
     description,
     path: `/author/${slug}`,
     type: "profile",
+    // With a bio this is a real entity page — the one the bylines and the
+    // Person JSON-LD below point at — and earns indexing off a single article.
+    // Without one it is a name over a card grid, so it stays out of the index
+    // (and out of the sitemap, which applies the same test).
+    index: isIndexableAuthor(profile.articles.length, author.bio),
   });
 }
 
