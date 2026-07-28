@@ -13,7 +13,9 @@ import AppStoreBadge from "./AppStoreBadge";
  * works in WebViews and on desktop instead of dead-ending.
  *
  * Until the app ships, `appId` is `null` (see app/lib/app-links.ts) and the
- * badge renders inert — visible but not a dead link.
+ * badge swaps its "Download on the" line for "Coming soon" and stops being a
+ * link — visible, labelled, and not a dead link. Same box as a live badge, so
+ * it stays level with the Play badge beside it. See AppStoreBadge.
  */
 export default function AppStoreButton({
   appId,
@@ -28,20 +30,25 @@ export default function AppStoreButton({
    *  from the surrounding text color). */
   color?: string;
 }) {
-  const badge = (
-    <AppStoreBadge color={color} className="h-12 w-auto lg:h-[58.66px]" />
-  );
-
   if (!appId) {
     return (
       <span
-        aria-label="Download on the App Store — coming soon"
-        className={`inline-block cursor-default text-muted opacity-90 ${className}`}
+        role="img"
+        aria-label="App Store — coming soon"
+        className={`inline-block cursor-default ${className}`}
       >
-        {badge}
+        <AppStoreBadge
+          color={color}
+          comingSoon
+          className="h-12 w-auto lg:h-[58.66px]"
+        />
       </span>
     );
   }
+
+  const badge = (
+    <AppStoreBadge color={color} className="h-12 w-auto lg:h-[58.66px]" />
+  );
 
   return (
     <a

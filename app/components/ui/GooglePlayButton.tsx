@@ -10,8 +10,17 @@
  * WebViews, on Play-less devices and on desktop instead of failing with
  * ERR_UNKNOWN_URL_SCHEME.
  *
- * Pass `packageName={null}` (the pre-launch default from app-links.ts) to
- * render the badge inert — visible but not a link — until the listing exists.
+ * Pass `packageName={null}` (the pre-launch default from app-links.ts) and the
+ * badge swaps its "Get it on" line for "Coming soon" and stops being a link,
+ * until the listing exists.
+ *
+ * The swap happens INSIDE the badge rather than via a chip stacked above or
+ * overlaid on it. The badge box has to stay exactly the size a live badge is:
+ * the App Store app can ship before this one (it already has), and anything
+ * that adds height breaks the shared baseline with the badge beside it — while
+ * anything overlaid covers the wordmark it is trying to caption. The small
+ * upper line is the one piece of the badge that is ours to reword, so it does
+ * the work, tinted `accent` to read as a state rather than a label.
  */
 export default function GooglePlayButton({
   packageName,
@@ -32,7 +41,7 @@ export default function GooglePlayButton({
     >
       <svg
         viewBox="0 0 28.2 31"
-        className="h-6 w-auto lg:h-7"
+        className="h-6 w-auto lg:h-8"
         aria-hidden
         fill="none"
       >
@@ -55,10 +64,14 @@ export default function GooglePlayButton({
       </svg>
 
       <span className="flex flex-col items-start leading-none text-white">
-        <span className="text-[9px] font-medium uppercase tracking-[0.08em] lg:text-[11px]">
-          Get it on
+        <span
+          className={`text-[9px] font-bold uppercase tracking-[0.08em] lg:text-[12px] ${
+            packageName ? "" : "text-accent"
+          }`}
+        >
+          {packageName ? "Get it on" : "Coming soon"}
         </span>
-        <span className="mt-0.5 text-lg font-semibold lg:mt-1 lg:text-[21px]">
+        <span className=" text-lg font-semibold lg:text-[21px]">
           Google Play
         </span>
       </span>
@@ -68,8 +81,9 @@ export default function GooglePlayButton({
   if (!packageName) {
     return (
       <span
-        aria-label="Get it on Google Play — coming soon"
-        className={`inline-block cursor-default opacity-90 ${className}`}
+        role="img"
+        aria-label="Google Play — coming soon"
+        className={`inline-block cursor-default ${className}`}
       >
         {badge}
       </span>
