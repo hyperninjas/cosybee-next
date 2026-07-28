@@ -2,15 +2,17 @@ import "server-only";
 import { api, type ApiPost, type Blog } from "./api";
 import {
   resolveCoverImage,
+  tagSlug,
   validImageOrNull,
   type Article,
   type Author,
   type Category,
   type Tag,
 } from "./article-types";
+import { SITE_URL } from "./site";
 
 export type { Article, Author, Category, Tag } from "./article-types";
-export { formatReadTime } from "./article-types";
+export { formatReadTime, tagSlug } from "./article-types";
 export type { Blog } from "./api";
 
 /** Normalize category - handles both old (string) and new (object) formats. */
@@ -46,14 +48,16 @@ function normalizeTags(tags: (string | Tag)[] | undefined): Tag[] {
   if (!tags || tags.length === 0) return [];
   return tags.map((t) => {
     if (typeof t === "string") {
-      // Old format: tag is just a string
+      // Old format: tag is just a string. `tagSlug` slugifies properly — the
+      // previous inline `replace(/\s+/g, "-")` kept punctuation, so "Solar &
+      // Wind" produced a slug no route could ever match.
       return {
         id: "",
         name: t,
-        slug: t.toLowerCase().replace(/\s+/g, "-"),
+        slug: tagSlug(t),
       };
     }
-    // New format: already a Tag object
+    // New format: already a Tag object — its stored slug is authoritative.
     return t;
   });
 }
@@ -218,22 +222,62 @@ export async function getPublishedSlugs(blog: Blog): Promise<string[]> {
   return response.data;
 }
 
+const PER_PAGE = 50; // API caps the limit (larger values 400)
+const MAX_PAGES = 100; // hard safety cap: 5,000 posts
+
 /**
  * Fetch every published post for a blog, paginating within the API's page-size
  * limit. The API rejects large limits with a 400, so we walk pages instead.
+ *
+ * Throws — deliberately — if any page fails or the walk would be truncated.
+ * Callers here feed the sitemap, the feeds and the tag/author archives, where a
+ * short list is not a smaller truth but a wrong one: it reads as "those pages
+ * are gone" and gets cached and served in that state. The previous version used
+ * the tolerant `getPosts`, whose empty fallback carries `totalPages: 0` — so a
+ * failure on page 3 of 8 ended the loop and returned pages 1-2 as if that were
+ * the whole catalogue, with nothing logged.
  */
 async function getAllPublishedPosts(blog: Blog): Promise<ApiPost[]> {
-  const PER_PAGE = 50; // API caps the limit (larger values 400)
   const out: ApiPost[] = [];
   let page = 1;
   let totalPages = 1;
   do {
-    const res = await api.getPosts(blog, page, PER_PAGE);
+    const res = await api.getPostsStrict(blog, page, PER_PAGE);
     out.push(...res.data);
-    totalPages = res.pagination?.totalPages ?? 1;
+    totalPages = res.pagination?.totalPages ?? 0;
     page++;
-  } while (page <= totalPages && page <= 100); // hard safety cap
+  } while (page <= totalPages && page <= MAX_PAGES);
+
+  if (totalPages > MAX_PAGES) {
+    throw new Error(
+      `${blog}: ${totalPages} pages exceeds the ${MAX_PAGES}-page cap — raise MAX_PAGES rather than publish a truncated catalogue.`,
+    );
+  }
   return out;
+}
+
+/** Fields every dated record shares — enough to pick a real `lastModified`. */
+type Dated = {
+  updatedAt?: string;
+  publishedAt?: string | null;
+  authorDate?: string;
+};
+
+/**
+ * The most trustworthy modification date available, newest signal first.
+ * `updatedAt` is always set by the backend, so the final fallback is unreachable
+ * in practice — it exists so a malformed record can't produce an `Invalid Date`.
+ */
+function lastModifiedOf(p: Dated): Date {
+  return new Date(p.updatedAt || p.publishedAt || p.authorDate || Date.now());
+}
+
+/** The newest `lastModified` in a set, or undefined when the set is empty. */
+export function newestOf(items: { lastModified: Date }[]): Date | undefined {
+  return items.reduce<Date | undefined>(
+    (max, i) => (!max || i.lastModified > max ? i.lastModified : max),
+    undefined,
+  );
 }
 
 /** Every published article for a blog (all pages) — for tag pages & search. */
@@ -247,17 +291,50 @@ function hasAuthorDetail(a: Author): boolean {
   return Boolean(a.bio || a.avatarUrl || a.role);
 }
 
-/** Unique author slugs across both blogs — for author-page static params + sitemap. */
-export async function getAuthorSlugs(): Promise<string[]> {
+/** An author with a live page, plus what the sitemap needs to describe it. */
+export type AuthorSummary = {
+  slug: string;
+  /** Richest bio seen across their posts — the page's only unique copy. */
+  bio: string | null;
+  /** Published articles across both blogs. */
+  count: number;
+  /** Newest article of theirs — the real "last changed" for the archive. */
+  lastModified: Date;
+};
+
+/**
+ * Every author with at least one published article, across both blogs.
+ * Drives the author-page static params, the sitemap, and the `index` decision.
+ *
+ * Keyed on `author.slug`, the same field the byline links and `getAuthorProfile`
+ * use, so params, links and sitemap entries cannot drift apart.
+ */
+export async function getAuthorSummaries(): Promise<AuthorSummary[]> {
   const [hive, learn] = await Promise.all([
     getAllArticles("hive"),
     getAllArticles("learn"),
   ]);
-  const slugs = new Set<string>();
+  const bySlug = new Map<string, AuthorSummary>();
   for (const a of [...hive, ...learn]) {
-    if (a.author?.slug) slugs.add(a.author.slug);
+    const slug = a.author?.slug;
+    if (!slug) continue;
+    const modified = lastModifiedOf(a);
+    const existing = bySlug.get(slug);
+    if (!existing) {
+      bySlug.set(slug, {
+        slug,
+        bio: a.author.bio,
+        count: 1,
+        lastModified: modified,
+      });
+      continue;
+    }
+    existing.count += 1;
+    // Only some posts may carry the full author record — keep the first bio.
+    existing.bio ??= a.author.bio;
+    if (modified > existing.lastModified) existing.lastModified = modified;
   }
-  return [...slugs];
+  return [...bySlug.values()];
 }
 
 /**
@@ -290,16 +367,45 @@ export async function getAuthorProfile(
   return { author, articles };
 }
 
+/**
+ * Does this post's `canonicalUrl` point at something other than the post itself?
+ *
+ * A self-referential canonical (the common case when the field is filled in at
+ * all) changes nothing and the post stays listed. One pointing elsewhere is the
+ * author saying "the version to rank lives over there" — listing it would put
+ * the sitemap in direct conflict with the page's own `<link rel="canonical">`,
+ * and Google resolves that by trusting neither.
+ */
+function hasForeignCanonical(p: ApiPost): boolean {
+  if (!p.canonicalUrl) return false;
+  const own = `/${p.blog}/${p.slug}`;
+  try {
+    const { pathname } = new URL(p.canonicalUrl, SITE_URL);
+    return pathname.replace(/\/$/, "") !== own;
+  } catch {
+    return true; // unparseable → can't prove it's ours, so don't advertise it
+  }
+}
+
+/**
+ * Published article URLs for the sitemap, excluding anything the article page
+ * itself asks Google to skip.
+ *
+ * The sitemap is an explicit "please index this". A post the detail page renders
+ * as `noindex`, or points at a foreign canonical, must not appear here — a
+ * sitemap that contradicts the page it lists is a Search Console warning and a
+ * wasted crawl, not a second opinion.
+ */
 export async function getSitemapArticles(
   blog: Blog,
 ): Promise<{ path: string; lastModified: Date }[]> {
   const posts = await getAllPublishedPosts(blog);
-  return posts.map((p) => ({
-    path: `/${blog}/${p.slug}`,
-    lastModified: new Date(
-      p.updatedAt || p.publishedAt || p.authorDate || Date.now(),
-    ),
-  }));
+  return posts
+    .filter((p) => !p.noindex && !hasForeignCanonical(p))
+    .map((p) => ({
+      path: `/${blog}/${p.slug}`,
+      lastModified: lastModifiedOf(p),
+    }));
 }
 
 /**
@@ -318,30 +424,102 @@ export async function getSitemapArticles(
  */
 export const MIN_TAG_ARTICLES = 2;
 
-/** A tag slug plus how many of a blog's published articles carry it. */
-export type TagCount = { slug: string; count: number };
+/**
+ * Whether a tag landing page should be indexed *and* listed in the sitemap.
+ *
+ * One predicate for both so the two can never disagree: the sitemap saying
+ * "index this" while the page's own meta says `noindex` is the contradiction
+ * this function exists to prevent.
+ */
+export function isIndexableTag(articleCount: number): boolean {
+  return articleCount >= MIN_TAG_ARTICLES;
+}
 
 /**
- * Tag slugs used by a blog's published articles, each with its article count.
- *
- * Slugs come from `t.slug` — the same field the tag chips on article pages link
- * to (see ArticleDetail) — so the sitemap can only list URLs that are genuinely
- * linked. A tag repeated on a single article counts once.
+ * Minimum published articles before a *bio-less* author archive is worth
+ * indexing. An author page's unique content is the bio — see `isIndexableAuthor`.
  */
-export async function getTagCounts(blog: Blog): Promise<TagCount[]> {
+export const MIN_AUTHOR_ARTICLES = 2;
+
+/**
+ * Whether an author archive should be indexed *and* listed in the sitemap.
+ *
+ * Deliberately not a pure count. An author page carries something a tag page
+ * never does: an identity. With a bio it is the entity page the article bylines
+ * and `Person` JSON-LD both point at — real unique copy, and the page Google
+ * looks for when corroborating who wrote something (E-E-A-T). That is worth
+ * indexing on the strength of one article. Without a bio it is a name over a
+ * card grid, thin in exactly the way a one-article tag page is.
+ */
+export function isIndexableAuthor(
+  articleCount: number,
+  bio: string | null,
+): boolean {
+  return articleCount >= MIN_AUTHOR_ARTICLES || Boolean(bio?.trim());
+}
+
+/** A tag with a live landing page, plus what the sitemap needs to describe it. */
+export type TagSummary = {
+  slug: string;
+  name: string;
+  /** Published articles in this blog carrying the tag. */
+  count: number;
+  /** Newest article carrying it — the real "last changed" for the listing. */
+  lastModified: Date;
+};
+
+/**
+ * Tags used by a blog's published articles, keyed by `tagSlug` — the stored
+ * slug, which is also what the chips link to and what the tag route resolves.
+ * Every URL this produces is therefore one the site genuinely links and the
+ * page genuinely serves. A tag repeated on a single article counts once.
+ */
+export async function getTagSummaries(blog: Blog): Promise<TagSummary[]> {
   const posts = await getAllPublishedPosts(blog);
-  const counts = new Map<string, number>();
+  const bySlug = new Map<string, TagSummary>();
   for (const p of posts) {
+    const modified = lastModifiedOf(p);
     // A post listing the same tag twice shouldn't inflate that tag's count.
     const seen = new Set<string>();
     for (const t of p.tags ?? []) {
-      // Handle both old (string) and new (Tag object) formats
-      const slug =
-        typeof t === "string" ? t.toLowerCase().replace(/\s+/g, "-") : t.slug;
+      const slug = tagSlug(t);
       if (!slug || seen.has(slug)) continue;
       seen.add(slug);
-      counts.set(slug, (counts.get(slug) ?? 0) + 1);
+      const existing = bySlug.get(slug);
+      if (!existing) {
+        bySlug.set(slug, {
+          slug,
+          name: typeof t === "string" ? t : t.name,
+          count: 1,
+          lastModified: modified,
+        });
+        continue;
+      }
+      existing.count += 1;
+      if (modified > existing.lastModified) existing.lastModified = modified;
     }
   }
-  return [...counts].map(([slug, count]) => ({ slug, count }));
+  return [...bySlug.values()];
+}
+
+/**
+ * Resolve a `/[blog]/tag/[slug]` URL to its label and articles, or null when no
+ * published article carries that tag.
+ *
+ * The single matcher behind the tag route's body, its metadata and its static
+ * params. Matching is on `t.slug` only. It used to be `slugify(t.name)`, which
+ * held right up until a tag was renamed — the admin keeps the slug fixed across
+ * a rename on purpose, so from then on the sitemapped, linked URL 404'd while a
+ * URL nothing pointed at quietly worked.
+ */
+export async function getTagArticles(
+  blog: Blog,
+  slug: string,
+): Promise<{ label: string; articles: Article[] } | null> {
+  const articles = await getAllArticles(blog);
+  const matches = articles.filter((a) => a.tags.some((t) => t.slug === slug));
+  if (matches.length === 0) return null;
+  const label =
+    matches[0].tags.find((t) => t.slug === slug)?.name ?? slug.replace(/-/g, " ");
+  return { label, articles: matches };
 }

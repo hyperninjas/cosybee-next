@@ -66,11 +66,25 @@ export const SOCIAL = {
 /** X/Twitter @handle used for twitter:site and twitter:creator card tags. */
 export const TWITTER_HANDLE = "@EnergieBee";
 
-/** All public routes — keep in sync with the page.tsx files under app/. Used by sitemap. */
+/**
+ * All public routes — keep in sync with the page.tsx files under app/. Used by sitemap.
+ *
+ * `lastModified` is an ISO date and is OPTIONAL, on purpose. `<lastmod>` is only
+ * worth sending when it is true: Google uses it while it stays consistent with
+ * what it finds, and discounts it site-wide once it doesn't — which would also
+ * cost us the accurate dates on articles. So set it only where the page states
+ * its own revision date (the legal pages do, in their footers — keep the two in
+ * step), and leave it off everywhere else rather than inventing one.
+ *
+ * /hive and /learn are the exception the sitemap fills in for free: they are
+ * listings, so their newest article IS their modification date.
+ */
 export const ROUTES: ReadonlyArray<{
   path: string;
   changeFrequency: "daily" | "weekly" | "monthly" | "yearly";
   priority: number;
+  /** ISO date, only when the page publishes a revision date of its own. */
+  lastModified?: string;
 }> = [
   { path: "/", changeFrequency: "weekly", priority: 1.0 },
   { path: "/smart", changeFrequency: "monthly", priority: 0.9 },
@@ -82,10 +96,11 @@ export const ROUTES: ReadonlyArray<{
   { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
   { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
   { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
-  { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/cookies", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/data-security", changeFrequency: "yearly", priority: 0.3 },
+  // Dates below mirror the "Last updated" line each page renders in its footer.
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/cookies", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/data-security", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-15" },
 ];
 
 /** Absolute URL helper for sitemaps, canonicals, OG image refs, etc. */

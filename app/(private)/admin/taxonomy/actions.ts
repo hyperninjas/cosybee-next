@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateContent } from "@/app/lib/revalidate";
 import { slugify } from "@/app/lib/slug";
 import {
   adminApi,
@@ -74,6 +75,7 @@ export async function saveAuthor(
   }
 
   revalidatePath("/admin/authors");
+  revalidateContent();
   return { ok: true, entity };
 }
 
@@ -95,6 +97,7 @@ export async function deleteAuthorAction(
     return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/authors");
+  revalidateContent();
   return { ok: true };
 }
 
@@ -147,6 +150,7 @@ export async function saveCategory(
   }
 
   revalidatePath("/admin/categories");
+  revalidateContent();
   return { ok: true, entity };
 }
 
@@ -163,6 +167,7 @@ export async function deleteCategoryAction(
     return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/categories");
+  revalidateContent();
   return { ok: true };
 }
 
@@ -205,6 +210,7 @@ export async function saveTag(
   }
 
   revalidatePath("/admin/tags");
+  revalidateContent();
   return { ok: true };
 }
 
@@ -221,5 +227,6 @@ export async function deleteTagAction(
     return { ok: false, error: `Could not delete: ${(e as Error).message}` };
   }
   revalidatePath("/admin/tags");
+  revalidateContent();
   return { ok: true };
 }

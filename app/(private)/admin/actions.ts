@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateContent } from "@/app/lib/revalidate";
 import { redirect } from "next/navigation";
 import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
@@ -273,6 +274,7 @@ export async function savePost(
   }
 
   revalidatePath("/admin");
+  revalidateContent();
   revalidatePath(`/${blog}`);
   revalidatePath(`/${blog}/${slug}`);
   redirect(`/admin?saved=${blog}/${slug}&status=${status}`);
@@ -297,6 +299,7 @@ export async function setStatus(formData: FormData): Promise<ActionResult> {
     await adminApi.setStatus(id, status);
 
     revalidatePath("/admin");
+    revalidateContent();
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
     return { ok: true };
@@ -319,6 +322,7 @@ export async function setFeatured(formData: FormData): Promise<ActionResult> {
     await adminApi.updatePost(id, { featured });
 
     revalidatePath("/admin");
+    revalidateContent();
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
     return { ok: true };
@@ -341,6 +345,7 @@ export async function setHomeFeatured(formData: FormData): Promise<ActionResult>
     await adminApi.updatePost(id, { homeFeatured });
 
     revalidatePath("/admin");
+    revalidateContent();
     revalidatePath("/"); // home page featured-articles section
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
@@ -363,6 +368,7 @@ export async function deletePost(formData: FormData): Promise<ActionResult> {
     await adminApi.deletePost(id);
 
     revalidatePath("/admin");
+    revalidateContent();
     revalidatePath(`/${blog}`);
     revalidatePath(`/${blog}/${slug}`);
     return { ok: true };
