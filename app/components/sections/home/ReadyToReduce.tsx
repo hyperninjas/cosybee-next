@@ -32,15 +32,15 @@ export default function ReadyToReduce() {
         {/* text + buttons */}
         <div className="flex-1 md:text-center min-[1200px]:text-left!">
           <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
-            EnergieBee helps you understand your home energy in a simple and
-            connected way. One system. One view. Total clarity.
-          </p>{" "}
+            More time for what matters
+          </p>
           <h2 className="text-2xl font-extrabold leading-tight text-foreground sm:text-3xl min-[1200px]:text-[40px]">
             Bring clarity to your home energy.
           </h2>
           <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
-            More time for what matters.
-          </p>
+            EnergieBee helps you understand your home energy in a simple and
+            connected way. One system. One view. Total clarity.
+          </p>{" "}
           <div className="mt-6 flex flex-wrap items-center md:justify-center gap-4 min-[1200px]:justify-start!">
             <CtaButton href="/download-app" size="md">
               Download Free App

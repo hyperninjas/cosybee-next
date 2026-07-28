@@ -22,7 +22,7 @@ const NAV_LINKS = [
 const MENU_ID = "site-mobile-menu";
 
 /** The one place the header CTA's destination and wording are defined. */
-const DOWNLOAD_CTA = { label: "Download app", href: "/download-app" };
+const DOWNLOAD_CTA = { label: "Download Free App", href: "/download-app" };
 
 // function SearchIcon() {
 //   return (
