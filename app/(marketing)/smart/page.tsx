@@ -16,17 +16,17 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 export const metadata: Metadata = pageMetadata({
   title: "Smart Home Integration",
   description:
-    "Connect every device and let EnergieBee's AI orchestrate energy automatically. Works with Alexa, Google Home, and Apple HomeKit out of the box.",
+    "Connect your solar system, battery, and smart home devices in one intelligent platform. AI-powered insights show energy production, usage, and savings at a glance.",
   ogDescription:
-    "Connect every device and let AI orchestrate your home's energy automatically. Reduce waste, save money, stay in control.",
+    "Solar, battery, and smart devices together in one platform — with AI-powered insights on energy production, usage, and savings.",
   path: "/smart",
   keywords: [
     "smart home energy",
-    "Matter smart home",
-    "smart home automation",
-    "Alexa energy",
-    "Google Home energy",
-    "Apple HomeKit",
+    "smart home integration",
+    "connected home devices",
+    "solar battery monitoring",
+    "AI energy insights",
+    "energy independence",
   ],
 });
 

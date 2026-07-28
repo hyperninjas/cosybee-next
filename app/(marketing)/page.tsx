@@ -18,9 +18,9 @@ export const metadata: Metadata = pageMetadata({
   title: "EnergieBee — One App. Total Energy Clarity.",
   absoluteTitle: true,
   description:
-    "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado — all from one app.",
+    "See how your home uses energy day by day. EnergieBee brings heating, solar, and your energy balance into one clear app — understand your whole home at a glance.",
   ogDescription:
-    "Smart home energy control that pays for itself. Connect every device, automate heating and solar, and save up to £300 a year vs tado.",
+    "One app to see how your home uses energy — heating, solar, and energy balance in a single clear view.",
   path: "/",
 });
 

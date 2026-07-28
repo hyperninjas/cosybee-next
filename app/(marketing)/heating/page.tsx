@@ -13,20 +13,19 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 // import { GENERAL_FAQ } from "@/app/lib/faq-data";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Smart Heating Control",
+  title: "Home Heating Intelligence",
   description:
-    "Intelligent heating that learns your routines and adapts in real time. Zoning, geofencing, and AI boiler tuning cut your heating bill up to 35%.",
+    "Predictive heating intelligence that helps you understand, optimise, and reduce home heating consumption. Climate-aware forecasting — early access ahead of the August 2026 launch.",
   ogDescription:
-    "Heating that learns your routines and adapts in real time. Stay comfortable, cut your bill up to 35%.",
+    "Understand and optimise your home heating with predictive, climate-aware intelligence. Early access is open ahead of the August 2026 launch.",
   path: "/heating",
   keywords: [
-    "smart heating",
-    "smart thermostat",
-    "zone heating",
-    "geofencing heating",
-    "boiler optimisation",
-    "tado alternative",
-    "heat pump control",
+    "home heating intelligence",
+    "heating energy forecasting",
+    "reduce heating consumption",
+    "climate-aware energy insights",
+    "heating energy savings",
+    "connected home energy",
   ],
 });
 

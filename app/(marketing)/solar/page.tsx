@@ -16,7 +16,7 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 export const metadata: Metadata = pageMetadata({
   title: "Solar Forecasting & Optimisation",
   description:
-    "95% accurate next-day solar forecasting. EnergieBee uses AI and weather data to predict generation, schedule loads, and grow your solar returns.",
+    "95% accurate next-day solar forecasting. EnergieBee uses AI and weather data to predict generation, with 7-day simulations, usage recommendations, and ROI tracking.",
   ogDescription:
     "95% accurate next-day solar forecasting. Plan your energy usage with confidence and maximise your solar investment.",
   path: "/solar",
@@ -25,6 +25,7 @@ export const metadata: Metadata = pageMetadata({
     "solar production prediction",
     "solar energy management",
     "AI solar optimisation",
+    "solar ROI tracking",
     "solar savings UK",
   ],
 });

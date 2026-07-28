@@ -16,17 +16,18 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 export const metadata: Metadata = pageMetadata({
   title: "Total Energy Control",
   description:
-    "Track every watt across grid, solar, battery, and devices. AI tariff shifting, bill forecasting, and battery arbitrage cut your bill up to 40%.",
+    "Track every watt across grid, solar, battery, and devices — no extra sensors needed. Smart tariff switching, bill forecasting, and battery arbitrage in one dashboard.",
   ogDescription:
-    "Every watt your home uses, in one dashboard. AI-driven tariff shifting and bill forecasting that cuts your bill up to 40%.",
+    "Every watt your home uses, in one dashboard — with smart tariff switching, bill forecasting, and battery arbitrage.",
   path: "/energy",
   keywords: [
     "home energy monitoring",
     "energy usage tracking",
-    "smart tariff",
+    "smart tariff switching",
     "battery arbitrage",
     "EV charging optimisation",
-    "tariff comparison UK",
+    "bill forecasting",
+    "appliance disaggregation",
   ],
 });
 

@@ -9,7 +9,7 @@ import {
 import AppFeatureCards from "@/app/components/sections/download-app/AppFeatureCards";
 import Benefits from "@/app/components/sections/download-app/Benefits";
 import DownloadHero from "@/app/components/sections/download-app/DownloadHero";
-import GettingStarted from "@/app/components/sections/download-app/GettingStarted";
+// import GettingStarted from "@/app/components/sections/download-app/GettingStarted";
 import GettingStartedV2 from "@/app/components/sections/download-app/GettingStartedV2";
 // import MobileAppPromo from "@/app/components/sections/download-app/MobileAppPromo";
 import MobileAppPromoV2 from "@/app/components/sections/download-app/MobileAppPromoV2";
@@ -20,9 +20,9 @@ export const metadata: Metadata = pageMetadata({
   title: "Download EnergieBee — Free Smart Energy App for iOS & Android",
   absoluteTitle: true,
   description:
-    "Download EnergieBee free for iPhone and Android — smart heating, solar forecasting, and energy analytics for your whole home in one app.",
+    "Download EnergieBee free for iPhone and Android. Set up in minutes with no credit card required — heating, solar forecasting, and energy analytics in one app.",
   ogDescription:
-    "One free app for your whole home's energy — heating, solar, and analytics. Get EnergieBee on iOS and Android.",
+    "One free app for your whole home's energy — heating, solar, and analytics. Set up in minutes, no credit card required.",
   path: "/download-app",
   keywords: [
     "download EnergieBee",
@@ -48,7 +48,8 @@ export default async function DownloadPage() {
       />
       <JsonLd data={softwareApplicationSchema()} />
       <DownloadHero qrSvg={qrSvg} />
-      <GettingStarted />
+      {/* V1 superseded by V2 — both rendered the same "four steps" band. */}
+      {/* <GettingStarted /> */}
       <GettingStartedV2 />
       {/* <MobileAppPromo /> */}
       <MobileAppPromoV2 />

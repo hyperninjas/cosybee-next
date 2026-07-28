@@ -4,7 +4,7 @@ import ComingSoon from "@/app/components/layout/ComingSoon";
 export const metadata: Metadata = {
   title: "Start Saving",
   description:
-    "Set up your EnergieBee device and start monitoring your home energy.",
+    "The EnergieBee sign-up flow is on its way. Explore the product across heating, solar, and energy management while we finish it.",
   alternates: { canonical: "/start" },
   robots: { index: false, follow: true },
 };
