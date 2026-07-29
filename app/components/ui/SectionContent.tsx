@@ -192,7 +192,9 @@ export function MediaCard({
                   aria-hidden
                   className="h-5 w-6 lg:h-6 lg:w-7"
                 />
-                <span className="text-sm text-foreground sm:text-base">{b}</span>
+                <span className="text-sm text-foreground sm:text-base">
+                  {b}
+                </span>
               </li>
             ))}
           </ul>
@@ -273,7 +275,7 @@ export function FeatureItem({
         <h3 className="text-base font-bold text-foreground sm:text-lg">
           {title}
         </h3>
-        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted sm:text-sm">
+        <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-muted sm:text-sm">
           {description}
         </p>
       </div>

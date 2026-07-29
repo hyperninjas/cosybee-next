@@ -27,8 +27,8 @@ export default function UnderstandOptimise() {
           />
         </div>
         {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
-          <SectionTitle align="center">
+        <div className="min-[1200px]:max-w-120.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+          <SectionTitle align="left">
             Understand and Optimise Your Home Energy Today
           </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">

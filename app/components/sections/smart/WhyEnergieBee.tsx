@@ -36,11 +36,11 @@ export default function WhyEnergieBee() {
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+        <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
           <SectionTitle align="center" className="min-[550px]:text-center">
             Works With Your Smart Home
           </SectionTitle>
-          <SectionLead className="min-[550px]:text-center self-center">
+          <SectionLead className="min-[550px]:text-center self-center lg:px-6">
             Part of the EnergieBee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
@@ -54,7 +54,7 @@ export default function WhyEnergieBee() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-6 md:mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
             <FeatureCard
               glyph="sun"
               title="Maximise Production"

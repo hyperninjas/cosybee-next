@@ -63,7 +63,7 @@ export default function WhyChoose() {
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-126 leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
+          <p className="mt-4 text-base max-w-135 leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>

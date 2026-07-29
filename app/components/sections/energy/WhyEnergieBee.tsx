@@ -18,7 +18,7 @@ export default function WhyEnergieBee() {
         {/* left: phone — wrapper has explicit width, image fills it
             via w-full h-auto so it scales proportionally instead of
             rendering at intrinsic size */}
-        <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
+        <div className="absolute -top-7 left-0 hidden w-[330.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy analytics dashboard"
@@ -29,11 +29,11 @@ export default function WhyEnergieBee() {
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+        <div className="min-[1200px]:max-w-155 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
           <SectionTitle align="center">
             Why Choose EnergieBee Energy?
           </SectionTitle>
-          <SectionLead className="text-center">
+          <SectionLead className="text-center lg:px-6">
             Part of the EnergieBee app — one dashboard for every kilowatt-hour,
             every device, every cost.
           </SectionLead>
@@ -47,7 +47,7 @@ export default function WhyEnergieBee() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-6 md:mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
             <FeatureCard
               glyph="sun"
               title="See Everything"
@@ -69,7 +69,7 @@ export default function WhyEnergieBee() {
         {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
             absolute positioning + explicit width so the inner `w-full`
             has a definite reference */}
-        <div className="absolute -right-40 top-15 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-55! min-[1200px]:-right-40! top-15 hidden w-125.5 lg:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

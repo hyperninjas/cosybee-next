@@ -75,9 +75,11 @@ export default function WhyEnergieBee({
         </div>
 
         {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
+        <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
           <SectionTitle>{title}</SectionTitle>
-          <SectionLead className="max-[1200px]:text-center">{lead}</SectionLead>
+          <SectionLead className="max-[1200px]:text-center lg:px-6">
+            {lead}
+          </SectionLead>
           {/* inline phone for tablet/mobile — side images hidden below 1200px */}
           <div className="w-[345.3px] min-[1200px]:hidden mt-8">
             <Image
@@ -88,7 +90,7 @@ export default function WhyEnergieBee({
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-6 md:mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
             {cards.map((c) => (
               <FeatureCard
                 key={c.title}
@@ -103,7 +105,7 @@ export default function WhyEnergieBee({
         {/* right: 3-hex hive cluster (mirrored, installer photo) —
             wrapper holds the absolute positioning + explicit width so
             the inner `w-full` has a definite reference */}
-        <div className="absolute -right-40 top-0 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-55! min-[1200px]:-right-40! top-15 hidden w-125.5 lg:block">
           <SharedImageHexCluster
             src={clusterSrc}
             viewBox={HIVE_3_VIEWBOX}

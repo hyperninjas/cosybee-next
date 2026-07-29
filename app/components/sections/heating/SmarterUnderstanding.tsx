@@ -12,7 +12,7 @@ export default function SmarterUnderstanding() {
     <Section surface="base" spacing="lg" className="px-6 lg:px-0">
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: phone mockup */}
-        <div className="absolute -top-17! left-0 hidden w-[345.3px] min-[1200px]:block">
+        <div className="absolute -top-17 left-0 hidden w-[345.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy dashboard"
@@ -23,7 +23,7 @@ export default function SmarterUnderstanding() {
         </div>
 
         {/* middle: title + feature cards */}
-        <div className="min-[1200px]:max-w-125 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
+        <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
           <SectionTitle align="center">
             A Smarter Understanding of Your Home
           </SectionTitle>
@@ -37,7 +37,7 @@ export default function SmarterUnderstanding() {
               className="h-auto w-full"
             />
           </div>
-          <div className="mt-6 md:mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
             <FeatureCard
               glyph="sun"
               title="Battery Optimisation Insights"
@@ -57,7 +57,7 @@ export default function SmarterUnderstanding() {
         </div>
 
         {/* right: 3-hex hive cluster (mirrored) */}
-        <div className="absolute -right-40 top-5 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -right-55! min-[1200px]:-right-40! top-0 hidden w-125.5 lg:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}

@@ -58,7 +58,7 @@ export default function FaqPage() {
     <main className="flex-1">
       <JsonLd data={faqPageSchema(ALL_FAQ)} />
       <JsonLd data={breadcrumbSchema(CRUMBS)} />
-      <Section spacing="md" surface="base">
+      <Section spacing="md" surface="base" className="max-w-250 mx-auto">
         <Container size="page">
           <Breadcrumbs items={CRUMBS} className="mb-5" />
           <Heading as="h1" variant="title" className="text-foreground">

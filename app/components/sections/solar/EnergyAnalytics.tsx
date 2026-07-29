@@ -54,7 +54,7 @@ export default function EnergyAnalytics({
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
             against a non-zero containing block */}
-        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -left-50 -top-14 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={clusterSrc}
             viewBox={HIVE_3_VIEWBOX}
@@ -64,8 +64,8 @@ export default function EnergyAnalytics({
           />
         </div>
         {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
-          <SectionTitle align="center">{title}</SectionTitle>
+        <div className="min-[1200px]:max-w-130 max-[1200px]:max-w-160 flex flex-col justify-center">
+          <SectionTitle align="left">{title}</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">
             {features.map((f) => (
               <FeatureItem
@@ -89,7 +89,7 @@ export default function EnergyAnalytics({
         {/* right: analytics phone — wrapper has explicit width, image
             fills it via w-full h-auto so it scales proportionally
             instead of rendering at intrinsic size */}
-        <div className="absolute -top-15 right-0 hidden w-75 min-[1200px]:block">
+        <div className="absolute -top-23 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceSrc}
             alt={deviceAlt}

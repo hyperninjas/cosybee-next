@@ -79,7 +79,7 @@ export default function WhyEnergieBeeSolar({
       spacing="none"
       className="py-16 pb-8 text-foreground lg:py-20 lg:pb-10"
     >
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"
@@ -88,10 +88,10 @@ export default function WhyEnergieBeeSolar({
         {/* text — left */}
         <div className="min-[1200px]:max-w-163.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
           <SectionTitle>{title}</SectionTitle>
-          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
+          <SectionLead className="max-w-140 min-[550px]:max-[1200px]:text-center">
             {lead}
           </SectionLead>
-          <div className="mt-6 md:mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4 lg:max-w-135">
             {cards.map((c) => (
               <FeatureCard
                 key={c.title}
