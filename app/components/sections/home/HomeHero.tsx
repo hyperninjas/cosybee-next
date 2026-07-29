@@ -48,7 +48,11 @@ export default async function HomeHero() {
             // display width. Not the LCP element (the bg photo is), so no
             // fetchPriority — let the LCP image win the bandwidth race.
             sizes="(min-width: 968px) 800px, 1px"
-            className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto"
+            // The breakpoint shift is a transform, not a `right` change: bare
+            // `transition` doesn't cover inset properties, and translating is
+            // composited instead of re-running layout. -right-10 + 21.25 (85px)
+            // matches the old -right-31.25; at 1300px+ it slides back to -40px.
+            className="absolute -right-10 translate-x-21.25 min-[1300px]:translate-x-0 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto transition-transform duration-300 ease-out motion-reduce:transition-none"
           />
         </div>
         <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
