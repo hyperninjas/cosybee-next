@@ -31,13 +31,13 @@ export default function ReadyToReduce() {
         <div className="h-auto hidden min-[1200px]:block w-44 lg:w-59"></div>
         {/* text + buttons */}
         <div className="flex-1 md:text-center min-[1200px]:text-left!">
-          <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
+          <p className="mt-1.5 mb-3 text-base text-[#424242] tracking-wide uppercase font-bold leading-relaxed sm:text-lg">
             More time for what matters
           </p>
-          <h2 className="text-2xl font-extrabold leading-tight text-foreground sm:text-3xl min-[1200px]:text-[40px]">
+          <h2 className="text-2xl tracking-[-2%] font-extrabold text-foreground sm:text-3xl min-[1200px]:text-[38px]!">
             Bring clarity to your home energy.
           </h2>
-          <p className="mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
+          <p className="mt-2.5 text-base tracking-wide text-[#545454] sm:text-lg">
             EnergieBee helps you understand your home energy in a simple and
             connected way. One system. One view. Total clarity.
           </p>{" "}
