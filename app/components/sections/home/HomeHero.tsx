@@ -69,7 +69,7 @@ export default async function HomeHero() {
             <strong>EnergieBee</strong> shows how your home uses energy day by
             day. Understand heating, solar and energy balance in one place.
           </Text>
-          <div className="mt-14 w-fit">
+          <div className="mt-8 w-fit">
             <HeroDownloadCta qrSvg={qrSvg} />
           </div>
         </div>
