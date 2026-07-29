@@ -16,13 +16,22 @@ import { Section } from "@/app/components/ui/Section";
 export default function ConnectedEcosystem() {
   return (
     <Section spacing="md" className="bg-surface text-foreground">
-      {/* early-access launch banner */}
+      {/* Early-access launch banner. An <aside>, not a heading block: it sits
+          above the section's own <h2>, so an <h3> here inverted the document
+          order. Its headline is also deliberately smaller than SectionTitle —
+          at 36px it out-shouted the heading it precedes. */}
       <Container className="mb-20">
-        <div className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10">
-          <div className="">
-            <h3 className="text-xl font-extrabold leading-tight text-foreground sm:text-[36px] whitespace-pre-line">
-              {"Launching August 2026 \n Early Access Available."}
-            </h3>
+        <aside
+          aria-label="Early access"
+          className="flex flex-col gap-5 rounded-2xl border border-border bg-surface-secondary p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10"
+        >
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+              Early access
+            </p>
+            <p className="mt-2 text-2xl font-extrabold leading-tight text-foreground sm:text-[28px]">
+              Launching August 2026
+            </p>
             <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
               Be part of the first wave of connected home energy intelligence.
             </p>
@@ -30,7 +39,7 @@ export default function ConnectedEcosystem() {
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="/get-started"
-              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-border bg-surface px-6 text-base lg:text-lg leading-[135%] font-semibold text-foreground transition-colors hover:bg-neutral-50"
+              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-border bg-surface px-6 text-base lg:text-lg leading-[135%] font-semibold text-foreground transition-colors hover:bg-surface-tertiary"
             >
               Pre-order access
             </a>
@@ -38,7 +47,7 @@ export default function ConnectedEcosystem() {
               Register interest
             </CtaButton>
           </div>
-        </div>
+        </aside>
       </Container>
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
@@ -51,7 +60,7 @@ export default function ConnectedEcosystem() {
           <SectionTitle>
             EnergieBee is evolving into a connected home energy ecosystem
           </SectionTitle>
-          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
+          <SectionLead className="max-w-160.5 min-[550px]:max-[1200px]:text-center">
             Today we optimise and forecast energy. Tomorrow we actively connect
             and control it.
           </SectionLead>

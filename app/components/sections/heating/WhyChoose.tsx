@@ -50,12 +50,17 @@ export default function WhyChoose() {
           className="pointer-events-none absolute -right-24 -top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
         />
         {/* text */}
-        <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center text-left min-[1200px]:max-w-163.5">
-          <SectionTitle>Why Choose EnergieBee?</SectionTitle>
-          <SectionLead className="max-w-163.5 min-[550px]:max-[1200px]:text-center">
+        {/* Tablet (550–1200px) keeps the column capped at the desktop width and
+            centred on the page, but its content stays left-aligned — a centred
+            bullet list and centred feature rows read as ragged here. */}
+        <div className="z-9 flex flex-col text-left min-[550px]:max-w-163.5 min-[550px]:max-[1200px]:mx-auto">
+          <SectionTitle className="min-[550px]:max-[1200px]:text-left!">
+            Why Choose EnergieBee?
+          </SectionTitle>
+          <SectionLead className="max-w-163.5">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>
-          <p className="mt-4 text-base leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
+          <p className="mt-4 text-base leading-relaxed text-muted">
             EnergieBee is designed to solve three problems at once:
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-muted marker:text-muted">
@@ -63,7 +68,7 @@ export default function WhyChoose() {
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-135 leading-relaxed text-muted min-[550px]:max-[1200px]:text-center">
+          <p className="mt-4 text-base max-w-135 leading-relaxed text-muted">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>
