@@ -40,8 +40,10 @@ export default function BlogFilterBar({
           </SearchField.Group>
         </SearchField>
 
-        {/* category filters */}
-        <div className="flex flex-nowrap overflow-auto items-center gap-2 p-1 -mx-1">
+        {/* category filters — scrollbar-overlay + the pb-3/-mb-2 strip (12px
+            pad − 8px margin = the original 4px) host the Windows scrollbar
+            outside the layout (mac-style hover overlay) */}
+        <div className="flex flex-nowrap overflow-auto items-center gap-2 p-1 -mx-1 pb-3 -mb-2 scrollbar-overlay">
           {categories.map((cat, i) => (
             <Button
               key={cat + i}

@@ -403,3 +403,37 @@
     animation: none;
   }
 }
+
+/* macOS-style overlay scrollbar. Windows classic scrollbars are always visible
+   and consume layout space; this keeps the bar invisible until the container
+   is hovered/focused, with a thin translucent thumb. Pair with a reserved
+   strip at the call site (e.g. `pb-2 -mb-2` for horizontal rows) so the bar
+   renders inside cancelled-out padding and never shifts layout. */
+@utility scrollbar-overlay {
+  /* Standard properties (Firefox, Chrome/Edge 121+) */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover,
+  &:focus-within {
+    scrollbar-color: oklch(50% 0 0 / 0.4) transparent;
+  }
+
+  /* Legacy WebKit path (older Chrome/Edge, Safari with visible bars) */
+  &::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+  }
+  &:hover::-webkit-scrollbar-thumb,
+  &:focus-within::-webkit-scrollbar-thumb {
+    background-color: oklch(50% 0 0 / 0.4);
+  }
+}

@@ -243,7 +243,7 @@ export default async function ArticleDetail({
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
-          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex">
+          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
             {/* sticky={false}: the aside already pins it. */}
             {toc.length > 1 && <ArticleToc items={toc} sticky={false} />}
 
