@@ -3,6 +3,7 @@ import LegalContainer from "@/app/components/legal/LegalContainer";
 import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "@/app/components/legal/LegalSection";
+import ContactLink from "@/app/components/ui/ContactLink";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
@@ -76,7 +77,12 @@ export default function PrivacyPage() {
           <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
           <p>
             For privacy-related enquiries:{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
+            <ContactLink
+              href="mailto:privacy@energiebee.com"
+              label="email address"
+            >
+              privacy@energiebee.com
+            </ContactLink>
           </p>
           <p>
             This policy is governed by the UK General Data Protection Regulation
@@ -407,9 +413,14 @@ export default function PrivacyPage() {
           </p>
           <p>
             To exercise any of these rights, please contact us at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
-            We will respond within 30 days. We may need to verify your identity
-            before fulfilling a request.
+            <ContactLink
+              href="mailto:privacy@energiebee.com"
+              label="email address"
+            >
+              privacy@energiebee.com
+            </ContactLink>
+            . We will respond within 30 days. We may need to verify your
+            identity before fulfilling a request.
           </p>
         </LegalSection>
 
@@ -442,7 +453,12 @@ export default function PrivacyPage() {
             not knowingly collect personal data from anyone under 18. If you
             believe a child has provided us with personal data, please contact
             us at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>{" "}
+            <ContactLink
+              href="mailto:privacy@energiebee.com"
+              label="email address"
+            >
+              privacy@energiebee.com
+            </ContactLink>{" "}
             and we will delete the information promptly.
           </p>
         </LegalSection>
@@ -471,7 +487,13 @@ export default function PrivacyPage() {
           <p>
             If you have concerns about how we handle your personal data, please
             contact us first at{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>.
+            <ContactLink
+              href="mailto:privacy@energiebee.com"
+              label="email address"
+            >
+              privacy@energiebee.com
+            </ContactLink>
+            .
           </p>
           <p>
             If you remain unsatisfied, you have the right to lodge a complaint
@@ -486,7 +508,14 @@ export default function PrivacyPage() {
               </a>
             </li>
             <li>
-              <strong>Phone</strong>: +44 (0) 0303 123 1113
+              <strong>Phone</strong>:{" "}
+              <ContactLink
+                href="tel:+443031231113"
+                value="+44 (0) 0303 123 1113"
+                label="phone number"
+              >
+                +44 (0) 0303 123 1113
+              </ContactLink>
             </li>
           </ul>
           <p className="mt-8 text-sm text-neutral-500">

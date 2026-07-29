@@ -2,6 +2,7 @@ import LegalContainer from "@/app/components/legal/LegalContainer";
 import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "@/app/components/legal/LegalSection";
+import ContactLink from "@/app/components/ui/ContactLink";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
@@ -157,7 +158,12 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>3.2</strong> To exercise your right to cancel, contact us at{" "}
-            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            <ContactLink
+              href="mailto:support@energiebee.com"
+              label="email address"
+            >
+              support@energiebee.com
+            </ContactLink>{" "}
             with your order details.
           </p>
           <p>
@@ -236,7 +242,12 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>5.2</strong> You agree to notify us immediately at{" "}
-            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            <ContactLink
+              href="mailto:support@energiebee.com"
+              label="email address"
+            >
+              support@energiebee.com
+            </ContactLink>{" "}
             if you suspect any unauthorised access to your Account.
           </p>
           <p>
@@ -331,7 +342,12 @@ export default function TermsPage() {
           </ul>
           <p>
             <strong>8.3</strong> To make a warranty claim, contact us at{" "}
-            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            <ContactLink
+              href="mailto:support@energiebee.com"
+              label="email address"
+            >
+              support@energiebee.com
+            </ContactLink>{" "}
             with proof of purchase and a description of the defect. We may, at
             our discretion, repair, replace, or refund the Device.
           </p>
@@ -469,7 +485,12 @@ export default function TermsPage() {
             <strong>13.3 Alternative Dispute Resolution:</strong> We are
             committed to resolving disputes fairly. Before initiating legal
             proceedings, we encourage you to contact us directly at{" "}
-            <a href="mailto:support@energiebee.com">support@energiebee.com</a>{" "}
+            <ContactLink
+              href="mailto:support@energiebee.com"
+              label="email address"
+            >
+              support@energiebee.com
+            </ContactLink>{" "}
             to seek an amicable resolution. If we are unable to resolve a
             dispute, you may also have the right to use the Online Dispute
             Resolution (ODR) platform provided by the European Commission at{" "}

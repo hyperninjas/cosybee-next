@@ -2,6 +2,7 @@ import LegalContainer from "@/app/components/legal/LegalContainer";
 import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "@/app/components/legal/LegalSection";
+import ContactLink from "@/app/components/ui/ContactLink";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
@@ -83,7 +84,12 @@ export default function CookiesPage() {
           <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
           <p>
             For cookie-related enquiries:{" "}
-            <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>
+            <ContactLink
+              href="mailto:privacy@energiebee.com"
+              label="email address"
+            >
+              privacy@energiebee.com
+            </ContactLink>
           </p>
           <p>
             This policy applies to our website at{" "}

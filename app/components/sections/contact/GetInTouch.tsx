@@ -10,6 +10,7 @@ import {
   toast,
 } from "@heroui/react";
 import { Envelope, MapPin, Smartphone } from "@gravity-ui/icons";
+import CopyButton from "@/app/components/ui/CopyButton";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
@@ -17,7 +18,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { submitContact } from "@/app/lib/public-forms";
 import { getRecaptchaToken, preloadRecaptcha } from "@/app/lib/recaptcha";
 import { trackEvent } from "@/app/lib/analytics";
-import { NewsletterSignup } from "./NewsletterSignup";
+// import { NewsletterSignup } from "./NewsletterSignup";
 
 const FIELD_CLASS =
   "w-full border border-transparent bg-surface-secondary px-4 py-3 text-base text-foreground transition-colors placeholder:text-muted focus-within:border-accent";
@@ -27,6 +28,8 @@ type ContactInfo = {
   title: string;
   detail: string;
   href?: string;
+  /** When set, a hover-revealed button copies this text to the clipboard. */
+  copy?: string;
 };
 
 const CONTACT_INFO: ContactInfo[] = [
@@ -35,12 +38,14 @@ const CONTACT_INFO: ContactInfo[] = [
     title: "Phone Number",
     detail: "(555) 123-4567-8901",
     href: "tel:+15551234567",
+    copy: "(555) 123-4567-8901",
   },
   {
     icon: <Envelope className="size-5" />,
     title: "Email Address",
     detail: "support@energiebee.com",
     href: "mailto:support@energiebee.com",
+    copy: "support@energiebee.com",
   },
   {
     icon: <MapPin className="size-5" />,
@@ -250,7 +255,7 @@ export default function GetInTouch() {
             return (
               <div
                 key={item.title}
-                className="flex flex-col items-center rounded-2xl bg-surface-secondary px-6 py-8 text-center"
+                className="group/copy flex flex-col items-center rounded-2xl bg-surface-secondary px-6 py-8 text-center"
               >
                 <span className="flex size-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
                   {item.icon}
@@ -258,7 +263,12 @@ export default function GetInTouch() {
                 <h3 className="mt-4 text-base font-bold text-foreground">
                   {item.title}
                 </h3>
-                <div className="mt-1">{detail}</div>
+                <div className="mt-1 flex items-center justify-center gap-1">
+                  {detail}
+                  {item.copy && (
+                    <CopyButton label={item.title} value={item.copy} />
+                  )}
+                </div>
               </div>
             );
           })}
@@ -277,7 +287,7 @@ export default function GetInTouch() {
         </div>
 
         {/* newsletter sign-up */}
-        <NewsletterSignup />
+        {/* <NewsletterSignup /> */}
       </Container>
     </Section>
   );

@@ -2,6 +2,7 @@ import LegalContainer from "@/app/components/legal/LegalContainer";
 import LegalHero from "@/app/components/legal/LegalHero";
 // import LegalIllustrationPlaceholder from "@/app/components/legal/LegalIllustrationPlaceholder";
 import LegalSection from "@/app/components/legal/LegalSection";
+import ContactLink from "@/app/components/ui/ContactLink";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
@@ -282,7 +283,12 @@ export default function DataSecurityPage() {
           <p>
             If you suspect that your EnergieBee account has been compromised,
             please contact us immediately at{" "}
-            <a href="mailto:security@EnergieBee.com">security@EnergieBee.com</a>
+            <ContactLink
+              href="mailto:security@EnergieBee.com"
+              label="email address"
+            >
+              security@EnergieBee.com
+            </ContactLink>
             .
           </p>
         </LegalSection>
@@ -312,9 +318,12 @@ export default function DataSecurityPage() {
             <li>Log out of the App when using a shared or public device;</li>
             <li>
               Contact us immediately at{" "}
-              <a href="mailto:security@EnergieBee.com">
+              <ContactLink
+                href="mailto:security@EnergieBee.com"
+                label="email address"
+              >
                 security@EnergieBee.com
-              </a>{" "}
+              </ContactLink>{" "}
               if you notice any suspicious activity on your account or receive
               unexpected communications claiming to be from EnergieBee.
             </li>

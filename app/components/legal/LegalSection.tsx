@@ -14,7 +14,10 @@ export default function LegalSection({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-10 first:mt-0 sm:mt-12">
+    // The rule between sections is a top border rather than a <Divider>: it
+    // needs no extra DOM node, and `first:` drops it above the opening section
+    // without the caller having to know its position.
+    <section className="mt-10 border-t border-border pt-10 first:mt-0 first:border-t-0 first:pt-0 sm:mt-12 sm:pt-12 sm:first:pt-0">
       <h2 className="text-xl font-bold text-foreground sm:text-2xl">{title}</h2>
       <div
         className={[
