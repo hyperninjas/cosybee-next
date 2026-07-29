@@ -164,7 +164,7 @@ export default function Navbar({
                 <Link
                   href={link.href}
                   className={`text-[15px] font-medium tracking-wide transition-colors hover:text-white ${
-                    isActive ? "text-white" : "text-border"
+                    isActive ? "text-white" : "text-white/80"
                   }`}
                 >
                   {link.label}
