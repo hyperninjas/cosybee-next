@@ -22,7 +22,7 @@ export default function LegalHero({
       <span className="block text-base font-semibold tracking-wide text-[#EE3D1A] sm:text-lg">
         {label}
       </span>
-      <h1 className="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-5xl">
+      <h1 className="mt-6 text-3xl text-balance font-extrabold leading-tight tracking-tight text-black sm:text-4xl lg:text-5xl">
         {title}
       </h1>
       <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">

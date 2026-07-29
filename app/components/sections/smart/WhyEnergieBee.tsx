@@ -25,7 +25,7 @@ export default function WhyEnergieBee() {
         {/* left: phone — wrapper has explicit width, image fills it
             via w-full h-auto so it scales proportionally instead of
             rendering at intrinsic size */}
-        <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
+        <div className="absolute -top-14 left-0 hidden w-[345.3px] min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy analytics dashboard"
