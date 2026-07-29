@@ -144,7 +144,7 @@ export function CtaCard({
   return (
     <Card
       variant="secondary"
-      className={`flex-col items-start gap-7 rounded-3xl ${!glyph ? "bg-[url(/bg-hive-grid.svg),linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] dark:bg-none" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12 ${className}`}
+      className={`flex-col items-start gap-7 rounded-3xl ${!glyph ? "bg-[url(/bg-hive-grid.svg),linear-gradient(117.77deg,#F6F9FB_12.42%,#F3F9F5_51.01%,#EFF7FB_73.68%,#F0F0FB_95.76%)] dark:bg-none" : ""} bg-cover bg-center bg-no-repeat p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-7 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:gap-5 min-[1200px]:p-12! ${className}`}
     >
       {glyph && (
         <HexBadge
