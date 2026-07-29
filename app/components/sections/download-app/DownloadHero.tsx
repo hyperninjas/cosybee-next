@@ -64,12 +64,12 @@ export default function DownloadHero({ qrSvg }: { qrSvg: string }) {
 
       <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
-          <Heading as="h1" variant="display">
-            Easily track energy usage with the user&#8209;friendly EnergieBee
-            app.
+          <Heading as="h1" variant="display" className="whitespace-pre-line">
+            {"One app.\n Complete home energy insight."}
           </Heading>
           <Text variant="heroLead" className="mt-5 max-w-129.5">
-            Save energy, cut costs, and keep track of everything.
+            Track, simulate, and optimise your home&apos;s energy with
+            confidence.
           </Text>
           <div className="mt-14 flex flex-col flex-wrap w-fit gap-4">
             <CtaButton href="#benefits" size="md">
