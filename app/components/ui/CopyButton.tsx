@@ -42,7 +42,7 @@ export default function CopyButton({
       aria-label={`Copy ${label}`}
       title={`Copy ${label}`}
       onClick={onCopy}
-      className={`inline-flex shrink-0 items-center justify-center rounded-md p-1 text-muted no-underline opacity-0 transition-opacity duration-150 hover:text-accent focus-visible:opacity-100 group-hover/copy:opacity-100 group-focus-within/copy:opacity-100 ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-md p-1 text-muted no-underline opacity-100 transition-opacity duration-150 hover:text-accent focus-visible:opacity-100 group-hover/copy:opacity-100 group-focus-within/copy:opacity-100 ${className}`}
     >
       {copied ? (
         <Check className="size-3.5 text-accent" aria-hidden />
