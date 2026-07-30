@@ -44,7 +44,7 @@ export default function ConnectedEcosystem() {
               Pre-order access
             </a> */}
             <CtaButton href="/contact" size="md">
-              Register interest
+              Register Interest
             </CtaButton>
           </div>
         </aside>
