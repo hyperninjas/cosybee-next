@@ -1,10 +1,7 @@
 import Hexagon from "@/app/components/ui/Hexagon";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
+import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import beeFlowerImg from "@/public/energy/img-1.png";
-import deviceImg from "@/public/heating/energiebee-app-heating-overview.png";
-import windTurbineImg from "@/public/energy/img-2.png";
-import Image from "next/image";
+import sideImage from "@/public/heating/energiebee-app-heating-device-mockup.webp";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
@@ -12,27 +9,12 @@ export default function AccurateIntelligence() {
   return (
     <Section spacing="md" surface="surface" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
-        {/* 3-hex hive cluster — three distinct cells */}
-        <HiveHexCluster
+        {/* uniform 3-hex hive cluster */}
+        <SharedImageHexCluster
+          src={sideImage}
           gap={5}
           cornerInset={4}
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
-          left={{ src: windTurbineImg, alt: "Wind turbines", color: "#7FA9C9" }}
-          topRight={{
-            src: beeFlowerImg,
-            alt: "Bee on a flower",
-            color: "#D4A017",
-          }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="energie bee app screen"
-                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
-              />
-            ),
-          }}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
