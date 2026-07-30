@@ -1,8 +1,10 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "@/app/components/ui/Hexagon";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/energy-monitoring.png";
+import beeFlowerImg from "@/public/energy/img-1.png";
+import deviceImg from "@/public/energy/device-mockup-energy.png";
+import windTurbineImg from "@/public/energy/img-2.png";
+import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
@@ -11,12 +13,30 @@ export default function EnergyMonitoring() {
     <Section spacing="md" surface="surface" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImage.src}
-          gap={5}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
+        <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
+          gap={5}
+          cornerInset={4}
+          left={{
+            src: windTurbineImg,
+            alt: "Wind turbines",
+            color: "#7FA9C9",
+          }}
+          topRight={{
+            src: beeFlowerImg,
+            alt: "Bee on a flower",
+            color: "#D4A017",
+          }}
+          bottomRight={{
+            color: "#E9E19E",
+            children: (
+              <Image
+                src={deviceImg}
+                alt="energie bee app screen"
+                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
+              />
+            ),
+          }}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
