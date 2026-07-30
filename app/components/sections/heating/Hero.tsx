@@ -19,7 +19,7 @@ export default function Hero() {
         Powered by high-accuracy forecasting models, real-time energy data, and
         climate-aware intelligence that reduces waste, cost, and carbon impact.
       </Text>
-      <CtaButton href="/get-started" size="md" className="mt-10">
+      <CtaButton href="/download-app" size="md" className="mt-10">
         Get Started
       </CtaButton>
     </PageHero>

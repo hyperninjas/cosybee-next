@@ -17,7 +17,7 @@ export default function Hero() {
         with confidence and maximise your solar investment with industry-leading
         accuracy.
       </Text>
-      <CtaButton href="/get-started" size="md" className="mt-10">
+      <CtaButton href="/download-app" size="md" className="mt-10">
         Get Started
       </CtaButton>
     </PageHero>

@@ -1,5 +1,4 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import HeroDownloadCta from "./HeroDownloadCta";
@@ -72,9 +71,6 @@ export default function DownloadHero({ qrSvg }: { qrSvg: string }) {
             confidence.
           </Text>
           <div className="mt-14 flex flex-col flex-wrap w-fit gap-4">
-            <CtaButton href="#benefits" size="md">
-              Learn more
-            </CtaButton>
             <HeroDownloadCta qrSvg={qrSvg} />
           </div>
         </div>

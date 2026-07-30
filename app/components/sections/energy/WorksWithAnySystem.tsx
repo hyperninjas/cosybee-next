@@ -14,7 +14,7 @@ export default function WorksWithAnySystem() {
           title="Works With Any Energy Setup"
           description="Compatible with smart meters, inverters, batteries, and EV chargers from all major brands. Plug-and-play setup in minutes."
           buttonText="Get Started Today"
-          href="/start"
+          href="/download-app"
         />
       </div>
     </Section>

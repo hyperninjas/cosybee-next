@@ -37,13 +37,13 @@ export default function ConnectedEcosystem() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <a
+            {/* <a
               href="/get-started"
               className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-border bg-surface px-6 text-base lg:text-lg leading-[135%] font-semibold text-foreground transition-colors hover:bg-surface-tertiary"
             >
               Pre-order access
-            </a>
-            <CtaButton href="/get-started" size="md">
+            </a> */}
+            <CtaButton href="/contact" size="md">
               Register interest
             </CtaButton>
           </div>

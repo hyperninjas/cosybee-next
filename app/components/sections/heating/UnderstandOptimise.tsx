@@ -17,7 +17,7 @@ export default function UnderstandOptimise() {
     >
       <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
         {/* left: uniform 3-hex hive cluster */}
-        <div className="absolute -left-50 -top-4 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}
@@ -57,7 +57,7 @@ export default function UnderstandOptimise() {
           </div>
         </div>
         {/* right: phone mockup */}
-        <div className="absolute -top-12 right-0 hidden w-75 min-[1200px]:block">
+        <div className="absolute -top-18 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy dashboard"

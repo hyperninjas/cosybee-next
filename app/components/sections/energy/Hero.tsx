@@ -14,7 +14,7 @@ export default function Hero() {
         Track every watt your home uses — across grid, solar, battery, and
         individual devices. One dashboard, one source of truth, real savings.
       </Text>
-      <CtaButton href="/get-started" size="md" className="mt-10">
+      <CtaButton href="/download-app" size="md" className="mt-10">
         Get Started
       </CtaButton>
     </PageHero>

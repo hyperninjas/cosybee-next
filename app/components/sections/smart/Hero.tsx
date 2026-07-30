@@ -20,7 +20,7 @@ export default function Hero() {
         everything in one place. AI-powered insights help you understand energy
         production, usage and savings — and make smarter decisions every day.
       </Text>
-      <CtaButton href="/get-started" size="md" className="mt-10">
+      <CtaButton href="/download-app" size="md" className="mt-10">
         Get Started
       </CtaButton>
     </PageHero>

@@ -25,7 +25,7 @@ export default function EnergyAnalytics() {
         {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
             positioning + explicit width so the inner `w-full` resolves
             against a non-zero containing block */}
-        <div className="absolute -left-50 -top-5 hidden w-125.5 min-[1200px]:block">
+        <div className="absolute -left-50 -top-13 hidden w-125.5 min-[1200px]:block">
           <SharedImageHexCluster
             src={sideImage.src}
             viewBox={HIVE_3_VIEWBOX}
@@ -66,7 +66,7 @@ export default function EnergyAnalytics() {
         </div>
         {/* right: analytics phone — wrapper has explicit width, image
             fills it via w-full h-auto so it scales proportionally */}
-        <div className="absolute -top-15 right-0 hidden w-75 min-[1200px]:block">
+        <div className="absolute -top-20 right-0 hidden w-75 min-[1200px]:block">
           <Image
             src={deviceImg}
             alt="energy analytics dashboard"
