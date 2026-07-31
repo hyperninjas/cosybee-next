@@ -248,6 +248,41 @@
   border: 0;
   border-top: 1px solid var(--separator);
 }
+/* Tables. The lossy export emits a bare `<table><colgroup>…<tr><th>/<td>` with
+   no wrapper and no classes, and .article-body previously had no table rules —
+   so published tables rendered browser-default (borderless, collapsed) instead
+   of how they previewed in the editor. Mirror the editor's BlockNote look
+   (collapsed 1px cell borders, 5px/10px padding, bold left-aligned header row,
+   top-aligned cells) using the site's border token. `table-layout: fixed`
+   honours the author's `<colgroup>` column widths; `width: 100%` fills the
+   article column. `.article-table-wrap` (added by wrapArticleTables at render
+   time) scrolls oversized tables sideways — the editor's .tableWrapper
+   equivalent — instead of letting them blow out the page on mobile. */
+.article-table-wrap {
+  overflow-x: auto;
+}
+.article-body table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  word-break: break-word;
+}
+.article-body th,
+.article-body td {
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  vertical-align: top;
+  text-align: left;
+}
+.article-body th {
+  font-weight: 700;
+  color: var(--foreground);
+}
+/* Empty cells still get a row height (editor parity). */
+.article-body th > p,
+.article-body td > p {
+  min-height: 1.5rem;
+}
 /* Multi-column blocks (BlockNote `columnList`). The lossy HTML export hardcodes
    `display:flex` + per-column `flex-grow` inline, so columns lay out with no
    extra CSS — we only add a gap, top spacing to match other blocks, and a

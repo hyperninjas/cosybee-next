@@ -12,6 +12,20 @@ function slugify(input: string): string {
 export type TocItem = { id: string; text: string; level: number };
 
 /**
+ * Wrap each bare `<table>` from the lossy BlockNote export in a scroll
+ * container (`.article-table-wrap`, styled in globals.css). The editor gets
+ * this from BlockNote's own `.tableWrapper`; the export ships the table naked,
+ * so without this an author-resized table wider than the article column would
+ * overflow the page on small screens. Safe as a plain string replace —
+ * BlockNote tables can't nest.
+ */
+export function wrapArticleTables(html: string): string {
+  return html
+    .replace(/<table(?=[\s>])/g, '<div class="article-table-wrap"><table')
+    .replace(/<\/table>/g, "</table></div>");
+}
+
+/**
  * Inject stable `id`s into the article HTML's h2/h3 headings and return
  * a flat table-of-contents. Pure string processing over server-rendered HTML.
  */

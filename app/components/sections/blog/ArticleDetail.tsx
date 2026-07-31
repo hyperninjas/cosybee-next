@@ -6,7 +6,7 @@ import {
   formatReadTime,
   isExternalUrl,
 } from "@/app/lib/article-types";
-import { buildToc } from "@/app/lib/toc";
+import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { ArticleCard } from "./ArticleCard";
@@ -55,7 +55,9 @@ export default async function ArticleDetail({
       : "";
     rawHtml = blockNoteHtml || article.contentHtml || "";
   }
-  const { html, items: toc } = buildToc(rawHtml);
+  // Post-process the rendered body regardless of which source produced it:
+  // heading ids for the TOC, and a scroll wrapper around each table.
+  const { html, items: toc } = buildToc(wrapArticleTables(rawHtml));
   const path = `${basePath}/${article.slug}`;
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
   const crumbs = [
