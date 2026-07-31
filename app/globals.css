@@ -248,6 +248,165 @@
   border: 0;
   border-top: 1px solid var(--separator);
 }
+/* Tables. The lossy export emits a bare `<table><colgroup>…<tr><th>/<td>` with
+   no wrapper and no classes, and .article-body previously had no table rules —
+   so published tables rendered browser-default (borderless, collapsed) instead
+   of how they previewed in the editor. Mirror the editor's BlockNote look
+   (collapsed 1px cell borders, 5px/10px padding, bold left-aligned header row,
+   top-aligned cells) using the site's border token. `table-layout: fixed`
+   honours the author's `<colgroup>` column widths; `width: 100%` fills the
+   article column. `.article-table-wrap` (added by wrapArticleTables at render
+   time) scrolls oversized tables sideways — the editor's .tableWrapper
+   equivalent — instead of letting them blow out the page on mobile. */
+.article-table-wrap {
+  overflow-x: auto;
+}
+.article-body table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  word-break: break-word;
+}
+.article-body th,
+.article-body td {
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  vertical-align: top;
+  text-align: left;
+}
+.article-body th {
+  font-weight: 700;
+  color: var(--foreground);
+}
+/* Empty cells still get a row height (editor parity). */
+.article-body th > p,
+.article-body td > p {
+  min-height: 1.5rem;
+}
+/* Alignment + named colors that the lossy export carries as DATA ATTRIBUTES
+   only (no inline styles) — table cells are the main case (paragraphs get an
+   inline `text-align`, cells get `data-text-alignment`; cell colors come as
+   `data-text-color`/`data-background-color`). The editor renders these via
+   BlockNote's own CSS; without this mirror the styling silently vanished
+   from the published article. Palette values match @blocknote/core. */
+.article-body [data-text-alignment="left"] {
+  text-align: left;
+}
+.article-body [data-text-alignment="center"] {
+  text-align: center;
+}
+.article-body [data-text-alignment="right"] {
+  text-align: right;
+}
+.article-body [data-text-alignment="justify"] {
+  text-align: justify;
+}
+.article-body [data-text-color="gray"] {
+  color: #9b9a97;
+}
+.article-body [data-text-color="brown"] {
+  color: #64473a;
+}
+.article-body [data-text-color="red"] {
+  color: #e03e3e;
+}
+.article-body [data-text-color="orange"] {
+  color: #d9730d;
+}
+.article-body [data-text-color="yellow"] {
+  color: #dfab01;
+}
+.article-body [data-text-color="green"] {
+  color: #4d6461;
+}
+.article-body [data-text-color="blue"] {
+  color: #0b6e99;
+}
+.article-body [data-text-color="purple"] {
+  color: #6940a5;
+}
+.article-body [data-text-color="pink"] {
+  color: #ad1a72;
+}
+.article-body [data-background-color="gray"] {
+  background-color: #ebeced;
+}
+.article-body [data-background-color="brown"] {
+  background-color: #e9e5e3;
+}
+.article-body [data-background-color="red"] {
+  background-color: #fbe4e4;
+}
+.article-body [data-background-color="orange"] {
+  background-color: #f6e9d9;
+}
+.article-body [data-background-color="yellow"] {
+  background-color: #fbf3db;
+}
+.article-body [data-background-color="green"] {
+  background-color: #ddedea;
+}
+.article-body [data-background-color="blue"] {
+  background-color: #ddebf1;
+}
+.article-body [data-background-color="purple"] {
+  background-color: #eae4f2;
+}
+.article-body [data-background-color="pink"] {
+  background-color: #f4dfeb;
+}
+/* Author-inserted table of contents (the `tableOfContents` block). The block
+   exports an empty `.article-toc` div that buildToc fills with heading
+   anchors at render time; an article with no h2/h3 leaves it empty → hide. */
+.article-body .article-toc {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in oklab, var(--border) 18%, transparent);
+}
+.article-body .article-toc:empty {
+  display: none;
+}
+/* Out-specifies `.article-body p` (which sets the prose font size). */
+.article-body .article-toc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.article-body .article-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.75rem;
+}
+.article-body .article-toc li {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+.article-body .article-toc li[data-level="3"] {
+  padding-left: 1.25rem;
+}
+.article-body .article-toc a {
+  text-decoration: none;
+}
+.article-body .article-toc a:hover {
+  text-decoration: underline;
+}
+/* Custom HTML block (`htmlBlock`): author-written markup/embeds, sanitized
+   at export. Keep foreign content inside the article column; nested tables
+   inherit the .article-body table rules above. */
+.article-body .article-html iframe,
+.article-body .article-html img,
+.article-body .article-html video {
+  max-width: 100%;
+}
+/* A 16:9 default for embeds that arrive without explicit dimensions. */
+.article-body .article-html iframe:not([height]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
 /* Multi-column blocks (BlockNote `columnList`). The lossy HTML export hardcodes
    `display:flex` + per-column `flex-grow` inline, so columns lay out with no
    extra CSS — we only add a gap, top spacing to match other blocks, and a
@@ -349,6 +508,134 @@
 }
 .post-editor .bn-block-column[style*="box-shadow"]::after {
   background: var(--accent);
+}
+
+/* Per-link SEO rel qualifiers (the `linkRel` style): show the tokens as a
+   small superscript badge after the styled link text so authors can see at a
+   glance which links carry nofollow/sponsored/ugc. Editor-only — the badge
+   attribute is stripped from the published HTML. */
+.post-editor span[data-link-rel]:not([data-link-rel=""])::after {
+  content: attr(data-link-rel);
+  font-size: 0.62em;
+  font-weight: 700;
+  vertical-align: super;
+  margin-left: 0.25em;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* Editor preview of the table-of-contents block: same card feel as the
+   published `.article-toc`, with clickable entries that scroll the editor. */
+.post-editor .bn-toc-block {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in oklab, var(--border) 18%, transparent);
+}
+.post-editor .bn-toc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.post-editor .bn-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+.post-editor .bn-toc li[data-level="3"] {
+  padding-left: 1.25rem;
+}
+.post-editor .bn-toc button {
+  display: block;
+  padding: 0.15rem 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-align: left;
+}
+.post-editor .bn-toc button:hover {
+  text-decoration: underline;
+}
+.post-editor .bn-toc-empty {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Editor view of the custom HTML block: labelled dashed card with a
+   sanitized live preview and a toggleable source textarea. */
+.post-editor .bn-html-block {
+  width: 100%;
+  border: 1px dashed var(--border);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+}
+.post-editor .bn-html-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.post-editor .bn-html-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.post-editor .bn-html-toggle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+.post-editor .bn-html-toggle:hover {
+  border-color: var(--accent);
+}
+.post-editor .bn-html-preview {
+  margin-top: 0.75rem;
+}
+.post-editor .bn-html-preview iframe,
+.post-editor .bn-html-preview img,
+.post-editor .bn-html-preview video {
+  max-width: 100%;
+}
+.post-editor .bn-html-preview iframe:not([height]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+.post-editor .bn-html-preview-empty {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.post-editor .bn-html-source {
+  display: block;
+  width: 100%;
+  min-height: 8rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--border) 12%, transparent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.post-editor .bn-html-source:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 
 /* Entrance for the media-library batch action bar when it mounts (a selection

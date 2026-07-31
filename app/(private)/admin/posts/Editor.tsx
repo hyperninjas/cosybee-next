@@ -11,7 +11,14 @@ import {
   FormattingToolbarController,
   TextAlignButton,
   getFormattingToolbarItems,
+  LinkToolbarController,
+  EditLinkButton,
+  OpenLinkButton,
+  DeleteLinkButton,
+  useComponentsContext,
+  useBlockNoteEditor,
   type DefaultReactSuggestionItem,
+  type LinkToolbarProps,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import {
@@ -27,7 +34,12 @@ import {
 } from "@blocknote/xl-multi-column";
 import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
 import { uploadLibraryMedia } from "@/app/lib/media-upload";
-import { blockNoteSchema as schema } from "@/app/lib/blocknoteSchema";
+import {
+  blockNoteSchema as schema,
+  collectHeadingAnchors,
+  LINK_REL_TOKENS,
+  type LinkRelToken,
+} from "@/app/lib/blocknoteSchema";
 import { MediaPickerModal } from "@/app/(private)/admin/media/MediaPickerModal";
 
 type SchemaPartialBlock = typeof schema.PartialBlock;
@@ -94,7 +106,8 @@ function blockForMedia(media: MediaItem): SchemaPartialBlock {
 
 /**
  * Formatting toolbar with an extra justify button (the default omits it even
- * though the schema + CSS support it), inserted right after right-align.
+ * though the schema + CSS support it), inserted right after right-align, and
+ * a "Link to section" menu right after the link button.
  *
  * Used via FormattingToolbarController, with `formattingToolbar={false}` on
  * BlockNoteView so this REPLACES the built-in toolbar rather than stacking a
@@ -113,7 +126,268 @@ function FormattingToolbarWithJustify() {
   const rightIdx = items.findIndex((item) => item.key === "textAlignRightButton");
   if (rightIdx >= 0) items.splice(rightIdx + 1, 0, justify);
   else items.push(justify);
+  const sectionLink = <LinkToSectionButton key="linkToSectionButton" />;
+  const linkIdx = items.findIndex((item) => item.key === "createLinkButton");
+  if (linkIdx >= 0) items.splice(linkIdx + 1, 0, sectionLink);
+  else items.push(sectionLink);
   return <FormattingToolbar>{items}</FormattingToolbar>;
+}
+
+/** Small list icon for the table-of-contents slash menu entry. */
+function TocIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M8 6h13" />
+      <path d="M10 12h11" />
+      <path d="M10 18h11" />
+      <path d="M3 6h.01" />
+      <path d="M5 12h.01" />
+      <path d="M5 18h.01" />
+    </svg>
+  );
+}
+
+/** Code icon for the custom HTML slash menu entry. */
+function CodeIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  );
+}
+
+/** Anchor icon for the "Link to section" toolbar button. */
+function AnchorIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M12 22V8" />
+      <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+      <circle cx="12" cy="5" r="3" />
+    </svg>
+  );
+}
+
+/**
+ * Formatting-toolbar menu that links the selected text to one of the
+ * article's h2/h3 sections — no need to hand-type `#slug` anchors (the slugs
+ * are predicted with the exact algorithm `buildToc` uses on publish). Hidden
+ * when the article has no headings yet.
+ *
+ * `"use no memo"` — React-Compiler exempt like every component in this file.
+ */
+function LinkToSectionButton() {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+  // Recomputed per toolbar render — the toolbar only mounts on selection,
+  // so this stays cheap and always current.
+  const anchors = collectHeadingAnchors(
+    editor.document as unknown as Parameters<typeof collectHeadingAnchors>[0],
+  );
+
+  if (anchors.length === 0) return null;
+
+  return (
+    <Components.Generic.Menu.Root>
+      <Components.Generic.Menu.Trigger>
+        <Components.FormattingToolbar.Button
+          className="bn-button"
+          label="Link to section"
+          mainTooltip="Link selection to a section of this article"
+          icon={<AnchorIcon />}
+        />
+      </Components.Generic.Menu.Trigger>
+      <Components.Generic.Menu.Dropdown className="bn-menu-dropdown">
+        {anchors.map((anchor) => (
+          <Components.Generic.Menu.Item
+            key={anchor.slug}
+            className="bn-menu-item"
+            onClick={() => {
+              editor.createLink(`#${anchor.slug}`);
+              // Same trick as BlockNote's own color menu: refocus after the
+              // Mantine focus trap releases.
+              setTimeout(() => editor.focus());
+            }}
+          >
+            <span
+              style={anchor.level === 3 ? { paddingLeft: 16 } : undefined}
+            >
+              {anchor.text}
+            </span>
+          </Components.Generic.Menu.Item>
+        ))}
+      </Components.Generic.Menu.Dropdown>
+    </Components.Generic.Menu.Root>
+  );
+}
+
+type PmRange = { from: number; to: number };
+
+/**
+ * Read the linkRel style tokens present anywhere in a document range.
+ *
+ * `"use no memo"` — called from event handlers/state initializers, not
+ * render; see `blockForMedia` for why the compiler must skip it.
+ */
+function getRelTokens(
+  editor: { _tiptapEditor: unknown },
+  range: PmRange,
+): Set<LinkRelToken> {
+  "use no memo";
+  const tokens = new Set<LinkRelToken>();
+  // The linkRel style is a tiptap mark carrying its value as `stringValue`.
+  // BlockNote has no public API to READ styles over an arbitrary range (only
+  // the current selection), so inspect the ProseMirror doc directly.
+  const { state } = editor._tiptapEditor as {
+    state: {
+      schema: { marks: Record<string, unknown> };
+      doc: {
+        nodesBetween: (
+          from: number,
+          to: number,
+          cb: (node: {
+            marks: { type: unknown; attrs: { stringValue?: string } }[];
+          }) => void,
+        ) => void;
+      };
+    };
+  };
+  const markType = state.schema.marks["linkRel"];
+  if (!markType) return tokens;
+  state.doc.nodesBetween(range.from, range.to, (node) => {
+    for (const mark of node.marks) {
+      if (mark.type !== markType) continue;
+      for (const t of (mark.attrs.stringValue ?? "").split(/\s+/)) {
+        if ((LINK_REL_TOKENS as readonly string[]).includes(t)) {
+          tokens.add(t as LinkRelToken);
+        }
+      }
+    }
+  });
+  return tokens;
+}
+
+/** Replace the linkRel style across a range (empty list removes it). */
+function setRelTokens(
+  editor: { _tiptapEditor: unknown },
+  range: PmRange,
+  tokens: LinkRelToken[],
+): void {
+  "use no memo";
+  const tiptap = editor._tiptapEditor as {
+    state: {
+      schema: {
+        marks: Record<
+          string,
+          { create: (attrs: { stringValue: string }) => unknown } | undefined
+        >;
+      };
+      tr: {
+        removeMark: (from: number, to: number, type: unknown) => unknown;
+      };
+    };
+    view: { dispatch: (tr: unknown) => void };
+  };
+  const markType = tiptap.state.schema.marks["linkRel"];
+  if (!markType) return;
+  let tr = tiptap.state.tr.removeMark(range.from, range.to, markType) as {
+    addMark: (from: number, to: number, mark: unknown) => unknown;
+  };
+  if (tokens.length > 0) {
+    tr = tr.addMark(
+      range.from,
+      range.to,
+      markType.create({ stringValue: tokens.join(" ") }),
+    ) as typeof tr;
+  }
+  tiptap.view.dispatch(tr);
+}
+
+/**
+ * Link toolbar (hover/click popup on a link) extended with per-link SEO rel
+ * toggles. The tokens are stored as the `linkRel` text style on the link's
+ * text (see blocknoteSchema.ts); the server export hoists them onto the
+ * published `<a rel>`. Default buttons (edit/open/delete) are kept.
+ *
+ * Used via LinkToolbarController with `linkToolbar={false}` on BlockNoteView
+ * so it REPLACES the built-in toolbar (same pattern as the formatting
+ * toolbar above).
+ *
+ * `"use no memo"` — React-Compiler exempt like every component in this file.
+ */
+function LinkToolbarWithRel(props: LinkToolbarProps) {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+  const [tokens, setTokens] = useState<Set<LinkRelToken>>(() =>
+    getRelTokens(editor, props.range),
+  );
+
+  function toggle(token: LinkRelToken) {
+    const next = new Set(tokens);
+    if (next.has(token)) next.delete(token);
+    else next.add(token);
+    setRelTokens(
+      editor,
+      props.range,
+      LINK_REL_TOKENS.filter((t) => next.has(t)),
+    );
+    setTokens(next);
+  }
+
+  return (
+    <Components.LinkToolbar.Root className="bn-toolbar bn-link-toolbar">
+      <EditLinkButton
+        url={props.url}
+        text={props.text}
+        range={props.range}
+        setToolbarOpen={props.setToolbarOpen}
+        setToolbarPositionFrozen={props.setToolbarPositionFrozen}
+      />
+      <OpenLinkButton url={props.url} />
+      <DeleteLinkButton
+        range={props.range}
+        setToolbarOpen={props.setToolbarOpen}
+      />
+      {LINK_REL_TOKENS.map((token) => (
+        <Components.LinkToolbar.Button
+          key={token}
+          className="bn-button"
+          label={token}
+          mainTooltip={`Toggle rel="${token}" on this link`}
+          isSelected={tokens.has(token)}
+          onClick={() => toggle(token)}
+        >
+          {token}
+        </Components.LinkToolbar.Button>
+      ))}
+    </Components.LinkToolbar.Root>
+  );
 }
 
 /**
@@ -156,6 +430,56 @@ export default function Editor({ initialContent, onChange }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   // The block where "/" was typed — we insert the picked media after it.
   const insertAfterRef = useRef<string | null>(null);
+
+  // Custom slash-menu entry that inserts an author-controlled table of
+  // contents block (live outline in the editor; anchor links when published).
+  const tocSlashItem: DefaultReactSuggestionItem = {
+    title: "Table of contents",
+    subtext: "Linked outline of this article's headings",
+    aliases: ["toc", "contents", "outline"],
+    group: "Basic blocks",
+    icon: <TocIcon />,
+    onItemClick: () => {
+      const current = editor.getTextCursorPosition().block;
+      editor.insertBlocks(
+        [{ type: "tableOfContents" } as SchemaPartialBlock],
+        current.id,
+        "after",
+      );
+      // The slash trigger leaves an empty paragraph — drop it so the block
+      // takes its place cleanly (same cleanup as the media picker insert).
+      if (
+        current.type === "paragraph" &&
+        (current.content as unknown[]).length === 0
+      ) {
+        editor.removeBlocks([current.id]);
+      }
+    },
+  };
+
+  // Custom slash-menu entry for the sanitized raw-HTML block (embeds or
+  // hand-written markup).
+  const htmlSlashItem: DefaultReactSuggestionItem = {
+    title: "Custom HTML",
+    subtext: "Embed (YouTube, Maps…) or hand-written markup",
+    aliases: ["html", "embed", "iframe", "custom"],
+    group: "Media",
+    icon: <CodeIcon />,
+    onItemClick: () => {
+      const current = editor.getTextCursorPosition().block;
+      editor.insertBlocks(
+        [{ type: "htmlBlock" } as SchemaPartialBlock],
+        current.id,
+        "after",
+      );
+      if (
+        current.type === "paragraph" &&
+        (current.content as unknown[]).length === 0
+      ) {
+        editor.removeBlocks([current.id]);
+      }
+    },
+  };
 
   // Custom slash-menu entry that opens the media library picker.
   const mediaSlashItem: DefaultReactSuggestionItem = {
@@ -200,6 +524,9 @@ export default function Editor({ initialContent, onChange }: Props) {
         // Without this, BOTH toolbars mount and fight over focus/position,
         // which blurs the editor on click and closes the toolbar.
         formattingToolbar={false}
+        // Same deal for the link toolbar: replaced below by the variant
+        // with per-link rel (nofollow/sponsored/ugc) toggles.
+        linkToolbar={false}
       >
         <SuggestionMenuController
           triggerCharacter="/"
@@ -208,7 +535,7 @@ export default function Editor({ initialContent, onChange }: Props) {
               combineByGroup(
                 getDefaultReactSlashMenuItems(editor),
                 getMultiColumnSlashMenuItems(editor),
-                [mediaSlashItem],
+                [tocSlashItem, htmlSlashItem, mediaSlashItem],
               ),
               query,
             )
@@ -219,6 +546,8 @@ export default function Editor({ initialContent, onChange }: Props) {
         <FormattingToolbarController
           formattingToolbar={FormattingToolbarWithJustify}
         />
+        {/* Link toolbar with per-link SEO rel toggles (see LinkToolbarWithRel). */}
+        <LinkToolbarController linkToolbar={LinkToolbarWithRel} />
       </BlockNoteView>
 
       <MediaPickerModal
