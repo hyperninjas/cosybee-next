@@ -155,6 +155,24 @@ function TocIcon() {
   );
 }
 
+/** Code icon for the custom HTML slash menu entry. */
+function CodeIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  );
+}
+
 /** Anchor icon for the "Link to section" toolbar button. */
 function AnchorIcon() {
   return (
@@ -439,6 +457,30 @@ export default function Editor({ initialContent, onChange }: Props) {
     },
   };
 
+  // Custom slash-menu entry for the sanitized raw-HTML block (embeds or
+  // hand-written markup).
+  const htmlSlashItem: DefaultReactSuggestionItem = {
+    title: "Custom HTML",
+    subtext: "Embed (YouTube, Maps…) or hand-written markup",
+    aliases: ["html", "embed", "iframe", "custom"],
+    group: "Media",
+    icon: <CodeIcon />,
+    onItemClick: () => {
+      const current = editor.getTextCursorPosition().block;
+      editor.insertBlocks(
+        [{ type: "htmlBlock" } as SchemaPartialBlock],
+        current.id,
+        "after",
+      );
+      if (
+        current.type === "paragraph" &&
+        (current.content as unknown[]).length === 0
+      ) {
+        editor.removeBlocks([current.id]);
+      }
+    },
+  };
+
   // Custom slash-menu entry that opens the media library picker.
   const mediaSlashItem: DefaultReactSuggestionItem = {
     title: "Media library",
@@ -493,7 +535,7 @@ export default function Editor({ initialContent, onChange }: Props) {
               combineByGroup(
                 getDefaultReactSlashMenuItems(editor),
                 getMultiColumnSlashMenuItems(editor),
-                [tocSlashItem, mediaSlashItem],
+                [tocSlashItem, htmlSlashItem, mediaSlashItem],
               ),
               query,
             )

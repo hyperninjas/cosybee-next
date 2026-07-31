@@ -321,6 +321,20 @@
 .article-body .article-toc a:hover {
   text-decoration: underline;
 }
+/* Custom HTML block (`htmlBlock`): author-written markup/embeds, sanitized
+   at export. Keep foreign content inside the article column; nested tables
+   inherit the .article-body table rules above. */
+.article-body .article-html iframe,
+.article-body .article-html img,
+.article-body .article-html video {
+  max-width: 100%;
+}
+/* A 16:9 default for embeds that arrive without explicit dimensions. */
+.article-body .article-html iframe:not([height]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
 /* Multi-column blocks (BlockNote `columnList`). The lossy HTML export hardcodes
    `display:flex` + per-column `flex-grow` inline, so columns lay out with no
    extra CSS — we only add a gap, top spacing to match other blocks, and a
@@ -480,6 +494,76 @@
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+/* Editor view of the custom HTML block: labelled dashed card with a
+   sanitized live preview and a toggleable source textarea. */
+.post-editor .bn-html-block {
+  width: 100%;
+  border: 1px dashed var(--border);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+}
+.post-editor .bn-html-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.post-editor .bn-html-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.post-editor .bn-html-toggle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+.post-editor .bn-html-toggle:hover {
+  border-color: var(--accent);
+}
+.post-editor .bn-html-preview {
+  margin-top: 0.75rem;
+}
+.post-editor .bn-html-preview iframe,
+.post-editor .bn-html-preview img,
+.post-editor .bn-html-preview video {
+  max-width: 100%;
+}
+.post-editor .bn-html-preview iframe:not([height]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+.post-editor .bn-html-preview-empty {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.post-editor .bn-html-source {
+  display: block;
+  width: 100%;
+  min-height: 8rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--border) 12%, transparent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.post-editor .bn-html-source:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 
 /* Entrance for the media-library batch action bar when it mounts (a selection

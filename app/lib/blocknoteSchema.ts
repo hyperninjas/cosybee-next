@@ -6,6 +6,7 @@ import {
   defaultStyleSpecs,
 } from "@blocknote/core";
 import { withMultiColumn } from "@blocknote/xl-multi-column";
+import DOMPurify from "dompurify";
 import { createAnchorAssigner } from "./toc";
 
 /**
@@ -205,6 +206,165 @@ const tableOfContentsBlock = createBlockSpec(
   },
 );
 
+// ── htmlBlock (custom HTML / embeds) ─────────────────────────────────────
+
+/**
+ * Origins an `<iframe>` may embed from. Anything else — and any non-https
+ * src — is removed by the sanitizer. Extend deliberately; every entry is a
+ * site we let run inside our pages.
+ */
+const EMBED_IFRAME_HOSTS = new Set([
+  "www.youtube.com",
+  "youtube.com",
+  "www.youtube-nocookie.com",
+  "player.vimeo.com",
+  "open.spotify.com",
+  "www.google.com",
+  "maps.google.com",
+]);
+
+// DOMPurify instances are bound to a window: the browser's in the editor,
+// server-util's jsdom during HTML export. Created lazily (no window exists
+// at module load on the server) and re-created if the window changes.
+let purifier: ReturnType<typeof DOMPurify> | null = null;
+let purifierWindow: unknown = null;
+
+function getPurifier(): ReturnType<typeof DOMPurify> | null {
+  const win = (globalThis as { window?: Window }).window;
+  if (!win) return null;
+  if (purifier && purifierWindow === win) return purifier;
+  purifier = DOMPurify(win as unknown as Parameters<typeof DOMPurify>[0]);
+  purifierWindow = win;
+  // Enforce the embed allowlist: iframes survive only with an https src on
+  // an approved host.
+  purifier.addHook("uponSanitizeElement", (node, data) => {
+    if (data.tagName !== "iframe") return;
+    const src = (node as Element).getAttribute?.("src") ?? "";
+    let allowed = false;
+    try {
+      const url = new URL(src);
+      allowed = url.protocol === "https:" && EMBED_IFRAME_HOSTS.has(url.hostname);
+    } catch {
+      allowed = false;
+    }
+    if (!allowed) (node as Element).remove();
+  });
+  return purifier;
+}
+
+/**
+ * Sanitize author-written HTML for the `htmlBlock`. Runs in BOTH the editor
+ * preview and the server export, so what the author sees is exactly what
+ * publishes. DOMPurify defaults strip scripts, event handlers and
+ * javascript: URLs; inline `style` and the usual formatting/table tags stay,
+ * and iframes are restricted to EMBED_IFRAME_HOSTS. Returns "" when no DOM
+ * is available (never passes raw input through).
+ */
+export function sanitizeEmbeddedHtml(html: string): string {
+  const p = getPurifier();
+  if (!p) return "";
+  return p.sanitize(html, {
+    ADD_TAGS: ["iframe"],
+    ADD_ATTR: [
+      "allow",
+      "allowfullscreen",
+      "frameborder",
+      "referrerpolicy",
+      "loading",
+      "target",
+    ],
+  });
+}
+
+const htmlBlock = createBlockSpec(
+  {
+    type: "htmlBlock",
+    propSchema: { html: { default: "" } },
+    content: "none",
+  },
+  {
+    /**
+     * Editor: sanitized live preview + a source textarea toggled by an
+     * Edit/Apply button. Key events inside the textarea are stopped from
+     * propagating so BlockNote's shortcuts don't hijack typing.
+     */
+    render(block, editor) {
+      const dom = document.createElement("div");
+      dom.className = "bn-html-block";
+      dom.contentEditable = "false";
+
+      const header = document.createElement("div");
+      header.className = "bn-html-header";
+      const label = document.createElement("span");
+      label.className = "bn-html-label";
+      label.textContent = "Custom HTML";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "bn-html-toggle";
+      header.append(label, toggle);
+
+      const preview = document.createElement("div");
+      preview.className = "bn-html-preview";
+
+      const source = document.createElement("textarea");
+      source.className = "bn-html-source";
+      source.spellcheck = false;
+      source.placeholder =
+        "Paste an embed (YouTube, Vimeo, Spotify, Google Maps) or write HTML.\nScripts are stripped; iframes only from the allowed sites.";
+      for (const type of ["keydown", "keypress", "keyup", "paste", "copy", "cut", "mousedown"]) {
+        source.addEventListener(type, (e) => e.stopPropagation());
+      }
+
+      const syncPreview = (html: string) => {
+        const clean = sanitizeEmbeddedHtml(html);
+        if (clean.trim()) {
+          preview.classList.remove("bn-html-preview-empty");
+          preview.innerHTML = clean;
+        } else {
+          preview.classList.add("bn-html-preview-empty");
+          preview.textContent = "Empty HTML block — click Edit to add markup.";
+        }
+      };
+
+      let editing = false;
+      const setEditing = (next: boolean) => {
+        editing = next;
+        toggle.textContent = next ? "Apply" : "Edit";
+        source.style.display = next ? "" : "none";
+        if (next) setTimeout(() => source.focus());
+      };
+
+      toggle.addEventListener("click", () => {
+        if (!editing) {
+          setEditing(true);
+          return;
+        }
+        // Apply: preview immediately, then persist to the block props (the
+        // preview is synced here too in case BlockNote re-mounts the view).
+        syncPreview(source.value);
+        setEditing(false);
+        editor.updateBlock(block, { props: { html: source.value } });
+      });
+
+      source.value = block.props.html;
+      syncPreview(block.props.html);
+      // A freshly inserted (empty) block starts in edit mode.
+      setEditing(block.props.html.trim() === "");
+
+      dom.append(header, preview, source);
+      return { dom };
+    },
+
+    /** Published HTML: the sanitized markup in an `.article-html` wrapper. */
+    toExternalHTML(block) {
+      const dom = document.createElement("div");
+      dom.className = "article-html";
+      dom.innerHTML = sanitizeEmbeddedHtml(block.props.html);
+      return { dom };
+    },
+  },
+);
+
 // ── schema ───────────────────────────────────────────────────────────────
 
 export const blockNoteSchema = withMultiColumn(
@@ -212,6 +372,7 @@ export const blockNoteSchema = withMultiColumn(
     blockSpecs: {
       ...defaultBlockSpecs,
       tableOfContents: tableOfContentsBlock(),
+      htmlBlock: htmlBlock(),
     },
     styleSpecs: {
       ...defaultStyleSpecs,

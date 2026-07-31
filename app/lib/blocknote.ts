@@ -67,6 +67,12 @@ export function decorateArticleLinks(html: string): string {
       const parts = [`href="${href}"`];
       if (rel.length) parts.push(`rel="${rel.join(" ")}"`);
       if (external) parts.push('target="_blank"');
+      // Keep presentational attrs an author may have written in a custom
+      // HTML block (BlockNote's own links never carry these — its junk
+      // attribute is `classname`, which this intentionally drops).
+      for (const kept of attrs.matchAll(/\s(?:class|style|title)="[^"]*"/g)) {
+        parts.push(kept[0].trim());
+      }
       return `<a ${parts.join(" ")}>${inner}</a>`;
     },
   );
@@ -101,7 +107,10 @@ export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const html = await editor.blocksToHTMLLossy(blocks);
   // Apply the site link policy (hoist author rel tokens, un-nofollow internal
   // links, external → noopener/new-tab) before the HTML goes anywhere.
-  return decorateArticleLinks(html);
+  // Also drop the `data-html` attribute BlockNote's block wrapper stamps on
+  // exported htmlBlocks — it duplicates the RAW (unsanitized) source next to
+  // the sanitized markup; the raw source belongs only in contentJson.
+  return decorateArticleLinks(html).replace(/\s*data-html="[^"]*"/g, "");
 }
 
 /**
