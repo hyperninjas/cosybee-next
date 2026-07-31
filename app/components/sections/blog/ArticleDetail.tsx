@@ -60,6 +60,9 @@ export default async function ArticleDetail({
   // Post-process the rendered body regardless of which source produced it:
   // heading ids for the TOC, and a scroll wrapper around each table.
   const { html, items: toc } = buildToc(wrapArticleTables(rawHtml));
+  // The sidebar "On this page" outline lists top-level sections (h2) only.
+  // Anchors and the in-article /toc block still cover h3 subsections.
+  const sidebarToc = toc.filter((item) => item.level === 2);
   const path = `${basePath}/${article.slug}`;
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
   const crumbs = [
@@ -241,13 +244,15 @@ export default async function ArticleDetail({
           )}
         </article>
 
-        {(toc.length > 1 || related.length > 0) && (
+        {(sidebarToc.length > 1 || related.length > 0) && (
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
           <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
             {/* sticky={false}: the aside already pins it. */}
-            {toc.length > 1 && <ArticleToc items={toc} sticky={false} />}
+            {sidebarToc.length > 1 && (
+              <ArticleToc items={sidebarToc} sticky={false} />
+            )}
 
             {related.length > 0 && (
               <div>
