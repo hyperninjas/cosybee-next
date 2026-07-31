@@ -36,6 +36,7 @@ import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
 import { uploadLibraryMedia } from "@/app/lib/media-upload";
 import {
   blockNoteSchema as schema,
+  collectHeadingAnchors,
   LINK_REL_TOKENS,
   type LinkRelToken,
 } from "@/app/lib/blocknoteSchema";
@@ -105,7 +106,8 @@ function blockForMedia(media: MediaItem): SchemaPartialBlock {
 
 /**
  * Formatting toolbar with an extra justify button (the default omits it even
- * though the schema + CSS support it), inserted right after right-align.
+ * though the schema + CSS support it), inserted right after right-align, and
+ * a "Link to section" menu right after the link button.
  *
  * Used via FormattingToolbarController, with `formattingToolbar={false}` on
  * BlockNoteView so this REPLACES the built-in toolbar rather than stacking a
@@ -124,6 +126,10 @@ function FormattingToolbarWithJustify() {
   const rightIdx = items.findIndex((item) => item.key === "textAlignRightButton");
   if (rightIdx >= 0) items.splice(rightIdx + 1, 0, justify);
   else items.push(justify);
+  const sectionLink = <LinkToSectionButton key="linkToSectionButton" />;
+  const linkIdx = items.findIndex((item) => item.key === "createLinkButton");
+  if (linkIdx >= 0) items.splice(linkIdx + 1, 0, sectionLink);
+  else items.push(sectionLink);
   return <FormattingToolbar>{items}</FormattingToolbar>;
 }
 
@@ -146,6 +152,79 @@ function TocIcon() {
       <path d="M5 12h.01" />
       <path d="M5 18h.01" />
     </svg>
+  );
+}
+
+/** Anchor icon for the "Link to section" toolbar button. */
+function AnchorIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M12 22V8" />
+      <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+      <circle cx="12" cy="5" r="3" />
+    </svg>
+  );
+}
+
+/**
+ * Formatting-toolbar menu that links the selected text to one of the
+ * article's h2/h3 sections — no need to hand-type `#slug` anchors (the slugs
+ * are predicted with the exact algorithm `buildToc` uses on publish). Hidden
+ * when the article has no headings yet.
+ *
+ * `"use no memo"` — React-Compiler exempt like every component in this file.
+ */
+function LinkToSectionButton() {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+  // Recomputed per toolbar render — the toolbar only mounts on selection,
+  // so this stays cheap and always current.
+  const anchors = collectHeadingAnchors(
+    editor.document as unknown as Parameters<typeof collectHeadingAnchors>[0],
+  );
+
+  if (anchors.length === 0) return null;
+
+  return (
+    <Components.Generic.Menu.Root>
+      <Components.Generic.Menu.Trigger>
+        <Components.FormattingToolbar.Button
+          className="bn-button"
+          label="Link to section"
+          mainTooltip="Link selection to a section of this article"
+          icon={<AnchorIcon />}
+        />
+      </Components.Generic.Menu.Trigger>
+      <Components.Generic.Menu.Dropdown className="bn-menu-dropdown">
+        {anchors.map((anchor) => (
+          <Components.Generic.Menu.Item
+            key={anchor.slug}
+            className="bn-menu-item"
+            onClick={() => {
+              editor.createLink(`#${anchor.slug}`);
+              // Same trick as BlockNote's own color menu: refocus after the
+              // Mantine focus trap releases.
+              setTimeout(() => editor.focus());
+            }}
+          >
+            <span
+              style={anchor.level === 3 ? { paddingLeft: 16 } : undefined}
+            >
+              {anchor.text}
+            </span>
+          </Components.Generic.Menu.Item>
+        ))}
+      </Components.Generic.Menu.Dropdown>
+    </Components.Generic.Menu.Root>
   );
 }
 

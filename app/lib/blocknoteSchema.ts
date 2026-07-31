@@ -6,6 +6,7 @@ import {
   defaultStyleSpecs,
 } from "@blocknote/core";
 import { withMultiColumn } from "@blocknote/xl-multi-column";
+import { createAnchorAssigner } from "./toc";
 
 /**
  * The BlockNote schema shared by the client editor and the server-side
@@ -68,6 +69,12 @@ type AnyBlock = {
 export type HeadingAnchor = {
   /** BlockNote block id — used for click-to-scroll inside the editor. */
   blockId: string;
+  /**
+   * The anchor id this heading will get on the published page. Predicted
+   * with the SAME assigner `buildToc` uses (same texts, same document
+   * order → same ids). Lets the editor offer pickable `#anchor` links.
+   */
+  slug: string;
   text: string;
   level: 2 | 3;
 };
@@ -90,13 +97,21 @@ function inlineText(content: unknown): string {
  */
 export function collectHeadingAnchors(blocks: AnyBlock[]): HeadingAnchor[] {
   const anchors: HeadingAnchor[] = [];
+  const assignAnchor = createAnchorAssigner();
 
   const walk = (list: AnyBlock[] | undefined): void => {
     for (const block of list ?? []) {
       const level = block.props?.["level"];
       if (block.type === "heading" && (level === 2 || level === 3)) {
         const text = inlineText(block.content).replace(/\s+/g, " ").trim();
-        if (text) anchors.push({ blockId: block.id ?? "", text, level });
+        if (text) {
+          anchors.push({
+            blockId: block.id ?? "",
+            slug: assignAnchor(text),
+            text,
+            level,
+          });
+        }
       }
       walk(block.children);
     }
