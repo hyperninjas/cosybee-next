@@ -283,6 +283,44 @@
 .article-body td > p {
   min-height: 1.5rem;
 }
+/* Author-inserted table of contents (the `tableOfContents` block). The block
+   exports an empty `.article-toc` div that buildToc fills with heading
+   anchors at render time; an article with no h2/h3 leaves it empty → hide. */
+.article-body .article-toc {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in oklab, var(--border) 18%, transparent);
+}
+.article-body .article-toc:empty {
+  display: none;
+}
+/* Out-specifies `.article-body p` (which sets the prose font size). */
+.article-body .article-toc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.article-body .article-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.75rem;
+}
+.article-body .article-toc li {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+.article-body .article-toc li[data-level="3"] {
+  padding-left: 1.25rem;
+}
+.article-body .article-toc a {
+  text-decoration: none;
+}
+.article-body .article-toc a:hover {
+  text-decoration: underline;
+}
 /* Multi-column blocks (BlockNote `columnList`). The lossy HTML export hardcodes
    `display:flex` + per-column `flex-grow` inline, so columns lay out with no
    extra CSS — we only add a gap, top spacing to match other blocks, and a
@@ -384,6 +422,64 @@
 }
 .post-editor .bn-block-column[style*="box-shadow"]::after {
   background: var(--accent);
+}
+
+/* Per-link SEO rel qualifiers (the `linkRel` style): show the tokens as a
+   small superscript badge after the styled link text so authors can see at a
+   glance which links carry nofollow/sponsored/ugc. Editor-only — the badge
+   attribute is stripped from the published HTML. */
+.post-editor span[data-link-rel]:not([data-link-rel=""])::after {
+  content: attr(data-link-rel);
+  font-size: 0.62em;
+  font-weight: 700;
+  vertical-align: super;
+  margin-left: 0.25em;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* Editor preview of the table-of-contents block: same card feel as the
+   published `.article-toc`, with clickable entries that scroll the editor. */
+.post-editor .bn-toc-block {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in oklab, var(--border) 18%, transparent);
+}
+.post-editor .bn-toc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.post-editor .bn-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+.post-editor .bn-toc li[data-level="3"] {
+  padding-left: 1.25rem;
+}
+.post-editor .bn-toc button {
+  display: block;
+  padding: 0.15rem 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-align: left;
+}
+.post-editor .bn-toc button:hover {
+  text-decoration: underline;
+}
+.post-editor .bn-toc-empty {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* Entrance for the media-library batch action bar when it mounts (a selection

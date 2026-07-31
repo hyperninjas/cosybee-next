@@ -25,15 +25,30 @@ export function wrapArticleTables(html: string): string {
     .replace(/<\/table>/g, "</table></div>");
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /**
  * Inject stable `id`s into the article HTML's h2/h3 headings and return
  * a flat table-of-contents. Pure string processing over server-rendered HTML.
+ *
+ * Also populates any author-inserted `tableOfContents` blocks: their HTML
+ * export is an EMPTY `<div class="article-toc"></div>` placeholder (the
+ * headless server export can't see sibling blocks), which gets filled here
+ * with links to the ids just injected — so the in-article TOC and the heading
+ * anchors can never drift apart. A placeholder in an article with no
+ * headings stays empty (hidden via `.article-toc:empty` in globals.css).
  */
 export function buildToc(html: string): { html: string; items: TocItem[] } {
   const items: TocItem[] = [];
   const seen = new Set<string>();
 
-  const out = html.replace(
+  let out = html.replace(
     /<(h[23])([^>]*)>([\s\S]*?)<\/\1>/g,
     (_match, tag: string, attrs: string, inner: string) => {
       const text = inner.replace(/<[^>]+>/g, "").trim();
@@ -48,6 +63,22 @@ export function buildToc(html: string): { html: string; items: TocItem[] } {
       return `<${tag}${attrsWithId}>${inner}</${tag}>`;
     },
   );
+
+  if (items.length > 0) {
+    const list =
+      `<p class="article-toc-title">Contents</p><ul>` +
+      items
+        .map(
+          (i) =>
+            `<li data-level="${i.level}"><a href="#${i.id}">${escapeHtml(i.text)}</a></li>`,
+        )
+        .join("") +
+      `</ul>`;
+    out = out.replace(
+      /<div class="article-toc">\s*<\/div>/g,
+      `<div class="article-toc">${list}</div>`,
+    );
+  }
 
   return { html: out, items };
 }

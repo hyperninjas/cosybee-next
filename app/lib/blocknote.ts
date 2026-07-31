@@ -1,7 +1,83 @@
 import "server-only";
 import { ServerBlockNoteEditor } from "@blocknote/server-util";
 import type { PartialBlock } from "@blocknote/core";
-import { blockNoteSchema } from "./blocknoteSchema";
+import { blockNoteSchema, LINK_REL_TOKENS } from "./blocknoteSchema";
+import { PRODUCTION_URL, SITE_URL } from "./site";
+
+/** Is this href off-site? Relative paths, #anchors, mailto/tel and our own
+ *  origin(s) are "internal"; only absolute http(s) URLs elsewhere are not. */
+function isExternalHref(href: string): boolean {
+  if (!/^https?:\/\//i.test(href)) return false;
+  return !(
+    href.startsWith(`${SITE_URL}/`) ||
+    href === SITE_URL ||
+    href.startsWith(`${PRODUCTION_URL}/`) ||
+    href === PRODUCTION_URL
+  );
+}
+
+/**
+ * Rewrite every `<a>` in the exported article HTML with the site's link
+ * policy. Two problems this solves:
+ *
+ *  1. BlockNote's export hardcodes `target="_blank"
+ *     rel="noopener noreferrer nofollow"` (plus a junk `classname` attribute)
+ *     on EVERY link — so internal article links were nofollow'd and forced
+ *     into new tabs on the public site.
+ *  2. Author-chosen rel qualifiers live as `data-link-rel` marker spans on
+ *     the link text (see the `linkRel` style in blocknoteSchema.ts) and need
+ *     hoisting onto the `<a>` itself.
+ *
+ * Policy: internal links get only the author's tokens (usually none);
+ * external links get the author's tokens + `noopener noreferrer` +
+ * `target="_blank"`. Marker attributes are stripped afterwards. Safe as
+ * string processing: BlockNote can't nest `<a>` elements.
+ */
+export function decorateArticleLinks(html: string): string {
+  // 1. Unwrap marker spans that wrap a link (`<span data-link-rel><a>…</a>
+  //    </span>` — the usual nesting, as the linkRel mark sorts outside the
+  //    link mark), moving the tokens onto the <a> itself. Spans wrapping
+  //    anything other than exactly one link are left for step 2's inner scan.
+  let out = html.replace(
+    /<span\b[^>]*?data-link-rel="([^"]*)"[^>]*>(<a\b[^>]*>[\s\S]*?<\/a>)<\/span>/g,
+    (_m, tokens: string, anchor: string) =>
+      anchor.replace(/^<a\b/, `<a data-link-rel="${tokens}"`),
+  );
+
+  // 2. Rebuild every <a>'s attributes per the policy, collecting tokens from
+  //    the hoisted attribute and from any marker spans still inside.
+  out = out.replace(
+    /<a\b([^>]*)>([\s\S]*?)<\/a>/g,
+    (match, attrs: string, inner: string) => {
+      const href = /\bhref="([^"]*)"/.exec(attrs)?.[1];
+      if (href === undefined) return match;
+
+      const tokens = new Set<string>();
+      for (const m of `${attrs} ${inner}`.matchAll(/data-link-rel="([^"]*)"/g)) {
+        for (const t of m[1].split(/\s+/)) {
+          if ((LINK_REL_TOKENS as readonly string[]).includes(t)) tokens.add(t);
+        }
+      }
+
+      const external = isExternalHref(href);
+      const rel = [
+        ...LINK_REL_TOKENS.filter((t) => tokens.has(t)),
+        ...(external ? ["noopener", "noreferrer"] : []),
+      ];
+      const parts = [`href="${href}"`];
+      if (rel.length) parts.push(`rel="${rel.join(" ")}"`);
+      if (external) parts.push('target="_blank"');
+      return `<a ${parts.join(" ")}>${inner}</a>`;
+    },
+  );
+
+  // 3. The markers' job is done — collapse linkRel marker spans to bare
+  //    (inert) <span>s. Scoped to data-style-type="linkRel" so the
+  //    data-value attrs of OTHER styles (e.g. text colors) are untouched.
+  return out
+    .replace(/<span\b[^>]*data-style-type="linkRel"[^>]*>/g, "<span>")
+    .replace(/\s*data-link-rel="[^"]*"/g, "");
+}
 
 /**
  * Convert BlockNote JSON blocks to HTML string.
@@ -23,7 +99,9 @@ import { blockNoteSchema } from "./blocknoteSchema";
 export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
   const html = await editor.blocksToHTMLLossy(blocks);
-  return html;
+  // Apply the site link policy (hoist author rel tokens, un-nofollow internal
+  // links, external → noopener/new-tab) before the HTML goes anywhere.
+  return decorateArticleLinks(html);
 }
 
 /**
