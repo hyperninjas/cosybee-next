@@ -283,6 +283,78 @@
 .article-body td > p {
   min-height: 1.5rem;
 }
+/* Alignment + named colors that the lossy export carries as DATA ATTRIBUTES
+   only (no inline styles) — table cells are the main case (paragraphs get an
+   inline `text-align`, cells get `data-text-alignment`; cell colors come as
+   `data-text-color`/`data-background-color`). The editor renders these via
+   BlockNote's own CSS; without this mirror the styling silently vanished
+   from the published article. Palette values match @blocknote/core. */
+.article-body [data-text-alignment="left"] {
+  text-align: left;
+}
+.article-body [data-text-alignment="center"] {
+  text-align: center;
+}
+.article-body [data-text-alignment="right"] {
+  text-align: right;
+}
+.article-body [data-text-alignment="justify"] {
+  text-align: justify;
+}
+.article-body [data-text-color="gray"] {
+  color: #9b9a97;
+}
+.article-body [data-text-color="brown"] {
+  color: #64473a;
+}
+.article-body [data-text-color="red"] {
+  color: #e03e3e;
+}
+.article-body [data-text-color="orange"] {
+  color: #d9730d;
+}
+.article-body [data-text-color="yellow"] {
+  color: #dfab01;
+}
+.article-body [data-text-color="green"] {
+  color: #4d6461;
+}
+.article-body [data-text-color="blue"] {
+  color: #0b6e99;
+}
+.article-body [data-text-color="purple"] {
+  color: #6940a5;
+}
+.article-body [data-text-color="pink"] {
+  color: #ad1a72;
+}
+.article-body [data-background-color="gray"] {
+  background-color: #ebeced;
+}
+.article-body [data-background-color="brown"] {
+  background-color: #e9e5e3;
+}
+.article-body [data-background-color="red"] {
+  background-color: #fbe4e4;
+}
+.article-body [data-background-color="orange"] {
+  background-color: #f6e9d9;
+}
+.article-body [data-background-color="yellow"] {
+  background-color: #fbf3db;
+}
+.article-body [data-background-color="green"] {
+  background-color: #ddedea;
+}
+.article-body [data-background-color="blue"] {
+  background-color: #ddebf1;
+}
+.article-body [data-background-color="purple"] {
+  background-color: #eae4f2;
+}
+.article-body [data-background-color="pink"] {
+  background-color: #f4dfeb;
+}
 /* Author-inserted table of contents (the `tableOfContents` block). The block
    exports an empty `.article-toc` div that buildToc fills with heading
    anchors at render time; an article with no h2/h3 leaves it empty → hide. */
