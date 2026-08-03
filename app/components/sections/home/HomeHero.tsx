@@ -4,20 +4,8 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import VideoCarousel from "@/app/components/ui/VideoCarousel";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import { downloadQrSvg } from "@/app/lib/download-qr";
+import { HERO_VIDEOS } from "@/app/lib/hero-videos";
 import HeroDownloadCta from "../download-app/HeroDownloadCta";
-
-// energiebee_tx_v1_(720p).mp4 also lives in /hero-videos but is landscape
-// (1366x720) — it would be center-cropped to a sliver in this portrait
-// carousel, so it's left out.
-const heroVideos = [
-  "/hero-videos/your_home_is_talking_(720p).mp4",
-  "/hero-videos/keep_it_simple_(720p).mp4",
-  "/hero-videos/energy_insights_(720p).mp4",
-  "/hero-videos/are_you_overpaying_(720p).mp4",
-  "/hero-videos/small_changes_(720p).mp4",
-  "/hero-videos/free_epc_(720p).mp4",
-  "/hero-videos/energy_bee_portrait_reel_(720p).mp4",
-];
 
 /**
  * Home hero — "One app. Total energy clarity." Background photo with the
@@ -68,7 +56,7 @@ export default async function HomeHero() {
         {/* right: portrait product-video carousel — phone-mockup-sized,
             same visibility rule as the old mockup (desktop only) */}
         <div className="hidden w-full max-w-70 shrink-0 min-[968px]:block min-[1300px]:max-w-80">
-          <VideoCarousel videos={heroVideos} className="shadow-2xl" />
+          <VideoCarousel videos={HERO_VIDEOS} className="shadow-2xl" />
         </div>
       </div>
     </Section>
