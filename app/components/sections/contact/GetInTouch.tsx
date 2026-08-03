@@ -18,6 +18,7 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { submitContact } from "@/app/lib/public-forms";
 import { getRecaptchaToken, preloadRecaptcha } from "@/app/lib/recaptcha";
+import landmarkImg from "@/public/Landmark-Day-scaled.webp";
 import { trackEvent } from "@/app/lib/analytics";
 // import { NewsletterSignup } from "./NewsletterSignup";
 
@@ -111,9 +112,10 @@ function ParallaxImage() {
         className="absolute inset-x-0 top-[-15%] h-[130%] will-change-transform"
       >
         <AppImage
-          src="/Landmark-Day-scaled.webp"
+          src={landmarkImg}
           alt="The Landmark, 1 School Lane, Burnley — home of EnergieBee"
           fill
+          placeholder="blur"
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover"
         />
@@ -193,7 +195,7 @@ export default function GetInTouch() {
         </div>
 
         {/* parallax image + form */}
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="mx-auto mt-12 grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
           <ParallaxImage />
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
             <fieldset className="flex flex-col gap-4">
