@@ -2,13 +2,27 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { CtaButton } from "@/app/components/ui/Cta";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
+import VideoCarousel from "@/app/components/ui/VideoCarousel";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
-import heroDeviceImg from "@/public/energibee-hero-device.png";
 import AppStoreButton from "@/app/components/ui/AppStoreButton";
 
+// energiebee_tx_v1_(720p).mp4 also lives in /hero-videos but is landscape
+// (1366x720) — it would be center-cropped to a sliver in this portrait
+// carousel, so it's left out.
+const heroVideos = [
+  "/hero-videos/small_changes_(720p).mp4",
+  "/hero-videos/are_you_overpaying_(720p).mp4",
+  "/hero-videos/energy_bee_portrait_reel_(720p).mp4",
+  "/hero-videos/energy_insights_(720p).mp4",
+  "/hero-videos/free_epc_(720p).mp4",
+  "/hero-videos/keep_it_simple_(720p).mp4",
+  "/hero-videos/your_home_is_talking_(720p).mp4",
+];
+
 /**
- * Home hero — "One app. Total energy clarity." Background photo of
- * a hand holding a phone, with two CTAs (free trial + App Store).
+ * Home hero — "One app. Total energy clarity." Background photo with the
+ * device-aware download CTA on the left (store badge on phones, QR on
+ * desktop — see HeroDownloadCta) and a product-video carousel on the right.
  */
 export default function HomeHero() {
   return (
@@ -30,28 +44,10 @@ export default function HomeHero() {
           placeholder="blur"
           className="object-cover object-center"
         />
-        {/* device mockup — pinned to the right edge of the 1440px content rail, fills section height */}
-        <div className="pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-360 -translate-x-1/2">
-          <Image
-            src={heroDeviceImg}
-            alt="EnergieBee app preview"
-            aria-hidden
-            priority
-            quality={90}
-            placeholder="blur"
-            // Hidden below 968px; above it the mockup renders at most ~800px
-            // wide (h-full of the hero, w-auto). Without `sizes` Next ships the
-            // full 1605px source (~126 KiB wasted). Cap the srcset to the real
-            // display width. Not the LCP element (the bg photo is), so no
-            // fetchPriority — let the LCP image win the bandwidth race.
-            sizes="(min-width: 968px) 800px, 1px"
-            className="absolute -right-10 bottom-0 h-full hidden min-[968px]:block portrait:hidden! w-auto z-9"
-          />
-        </div>
         <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
+      <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
           <Heading as="h1" variant="display">
             One app.
@@ -68,6 +64,12 @@ export default function HomeHero() {
             </CtaButton>
             <AppStoreButton />
           </div>
+        </div>
+
+        {/* right: portrait product-video carousel — phone-mockup-sized,
+            same visibility rule as the old mockup (desktop only) */}
+        <div className="hidden w-full max-w-70 shrink-0 min-[968px]:block min-[1300px]:max-w-80">
+          <VideoCarousel videos={heroVideos} className="shadow-2xl" />
         </div>
       </div>
     </Section>
