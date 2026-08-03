@@ -39,19 +39,20 @@ export default function MobileAppPromoV2() {
         {/* right: copy + badges */}
         <div className="text-center lg:text-left">
           <Heading as="h2" variant="title" className="max-w-xl text-[#26272B]">
-            Manage your energy on the go with our mobile app
+            Manage your energy on the go
           </Heading>
 
           <div className="mt-6 max-w-xl text-sm leading-relaxed text-[#3F4046] sm:text-base">
-            <p>
-              Stay on top of your energy account, payments, usage, EV charging
-              and account health, all from one place.
+            <p className="whitespace-pre-line">
+              {
+                "Track payments, usage, EV charging and account health \n All in one app."
+              }
             </p>
-            <p className="mt-2">Already use MyAccount to manage your energy?</p>
+            {/* <p className="mt-2">Already use MyAccount to manage your energy?</p>
             <p>
               Great! All you have to do is download the app and use the same
               login details.
-            </p>
+            </p> */}
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">

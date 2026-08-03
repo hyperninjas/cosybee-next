@@ -16,19 +16,18 @@ const BENEFITS: ReadonlyArray<{
     icon: hexaDevice,
     title: "Manage energy in one place",
     description:
-      "Track heating, solar, and energy use in real-time. Know exactly what's costing you money",
+      "Track heating, solar and energy use in real-time. Know exactly what's costing you money",
   },
   {
     icon: hexaChart,
-    title: "System Behaviour",
+    title: "Understand your usage",
     description:
-      "Check out how the weather, solar energy, and what you do at home all connect!",
+      "See how weather, solar generation and your habits at home all affect your bills",
   },
   {
     icon: hexaDollar,
     title: "Reduce Your Bills",
-    description:
-      "Get smart insights that show you how to cut energy costs. Start saving from day one",
+    description: "Smart insights that show you where to cut costs",
   },
 ];
 

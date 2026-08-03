@@ -20,26 +20,22 @@ const STEPS: ReadonlyArray<{
 }> = [
   {
     title: "Download the App",
-    description:
-      "Get the EnergieBee app from the App Store or Google Play and start your smart energy journey in minutes.",
+    description: "From the App Store or Google Play.",
     image: downloadImg,
   },
   {
     title: "Create Your Free Account",
-    description:
-      "Sign up with your email in under a minute. No credit card required, no hidden commitments.",
+    description: "Free sign-up, under a minute.",
     image: accountImg,
   },
   {
     title: "Connect Your Home",
-    description:
-      "Follow the guided setup to connect your heating system, solar panels, or energy tariff for personalised insights.",
+    description: "With your EPC data.",
     image: connectImg,
   },
   {
     title: "Manage Everything in One Place",
-    description:
-      "Track heating, solar generation, energy usage, and savings from a single intelligent dashboard.",
+    description: "All your energy data, one dashboard.",
     image: homeImg,
   },
 ];
@@ -77,7 +73,13 @@ export default function GettingStartedV2() {
     const update = () => {
       raf = 0;
       const rect = runway.getBoundingClientRect();
-      const distance = rect.height - window.innerHeight;
+      // Measure the pinned child, not the viewport: its min-height floor can
+      // make it taller than the screen, and the section unpins when the
+      // runway bottom meets the CHILD's bottom — using innerHeight there
+      // would leave progress stuck short of 1 (last step never lights).
+      const pinned = runway.firstElementChild as HTMLElement | null;
+      const distance =
+        rect.height - (pinned?.offsetHeight ?? window.innerHeight);
       if (distance <= 0) return;
       // 0 when the section pins, 1 when the runway ends and it unpins.
       const next = Math.min(1, Math.max(0, -rect.top / distance));
@@ -105,21 +107,28 @@ export default function GettingStartedV2() {
       {/* The runway: its extra height beyond one screen is the scroll
           distance the pinned content plays through — ~55vh per step. */}
       <div ref={runwayRef} className="lg:h-[265vh]">
-        <div className="py-16 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:py-0">
-          <Container>
+        {/* min-h floor: on short viewports (small laptops, landscape tablets)
+            h-screen alone is too little for the header + 480px panel +
+            timeline; below 45rem the box grows past the viewport instead of
+            crushing its content. Centering comes from my-auto on the child,
+            NOT justify-center: auto margins collapse to 0 when the content
+            overflows the box, keeping the heading reachable at the top —
+            justify-center would overflow both ways and clip it. */}
+        <div className="py-16 lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-180 lg:flex-col lg:py-8">
+          <Container className="lg:my-auto">
             <SectionHeader
               title="Up and running in four steps"
               description="From install to insight in one evening — the app guides you through each step."
             />
 
-            <div className="mx-auto mt-12 grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div className="mx-auto mt-12 grid max-w-6xl grid-cols-1 items-center gap-10 lg:mt-10 lg:grid-cols-2 lg:gap-16">
               {/* left: shared cream panel — DESKTOP ONLY. Screenshots
                   crossfade as scroll changes the active step. Below lg there's
                   no scroll tracking, so this shared panel would freeze on step
                   1; the per-step images in the timeline take over instead. */}
               <div
                 aria-hidden
-                className="relative hidden h-135 overflow-hidden rounded-3xl bg-[#C7B7341A] lg:block"
+                className="relative hidden h-120 overflow-hidden rounded-3xl bg-[#C7B7341A] lg:block"
               >
                 {STEPS.map(({ image }, i) => (
                   <Image

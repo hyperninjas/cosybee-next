@@ -42,8 +42,9 @@ export default function AppFeatureCards() {
     <Section spacing="none" className="pb-25">
       <Container>
         <SectionHeader
-          title="One app does the job"
-          description="With EnergieBee, one app looks after your heating, solar, and energy — and makes life more comfortable for you and your loved ones."
+          className="max-w-xl"
+          title="One app takes care of it all"
+          description="With EnergieBee, one app looks after your heating, solar and energy, making life easier and more comfortable for you and your loved ones."
         />
 
         <div className="mt-10 grid grid-cols-1 gap-6 min-[900px]:grid-cols-3">
