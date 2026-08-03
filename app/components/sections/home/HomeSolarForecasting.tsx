@@ -1,13 +1,12 @@
 import Image from "next/image";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { Section } from "@/app/components/ui/Section";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
+import VideoCarousel from "@/app/components/ui/VideoCarousel";
 import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png";
-import sideImage from "@/public/energy-analytics-side.png";
 
 /**
  * Home "Solar Forecasting" — phone on the left, title + 3 feature cards
- * in the middle, hive cluster on the right.
+ * in the middle, portrait product video on the right.
  */
 export default function HomeSolarForecasting() {
   return (
@@ -61,16 +60,16 @@ export default function HomeSolarForecasting() {
           </div>
         </div>
 
-        {/* right: hive cluster — wrapper holds the absolute positioning
-            and an explicit width so the inner `w-full` has something
-            non-zero to resolve against */}
-        <div className="absolute -right-40 -top-10 hidden w-125.5 min-[1200px]:block">
-          <SharedImageHexCluster
-            src={sideImage.src}
-            cornerInset={4}
-            gap={5}
-            fallbackColor="#3a4a5c"
-            className="w-full transform-[scaleX(-1)]"
+        {/* right: portrait product video — mirrors the left phone's width
+            and top offset so the two sides read as a pair (9:16 at this
+            width is ~543px tall vs the phone's ~578px). right-0 keeps it
+            fully inside the rail — unlike the old hex cluster, nothing
+            bleeds past the section edge. A one-video carousel renders as
+            a plain looping video with hover play/mute controls. */}
+        <div className="absolute -top-15 right-0 hidden w-[305.3px] min-[1200px]:block">
+          <VideoCarousel
+            videos={["/hero-videos/small_changes_(720p).mp4"]}
+            className="shadow-2xl"
           />
         </div>
       </div>
