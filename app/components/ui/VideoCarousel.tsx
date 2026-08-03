@@ -64,7 +64,7 @@ export default function VideoCarousel({
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl ${className}`}>
+    <div className={`group relative overflow-hidden rounded-2xl ${className}`}>
       <div
         className="flex transition-transform duration-500 ease-out motion-reduce:transition-none"
         style={{ transform: `translateX(-${index * 100}%)` }}
@@ -78,9 +78,10 @@ export default function VideoCarousel({
             src={src}
             autoPlay={i === 0}
             muted
-            loop
+            loop={videos.length === 1}
             playsInline
             preload={i === 0 ? "auto" : "metadata"}
+            onEnded={() => goTo(i + 1)}
             onPlay={() => {
               if (i === index) setIsPlaying(true);
             }}
@@ -92,7 +93,7 @@ export default function VideoCarousel({
         ))}
       </div>
 
-      <div className="absolute bottom-3 right-3 flex gap-2">
+      <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
         <Button
           isIconOnly
           size="sm"
@@ -123,7 +124,7 @@ export default function VideoCarousel({
             variant="ghost"
             aria-label="Previous video"
             onPress={() => goTo(index - 1)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/60"
+            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-black/60"
           >
             <ChevronLeft />
           </Button>
@@ -133,11 +134,11 @@ export default function VideoCarousel({
             variant="ghost"
             aria-label="Next video"
             onPress={() => goTo(index + 1)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/60"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-black/60"
           >
             <ChevronRight />
           </Button>
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
             {videos.map((src, i) => (
               <button
                 key={src}
