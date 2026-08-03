@@ -4,8 +4,8 @@ import { Section } from "@/app/components/ui/Section";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 // import { CtaButton } from "@/app/components/ui/Cta";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-import beeFlowerImg from "@/public/bee-flower.png";
-import windTurbineImg from "@/public/wind-turbine.png";
+import cottageImg from "@/public/ss-image/ss-small-9.png";
+import beeHydrangeaImg from "@/public/ss-image/ss-small-8.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy.png";
 import Hexagon from "@/app/components/ui/Hexagon";
 
@@ -61,10 +61,10 @@ export default function PerfectHarmony() {
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
           gap={5}
           cornerInset={4}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
+          left={{ src: cottageImg, color: "#B7C0A8" }}
           // Above-the-fold (section right below the hero) → eager-load so it
           // isn't flagged as an un-prioritised LCP image.
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017", priority: true }}
+          topRight={{ src: beeHydrangeaImg, color: "#D8A9B6", priority: true }}
           bottomRight={{
             color: "#E9E19E",
             children: (

@@ -1,9 +1,9 @@
 import Hexagon from "@/app/components/ui/Hexagon";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
-import windTurbineImg from "@/public/wind-turbine.png";
+import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
+import smartSwitchImg from "@/public/ss-image/ss-small-1.png";
 import Image, { StaticImageData } from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -53,14 +53,14 @@ export default function EnergyMonitoring({
           gap={5}
           cornerInset={4}
           left={{
-            src: windTurbineImg,
-            alt: "Wind turbines",
-            color: "#7FA9C9",
+            src: energyDisplayImg,
+            alt: "EnergieBee desktop display showing live energy stats",
+            color: "#AEB2B4",
           }}
           topRight={{
-            src: beeFlowerImg,
-            alt: "Bee on a flower",
-            color: "#D4A017",
+            src: smartSwitchImg,
+            alt: "Smart switch on a wall",
+            color: "#E9EAEC",
           }}
           bottomRight={{
             color: "#E9E19E",

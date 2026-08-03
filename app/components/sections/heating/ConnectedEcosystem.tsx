@@ -6,9 +6,9 @@ import {
 } from "@/app/components/ui/SectionContent";
 import { CtaButton } from "@/app/components/ui/Cta";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/heating/energiebee-app-smart-thermostat.png";
-import windTurbineImg from "@/public/wind-turbine.png";
+import ecosystemBeeImg from "@/public/ss-image/ss-small-5.png";
+import radiatorValveImg from "@/public/ss-image/ss-small-13.png";
 import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -84,8 +84,8 @@ export default function ConnectedEcosystem() {
         <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
           cornerInset={4}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          left={{ src: ecosystemBeeImg, color: "#C9C3B8" }}
+          topRight={{ src: radiatorValveImg, color: "#E8E6E0" }}
           bottomRight={{
             color: "#E9E19E",
             children: (

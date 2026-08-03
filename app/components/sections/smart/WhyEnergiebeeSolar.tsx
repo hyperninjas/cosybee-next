@@ -5,9 +5,9 @@ import {
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/smart/energiebee-app-optimisation.png";
-import windTurbineImg from "@/public/wind-turbine.png";
+import gardenBlindsImg from "@/public/ss-image/ss-small-4.png";
+import beeCloseupImg from "@/public/ss-image/ss-small-12.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -55,8 +55,8 @@ export default function WhyEnergieBeeSolar() {
         <HiveHexCluster
           cornerInset={4}
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          left={{ src: gardenBlindsImg, color: "#D3D9CB" }}
+          topRight={{ src: beeCloseupImg, color: "#D8A9B6" }}
           bottomRight={{
             color: "#E9E19E",
             children: (

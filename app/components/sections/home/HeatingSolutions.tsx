@@ -7,9 +7,9 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";
-import beeFlowerImg from "@/public/bee-flower.png";
+import radiatorValveImg from "@/public/ss-image/ss-small-2.png";
+import windowCoffeeImg from "@/public/ss-image/ss-small-3.png";
 
 /**
  * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
@@ -32,8 +32,8 @@ export default function HeatingSolutions() {
           className="order-2 min-[1200px]:order-1 mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
           cornerInset={4}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017" }}
+          left={{ src: radiatorValveImg, color: "#E8E6E0" }}
+          topRight={{ src: windowCoffeeImg, color: "#9AA08C" }}
           bottomRight={{
             color: "#E9E19E",
             children: (

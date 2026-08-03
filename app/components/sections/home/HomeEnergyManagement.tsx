@@ -4,9 +4,9 @@ import { Section } from "@/app/components/ui/Section";
 import Hexagon from "@/app/components/ui/Hexagon";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import windTurbineImg from "@/public/wind-turbine.png";
 import deviceImg from "@/public/homepage-images/energiebee-device-energy-management.png";
-import beeFlowerImg from "@/public/bee-flower.png";
+import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
+import gatewayImg from "@/public/ss-image/ss-small-6.png";
 
 /**
  * Home "Energy Management" — dark variant with title + 3 feature cards
@@ -59,8 +59,8 @@ export default function HomeEnergyManagement() {
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
           cornerInset={4}
-          left={{ src: windTurbineImg.src, color: "#7FA9C9", alt: "" }}
-          topRight={{ src: beeFlowerImg.src, color: "#D4A017", alt: "" }}
+          left={{ src: energyDisplayImg, color: "#AEB2B4", alt: "" }}
+          topRight={{ src: gatewayImg, color: "#4E6472", alt: "" }}
           bottomRight={{
             color: "#E9E19E",
             children: (

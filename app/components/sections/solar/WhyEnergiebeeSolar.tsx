@@ -5,9 +5,9 @@ import {
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
 import HiveHexCluster, { HexCell } from "@/app/components/ui/HiveHexCluster";
-import beeFlowerImg from "@/public/bee-flower.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-cycle.png";
-import windTurbineImg from "@/public/wind-turbine.png";
+import windowLightImg from "@/public/ss-image/ss-small-7.png";
+import beeCloseupImg from "@/public/ss-image/ss-small-12.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import type { FeatureCardContent } from "./WhyEnergieBee";
 import { Container } from "@/app/components/ui/Container";
@@ -45,13 +45,13 @@ const DEFAULT_CARDS: FeatureCardContent[] = [
 ];
 
 const DEFAULT_LEFT: HexCell = {
-  src: windTurbineImg.src,
-  color: "#7FA9C9",
+  src: windowLightImg,
+  color: "#C2C8BE",
 };
 
 const DEFAULT_TOP_RIGHT: HexCell = {
-  src: beeFlowerImg.src,
-  color: "#D4A017",
+  src: beeCloseupImg,
+  color: "#D8A9B6",
 };
 
 const DEFAULT_BOTTOM_RIGHT: HexCell = {
