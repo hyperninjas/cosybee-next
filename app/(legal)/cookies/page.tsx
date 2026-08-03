@@ -81,7 +81,7 @@ export default function CookiesPage() {
             This Cookie Policy is published by EnergieBee Limited, a company
             registered in England and Wales, with its registered office at:
           </p>
-          <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
+          <p>The Landmark, 1 School Lane, Burnley, England, BB11 1UF</p>
           <p>
             For cookie-related enquiries:{" "}
             <ContactLink
