@@ -52,8 +52,8 @@ export default function TermsPage() {
             the products, services, mobile application, and website operated by
             EnergieBee Limited (&ldquo;EnergieBee&rdquo;, &ldquo;we&rdquo;,
             &ldquo;us&rdquo;, or &ldquo;our&rdquo;), a company registered in
-            England and Wales with its registered office at UK Electronics,
-            Fitton St, Royton, Oldham, England, OL2 5JX.
+            England and Wales with its registered office at The Landmark, 1
+            School Lane, Burnley, England, BB11 1UF.
           </p>
           <p>
             By purchasing an EnergieBee device, creating an account, or using

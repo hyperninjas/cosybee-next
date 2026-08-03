@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             EnergieBee Limited is the data controller responsible for your
             personal data. Our registered office is:
           </p>
-          <p>UK Electronics, Fitton St, Royton, Oldham, England, OL2 5JX</p>
+          <p>The Landmark, 1 School Lane, Burnley, England, BB11 1UF</p>
           <p>
             For privacy-related enquiries:{" "}
             <a href="mailto:privacy@energiebee.com">privacy@energiebee.com</a>

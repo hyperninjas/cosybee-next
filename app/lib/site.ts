@@ -47,10 +47,10 @@ export const SITE_KEYWORDS = [
 
 export const ORG_LEGAL_NAME = "EnergieBee Limited";
 export const ORG_ADDRESS = {
-  street: "UK Electronics, Fitton St, Royton",
-  city: "Oldham",
+  street: "The Landmark, 1 School Lane",
+  city: "Burnley",
   region: "England",
-  postalCode: "OL2 5JX",
+  postalCode: "BB11 1UF",
   country: "GB",
 };
 
