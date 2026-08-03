@@ -10,13 +10,13 @@ import HeroDownloadCta from "../download-app/HeroDownloadCta";
 // (1366x720) — it would be center-cropped to a sliver in this portrait
 // carousel, so it's left out.
 const heroVideos = [
-  "/hero-videos/small_changes_(720p).mp4",
-  "/hero-videos/are_you_overpaying_(720p).mp4",
-  "/hero-videos/energy_bee_portrait_reel_(720p).mp4",
-  "/hero-videos/energy_insights_(720p).mp4",
-  "/hero-videos/free_epc_(720p).mp4",
-  "/hero-videos/keep_it_simple_(720p).mp4",
   "/hero-videos/your_home_is_talking_(720p).mp4",
+  "/hero-videos/keep_it_simple_(720p).mp4",
+  "/hero-videos/energy_insights_(720p).mp4",
+  "/hero-videos/are_you_overpaying_(720p).mp4",
+  "/hero-videos/small_changes_(720p).mp4",
+  "/hero-videos/free_epc_(720p).mp4",
+  "/hero-videos/energy_bee_portrait_reel_(720p).mp4",
 ];
 
 /**
