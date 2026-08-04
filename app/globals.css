@@ -171,6 +171,23 @@
   max-width: 100%;
   height: auto;
 }
+/* Video/audio blocks. The lossy export emits a bare <video>/<audio> (the
+   player chrome in the editor is BlockNote's React view, which the public page
+   doesn't load) — blocknote.ts adds `controls`, and these rules give them the
+   same responsive sizing as images so they don't fall back to the browser's
+   default 300x150 box. */
+.article-body video {
+  border-radius: 0.5rem;
+  margin-top: 0;
+  /* Mirrors the img rule: the export sets the author's resized preview width. */
+  max-width: 100%;
+  height: auto;
+}
+.article-body audio {
+  margin-top: 0;
+  width: 100%;
+  max-width: 100%;
+}
 /* offset anchor jumps so headings clear the sticky navbar */
 .article-body h1,
 .article-body h2,
@@ -226,20 +243,24 @@
 .article-body figure[data-text-alignment="center"] {
   text-align: center;
 }
-.article-body figure[data-text-alignment="center"] img {
+.article-body figure[data-text-alignment="center"] img,
+.article-body figure[data-text-alignment="center"] video {
   margin-inline: auto;
 }
 .article-body figure[data-text-alignment="right"] {
   text-align: right;
 }
-.article-body figure[data-text-alignment="right"] img {
+.article-body figure[data-text-alignment="right"] img,
+.article-body figure[data-text-alignment="right"] video {
   margin-inline-start: auto;
   margin-inline-end: 0;
 }
-.article-body img[data-text-alignment="center"] {
+.article-body img[data-text-alignment="center"],
+.article-body video[data-text-alignment="center"] {
   margin-inline: auto;
 }
-.article-body img[data-text-alignment="right"] {
+.article-body img[data-text-alignment="right"],
+.article-body video[data-text-alignment="right"] {
   margin-inline-start: auto;
   margin-inline-end: 0;
 }

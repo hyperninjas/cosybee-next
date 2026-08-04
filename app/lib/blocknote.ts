@@ -86,6 +86,35 @@ export function decorateArticleLinks(html: string): string {
 }
 
 /**
+ * Make exported `<video>`/`<audio>` elements actually playable.
+ *
+ * BlockNote's lossy export emits a bare `<video src="…">` (plus the author's
+ * resize `width`) with NO `controls` — in the editor the player chrome comes
+ * from BlockNote's own React view, which the public page never loads. Without
+ * this the published/preview article shows a dead 300×150 black box that can't
+ * be played. `preload="metadata"` fetches just enough for the first frame +
+ * duration (not the whole file), and `playsinline` stops iOS Safari from
+ * hijacking playback into fullscreen.
+ *
+ * Attributes are only added when absent, so markup an author wrote by hand in
+ * a custom HTML block keeps its own settings.
+ */
+export function decorateMediaPlayers(html: string): string {
+  return html.replace(
+    /<(video|audio)\b([^>]*)>/g,
+    (match, tag: string, attrs: string) => {
+      const add: string[] = [];
+      if (!/\bcontrols\b/.test(attrs)) add.push("controls");
+      if (!/\bpreload=/.test(attrs)) add.push('preload="metadata"');
+      if (tag === "video" && !/\bplaysinline\b/.test(attrs)) {
+        add.push("playsinline");
+      }
+      return add.length ? `<${tag}${attrs} ${add.join(" ")}>` : match;
+    },
+  );
+}
+
+/**
  * Convert BlockNote JSON blocks to HTML string.
  * Uses server-side rendering for generating the HTML.
  *
@@ -106,11 +135,15 @@ export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
   const html = await editor.blocksToHTMLLossy(blocks);
   // Apply the site link policy (hoist author rel tokens, un-nofollow internal
-  // links, external → noopener/new-tab) before the HTML goes anywhere.
+  // links, external → noopener/new-tab) and give media blocks their player
+  // controls before the HTML goes anywhere.
   // Also drop the `data-html` attribute BlockNote's block wrapper stamps on
   // exported htmlBlocks — it duplicates the RAW (unsanitized) source next to
   // the sanitized markup; the raw source belongs only in contentJson.
-  return decorateArticleLinks(html).replace(/\s*data-html="[^"]*"/g, "");
+  return decorateMediaPlayers(decorateArticleLinks(html)).replace(
+    /\s*data-html="[^"]*"/g,
+    "",
+  );
 }
 
 /**
