@@ -4,8 +4,9 @@ import { Heading, Text } from "@/app/components/ui/Typography";
 import VideoCarousel from "@/app/components/ui/VideoCarousel";
 import heroBgImg from "@/public/energibee-hero-image.jpg";
 import { downloadQrSvg } from "@/app/lib/download-qr";
-import { HERO_VIDEOS } from "@/app/lib/hero-videos";
+import { HERO_VIDEO_LANDSCAPE, HERO_VIDEOS } from "@/app/lib/hero-videos";
 import HeroDownloadCta from "../download-app/HeroDownloadCta";
+import HeroBackgroundVideo from "../download-app/HeroBackgroundVideo";
 
 /**
  * Home hero — "One app. Total energy clarity." Background photo with the
@@ -27,15 +28,30 @@ export default async function HomeHero() {
           src={heroBgImg}
           alt="Hero image - dashboard of EnergieBee app"
           fill
-          priority
+          // `priority` is deprecated in Next 16 — `preload` is its successor.
+          preload
           fetchPriority="high"
           sizes="100vw"
           quality={85}
           placeholder="blur"
           className="object-cover object-center"
         />
-        <div className="absolute z-8 inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]" />
       </div>
+
+      {/* Background video layered over the photo: the photo paints
+          immediately; the video covers it once frames arrive (faststart-
+          encoded, so playback begins while still downloading). Mounted only
+          at md+ — phones keep the photo and never fetch the file. Sits
+          outside the aria-hidden wrapper because it also renders clickable
+          play/mute controls at the hero's top-right corner. */}
+      <HeroBackgroundVideo src={HERO_VIDEO_LANDSCAPE} />
+
+      {/* gradient overlay — after the video in the same -z-10 layer so it
+          darkens video and photo alike, keeping the copy legible */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]"
+      />
 
       <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="max-w-175">
@@ -55,9 +71,9 @@ export default async function HomeHero() {
 
         {/* right: portrait product-video carousel — phone-mockup-sized,
             same visibility rule as the old mockup (desktop only) */}
-        <div className="hidden w-full max-w-70 shrink-0 min-[968px]:block min-[1300px]:max-w-80">
+        {/* <div className="hidden w-full max-w-70 shrink-0 min-[968px]:block min-[1300px]:max-w-80">
           <VideoCarousel videos={HERO_VIDEOS} className="shadow-2xl" />
-        </div>
+        </div> */}
       </div>
     </Section>
   );
