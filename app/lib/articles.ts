@@ -196,13 +196,27 @@ export async function getTags(blog: Blog): Promise<Tag[]> {
   return response.data;
 }
 
-/** A single published article with rendered body HTML. */
+/**
+ * A single *published* article with rendered body HTML, or null.
+ *
+ * The status check is deliberately redundant — the API applies the same filter —
+ * because this is the one function behind every by-slug read on the site (both
+ * article pages and the OG card), and the cost of the API regressing is a full
+ * 200 with content and JSON-LD on a URL the author took down. Google indexes
+ * that. One `if` here means unpublishing can only ever produce a 404.
+ *
+ * Status only, deliberately: scheduling is left to the API, which is the single
+ * clock that matters. Re-checking `publishedAt <= now` against *this* server's
+ * clock would mean any skew ahead of the backend's turns a just-published
+ * article into a 404 that then caches for the fetch TTL — trading the bug this
+ * guards against for a worse one.
+ */
 export async function getArticleBySlug(
   blog: Blog,
   slug: string,
 ): Promise<Article | null> {
   const post = await api.getPost(blog, slug);
-  if (!post) return null;
+  if (!post || post.status !== "PUBLISHED") return null;
   return toArticle(post);
 }
 
