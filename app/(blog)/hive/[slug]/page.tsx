@@ -28,7 +28,15 @@ export async function generateMetadata({
       canonical: article.canonicalUrl ?? `/hive/${article.slug}`,
       types: RSS_ALTERNATE_TYPES,
     },
-    robots: article.noindex ? { index: false, follow: true } : undefined,
+    // Spread-or-omit, never `: undefined`. Next merges metadata shallowly and
+    // treats a key that is *present* with an undefined value as "clear it", not
+    // "inherit it" — so `robots: undefined` wiped the root layout's directives
+    // and articles shipped with no robots/googlebot meta at all. They stayed
+    // indexable (an absent tag means index, follow) but silently lost
+    // `max-image-preview:large` and `max-snippet:-1`, the two that earn large
+    // thumbnails in Discover and full-length snippets. Omitting the key lets
+    // the root layout's block through. Same rule as pageMetadata (lib/seo.ts).
+    ...(article.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       url: `/hive/${article.slug}`,
       title: `${seoTitle} — EnergieBee`,
