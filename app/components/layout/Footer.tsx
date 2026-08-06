@@ -112,6 +112,21 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Phrase of the week — ALTERNATIVE placement: its own quiet band,
+          sharing the legal strip's hairline and container so it reads as part
+          of the footer's existing rhythm rather than as a banner. The wide,
+          constrained measure suits the longer quotes (Kelvin's runs to 250
+          characters, which is ~10 lines in the narrow brand column).
+
+          NOTE: this renders a SECOND copy alongside the one in the brand
+          column above — both will show the same phrase. Keep whichever
+          placement wins and delete the other. */}
+      <div className="border-t border-[#FFFFFF1A]">
+        <div className="mx-auto max-w-360 px-6 py-8 sm:px-10 lg:px-30">
+          <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
+        </div>
+      </div>
+
       {/* bottom strip */}
       <div className="border-t border-[#FFFFFF1A] ">
         <div className="mx-auto flex max-w-360 flex-col-reverse sm:flex-col sm:justify-center sm:items-center gap-6 px-6 py-6 lg:flex-row lg:items-center lg:justify-between md:px-10 lg:px-30">
