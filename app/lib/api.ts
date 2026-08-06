@@ -147,6 +147,26 @@ async function fetchJsonOrThrow<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/**
+ * Detail read for a whole-catalogue crawl.
+ *
+ * Sits between the tolerant `fetchJsonOrNull` and the strict `fetchJsonOrThrow`
+ * because a by-slug read during a crawl has two distinguishable failures. A 404
+ * means the post was unpublished in the window between listing the catalogue
+ * and reading this entry — genuinely gone, so skipping it is correct and the
+ * rest of the crawl is still true. Anything else (5xx, network) is the backend
+ * faltering, where a short answer would be published as if it were the truth;
+ * that throws, and the caller keeps serving its last good output.
+ */
+async function fetchDetailForCrawl<T>(path: string): Promise<T | null> {
+  const res = await fetch(`${API_BASE}${path}`, { next: contentCache() });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`API ${path} failed: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
 const EMPTY_PAGINATED: PaginatedResponse<ApiPost> = {
   data: [],
   pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
@@ -215,6 +235,17 @@ export const api = {
   /** Single article by slug (includes contentHtml). */
   async getPost(blog: Blog, slug: string): Promise<ApiPost | null> {
     return fetchJsonOrNull(`/api/posts/${blog}/${slug}`);
+  },
+
+  /**
+   * Same request as `getPost` — so it shares one Data Cache entry with the
+   * article page's own read, no extra traffic — but a server error throws
+   * instead of reading as "no such post". Used by the video sitemap, which
+   * needs `contentJson` and only the detail endpoint carries it (list
+   * responses strip contentJson, contentHtml and jsonLd).
+   */
+  async getPostForCrawl(blog: Blog, slug: string): Promise<ApiPost | null> {
+    return fetchDetailForCrawl(`/api/posts/${blog}/${slug}`);
   },
 
   /** Related articles for in-article footer. */

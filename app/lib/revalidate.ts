@@ -33,6 +33,7 @@ export function revalidateContent(): void {
 
   // Derived files that enumerate the whole catalogue.
   revalidatePath("/sitemap.xml");
+  revalidatePath("/video-sitemap.xml");
   revalidatePath("/llms.txt");
 
   // Archives whose content can change without their own slug being touched.

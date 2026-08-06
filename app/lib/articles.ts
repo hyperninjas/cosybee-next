@@ -423,6 +423,61 @@ export async function getSitemapArticles(
 }
 
 /**
+ * How many article detail reads to have in flight at once.
+ *
+ * The video sitemap needs every published article's `contentJson`, which only
+ * the detail endpoint returns — so it is inherently one request per article.
+ * Unbounded `Promise.all` over a few hundred slugs would open a few hundred
+ * sockets at once and is the kind of thing that takes the backend down at the
+ * exact moment a crawler asks for the file.
+ */
+const DETAIL_CONCURRENCY = 8;
+
+/** Map over `items` with a bounded number of concurrent workers. */
+async function mapLimited<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await fn(items[index]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * Every published, indexable article for a blog WITH its body JSON.
+ *
+ * Exists because the list endpoint strips `contentJson` — so anything that has
+ * to look inside article bodies across the whole catalogue (the video sitemap)
+ * needs a detail read per article. Those reads use the same URL and cache
+ * options as the article pages' own reads, so they share Data Cache entries
+ * rather than doubling traffic, and `revalidateContent()` clears both together.
+ *
+ * Filtered by the same predicate as `getSitemapArticles`: an article the page
+ * marks `noindex`, or which points its canonical elsewhere, must not be
+ * advertised here either. Throws rather than truncating — see
+ * `getAllPublishedPosts`.
+ */
+export async function getIndexableArticlesWithContent(
+  blog: Blog,
+): Promise<Article[]> {
+  const posts = await getAllPublishedPosts(blog);
+  const indexable = posts.filter((p) => !p.noindex && !hasForeignCanonical(p));
+  const details = await mapLimited(indexable, DETAIL_CONCURRENCY, (p) =>
+    api.getPostForCrawl(blog, p.slug),
+  );
+  // A null is a post unpublished mid-crawl (see `getPostForCrawl`) — drop it.
+  return details.filter((p): p is ApiPost => p !== null).map(toArticle);
+}
+
+/**
  * Minimum published articles a tag needs before its landing page earns a spot
  * in the sitemap and an `index` directive.
  *

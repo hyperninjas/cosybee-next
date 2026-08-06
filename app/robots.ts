@@ -59,7 +59,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow,
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    // Both files are advertised: the video sitemap is a separate document
+    // because Google reads the `video:` namespace only from a sitemap that
+    // declares it, and Next's sitemap route has no vocabulary for it.
+    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/video-sitemap.xml`],
     // The Host directive expects a bare domain, not a full URL.
     host: SITE_URL.replace(/^https?:\/\//, ""),
   };

@@ -16,6 +16,7 @@ import {
   url,
 } from "./site";
 import type { Article } from "./article-types";
+import type { ResolvedArticleVideo } from "./article-videos";
 
 /** Resolve a possibly-relative asset path to an absolute URL. */
 function absolute(pathOrUrl: string): string {
@@ -65,6 +66,47 @@ export function blogPostingSchema(article: Article, path: string) {
       : {}),
     articleSection: article.category?.name || undefined,
     url: absolute(path),
+  };
+}
+
+/**
+ * VideoObject for one video embedded in an article.
+ *
+ * Emitted per video, alongside the article's BlogPosting — Google reads the
+ * page's video markup independently of the article markup, and a page with
+ * three clips is three VideoObjects, not one with three sources.
+ *
+ * Every required property (name, description, thumbnailUrl, uploadDate) is
+ * guaranteed non-empty by `resolveArticleVideos`, which drops anything it
+ * can't describe in full rather than emitting a partial node. `contentUrl` /
+ * `embedUrl` are spread-or-omitted: a self-hosted file has the former, a
+ * provider embed the latter, and asserting an empty one is worse than silence.
+ *
+ * @param path Canonical path of the page the video appears on.
+ */
+export function videoObjectSchema(video: ResolvedArticleVideo, path: string) {
+  const pageUrl = absolute(path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    // Stable per-video identity on the page, so repeat crawls reconcile the
+    // same node instead of treating each render as a new video.
+    "@id": `${pageUrl}#video-${video.index}`,
+    name: video.title,
+    description: video.description,
+    thumbnailUrl: [video.thumbnailUrl],
+    uploadDate: video.uploadDate,
+    ...(video.contentUrl ? { contentUrl: video.contentUrl } : {}),
+    ...(video.embedUrl ? { embedUrl: video.embedUrl } : {}),
+    // The page the video is watched on — this is what Google links a video
+    // result to. Not `mainEntityOfPage`: the article already claims that, and
+    // two entities claiming to be the page's main entity is a contradiction.
+    url: pageUrl,
+    publisher: {
+      "@type": "Organization",
+      name: ORG_LEGAL_NAME,
+      logo: { "@type": "ImageObject", url: url("/icon") },
+    },
   };
 }
 

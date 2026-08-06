@@ -21,7 +21,12 @@ import JsonLd from "@/app/components/JsonLd";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
-import { blogPostingSchema, breadcrumbSchema } from "@/app/lib/structured-data";
+import {
+  blogPostingSchema,
+  breadcrumbSchema,
+  videoObjectSchema,
+} from "@/app/lib/structured-data";
+import { resolveArticleVideos } from "@/app/lib/article-videos";
 
 type Props = {
   /** Published article with rendered body HTML (caller handles notFound). */
@@ -64,6 +69,12 @@ export default async function ArticleDetail({
   // Anchors and the in-article /toc block still cover h3 subsections.
   const sidebarToc = toc.filter((item) => item.level === 2);
   const path = `${basePath}/${article.slug}`;
+  // Videos embedded in the body, described for Google Video. Read from
+  // `contentJson` (the authored document), so adding or removing a video in
+  // the editor is the only step — the markup below follows on the next render.
+  // Empty for the vast majority of articles, which then emit no video markup
+  // at all rather than an empty node.
+  const videos = resolveArticleVideos(article);
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
   const crumbs = [
     { name: "Home", path: "/" },
@@ -84,6 +95,9 @@ export default async function ArticleDetail({
         data={[
           article.jsonLd ?? blogPostingSchema(article, path),
           breadcrumbSchema(crumbs),
+          // One VideoObject per embedded video — omitted entirely when the
+          // article has none.
+          ...videos.map((video) => videoObjectSchema(video, path)),
         ]}
       />
       <ReadingProgress targetSelector="#article-body" />
