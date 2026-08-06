@@ -65,7 +65,7 @@ export default function Footer() {
             <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
           </div>
         </div>
-        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.3fr_1fr_1fr] lg:gap-8">
+        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1fr_1fr_1fr] text-balance lg:gap-8">
           {/* why EnergieBee */}
           <div>
             <h3 className="text-lg font-bold tracking-[0.08em]">
