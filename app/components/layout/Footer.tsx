@@ -1,8 +1,10 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
+import PhraseOfTheWeek from "./PhraseOfTheWeek";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 import { SOCIAL } from "@/app/lib/site";
+import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
 
 const WHY_LINKS = [
   { label: "A Warm Hive, a Cosy Home", href: "/hive/a-warm-hive-a-cosy-home" },
@@ -55,6 +57,13 @@ export default function Footer() {
             Smart home energy control that pays for itself. Save up to £300/year
             vs tado.
           </p> */}
+          {/* Phrase of the week — sits under the brand mark, in the column the
+              tagline used to occupy: an editorial line belongs with the brand
+              rather than among the link lists. Rotates weekly by ISO week
+              number (see lib/phrase-of-the-week.ts). */}
+          <div className="mt-8 max-w-90">
+            <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
+          </div>
         </div>
         <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.3fr_1fr_1fr] lg:gap-8">
           {/* why EnergieBee */}
