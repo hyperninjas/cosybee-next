@@ -7,6 +7,10 @@ import {
 } from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 import { RSS_ALTERNATE_TYPES } from "@/app/lib/site";
+import {
+  openGraphVideos,
+  resolveArticleVideos,
+} from "@/app/lib/article-videos";
 
 /** Prerender every routable article at build time. */
 export async function generateStaticParams() {
@@ -21,6 +25,10 @@ export async function generateMetadata({
   const article = await getArticleBySlug("learn", slug);
   if (!article) return {};
   const seoTitle = article.seoTitle ?? article.title;
+  // og:video for any video in the body. Empty (and so omitted) for text-only
+  // articles — the overwhelming majority — which keeps their share cards as
+  // the large-image cards they are today.
+  const videos = openGraphVideos(resolveArticleVideos(article));
   return {
     title: seoTitle,
     description: article.seoDescription ?? article.description,
@@ -61,6 +69,9 @@ export async function generateMetadata({
       authors: [article.author?.name ?? "energiebee"],
       section: article.category?.name ?? undefined,
       tags: article.tags.map((t) => t.name),
+      // Spread-or-omit for the same reason as `robots` above: a present key
+      // holding an empty array still renders as "this page declares no video".
+      ...(videos.length ? { videos } : {}),
     },
   };
 }
