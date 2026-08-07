@@ -17,12 +17,15 @@ import {
   DeleteLinkButton,
   useComponentsContext,
   useBlockNoteEditor,
+  useEditorState,
   type DefaultReactSuggestionItem,
   type LinkToolbarProps,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import {
+  blockHasType,
   combineByGroup,
+  editorHasBlockWithType,
   filterSuggestionItems,
   type PartialBlock,
 } from "@blocknote/core";
@@ -130,7 +133,124 @@ function FormattingToolbarWithJustify() {
   const linkIdx = items.findIndex((item) => item.key === "createLinkButton");
   if (linkIdx >= 0) items.splice(linkIdx + 1, 0, sectionLink);
   else items.push(sectionLink);
+  // Alt text sits immediately after Caption: the two are the pair an author
+  // fills in for every image, and putting them together makes the distinction
+  // (visible caption vs screen-reader description) obvious at the point of use.
+  const altText = <AltTextButton key="imageAltTextButton" />;
+  const captionIdx = items.findIndex(
+    (item) => item.key === "fileCaptionButton",
+  );
+  if (captionIdx >= 0) items.splice(captionIdx + 1, 0, altText);
+  else items.unshift(altText);
   return <FormattingToolbar>{items}</FormattingToolbar>;
+}
+
+/** Icon for the "Alt text" button — the accessibility/description mark. */
+function AltTextIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M7 15.5 9.5 9l2.5 6.5" />
+      <path d="M8 13.5h3" />
+      <path d="M17 9v6.5" />
+      <path d="M14.5 15.5h5" />
+    </svg>
+  );
+}
+
+/**
+ * "Alt text" control for image blocks — the field BlockNote doesn't ship.
+ *
+ * Stock BlockNote publishes the upload FILE NAME as an image's alt attribute
+ * and gives authors no way to change it (see blocknoteSchema.ts). This writes
+ * the `alt` prop that the schema added, and appears only when a single image
+ * block is selected.
+ *
+ * Deliberately modelled on BlockNote's own FileCaptionButton — same popover,
+ * same form primitives, same Enter-to-close — so it looks and behaves like a
+ * native part of the toolbar rather than a bolt-on.
+ *
+ * `"use no memo"` — React-Compiler exempt like every component in this file.
+ */
+function AltTextButton() {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+
+  // Only for a single selected block that actually carries `url` + `alt` —
+  // i.e. our image block, and never a multi-block selection.
+  const block = useEditorState({
+    editor,
+    selector: ({ editor }) => {
+      if (!editor.isEditable) return undefined;
+      const selected = editor.getSelection()?.blocks ?? [
+        editor.getTextCursorPosition().block,
+      ];
+      if (selected.length !== 1) return undefined;
+      const candidate = selected[0];
+      return blockHasType(candidate, editor, candidate.type, {
+        url: "string",
+        alt: "string",
+      })
+        ? candidate
+        : undefined;
+    },
+  });
+
+  const [open, setOpen] = useState(false);
+
+  if (block === undefined) return null;
+
+  return (
+    <Components.Generic.Popover.Root open={open} onOpenChange={setOpen}>
+      <Components.Generic.Popover.Trigger>
+        <Components.FormattingToolbar.Button
+          className="bn-button"
+          label="Alt text"
+          mainTooltip="Describe this image for screen readers and search engines"
+          icon={<AltTextIcon />}
+          onClick={() => setOpen((wasOpen) => !wasOpen)}
+        />
+      </Components.Generic.Popover.Trigger>
+      <Components.Generic.Popover.Content
+        className="bn-popover-content bn-form-popover"
+        variant="form-popover"
+      >
+        <Components.Generic.Form.Root>
+          <Components.Generic.Form.TextInput
+            name="image-alt"
+            icon={<AltTextIcon />}
+            value={(block.props as { alt?: string }).alt ?? ""}
+            autoFocus
+            placeholder="Describe the image (leave blank if decorative)"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                event.preventDefault();
+                setOpen(false);
+              }
+            }}
+            onChange={(event) => {
+              if (
+                editorHasBlockWithType(editor, block.type, { alt: "string" })
+              ) {
+                editor.updateBlock(block.id, {
+                  props: { alt: event.currentTarget.value },
+                });
+              }
+            }}
+          />
+        </Components.Generic.Form.Root>
+      </Components.Generic.Popover.Content>
+    </Components.Generic.Popover.Root>
+  );
 }
 
 /** Small list icon for the table-of-contents slash menu entry. */
