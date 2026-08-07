@@ -152,6 +152,27 @@ export async function getArticles(blog: Blog): Promise<Article[]> {
   return response.data.map(toArticle);
 }
 
+/**
+ * The newest published articles for a blog, capped at `limit`.
+ *
+ * Asks the API for exactly as many as the caller needs rather than pulling a
+ * full page and slicing — this runs behind the footer, so it is on the render
+ * path of every page on the site.
+ *
+ * Deliberately tolerant: an API failure resolves to an empty list rather than
+ * throwing. The opposite rule applies to the catalogue crawls (see
+ * `getAllPublishedPosts`), where a short answer would be published to Google as
+ * if it were the truth. Here the caller falls back to a static list, and a
+ * momentarily stale footer column beats a 500 on every page of the site.
+ */
+export async function getLatestArticles(
+  blog: Blog,
+  limit = 4,
+): Promise<Article[]> {
+  const response = await api.getPosts(blog, 1, limit);
+  return response.data.map(toArticle);
+}
+
 /** Articles flagged for the featured carousel. */
 export async function getFeatured(blog: Blog): Promise<Article[]> {
   const response = await api.getFeatured(blog);
@@ -441,12 +462,15 @@ async function mapLimited<T, R>(
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let cursor = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await fn(items[index]);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (cursor < items.length) {
+        const index = cursor++;
+        results[index] = await fn(items[index]);
+      }
+    },
+  );
   await Promise.all(workers);
   return results;
 }

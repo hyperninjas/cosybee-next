@@ -5,8 +5,18 @@ import PhraseOfTheWeek from "./PhraseOfTheWeek";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 import { SOCIAL } from "@/app/lib/site";
 import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
+import { getLatestArticles } from "@/app/lib/articles";
 
-const WHY_LINKS = [
+/** Articles shown in the LATEST BLOGS column. */
+const LATEST_COUNT = 4;
+
+/**
+ * Used only when the API returns nothing. The footer renders on every page,
+ * so an empty column — a heading over blank space — would be a sitewide
+ * regression the moment the backend hiccups. These posts are evergreen, so
+ * the fallback is still a set of working links rather than a placeholder.
+ */
+const FALLBACK_LATEST_LINKS = [
   { label: "A Warm Hive, a Cosy Home", href: "/hive/a-warm-hive-a-cosy-home" },
   {
     label: "Energy, Without the Noise",
@@ -40,16 +50,27 @@ const LEGAL_LINKS = [
   { label: "Data Security", href: "/data-security" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  // Live from the blog rather than a hand-maintained list, so the column is
+  // genuinely "latest" and publishing an article is the only step. The read is
+  // tagged (CONTENT_TAG), so an admin save refreshes it sitewide.
+  const latest = await getLatestArticles("hive", LATEST_COUNT);
+  const latestLinks = latest.length
+    ? latest.map((article) => ({
+        label: article.title,
+        href: `/${article.blog}/${article.slug}`,
+      }))
+    : FALLBACK_LATEST_LINKS;
+
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.5fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.25fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
         <div>
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
-            className="h-auto w-36"
+            className="h-auto w-30"
             quality={85}
             loading="eager"
           />
@@ -61,7 +82,7 @@ export default function Footer() {
               tagline used to occupy: an editorial line belongs with the brand
               rather than among the link lists. Rotates weekly by ISO week
               number (see lib/phrase-of-the-week.ts). */}
-          <div className="mt-8 max-w-90">
+          <div className="mt-10 max-w-90">
             <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
           </div>
         </div>
@@ -72,11 +93,20 @@ export default function Footer() {
               LATEST BLOGS
             </h3>
             <ul className="mt-5 space-y-4.5">
-              {WHY_LINKS.map((link) => (
-                <li key={link.label}>
+              {latestLinks.map((link) => (
+                // Keyed on href, not label: two posts can share a title, but
+                // never a slug.
+                <li key={link.href}>
+                  {/* Article titles are author-written and unbounded, so they
+                      are clamped to two lines to keep the column from growing
+                      unpredictably. `line-clamp` sets `display: -webkit-box`,
+                      so it works applied to the anchor itself. The full title
+                      stays in the DOM for assistive tech, and `title` surfaces
+                      it on hover for sighted users. */}
                   <Link
                     href={link.href}
-                    className="text-[15px] font-medium text-muted transition-colors hover:text-white"
+                    title={link.label}
+                    className="line-clamp-2 text-[15px] font-medium text-muted transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -109,21 +139,6 @@ export default function Footer() {
             </h3>
             <SocialCluster className="mt-5 h-auto pb-1 w-46" {...SOCIAL} />
           </div>
-        </div>
-      </div>
-
-      {/* Phrase of the week — ALTERNATIVE placement: its own quiet band,
-          sharing the legal strip's hairline and container so it reads as part
-          of the footer's existing rhythm rather than as a banner. The wide,
-          constrained measure suits the longer quotes (Kelvin's runs to 250
-          characters, which is ~10 lines in the narrow brand column).
-
-          NOTE: this renders a SECOND copy alongside the one in the brand
-          column above — both will show the same phrase. Keep whichever
-          placement wins and delete the other. */}
-      <div className="border-t border-[#FFFFFF1A]">
-        <div className="mx-auto max-w-360 px-6 py-8 sm:px-10 lg:px-30">
-          <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
         </div>
       </div>
 
