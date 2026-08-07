@@ -1,9 +1,14 @@
 import {
   BlockNoteSchema,
+  createBlockConfig,
   createBlockSpec,
+  createImageBlockConfig,
   createStyleSpec,
   defaultBlockSpecs,
   defaultStyleSpecs,
+  imageParse,
+  imageRender,
+  imageToExternalHTML,
 } from "@blocknote/core";
 import { withMultiColumn } from "@blocknote/xl-multi-column";
 import DOMPurify from "dompurify";
@@ -365,12 +370,130 @@ const htmlBlock = createBlockSpec(
   },
 );
 
+// ── image block with real alt text ───────────────────────────────────────
+
+/**
+ * BlockNote's stock image block has NO alt field. Both its editor renderer and
+ * its HTML export do `img.alt = block.props.name` — the upload FILE NAME — and
+ * nothing in the UI can change it. Published articles were therefore shipping
+ * `alt="image.png"`, `alt="IMG_5169"` and `alt="Captura de pantalla 2026-07-17
+ * a la(s) 18.19.25.png"`, while the genuinely descriptive text sat in the
+ * caption. Worse, the alt-text save guard reads `caption`, so every one of
+ * those images passed validation as "has alt text".
+ *
+ * This adds a real `alt` prop and resolves the attribute as
+ * `alt → caption → ""`:
+ *
+ *  - `alt` is what the author typed in the Alt text field (Editor.tsx).
+ *  - `caption` is the fallback, which is what makes EVERY existing image
+ *    improve with no migration: legacy blocks have no `alt`, so they inherit
+ *    their (already descriptive) caption instead of a file name.
+ *  - `""` last — an explicitly blank alt marks an image decorative, which is
+ *    correct per WCAG H67 and much better than inventing text.
+ *
+ * The block is composed from BlockNote's own exported pieces
+ * (`createImageBlockConfig`, `imageParse`, `imageRender`,
+ * `imageToExternalHTML`) rather than reimplemented, so resizing, uploading,
+ * the file panel and HTML parsing all keep working exactly as before — we only
+ * add one prop and patch the `alt` attribute on the way out.
+ */
+
+/** The stock image config plus an `alt` prop. */
+const createImageWithAltConfig = createBlockConfig(
+  (options: { icon?: string } = {}) => {
+    const base = createImageBlockConfig(options);
+    return {
+      ...base,
+      propSchema: {
+        ...base.propSchema,
+        /** Author-written alt text. Empty = fall back to caption. */
+        alt: { default: "" as const },
+      },
+    } as const;
+  },
+);
+
+type ImageAltProps = { alt?: string; caption?: string; name?: string };
+
+/** The alt attribute for an image block: author's alt, else its caption. */
+function resolveImageAlt(props: ImageAltProps): string {
+  return (props.alt || props.caption || "").trim();
+}
+
+/**
+ * Set `alt` on the `<img>` inside a rendered image block, wherever it sits
+ * (the export returns a bare `<img>`, or a `<figure>` wrapping one).
+ *
+ * Tag-name checks rather than `instanceof HTMLImageElement`: the server export
+ * runs inside server-util's jsdom, which supplies a `window` but no DOM
+ * constructors on Node's global scope — `instanceof` there throws
+ * "HTMLImageElement is not defined" and takes every article render down with
+ * it. Same reason this whole file uses vanilla specs.
+ *
+ * `setAttribute` rather than `.alt =` for the same portability reason, and
+ * because an empty alt must still be WRITTEN: a missing alt is an error, an
+ * empty one declares the image decorative.
+ */
+function patchAlt(dom: HTMLElement, alt: string): void {
+  const img = dom.tagName === "IMG" ? dom : dom.querySelector?.("img");
+  img?.setAttribute("alt", alt);
+}
+
+const imageWithAltBlock = createBlockSpec(
+  createImageWithAltConfig,
+  (options: { icon?: string }) => ({
+    meta: { fileBlockAccept: ["image/*"] },
+
+    /**
+     * Stock parsing, plus the `alt` of any pasted/imported `<img>` — otherwise
+     * pasting HTML would drop alt text the source had already written.
+     */
+    parse: (element: HTMLElement) => {
+      const parsed = imageParse(options)(element);
+      if (!parsed) return undefined;
+      // Tag check, not `instanceof` — see `patchAlt`.
+      const img =
+        element.tagName === "IMG" ? element : element.querySelector("img");
+      const alt = img?.getAttribute("alt")?.trim();
+      return alt ? { ...parsed, alt } : parsed;
+    },
+
+    render: (block, editor) => {
+      const rendered = imageRender(options)(
+        block as Parameters<ReturnType<typeof imageRender>>[0],
+        editor as Parameters<ReturnType<typeof imageRender>>[1],
+      );
+      // Keep the editor preview honest: what a screen reader would announce
+      // here is what will publish.
+      patchAlt(rendered.dom, resolveImageAlt(block.props));
+      return rendered;
+    },
+
+    toExternalHTML: (block, editor) => {
+      const exported = imageToExternalHTML(options)(
+        block as Parameters<ReturnType<typeof imageToExternalHTML>>[0],
+        editor as Parameters<ReturnType<typeof imageToExternalHTML>>[1],
+      );
+      patchAlt(exported.dom, resolveImageAlt(block.props));
+      return exported;
+    },
+
+    // Same ordering as the stock spec — the generic file block must not claim
+    // images first.
+    runsBefore: ["file"] as const,
+  }),
+);
+
 // ── schema ───────────────────────────────────────────────────────────────
 
 export const blockNoteSchema = withMultiColumn(
   BlockNoteSchema.create({
     blockSpecs: {
       ...defaultBlockSpecs,
+      // Replaces the stock `image` block with the alt-aware one above. Same
+      // block type and same props plus `alt`, so existing documents keep
+      // loading unchanged — they simply pick up the "" default.
+      image: imageWithAltBlock(),
       tableOfContents: tableOfContentsBlock(),
       htmlBlock: htmlBlock(),
     },
