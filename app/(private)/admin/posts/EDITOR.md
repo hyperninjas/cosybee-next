@@ -55,10 +55,25 @@ reused and is tracked against the post:
 2. **Reuse existing** — type `/Media library`, pick an asset from the gallery,
    and it's inserted.
 
-After inserting an image you can:
-- **Add a caption** (the caption is also used as the image's alt text — good for
-  SEO/accessibility), and
+After inserting an image, select it and use the toolbar to:
+
+- **Alt text** — *required*. A short description of what the image shows, for
+  screen readers and search engines. It is not displayed on the page.
+  Uploads pre-fill this from the file name when the name is meaningful
+  (`worker-bee-symbol.jpg` → "Worker bee symbol"); names like `IMG_5169` or
+  `Screenshot 2026-07-17` are ignored, so you'll be asked to write one.
+  Images picked from the **Media library** inherit the alt text stored on the
+  asset — describe it once in the gallery and it comes across everywhere.
+  Leave it blank only if the image is purely decorative.
+- **Caption** — *optional*. Text shown **underneath** the image on the page.
+  Use it for credits or commentary; leave it empty if the image speaks for
+  itself.
 - **Resize** it by dragging its edge.
+
+> **Alt vs caption:** alt says *what the image is* (“A worker bee on a
+> wildflower”); the caption says *what to tell the reader about it* (“Spring
+> forage, Lancashire”). They're often different — that's fine and expected.
+> A post can't be saved while a content image has no alt text.
 
 Allowed types: images, video, and documents (PDF/docs). Oversized or unsupported
 files are rejected with a message.
@@ -95,5 +110,6 @@ What you see in the editor is what renders on the live article.
   on‑page table of contents.
 - Prefer **reusing** media from the library (`/Media library`) over re‑uploading
   the same file.
-- Add a **caption/alt** to every image.
+- Add **alt text** to every image (required); add a caption only when it adds
+  something for the reader.
 - Keep one idea per block — it makes reordering and multi‑column layouts easier.
