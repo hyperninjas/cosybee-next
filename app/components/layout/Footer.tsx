@@ -66,7 +66,7 @@ export default async function Footer() {
     <footer className="bg-black text-white">
       <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.25fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
-        <div>
+        <div className="flex flex-col gap-10">
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
@@ -82,11 +82,11 @@ export default async function Footer() {
               tagline used to occupy: an editorial line belongs with the brand
               rather than among the link lists. Rotates weekly by ISO week
               number (see lib/phrase-of-the-week.ts). */}
-          <div className="mt-10 max-w-90">
+          <div className="">
             <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
           </div>
         </div>
-        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1fr_1fr_1fr] text-balance lg:gap-8">
+        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.25fr_1.25fr_1fr] text-balance lg:gap-8">
           {/* why EnergieBee */}
           <div>
             <h3 className="text-lg font-bold tracking-[0.08em]">
