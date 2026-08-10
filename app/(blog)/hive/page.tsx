@@ -7,7 +7,7 @@ import {
   getFeatured,
   getCategoryNames,
 } from "@/app/lib/articles";
-import { ARTICLES_PER_PAGE } from "@/app/lib/article-types";
+import { browsePageCount } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
@@ -61,10 +61,7 @@ export default async function HivePage({ searchParams }: PageProps<"/hive">) {
     getFeatured("hive"),
     getCategoryNames("hive"),
   ]);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(articles.length / ARTICLES_PER_PAGE),
-  );
+  const totalPages = browsePageCount(articles.length);
   // Out-of-range browse page → 404 rather than a thin, empty soft-404.
   if (!filtered && page > totalPages) notFound();
 

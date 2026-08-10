@@ -4,10 +4,12 @@ import {
   getSitemapArticles,
   getTagSummaries,
   getAuthorSummaries,
+  getPublishedCount,
   isIndexableAuthor,
   isIndexableTag,
   newestOf,
 } from "./lib/articles";
+import { browsePageCount } from "./lib/article-types";
 
 /**
  * Generates /sitemap.xml.
@@ -31,14 +33,23 @@ import {
  * sitemap rather than caching a short one. See lib/articles.ts.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [hiveArticles, learnArticles, hiveTags, learnTags, authors] =
-    await Promise.all([
-      getSitemapArticles("hive"),
-      getSitemapArticles("learn"),
-      getTagSummaries("hive"),
-      getTagSummaries("learn"),
-      getAuthorSummaries(),
-    ]);
+  const [
+    hiveArticles,
+    learnArticles,
+    hiveTags,
+    learnTags,
+    authors,
+    hiveCount,
+    learnCount,
+  ] = await Promise.all([
+    getSitemapArticles("hive"),
+    getSitemapArticles("learn"),
+    getTagSummaries("hive"),
+    getTagSummaries("learn"),
+    getAuthorSummaries(),
+    getPublishedCount("hive"),
+    getPublishedCount("learn"),
+  ]);
 
   // The two blog indexes are listings of their articles, so the newest article
   // is genuinely when the page last changed. Every other static page either
@@ -58,6 +69,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: route.changeFrequency,
       priority: route.priority,
     };
+  });
+
+  // Page 2+ of each hub. Those pages are self-canonical and indexable (see the
+  // hub's generateMetadata), but the only other path to them is a `rel=next`
+  // chain Google has to walk one hop at a time — so a deep page can sit
+  // undiscovered for weeks. Page 1 is already covered by ROUTES above; the page
+  // count comes from `browsePageCount`, the same function the hub uses to 404
+  // anything past the end, so this can't advertise a page that doesn't exist.
+  //
+  // `lastModified` is the hub's own date: publishing an article shifts every
+  // article down the list, so page 5's contents genuinely change when the
+  // newest article does.
+  const paginationRoutes = (
+    [
+      ["/hive", hiveCount],
+      ["/learn", learnCount],
+    ] as const
+  ).flatMap(([path, count]) => {
+    const lastModified = blogUpdated[path];
+    return Array.from(
+      { length: browsePageCount(count) - 1 },
+      (_, i) => i + 2,
+    ).map((page) => ({
+      url: `${SITE_URL}${path}?page=${page}`,
+      ...(lastModified ? { lastModified } : {}),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
   });
 
   const articleRoutes = [...hiveArticles, ...learnArticles].map((a) => ({
@@ -93,5 +132,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     }));
 
-  return [...staticRoutes, ...articleRoutes, ...tagRoutes, ...authorRoutes];
+  return [
+    ...staticRoutes,
+    ...paginationRoutes,
+    ...articleRoutes,
+    ...tagRoutes,
+    ...authorRoutes,
+  ];
 }
