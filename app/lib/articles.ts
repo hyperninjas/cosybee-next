@@ -294,6 +294,20 @@ export function newestOf(items: { lastModified: Date }[]): Date | undefined {
   );
 }
 
+/**
+ * How many published articles a blog holds — the divisor behind the hubs'
+ * browse pagination, for callers that need the count and not the articles.
+ *
+ * Counts *every* published post, including `noindex` ones: the hub lists them,
+ * so they take up a slot on a browse page. The sitemap uses this (not the
+ * shorter `getSitemapArticles` list) so the `?page=` URLs it advertises are the
+ * same pages the hub will actually serve.
+ */
+export async function getPublishedCount(blog: Blog): Promise<number> {
+  const posts = await getAllPublishedPosts(blog);
+  return posts.length;
+}
+
 /** Every published article for a blog (all pages) — for tag pages & search. */
 export async function getAllArticles(blog: Blog): Promise<Article[]> {
   const posts = await getAllPublishedPosts(blog);

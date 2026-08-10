@@ -173,6 +173,17 @@ export function isExternalUrl(url: string): boolean {
 export const ARTICLES_PER_PAGE = 12;
 
 /**
+ * How many browse pages `total` articles occupy — the single definition of the
+ * blog hubs' pagination. The hub pages 404 anything past this, and the sitemap
+ * lists exactly this many `?page=` URLs, so the two must not drift: a sitemap
+ * computing its own page count would advertise a 404 the day the divisor
+ * changes. Always ≥ 1, so an empty blog still has its page 1.
+ */
+export function browsePageCount(total: number): number {
+  return Math.max(1, Math.ceil(total / ARTICLES_PER_PAGE));
+}
+
+/**
  * Placeholder cover used by listings (cards, carousel) when a post has no valid
  * cover image. The article hero deliberately skips it — a coverless article
  * shows no hero rather than a stand-in. Client-safe.

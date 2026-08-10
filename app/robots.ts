@@ -44,18 +44,25 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   const disallow = ["/api/", "/admin", "/account"];
+  // `/api/` is closed, but the social/rich-result card images live under it
+  // (`/api/og` and `/api/og/article/*` — see lib/seo.ts, lib/structured-data.ts
+  // and the article pages). Crawlers that honour robots.txt — Facebook's
+  // scraper among them — would otherwise refuse to fetch the image and fall
+  // back to a preview with no card. The longer, more specific rule wins over
+  // the `/api/` disallow for Google and Bing regardless of line order.
+  const allow = ["/", "/api/og"];
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow,
         disallow,
       },
       // Explicit (redundant-but-intentional) allow for AI crawlers, so the
       // policy is documented and obvious rather than relying on the wildcard.
       {
         userAgent: AI_CRAWLERS,
-        allow: "/",
+        allow,
         disallow,
       },
     ],
