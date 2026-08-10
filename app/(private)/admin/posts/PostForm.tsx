@@ -528,13 +528,15 @@ export default function PostForm({
                         : `${missingAlts.length} images are missing alt text`}
                     </Alert.Title>
                     <Alert.Description>
-                      Add an alt/caption to{" "}
+                      Select{" "}
                       {missingAlts.map((m, i) => (
                         <span key={m.index}>
                           {i > 0 && ", "}image #{m.index}
                         </span>
                       ))}{" "}
-                      in the editor below before saving.
+                      in the editor below and use the <strong>Alt text</strong>{" "}
+                      button to describe it. Captions are optional; alt text is
+                      what screen readers and search engines read.
                     </Alert.Description>
                   </Alert.Content>
                 </Alert>

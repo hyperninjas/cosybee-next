@@ -37,6 +37,7 @@ import {
 } from "@blocknote/xl-multi-column";
 import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
 import { uploadLibraryMedia } from "@/app/lib/media-upload";
+import { altFromFileName } from "@/app/lib/image-alt";
 import {
   blockNoteSchema as schema,
   collectHeadingAnchors,
@@ -84,9 +85,9 @@ function MediaIcon() {
 function blockForMedia(media: MediaItem): SchemaPartialBlock {
   "use no memo";
   const url = media.url ?? "";
-  // BlockNote's image/video/file blocks have no separate alt field — `caption`
-  // is shown AND used as alt. Pull the richest text the asset has so inserted
-  // images arrive already-captioned (and satisfy the "image needs alt" guard).
+  // Video/file blocks still have no alt field of their own, so for those the
+  // caption remains the one place any descriptive text can live — keep pulling
+  // the richest text the asset has.
   const caption = media.caption || media.alt || media.title || "";
   if (media.kind === "video") {
     return {
@@ -95,9 +96,21 @@ function blockForMedia(media: MediaItem): SchemaPartialBlock {
     } as SchemaPartialBlock;
   }
   if (media.kind === "image") {
+    // Images DO have a real alt prop now, so the library's own fields map
+    // across one-to-one instead of being collapsed into the caption: the
+    // asset's alt (what it depicts) becomes alt, its caption (what to print
+    // under it) becomes the caption. An asset that was described once in the
+    // gallery is then correctly described everywhere it is used.
     return {
       type: "image",
-      props: { url, caption, name: media.name ?? "" },
+      props: {
+        url,
+        alt: media.alt || media.title || altFromFileName(media.name),
+        // Optional now — no longer padded out with alt/title, which produced
+        // a visible caption the author never asked for.
+        caption: media.caption ?? "",
+        name: media.name ?? "",
+      },
     } as SchemaPartialBlock;
   }
   // pdf / document → a downloadable file block.
@@ -543,7 +556,25 @@ export default function Editor({ initialContent, onChange }: Props) {
       // other path — then hand the public URL back to BlockNote for the block.
       const result = await uploadLibraryMedia(file);
       if (!result.fileUrl) throw new Error("Upload failed - no URL returned");
-      return result.fileUrl;
+
+      // Returning an OBJECT rather than the URL string, so images arrive with
+      // alt text already drafted. BlockNote spreads this straight into
+      // `updateBlock` as a partial BLOCK (not as props), which is why `props`
+      // is explicit here — and why `name` must be set too: the drag/paste path
+      // only fills in `url` when handed a bare string.
+      const props: Record<string, string> = {
+        url: result.fileUrl,
+        name: file.name,
+      };
+      // Only the image block has an `alt` prop — the same uploader serves
+      // video, audio and file blocks, and handing those an unknown prop would
+      // be a schema error.
+      if (file.type.startsWith("image/")) {
+        // "" for camera-roll and screenshot names, so the author is prompted
+        // for real alt text instead of nudged into keeping "IMG_5169".
+        props.alt = altFromFileName(file.name);
+      }
+      return { props };
     },
   });
 

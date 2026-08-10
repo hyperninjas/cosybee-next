@@ -15,8 +15,11 @@ You build the article by stacking and arranging blocks.
 
 ## What's new — August 2026
 
-Four recent additions to the editor:
+Recent additions to the editor:
 
+- **Alt text for images** — images now have their own **Alt text** field,
+  separate from the caption. Alt text is required; captions are optional.
+  See section 5.
 - **Table of contents** — type `/toc` for a live "Contents" box built from the
   article's Heading 2/3s; entries become clickable links on the published page.
   See section 6.
@@ -109,22 +112,36 @@ file can be reused later:
    gallery. Pictures, videos and documents you (or anyone) already uploaded
    are all there.
 
-After inserting:
+After inserting an image, select it and use the toolbar:
 
-- **Add a caption** — click below the image and type. The caption doubles as
-  the image's **alt text** (what screen readers and Google see).
-- ⚠️ **Every image must have a caption/alt before the post can be saved.**
-  If any are missing, a yellow warning above the editor tells you which
-  image (#1, #2…) and the Save/Publish buttons stay disabled until fixed.
-  Media inserted from the library usually arrives with its caption pre-filled.
+- **Alt text** — _required_. A short description of what the image shows, for
+  screen readers and search engines. It is **not** shown on the page.
+  Uploads pre-fill it from the file name when the name is meaningful
+  (`worker-bee-symbol.jpg` → "Worker bee symbol"); names like `IMG_5169` or
+  `Screenshot 2026-07-17` are ignored, so you'll be asked to write one.
+  Images picked from the **Media library** inherit the alt text stored on the
+  asset — describe it once in the gallery and it comes across everywhere.
+  Leave it blank only if the image is purely decorative.
+- **Caption** — _optional_. Text shown **underneath** the image on the page.
+  Use it for credits or commentary; leave it empty if the image speaks for
+  itself.
 - **Resize** an image or video by dragging its side handles.
-- Videos are optimised automatically after upload (converted for the web and
-  given a preview image) — nothing for you to do.
+
+> **Alt vs caption:** alt says _what the image is_ ("A worker bee on a
+> wildflower"); the caption says _what to tell the reader about it_ ("Spring
+> forage, Lancashire"). They're often different — that's fine and expected.
+
+⚠️ **A post can't be saved while a content image has no alt text.** If any are
+missing, a warning above the editor names them (#1, #2…) and the Save/Publish
+buttons stay disabled until they're described.
+
+Videos are optimised automatically after upload (converted for the web and
+given a preview image) — nothing for you to do.
 
 Allowed files: images, videos and documents (PDF etc.). Unsupported or
 oversized files are rejected with a message telling you why.
 
-## 6. Table of contents - New
+## 6. Table of contents
 
 Type **`/toc`** → **Table of contents**. It inserts a "Contents" box that
 lists every Heading 2 and Heading 3 in the article.
@@ -134,7 +151,7 @@ lists every Heading 2 and Heading 3 in the article.
 - On the published page, the entries become links that scroll the reader there.
 - Best placed near the top, right after the intro paragraph.
 
-## 7. Custom HTML & embeds (YouTube, Maps…) - New
+## 7. Custom HTML & embeds (YouTube, Maps…)
 
 Type **`/html`** → **Custom HTML**. Use it to embed things the normal blocks
 can't:
@@ -180,5 +197,6 @@ cover, tags, SEO…):
 
 - Structure with **Heading 2/3** — they power the table of contents.
 - **Reuse** media via `/media` instead of uploading the same file twice.
-- Caption **every image** — the post won't save without it.
+- **Alt text on every image** — the post won't save without it. Captions are
+  optional; add one only when it tells the reader something extra.
 - Keep **one idea per block** — easier to reorder and to arrange in columns.
