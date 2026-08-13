@@ -230,6 +230,20 @@ const nextConfig: NextConfig = {
         destination: "/hive",
         permanent: true,
       },
+
+      // Leftover WordPress URLs.
+      {
+        // The default post every WordPress install ships with.
+        source: "/hello-world",
+        destination: "/",
+        permanent: true,
+      },
+      // NOTE: WordPress's `/category/[slug]` archives are NOT handled here.
+      // They need the data to resolve (an old flat slug carries no blog, so
+      // only the category lists say whether it's a Hive or a Learn page), which
+      // a static rule can't read — see app/(blog)/category/[slug]/page.tsx.
+      // Adding a rule for one here would shadow that route, since redirects run
+      // before routing.
     ];
   },
 
