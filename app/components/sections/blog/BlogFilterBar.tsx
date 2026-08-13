@@ -1,20 +1,29 @@
 "use client";
 
 import { Button, SearchField } from "@heroui/react";
+import type { CategorySummary } from "@/app/lib/article-types";
 
 type Props = {
-  categories: readonly string[];
+  categories: readonly CategorySummary[];
   query: string;
   onQueryChange: (q: string) => void;
+  /** Active category *slug*; "" means All. */
   category: string;
-  onCategoryChange: (cat: string) => void;
+  onCategoryChange: (slug: string) => void;
 };
 
 /**
- * Controlled search input + horizontal category chip row. Filter
- * state lives in the parent (see BlogBrowse) so the featured carousel
- * and latest grid can react to it. Categories are passed in so each
- * blog (hive, learn, …) can define its own.
+ * Controlled search input + horizontal category chip row. Filter state lives in
+ * the parent (see BlogBrowse) so the featured carousel and latest grid can
+ * react to it, and the chips filter the grid in place rather than navigating.
+ *
+ * These chips are deliberately NOT the crawl path to the category pages — they
+ * are buttons, invisible to a crawler. Discovery runs through the "Browse by
+ * category" link list the hub renders below the grid (CategoryChips), and the
+ * sitemap. Keep that list in place: without it the category pages are orphans.
+ *
+ * Chips carry the category *slug*, not its name, so the mirrored `?category=`
+ * URL matches the canonical `/[blog]/category/[slug]` page it points at.
  */
 export default function BlogFilterBar({
   categories,
@@ -44,14 +53,21 @@ export default function BlogFilterBar({
             pad − 8px margin = the original 4px) host the Windows scrollbar
             outside the layout (mac-style hover overlay) */}
         <div className="flex flex-nowrap overflow-auto items-center gap-2 p-1 -mx-1 pb-3 -mb-2 scrollbar-overlay">
-          {categories.map((cat, i) => (
+          <Button
+            variant={category === "" ? "primary" : "tertiary"}
+            onPress={() => onCategoryChange("")}
+            className="shrink-0 rounded-full whitespace-nowrap"
+          >
+            All
+          </Button>
+          {categories.map((cat) => (
             <Button
-              key={cat + i}
-              variant={category === cat ? "primary" : "tertiary"}
-              onPress={() => onCategoryChange(cat)}
+              key={cat.slug}
+              variant={category === cat.slug ? "primary" : "tertiary"}
+              onPress={() => onCategoryChange(cat.slug)}
               className="shrink-0 rounded-full whitespace-nowrap"
             >
-              {cat}
+              {cat.name}
             </Button>
           ))}
         </div>

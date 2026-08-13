@@ -3,9 +3,11 @@ import { ROUTES, SITE_URL } from "./lib/site";
 import {
   getSitemapArticles,
   getTagSummaries,
+  getCategorySummaries,
   getAuthorSummaries,
   getPublishedCount,
   isIndexableAuthor,
+  isIndexableCategory,
   isIndexableTag,
   newestOf,
 } from "./lib/articles";
@@ -41,6 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     authors,
     hiveCount,
     learnCount,
+    hiveCategories,
+    learnCategories,
   ] = await Promise.all([
     getSitemapArticles("hive"),
     getSitemapArticles("learn"),
@@ -49,6 +53,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAuthorSummaries(),
     getPublishedCount("hive"),
     getPublishedCount("learn"),
+    getCategorySummaries("hive"),
+    getCategorySummaries("learn"),
   ]);
 
   // The two blog indexes are listings of their articles, so the newest article
@@ -106,6 +112,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Category landing pages. Ranked above tags on purpose: categories are the
+  // blog's own navigation — a curated handful, each a page a search visitor can
+  // legitimately land on — where tags are a long tail. Gated by the same
+  // predicate the category page applies to its own `robots` directive.
+  const categoryRoutes = [
+    ...hiveCategories.map((c) => ({ ...c, path: `/hive/category/${c.slug}` })),
+    ...learnCategories.map((c) => ({ ...c, path: `/learn/category/${c.slug}` })),
+  ]
+    .filter((c) => isIndexableCategory(c.count))
+    .map((c) => ({
+      url: `${SITE_URL}${c.path}`,
+      lastModified: c.lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
+
   // Only tags with enough articles to stand as their own search result — see
   // isIndexableTag. Thinner tags are marked noindex by the tag page itself,
   // so listing them here would only advertise URLs we've asked Google to skip.
@@ -135,6 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...paginationRoutes,
+    ...categoryRoutes,
     ...articleRoutes,
     ...tagRoutes,
     ...authorRoutes,

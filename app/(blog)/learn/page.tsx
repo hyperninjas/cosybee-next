@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogHero from "@/app/components/sections/blog/BlogHero";
 import BlogBrowse from "@/app/components/sections/blog/BlogBrowse";
-import { getAllArticles, getFeatured, getCategoryNames } from "@/app/lib/articles";
+import {
+  getAllArticles,
+  getFeatured,
+  getCategorySummaries,
+} from "@/app/lib/articles";
 import { browsePageCount } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
+import { hubIndexing, resolveCategorySlug } from "@/app/lib/blog-hub";
+import CategoryChips from "@/app/components/sections/blog/CategoryChips";
 import learnCover from "@/public/Cover/energiebee-learn-cover.png";
 import learnCoverMobile from "@/public/Cover/energiebee-learn-cover-mobile.png";
 
@@ -29,18 +35,20 @@ export async function generateMetadata({
   searchParams,
 }: PageProps<"/learn">): Promise<Metadata> {
   const sp = await searchParams;
-  const filtered = Boolean(
-    firstParam(sp.q) || firstParam(sp.category) || firstParam(sp.tag),
-  );
-  const page = parsePage(sp.page);
-  // Browse pages are self-canonical; filtered/search views are shareable but
-  // canonicalised to the clean hub and marked noindex (thin/duplicate).
-  const canonical = !filtered && page > 1 ? `/learn?page=${page}` : "/learn";
+  const categories = await getCategorySummaries("learn");
+  // See hubIndexing for the three cases and why each declares what it does.
+  const { path, index } = hubIndexing({
+    base: "/learn",
+    query: firstParam(sp.q)?.trim() ?? "",
+    categorySlug: resolveCategorySlug(categories, firstParam(sp.category)),
+    tag: firstParam(sp.tag) ?? "",
+    page: parsePage(sp.page),
+  });
   return pageMetadata({
     title: "Learn",
     description: LEARN_DESCRIPTION,
-    path: canonical,
-    index: !filtered,
+    path,
+    index,
   });
 }
 
@@ -48,16 +56,18 @@ export default async function LearnPage({
   searchParams,
 }: PageProps<"/learn">) {
   const sp = await searchParams;
-  const filtered = Boolean(
-    firstParam(sp.q) || firstParam(sp.category) || firstParam(sp.tag),
-  );
   const page = parsePage(sp.page);
 
   const [articles, featured, categories] = await Promise.all([
     getAllArticles("learn"),
     getFeatured("learn"),
-    getCategoryNames("learn"),
+    getCategorySummaries("learn"),
   ]);
+
+  const categorySlug = resolveCategorySlug(categories, firstParam(sp.category));
+  const filtered = Boolean(
+    firstParam(sp.q) || categorySlug || firstParam(sp.tag),
+  );
 
   const totalPages = browsePageCount(articles.length);
   // Out-of-range browse page → 404 rather than a thin, empty soft-404.
@@ -106,10 +116,29 @@ export default async function LearnPage({
         categories={categories}
         basePath="/learn"
         initialQuery={firstParam(sp.q) ?? ""}
-        initialCategory={firstParam(sp.category) ?? "All"}
+        initialCategory={categorySlug}
         initialTag={firstParam(sp.tag) ?? ""}
         page={page}
       />
+      {/* The crawl path to the category pages.
+          The chips inside BlogBrowse are buttons — they filter the grid in
+          place, which is what keeps the hub feeling instant, but a button
+          leaves nothing in the HTML for a crawler to follow. These are real
+          links to the same categories, so the pages are reachable by Google and
+          by anyone browsing with JS off. Removing this section orphans every
+          category page: the sitemap would list URLs nothing on the site links,
+          which is how a URL ends up "unknown to Google". */}
+      <section className="mx-auto w-full max-w-360 px-6 pb-16 sm:px-10 lg:px-30">
+        <h2 className="text-lg font-bold tracking-[0.08em] text-foreground">
+          BROWSE BY CATEGORY
+        </h2>
+        <CategoryChips
+          categories={categories}
+          basePath="/learn"
+          activeSlug={categorySlug || null}
+          className="mt-4"
+        />
+      </section>
     </main>
   );
 }
