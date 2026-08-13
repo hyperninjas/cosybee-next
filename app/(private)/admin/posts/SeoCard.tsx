@@ -15,7 +15,7 @@ export function SeoCard({
   blog,
   title,
   description,
-  effectiveSlug,
+  slug,
   seoTitle,
   setSeoTitle,
   seoDescription,
@@ -34,7 +34,7 @@ export function SeoCard({
   blog: string;
   title: string;
   description: string;
-  effectiveSlug: string;
+  slug: string;
   seoTitle: string;
   setSeoTitle: (v: string) => void;
   seoDescription: string;
@@ -76,7 +76,7 @@ export function SeoCard({
     },
     {
       label: "Crawlable URL slug",
-      passed: effectiveSlug.trim().length > 0,
+      passed: slug.trim().length > 0,
       fix: "Set a URL slug so the page has a stable, crawlable address.",
     },
     {
@@ -147,7 +147,7 @@ export function SeoCard({
         {/* Google SERP preview — keeps Google's signature colours */}
         <div className="rounded-md border border-border p-2.5">
           <div className="text-xs text-[#1a6b2f]">
-            energiebee.com › {blog} › {effectiveSlug || "…"}
+            energiebee.com › {blog} › {slug || "…"}
           </div>
           <div className="leading-tight text-[#1a0dab]">
             {truncate(metaTitle, 60)}

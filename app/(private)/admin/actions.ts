@@ -75,19 +75,61 @@ export async function uploadImage(formData: FormData): Promise<string> {
   return url;
 }
 
-/** Find a slug unique within a blog, appending -2, -3, … on collision. */
-async function uniqueSlug(
+/** Human label for a post status, for the "already used by" message. */
+function statusLabel(status: string): string {
+  return status === "PUBLISHED"
+    ? "published"
+    : status === "ARCHIVED"
+      ? "archived"
+      : "draft";
+}
+
+export type SlugCheck =
+  | { state: "idle" }
+  | { state: "invalid"; message: string }
+  | { state: "available" }
+  | { state: "taken"; message: string }
+  | { state: "error"; message: string };
+
+/**
+ * Is `slug` free within `blog`? Called from the editor as the admin types, and
+ * again by `savePost` — one implementation, so the inline hint and the save
+ * decision can never disagree.
+ *
+ * The slug used to be auto-suffixed (-2, -3…) on collision, silently. That is
+ * gone: an author who typed a slug gets that slug or an explicit reason why
+ * not, never a URL they didn't choose.
+ */
+export async function checkSlug(
   blog: string,
-  base: string,
-  excludeId?: string | null,
-): Promise<string> {
-  let slug = base;
-  let n = 2;
-  while (await adminApi.checkSlugExists(blog, slug, excludeId ?? undefined)) {
-    slug = `${base}-${n++}`;
-    if (n > 100) break; // Safety limit
+  rawSlug: string,
+  excludeId?: string,
+): Promise<SlugCheck> {
+  await assertAdmin();
+  if (!BLOGS.has(blog)) return { state: "invalid", message: "Unknown blog." };
+
+  // Always check the CANONICAL form — the field is mid-edit when this runs,
+  // so it can legitimately hold a trailing hyphen ("heat-" on the way to
+  // "heat-pump"). Comparing raw against canonical here reported that as
+  // invalid input, which is just someone typing.
+  const slug = slugify(rawSlug);
+  if (!slug) return { state: "idle" };
+
+  try {
+    const owner = await adminApi.findPostBySlug(blog, slug, excludeId);
+    if (!owner) return { state: "available" };
+    return {
+      state: "taken",
+      message: `Already used by “${owner.title}” (${statusLabel(owner.status)}).`,
+    };
+  } catch {
+    // Never claim "available" on a failed lookup — that is how a duplicate
+    // slips through to the database's unique index.
+    return {
+      state: "error",
+      message: "Couldn't check availability. It will be re-checked on save.",
+    };
   }
-  return slug;
 }
 
 /**
@@ -140,8 +182,26 @@ export async function savePost(
   const fieldErrors: Record<string, string> = {};
   if (!title) fieldErrors.title = "Add a title before saving.";
 
-  const base = slugify(str(formData, "slug") || title);
-  if (title && !base) fieldErrors.slug = "Could not derive a slug from the title.";
+  // The slug is the author's to choose — no longer derived from the title as
+  // a fallback, and never auto-suffixed on collision. Both of those changed a
+  // deliberate URL behind the author's back.
+  const slug = slugify(str(formData, "slug"));
+  if (!slug) {
+    fieldErrors.slug = "Add a slug — it's the article's URL.";
+  } else {
+    // Re-checked here rather than trusting the editor's inline hint: the hint
+    // can be stale by the time Save is pressed, and this is the last point
+    // before the database's unique index turns it into an opaque 500.
+    const check = await checkSlug(blog, slug, id ?? undefined);
+    if (check.state === "taken" || check.state === "invalid") {
+      fieldErrors.slug = check.message;
+    } else if (check.state === "error") {
+      return {
+        ok: false,
+        error: "Couldn't verify the slug is free. Try saving again.",
+      };
+    }
+  }
 
   // The backend rejects any content image without alt text. Catch it here so
   // the error surfaces inline instead of as a raw 400 from the upstream API.
@@ -155,11 +215,14 @@ export async function savePost(
   }
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { ok: false, error: "Add a title to save your post.", fieldErrors };
+    return {
+      ok: false,
+      error: "Fix the highlighted fields before saving.",
+      fieldErrors,
+    };
   }
 
   // Derived values
-  const slug = await uniqueSlug(blog, base, id);
   const readTimeMinutes = parseInt(str(formData, "readTime")) ||
     Math.max(1, Math.round(countWordsFromJson(contentJsonStr) / 200));
   const description = str(formData, "description") || excerptFromJson(contentJsonStr) || title || "No description";

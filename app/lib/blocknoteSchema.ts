@@ -1,7 +1,11 @@
 import {
+  addDefaultPropsExternalHTML,
   BlockNoteSchema,
   createBlockConfig,
   createBlockSpec,
+  createExtension,
+  createToggleWrapper,
+  defaultProps,
   createImageBlockConfig,
   createStyleSpec,
   defaultBlockSpecs,
@@ -85,8 +89,17 @@ export type HeadingAnchor = {
   level: 2 | 3;
 };
 
-/** Concatenate the plain text of a block's inline content (text + links). */
+/**
+ * Concatenate the plain text of a block's inline content (text + links).
+ *
+ * Stored documents hold an ARRAY of inline-content objects, but BlockNote also
+ * accepts a bare string wherever content is written (`insertBlocks`, fixtures,
+ * anything hand-authored), and such a block can be handed straight to these
+ * walkers. Accepting both costs one line and avoids silently reading an empty
+ * question or heading.
+ */
 function inlineText(content: unknown): string {
+  if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   let out = "";
   for (const item of content as Array<Record<string, unknown>>) {
@@ -125,6 +138,67 @@ export function collectHeadingAnchors(blocks: AnyBlock[]): HeadingAnchor[] {
 
   walk(blocks);
   return anchors;
+}
+
+// ── FAQ extraction (shared by the article's FAQPage JSON-LD) ────────────
+
+export type FaqEntry = { question: string; answer: string };
+
+/** Plain text of a block and everything nested under it, space-joined. */
+function blockText(block: AnyBlock): string {
+  const parts = [inlineText(block.content)];
+  for (const child of block.children ?? []) parts.push(blockText(child));
+  return parts.filter(Boolean).join(" ");
+}
+
+/**
+ * Every question/answer pair in a document, in reading order.
+ *
+ * Drives the article's FAQPage markup. Derived from the SAME blocks that
+ * render the visible accordion, which is what keeps the two in step — Google
+ * requires FAQ markup to mirror what a reader can actually see, and the surest
+ * way to satisfy that is to have one source rather than two that must agree.
+ *
+ * A pair needs both halves: a question with no answer yet (a block still being
+ * written) is skipped rather than emitted with an empty `acceptedAnswer`.
+ */
+export function collectFaqItems(contentJson: unknown): FaqEntry[] {
+  let data: unknown = contentJson;
+  if (typeof data === "string") {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  const root: AnyBlock[] = Array.isArray(data)
+    ? (data as AnyBlock[])
+    : data && typeof data === "object" && Array.isArray((data as AnyBlock).children)
+      ? ((data as AnyBlock).children as AnyBlock[])
+      : data && typeof data === "object" && Array.isArray((data as { blocks?: AnyBlock[] }).blocks)
+        ? ((data as { blocks: AnyBlock[] }).blocks as AnyBlock[])
+        : [];
+
+  const items: FaqEntry[] = [];
+  const walk = (blocks: AnyBlock[] | undefined): void => {
+    for (const block of blocks ?? []) {
+      if (block.type === "faqItem") {
+        const question = inlineText(block.content).replace(/\s+/g, " ").trim();
+        const answer = (block.children ?? [])
+          .map(blockText)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (question && answer) items.push({ question, answer });
+        // Don't recurse into a FAQ item: its children ARE the answer, and a
+        // nested FAQ block would otherwise be counted twice.
+        continue;
+      }
+      walk(block.children);
+    }
+  };
+  walk(root);
+  return items;
 }
 
 // ── tableOfContents block ────────────────────────────────────────────────
@@ -484,6 +558,150 @@ const imageWithAltBlock = createBlockSpec(
   }),
 );
 
+// ── faqItem block ────────────────────────────────────────────────────────
+
+/**
+ * A single question/answer pair, rendered as a native `<details>` accordion.
+ *
+ * WHY A BLOCK PER PAIR, rather than one block holding the whole FAQ (the shape
+ * WordPress plugins use): custom blocks here must build VANILLA DOM, because
+ * the same spec runs in the browser and in server-util's jsdom. A single
+ * container block would therefore need a hand-rolled editor — contenteditable
+ * fields with no formatting toolbar — and answers would lose bold, links and
+ * lists. One block per pair instead borrows BlockNote's own machinery: the
+ * QUESTION is the block's inline content and the ANSWER is its child blocks,
+ * so both are ordinary rich text, drag-reorderable, with no bespoke UI at all.
+ * Consecutive items are styled into one card by CSS (see globals.css), which
+ * recovers the grouped look without the architecture.
+ *
+ * A distinct type rather than reusing Toggle List, so that
+ * `collectFaqItems` can tell "this is a FAQ" from "this is a collapsible
+ * outline" — the FAQPage markup would otherwise claim every toggle in the
+ * article is a question. Existing toggle lists keep behaving exactly as before.
+ *
+ * `<details>` is the whole accordion: no JavaScript, keyboard accessible, and
+ * the answer stays in the DOM when collapsed — which is what keeps it
+ * crawlable, and therefore what makes the FAQPage markup honest.
+ */
+/**
+ * Expanded/collapsed memory for FAQ items in the EDITOR.
+ *
+ * BlockNote's default remembers the state in localStorage and treats "nothing
+ * stored" as COLLAPSED — which is right for a toggle list you are re-opening,
+ * and wrong for a block you just created: a new FAQ item appeared already
+ * folded shut, so pressing Enter moved the caret into an answer nobody could
+ * see. Here a missing entry means EXPANDED; only an explicit collapse is
+ * remembered.
+ *
+ * Keyed under `faq-` rather than BlockNote's `toggle-`, so a block that has
+ * been converted between the two types doesn't inherit the other's state.
+ * Guarded for the absence of `window`: this only ever runs in the editor, but
+ * the module is also imported by the server renderer.
+ */
+const faqToggledState = {
+  set: (block: { id: string }, isToggled: boolean) => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(`faq-${block.id}`, isToggled ? "true" : "false");
+  },
+  get: (block: { id: string }) => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem(`faq-${block.id}`) !== "false";
+  },
+};
+
+const faqItemBlock = createBlockSpec(
+  createBlockConfig(
+    () =>
+      ({
+        type: "faqItem" as const,
+        propSchema: { ...defaultProps },
+        content: "inline" as const,
+      }) as const,
+  ),
+  {
+    meta: { isolating: false },
+
+    /** Editor: BlockNote's own collapsible wrapper, so it behaves like a toggle. */
+    render(block, editor) {
+      const question = document.createElement("p");
+      const wrapper = createToggleWrapper(
+        block as Parameters<typeof createToggleWrapper>[0],
+        editor,
+        question,
+        // Default to expanded — see `faqToggledState`.
+        faqToggledState as Parameters<typeof createToggleWrapper>[3],
+      );
+      return { ...wrapper, contentDOM: question };
+    },
+
+    /**
+     * Published: `<details>` with the question in `<summary>` and the answer
+     * blocks in a wrapper div.
+     *
+     * Deliberately NOT `open`: an FAQ reads as a list of questions you expand,
+     * which is also how the site's marketing accordion behaves. Collapsed
+     * `<details>` still carries its content in the DOM, so nothing is hidden
+     * from crawlers.
+     */
+    toExternalHTML(block) {
+      const details = document.createElement("details");
+      details.className = "article-faq";
+
+      const summary = document.createElement("summary");
+      summary.className = "article-faq-q";
+      const question = document.createElement("p");
+      summary.appendChild(question);
+
+      const answer = document.createElement("div");
+      answer.className = "article-faq-a";
+
+      details.append(summary, answer);
+      addDefaultPropsExternalHTML(block.props, details);
+
+      return { dom: details, contentDOM: question, childrenDOM: answer };
+    },
+  },
+  [
+    createExtension({
+      key: "faq-item-shortcuts",
+      keyboardShortcuts: {
+        /**
+         * Enter on the question moves into the ANSWER, rather than creating a
+         * sibling block after the whole FAQ item.
+         *
+         * Without this the block inherits the default behaviour — Enter makes
+         * a new block *after* the card — which reads as the cursor escaping
+         * the question you were mid-way through answering. A question and its
+         * answer are one thought, so Enter should continue it.
+         *
+         * The answer is created on demand: a FAQ item whose answer was
+         * deleted still takes you somewhere sensible instead of doing nothing.
+         * Adding the child also makes the toggle wrapper reveal its children,
+         * so the caret can never land somewhere collapsed.
+         */
+        Enter: ({ editor }) => {
+          const { block } = editor.getTextCursorPosition();
+          if (block.type !== "faqItem") return false;
+
+          const existing = editor.getBlock(block.id);
+          const firstAnswer = existing?.children?.[0];
+          if (firstAnswer) {
+            editor.setTextCursorPosition(firstAnswer.id, "end");
+            return true;
+          }
+
+          const updated = editor.updateBlock(block, {
+            children: [{ type: "paragraph" }],
+          });
+          const created = updated.children?.[0];
+          if (created) editor.setTextCursorPosition(created.id, "end");
+          return true;
+        },
+      },
+    }),
+  ],
+);
+
 // ── schema ───────────────────────────────────────────────────────────────
 
 export const blockNoteSchema = withMultiColumn(
@@ -494,6 +712,7 @@ export const blockNoteSchema = withMultiColumn(
       // block type and same props plus `alt`, so existing documents keep
       // loading unchanged — they simply pick up the "" default.
       image: imageWithAltBlock(),
+      faqItem: faqItemBlock(),
       tableOfContents: tableOfContentsBlock(),
       htmlBlock: htmlBlock(),
     },

@@ -17,7 +17,7 @@ import type { Category } from "@/app/lib/article-types";
 import { saveCategory } from "../taxonomy/actions";
 import { initialSaveState, type EntitySaveState } from "../lib/form-state";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
-import { slugify } from "@/app/lib/slug";
+import { slugify, slugifyInput } from "@/app/lib/slug";
 
 function Labeled({
   label,
@@ -161,7 +161,7 @@ export default function CategoryForm({
               className="font-mono"
               value={effectiveSlug}
               onChange={(e) => {
-                setSlug(slugify(e.target.value));
+                setSlug(slugifyInput(e.target.value));
                 setSlugTouched(true);
               }}
             />

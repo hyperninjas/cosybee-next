@@ -23,6 +23,9 @@ Type **`/`** anywhere to open the insert menu, then start typing to filter
 | Image / Video / File / Audio | Media blocks (see **Media** below) |
 | Divider | Horizontal rule |
 | **Media library** | Insert an image/video/file you already uploaded (opens the gallery picker) |
+| **FAQ question** | Collapsible Q&A — also tells Google it's an FAQ (see **FAQ** below) |
+| **Table of contents** | Auto‑updating list of this article's H2/H3 headings |
+| **Custom HTML** | Embeds (YouTube, Vimeo, Spotify, Maps) or hand‑written markup |
 | Columns (multi‑column) | Side‑by‑side layout (see **Layout** below) |
 
 ## Quick markdown shortcuts
@@ -40,6 +43,9 @@ Type these at the start of a line and they convert automatically:
 - **Bold**, *italic*, underline, strikethrough, inline `code`
 - **Text & highlight colour**
 - **Link** — click the link button (or just paste a URL onto selected text)
+- **Link to page** — link the selection to another page or article on this
+  site *without* knowing its URL (see **Linking** below)
+- **Link to section** (⚓) — link the selection to a heading in this article
 - **Alignment** — left, center, right, and **justify**
 - **Block type** — convert the selection to a heading/list/etc.
 - **Nesting** — indent / outdent (also `Tab` / `Shift`+`Tab` in lists)
@@ -78,6 +84,44 @@ After inserting an image, select it and use the toolbar to:
 Allowed types: images, video, and documents (PDF/docs). Oversized or unsupported
 files are rejected with a message.
 
+## Linking to our own pages
+
+Select the words you want to link, then click **Link to page** in the toolbar.
+
+- The **selected text is used as the search**, so selecting "heat pumps" in
+  your sentence brings up the heat‑pump article straight away.
+- Type to narrow it down; ↑/↓ move through the list and **Enter** picks the
+  highlighted one. Icons show whether a result is a **site page** or a **blog
+  post**.
+- Only **published** articles appear — a link to a draft would be a dead link
+  until someone remembers to publish it.
+- Links added this way stay on the site (no "opens in a new tab"), and search
+  engines treat them as internal links, which is what passes ranking value
+  between our own pages.
+
+Clicking a link while editing puts your cursor in it rather than opening it.
+To actually visit the target, click the link and use **Open** in the small
+toolbar that appears.
+
+## FAQ questions
+
+Type **`/faq`** to add a question. **The block's own text is the question, and
+anything you nest underneath it is the answer** — press **Enter** after typing
+the question and the cursor moves into the answer for you.
+
+Add more questions the same way; consecutive ones display as a single
+accordion on the published page.
+
+Answers are ordinary content: **bold**, links, bullet lists all work.
+
+> **Why it matters:** an article with FAQ blocks automatically tells Google
+> those are questions and answers, which is what can earn the expandable Q&A
+> results in search. That only works because the questions are genuinely on
+> the page — so don't use FAQ blocks for content that isn't really a FAQ.
+
+A question with no answer yet is simply left out of that data, so a
+half‑written one does no harm.
+
 ## Layout — multi‑column
 
 To place blocks side by side, **drag one block to the left/right edge of
@@ -96,6 +140,22 @@ On mobile, columns stack vertically automatically.
 Insert with `/table`. Click into cells to edit; use the row/column controls that
 appear on hover to add or remove rows and columns.
 
+## The URL (slug)
+
+The **Slug** field in *Post details* is the article's address —
+`/hive/your-slug`. It is **required** and no longer follows the title, so it
+is yours to choose:
+
+- **Generate** fills it in from the title in one click; edit it freely after.
+- It's checked as you type: **Available**, or which post already uses it —
+  including **drafts**, which the check used to miss.
+- Saving is blocked on a clash rather than quietly renaming it, so you get the
+  URL you chose or a clear reason why not.
+
+> **Careful with published posts:** changing the slug of a live article breaks
+> its existing URL — old links and search results will 404. Only change it if
+> you mean to.
+
 ## Saving & publishing
 
 The body is part of the post form — it saves when you **Save** (draft) or
@@ -112,4 +172,8 @@ What you see in the editor is what renders on the live article.
   the same file.
 - Add **alt text** to every image (required); add a caption only when it adds
   something for the reader.
+- Link to our own articles with **Link to page** rather than pasting URLs —
+  it can't produce a typo'd or draft link.
+- Use **FAQ questions** for genuine Q&A; it's the part search engines can
+  surface directly.
 - Keep one idea per block — it makes reordering and multi‑column layouts easier.

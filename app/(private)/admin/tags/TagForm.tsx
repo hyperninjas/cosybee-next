@@ -13,7 +13,7 @@ import {
 import type { Tag } from "@/app/lib/article-types";
 import { saveTag } from "../taxonomy/actions";
 import { initialSaveState } from "../lib/form-state";
-import { slugify } from "@/app/lib/slug";
+import { slugify, slugifyInput } from "@/app/lib/slug";
 
 function Labeled({
   label,
@@ -127,7 +127,7 @@ export default function TagForm({
               className="font-mono"
               value={effectiveSlug}
               onChange={(e) => {
-                setSlug(slugify(e.target.value));
+                setSlug(slugifyInput(e.target.value));
                 setSlugTouched(true);
               }}
             />

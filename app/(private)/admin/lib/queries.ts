@@ -8,6 +8,8 @@ import {
   type Category,
   type Tag,
 } from "@/app/lib/article-types";
+import { getAllArticles } from "@/app/lib/articles";
+import type { LinkTarget } from "@/app/lib/link-targets";
 import { adminApi, type AdminPost, type AdminPostRow } from "./api";
 
 export type { AdminPostRow } from "./api";
@@ -119,12 +121,63 @@ export async function getAuthors(): Promise<Author[]> {
 }
 
 /**
- * Internal link targets for the CTA picker: the canonical site routes
- * plus every published article path. Used as searchable suggestions.
+ * Everything on this site an author can link to: the canonical static pages
+ * plus every PUBLISHED article, as titled, searchable entries.
+ *
+ * Published only, deliberately. A link to a draft is a link to a 404 until
+ * someone remembers to publish it, and the article carrying the link may well
+ * go live first — so an unpublished target is not a suggestion, it is a trap.
+ *
+ * A failure to reach the API degrades to the static pages rather than throwing:
+ * the picker is an authoring convenience, and losing the article list for one
+ * render is far better than an admin screen that won't open. (Contrast the
+ * catalogue crawls in lib/articles.ts, where a short list would be published to
+ * Google as though it were the truth.)
+ */
+export async function getLinkTargets(): Promise<LinkTarget[]> {
+  const pages: LinkTarget[] = ROUTES.map((route) => ({
+    kind: "page",
+    title: route.label,
+    path: route.path,
+  }));
+
+  try {
+    // Same catalogue the sitemap is built from (lib/articles.ts), for three
+    // reasons the admin listing couldn't give us:
+    //
+    //  1. It PAGINATES. `adminApi.listPosts` asks for a flat `limit=50` per
+    //     blog and stops, so past 50 posts the picker would have quietly
+    //     stopped offering older articles — a ceiling with no error.
+    //  2. It reads the PUBLIC endpoint, which serves live posts only. That
+    //     makes "published only" a property of the source rather than a filter
+    //     we have to remember to apply.
+    //  3. Its reads are cached and tagged (CONTENT_TAG), so they are shared
+    //     with the public pages and refreshed by the same admin save.
+    //
+    // The sitemap XML itself is the wrong input despite listing every URL: it
+    // carries no titles, so the picker could only ever show and search slugs.
+    const [hive, learn] = await Promise.all([
+      getAllArticles("hive"),
+      getAllArticles("learn"),
+    ]);
+    const articles: LinkTarget[] = [...hive, ...learn].map((article) => ({
+      kind: "post",
+      title: article.title,
+      path: `/${article.blog}/${article.slug}`,
+      blog: article.blog,
+    }));
+    return [...pages, ...articles];
+  } catch (e) {
+    console.error("getLinkTargets: falling back to static pages only", e);
+    return pages;
+  }
+}
+
+/**
+ * Paths only, for the CTA field's `<datalist>`. Derived from
+ * `getLinkTargets` so the two pickers can never drift apart — this used to
+ * return the static routes alone, despite promising articles too.
  */
 export async function getInternalRoutes(): Promise<string[]> {
-  const staticPaths = ROUTES.map((r) => r.path);
-  // For now, just return static paths
-  // Could fetch published posts from API if needed
-  return staticPaths;
+  return (await getLinkTargets()).map((target) => target.path);
 }

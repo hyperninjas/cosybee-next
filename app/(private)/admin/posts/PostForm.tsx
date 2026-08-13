@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Alert, Spinner } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "@/app/(private)/admin/actions";
 import { initialSaveState } from "@/app/(private)/admin/lib/form-state";
 import { useUnsavedChangesWarning } from "@/app/hooks/useUnsavedChangesWarning";
-import { slugify } from "@/app/lib/slug";
 import {
   PLACEHOLDER_COVER,
   type Author,
@@ -16,6 +15,7 @@ import {
 } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
+import type { LinkTarget } from "@/app/lib/link-targets";
 import TagInput from "./TagInput";
 import { ActionBar, type PostStatus } from "./ActionBar";
 import { AuthorPickerCard } from "./AuthorPickerCard";
@@ -98,8 +98,8 @@ type Props = {
   tagSuggestions?: string[];
   /** Existing authors for dropdown. */
   authors?: Author[];
-  /** Internal site paths for the CTA link picker. */
-  internalRoutes?: string[];
+  /** Pages + published articles offered by the internal link pickers. */
+  linkTargets?: LinkTarget[];
 };
 
 /**
@@ -189,13 +189,30 @@ function parseInitialBlocks(
   }
 }
 
+/**
+ * Size a textarea to fit its content — the "auto then scrollHeight" two-step
+ * is what lets it SHRINK as well as grow (measuring without resetting first
+ * only ever reports the current, already-expanded height).
+ *
+ * `"use no memo"` opts this out of the React Compiler. Under
+ * `compilationMode: "all"` the compiler injects a `useMemoCache` hook into
+ * every top-level function; this one is called from a ref callback and an
+ * effect — neither is a render context — where that hook throws
+ * "Invalid hook call".
+ */
+function fitToContent(el: HTMLTextAreaElement): void {
+  "use no memo";
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
+
 export default function PostForm({
   post,
   defaultBlog,
   categories = [],
   tagSuggestions = [],
   authors = [],
-  internalRoutes = [],
+  linkTargets = [],
 }: Props) {
   const [state, formAction, isPending] = useActionState(
     savePost,
@@ -209,14 +226,34 @@ export default function PostForm({
   // ── Content ─────────────────────────────────────────────────────────
   const [blocks, setBlocks] = useState<PartialBlock[]>(initialBlocks);
   const [title, setTitle] = useState(post?.title ?? "");
+  const titleRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Re-measure the title on every edit.
+  //
+  // This USED to live in the textarea's inline ref callback, relying on the
+  // callback being a new function each render so React would re-invoke it.
+  // The React Compiler (compilationMode: "all") hoists that closure to a
+  // stable module-level function, and React only calls a ref callback whose
+  // identity changed — so the height was measured once, on mount, against an
+  // empty box. Typing a title longer than one line then ran into
+  // `.post-title { overflow: hidden }` and the text was clipped out of sight.
+  //
+  // An effect keyed on the value is immune to that: it re-runs whenever the
+  // title changes, however the component happens to be compiled.
+  useEffect(() => {
+    if (titleRef.current) fitToContent(titleRef.current);
+  }, [title]);
   const [description, setDescription] = useState(post?.description ?? "");
   const [lede, setLede] = useState(post?.lede ?? "");
 
   // ── Slug + routing ──────────────────────────────────────────────────
   const [blog, setBlog] = useState(post?.blog ?? defaultBlog ?? "hive");
+  // The slug is the author's to choose. It used to shadow the title until
+  // someone edited it, which meant the URL of a post nobody had thought about
+  // was whatever the headline happened to say at the moment of saving. It is
+  // now plain state: empty until filled in, by hand or by the
+  // "Generate from title" button in PostDetailsCard.
   const [slug, setSlug] = useState(post?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
-  const effectiveSlug = slugTouched ? slug : slugify(title);
 
   // ── Status ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PostStatus>(post?.status ?? "DRAFT");
@@ -313,7 +350,6 @@ export default function PostForm({
     lede,
     blog,
     slug,
-    slugTouched,
     status,
     authorId,
     authorName,
@@ -380,7 +416,7 @@ export default function PostForm({
       {post && <input type="hidden" name="id" value={post.id} />}
       <input type="hidden" name="coverImage" value={coverUrl} />
       <input type="hidden" name="contentJson" value={JSON.stringify(blocks)} />
-      <input type="hidden" name="slug" value={effectiveSlug} />
+      <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
       <input
@@ -484,11 +520,13 @@ export default function PostForm({
               name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              // Mount-time sizing stays here on purpose: a ref callback runs
+              // BEFORE paint, so opening a post whose title already wraps
+              // never flashes at one row the way a post-paint effect would.
+              // The effect above owns every measurement after that.
               ref={(el) => {
-                if (el) {
-                  el.style.height = "auto";
-                  el.style.height = `${el.scrollHeight}px`;
-                }
+                titleRef.current = el;
+                if (el) fitToContent(el);
               }}
               rows={1}
               placeholder="Post title…"
@@ -502,7 +540,7 @@ export default function PostForm({
 
             <div className="mb-4 text-xs text-muted">
               <span className="font-mono">
-                /{blog}/{effectiveSlug || "…"}
+                /{blog}/{slug || "…"}
               </span>
             </div>
 
@@ -544,7 +582,12 @@ export default function PostForm({
             )}
 
             <div className="post-editor">
-              <Editor initialContent={initialBlocks} onChange={setBlocks} />
+              <Editor
+                initialContent={initialBlocks}
+                onChange={setBlocks}
+                linkTargets={linkTargets}
+                currentPath={slug ? `/${blog}/${slug}` : undefined}
+              />
             </div>
           </div>
         </div>
@@ -590,12 +633,13 @@ export default function PostForm({
 
             <PostDetailsCard
               blog={blog}
-              effectiveSlug={effectiveSlug}
+              slug={slug}
+              postId={post?.id}
+              title={title}
               slugError={errors.slug}
               description={description}
               setDescription={setDescription}
               setSlug={setSlug}
-              setSlugTouched={setSlugTouched}
               authorDate={authorDate}
               setAuthorDate={setAuthorDate}
               lede={lede}
@@ -606,7 +650,7 @@ export default function PostForm({
               blog={blog}
               title={title}
               description={description}
-              effectiveSlug={effectiveSlug}
+              slug={slug}
               seoTitle={seoTitle}
               setSeoTitle={setSeoTitle}
               seoDescription={seoDescription}
@@ -651,7 +695,7 @@ export default function PostForm({
               setCtaHref={setCtaHref}
               ctaExternal={ctaExternal}
               setCtaExternal={setCtaExternal}
-              internalRoutes={internalRoutes}
+              internalRoutes={linkTargets.map((t) => t.path)}
             />
           </div>
         </aside>

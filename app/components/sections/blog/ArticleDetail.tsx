@@ -9,6 +9,7 @@ import {
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { collectFaqItems } from "@/app/lib/blocknoteSchema";
 import { ArticleCard } from "./ArticleCard";
 import { MoreArticlesCard } from "./MoreArticlesCard";
 import { CtaButton } from "@/app/components/ui/Cta";
@@ -22,6 +23,7 @@ import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import {
   blogPostingSchema,
   breadcrumbSchema,
+  faqPageSchema,
   videoObjectSchema,
 } from "@/app/lib/structured-data";
 import { resolveArticleVideos } from "@/app/lib/article-videos";
@@ -73,6 +75,10 @@ export default async function ArticleDetail({
   // Empty for the vast majority of articles, which then emit no video markup
   // at all rather than an empty node.
   const videos = resolveArticleVideos(article);
+  // FAQ blocks in the body, described as a FAQPage. Read from the same blocks
+  // that render the visible accordion, so the markup cannot drift from what a
+  // reader sees — which is Google's condition for showing it at all.
+  const faqs = collectFaqItems(article.contentJson);
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
   const crumbs = [
     { name: "Home", path: "/" },
@@ -96,6 +102,8 @@ export default async function ArticleDetail({
           // One VideoObject per embedded video — omitted entirely when the
           // article has none.
           ...videos.map((video) => videoObjectSchema(video, path)),
+          // Omitted entirely unless the article actually has Q&A blocks.
+          ...(faqs.length ? [faqPageSchema(faqs)] : []),
         ]}
       />
       <ReadingProgress targetSelector="#article-body" />

@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
+  Button,
   Calendar,
   Card,
   DateField,
@@ -9,39 +11,94 @@ import {
   TextArea,
 } from "@heroui/react";
 import { parseDate } from "@internationalized/date";
-import { slugify } from "@/app/lib/slug";
+import { slugify, slugifyInput } from "@/app/lib/slug";
+import { checkSlug, type SlugCheck } from "@/app/(private)/admin/actions";
 import { Labeled } from "./Labeled";
 
+/** How long to wait after the last keystroke before asking the server. */
+const CHECK_DEBOUNCE_MS = 400;
+
 /**
- * "Post details" card — excerpt, slug, byline date, lede. Slug auto-derives
- * from the title until the admin edits it (slugTouched). The byline date
- * is a HeroUI DatePicker speaking the plain `YYYY-MM-DD` wire format.
+ * "Post details" card — excerpt, slug, byline date, lede.
+ *
+ * The slug is entered by hand (or generated from the title in one click) and
+ * checked for availability as it is typed. It used to shadow the title until
+ * someone edited it, which meant a post nobody had thought about got whatever
+ * URL the headline happened to say at the moment of saving.
+ *
+ * The byline date is a HeroUI DatePicker speaking the plain `YYYY-MM-DD`
+ * wire format.
  */
 export function PostDetailsCard({
   blog,
-  effectiveSlug,
+  slug,
+  postId,
+  title,
   slugError,
   description,
   setDescription,
   setSlug,
-  setSlugTouched,
   authorDate,
   setAuthorDate,
   lede,
   setLede,
 }: {
   blog: string;
-  effectiveSlug: string;
+  slug: string;
+  /** Id of the post being edited — it must not conflict with itself. */
+  postId?: string;
+  /** Current title, for "Generate from title". */
+  title: string;
   slugError?: string;
   description: string;
   setDescription: (v: string) => void;
   setSlug: (v: string) => void;
-  setSlugTouched: (v: boolean) => void;
   authorDate: string;
   setAuthorDate: (v: string) => void;
   lede: string;
   setLede: (v: string) => void;
 }) {
+  // The last answer we got, tagged with the slug it was about.
+  const [checked, setChecked] = useState<{
+    slug: string;
+    result: SlugCheck;
+  } | null>(null);
+
+  // Ask the server whether the slug is free, once the typing settles.
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const result = await checkSlug(blog, slug, postId);
+      if (!cancelled) setChecked({ slug, result });
+    }, CHECK_DEBOUNCE_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [blog, slug, postId]);
+
+  // Only trust an answer that is about the slug currently in the box. Storing
+  // the slug alongside the result — rather than clearing state on every
+  // keystroke — means a slow reply for an old slug can never be shown against
+  // a new one, and there is no setState in the effect body to race with it.
+  const check: SlugCheck =
+    checked && checked.slug === slug ? checked.result : { state: "idle" };
+
+  const generated = slugify(title);
+  const canGenerate = Boolean(generated) && generated !== slug;
+
+  // A server-side save error outranks the inline hint: it is newer, and it is
+  // the reason the save actually failed.
+  const message = slugError
+    ? { tone: "error" as const, text: slugError }
+    : check.state === "taken" || check.state === "invalid"
+      ? { tone: "error" as const, text: check.message }
+      : check.state === "available"
+        ? { tone: "ok" as const, text: "Available" }
+        : check.state === "error"
+          ? { tone: "warn" as const, text: check.message }
+          : null;
   return (
     <Card>
       <Card.Header>
@@ -63,22 +120,50 @@ export function PostDetailsCard({
 
         <Labeled
           label="Slug"
-          error={slugError}
-          hint="Auto from the title. Edit to override."
+          hint="The article's URL. Required, and must be unique."
         >
-          <Input
-            variant="secondary"
-            fullWidth
-            className="font-mono"
-            value={effectiveSlug}
-            onChange={(e) => {
-              setSlug(slugify(e.target.value));
-              setSlugTouched(true);
-            }}
-          />
-          <span className="mt-1 block text-xs text-muted">
-            /{blog}/{effectiveSlug || "…"}
+          <div className="flex items-start gap-2">
+            <Input
+              variant="secondary"
+              fullWidth
+              className="font-mono"
+              value={slug}
+              placeholder="my-article"
+              // `slugifyInput`, not `slugify`, while typing: the strict version
+              // strips trailing hyphens, so a dash vanished the instant it was
+              // typed and could not be entered at all.
+              onChange={(e) => setSlug(slugifyInput(e.target.value))}
+              // Settle to the canonical form once focus leaves, so a hyphen
+              // left dangling at the end doesn't reach the URL.
+              onBlur={() => setSlug(slugify(slug))}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              isDisabled={!canGenerate}
+              onPress={() => setSlug(generated)}
+            >
+              Generate
+            </Button>
+          </div>
+          <span className="mt-1 block font-mono text-xs text-muted">
+            /{blog}/{slug || "…"}
           </span>
+          {message && (
+            <span
+              className={`mt-1 block text-xs font-medium ${
+                message.tone === "error"
+                  ? "text-danger"
+                  : message.tone === "ok"
+                    ? "text-success"
+                    : "text-warning"
+              }`}
+            >
+              {message.text}
+            </span>
+          )}
         </Labeled>
 
         {/* Author date — segmented input + pop-out calendar. Wire format

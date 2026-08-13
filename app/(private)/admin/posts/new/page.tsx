@@ -4,7 +4,7 @@ import {
   getAllCategories,
   getAllTags,
   getAuthors,
-  getInternalRoutes,
+  getLinkTargets,
 } from "@/app/(private)/admin/lib/queries";
 
 export default async function NewPostPage({
@@ -15,11 +15,11 @@ export default async function NewPostPage({
   await connection();
   const { blog } = await searchParams;
   const defaultBlog = blog === "learn" ? "learn" : "hive";
-  const [categories, tags, authors, routes] = await Promise.all([
+  const [categories, tags, authors, linkTargets] = await Promise.all([
     getAllCategories(),
     getAllTags(),
     getAuthors(),
-    getInternalRoutes(),
+    getLinkTargets(),
   ]);
 
   // Extract tag names for autocomplete suggestions
@@ -31,7 +31,7 @@ export default async function NewPostPage({
       categories={categories}
       tagSuggestions={tagSuggestions}
       authors={authors}
-      internalRoutes={routes}
+      linkTargets={linkTargets}
     />
   );
 }
