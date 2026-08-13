@@ -1,10 +1,22 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
+import PhraseOfTheWeek from "./PhraseOfTheWeek";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 import { SOCIAL } from "@/app/lib/site";
+import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
+import { getLatestArticles } from "@/app/lib/articles";
 
-const WHY_LINKS = [
+/** Articles shown in the LATEST BLOGS column. */
+const LATEST_COUNT = 4;
+
+/**
+ * Used only when the API returns nothing. The footer renders on every page,
+ * so an empty column — a heading over blank space — would be a sitewide
+ * regression the moment the backend hiccups. These posts are evergreen, so
+ * the fallback is still a set of working links rather than a placeholder.
+ */
+const FALLBACK_LATEST_LINKS = [
   { label: "A Warm Hive, a Cosy Home", href: "/hive/a-warm-hive-a-cosy-home" },
   {
     label: "Energy, Without the Noise",
@@ -38,16 +50,27 @@ const LEGAL_LINKS = [
   { label: "Data Security", href: "/data-security" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  // Live from the blog rather than a hand-maintained list, so the column is
+  // genuinely "latest" and publishing an article is the only step. The read is
+  // tagged (CONTENT_TAG), so an admin save refreshes it sitewide.
+  const latest = await getLatestArticles("hive", LATEST_COUNT);
+  const latestLinks = latest.length
+    ? latest.map((article) => ({
+        label: article.title,
+        href: `/${article.blog}/${article.slug}`,
+      }))
+    : FALLBACK_LATEST_LINKS;
+
   return (
     <footer className="bg-black text-white">
-      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
+      <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.25fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
-        <div>
+        <div className="flex flex-col gap-10">
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
-            className="h-auto w-36"
+            className="h-auto w-30"
             quality={85}
             loading="eager"
           />
@@ -55,8 +78,15 @@ export default function Footer() {
             Smart home energy control that pays for itself. Save up to £300/year
             vs tado.
           </p> */}
+          {/* Phrase of the week — sits under the brand mark, in the column the
+              tagline used to occupy: an editorial line belongs with the brand
+              rather than among the link lists. Rotates weekly by ISO week
+              number (see lib/phrase-of-the-week.ts). */}
+          <div className="">
+            <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
+          </div>
         </div>
-        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.3fr_1fr_1fr] lg:gap-8">
+        <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.25fr_1.25fr_1fr] text-balance lg:gap-8">
           {/* why EnergieBee */}
           <div>
             <h3 className="text-lg font-bold tracking-[0.08em]">
@@ -66,11 +96,20 @@ export default function Footer() {
                 to block containers, so on the inline link it would be a no-op.
                 Keeps long labels from dropping a single orphan word. */}
             <ul className="mt-5 space-y-4.5">
-              {WHY_LINKS.map((link) => (
-                <li key={link.label} className="text-balance">
+              {latestLinks.map((link) => (
+                // Keyed on href, not label: two posts can share a title, but
+                // never a slug.
+                <li key={link.href}>
+                  {/* Article titles are author-written and unbounded, so they
+                      are clamped to two lines to keep the column from growing
+                      unpredictably. `line-clamp` sets `display: -webkit-box`,
+                      so it works applied to the anchor itself. The full title
+                      stays in the DOM for assistive tech, and `title` surfaces
+                      it on hover for sighted users. */}
                   <Link
                     href={link.href}
-                    className="text-[15px] font-medium text-white/80 transition-colors hover:text-white"
+                    title={link.label}
+                    className="line-clamp-2 text-[15px] font-medium text-muted transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
