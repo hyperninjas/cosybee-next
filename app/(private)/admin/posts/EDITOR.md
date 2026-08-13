@@ -17,15 +17,21 @@ You build the article by stacking and arranging blocks.
 
 Recent additions to the editor:
 
+- **FAQ questions** — type `/faq` for a collapsible Q&A that also tells search
+  engines it's an FAQ. See section 6.
+- **Link to page** — link selected text to another page or article on this
+  site without knowing its URL. See section 4.
+- **You choose the URL** — the slug no longer follows the title, and is
+  checked for clashes as you type. See section 11.
 - **Alt text for images** — images now have their own **Alt text** field,
   separate from the caption. Alt text is required; captions are optional.
   See section 5.
 - **Table of contents** — type `/toc` for a live "Contents" box built from the
   article's Heading 2/3s; entries become clickable links on the published page.
-  See section 6.
+  See section 7.
 - **Custom HTML block** — type `/html` and write any HTML with inline CSS in
   it, or paste embed codes. Scripts are stripped for safety; iframes only from
-  approved sites. See section 7.
+  approved sites. See section 8.
 - **Follow / nofollow links** — click any link to toggle **nofollow**,
   **sponsored** or **ugc** on it. See section 4.
 - **Link to section (⚓)** — connect selected text to any Heading 2 or 3 of the
@@ -58,17 +64,17 @@ Recent additions to the editor:
 ## 2. Inserting blocks — the `/` menu
 
 Type **`/`** to open the insert menu, then keep typing to filter
-(e.g. `/head`, `/img`, `/toc`, `/media`). What's available:
+(e.g. `/head`, `/img`, `/faq`, `/toc`, `/media`). What's available:
 
-| Group  | Blocks                                                        |
-| ------ | ------------------------------------------------------------- |
-| Text   | Headings 1–6, Toggle headings (collapsible), Paragraph, Quote |
-| Lists  | Bullet, Numbered, Checklist, Toggle list (collapsible)        |
-| Media  | Image, Video, Audio, File, **Media library**, **Custom HTML** |
-| Layout | Table, Two/Three Columns, Divider                             |
-| Other  | Code block, Emoji, **Table of contents**                      |
+| Group  | Blocks                                                          |
+| ------ | --------------------------------------------------------------- |
+| Text   | Headings 1–6, Toggle headings (collapsible), Paragraph, Quote   |
+| Lists  | Bullet, Numbered, Checklist, Toggle list (collapsible)          |
+| Media  | Image, Video, Audio, File, **Media library**, **Custom HTML**   |
+| Layout | Table, Two/Three Columns, Divider                               |
+| Other  | Code block, Emoji, **FAQ question**, **Table of contents**      |
 
-The three **bold** ones are special to our site — see sections 5–7.
+The **bold** ones are special to our site — see sections 5–8.
 
 ## 3. Formatting text
 
@@ -80,19 +86,25 @@ The three **bold** ones are special to our site — see sections 5–7.
 - **Alignment** — left, centre, right, justify
 - **Turn into** — convert the block to a heading, list, quote…
 - **Indent / outdent** — also **Tab** / **Shift+Tab** inside lists
-- **Link** — see next section
-- **⚓ Link to section** — see next section
+- **Link**, **🔗 Link to page** and **⚓ Link to section** — see next section
 
 ## 4. Links
 
 - **Add a link:** select text and click the link button — or just paste a URL
   onto the selected text.
+- **Link to another page on this site** (🔗): select the words you want to
+  link and click **Link to page**. **The selected text is used as the
+  search** — selecting "heat pumps" brings up the heat-pump article straight
+  away. Type to narrow it down, ↑/↓ to move, **Enter** to pick. Icons show
+  whether a result is a **site page** or a **blog post**. Only **published**
+  articles appear: a link to a draft would be a dead link until someone
+  remembers to publish it.
+- **Link to a section of this article** (⚓): select text, click the anchor
+  button, then pick a heading. Readers who click it jump straight to that
+  section. (Appears once the article has Heading 2/3s.)
 - **Edit a link:** click it — a small toolbar offers **Edit**, **Open** and
-  **Delete**.
-- **Link to a section of this article:** select text and click the **anchor
-  (⚓) button**, then pick a heading from the list. Readers who click it jump
-  straight to that section. (The button appears once the article has
-  Heading 2/3s.)
+  **Delete**. Clicking a link while editing puts your cursor in it rather than
+  opening it; use **Open** to actually visit the target.
 - **SEO toggles** (in the link toolbar): **nofollow**, **sponsored**, **ugc**.
   Most links need none of these. Turn on **sponsored** for paid or affiliate
   links, **ugc** for links submitted by users, **nofollow** when we don't want
@@ -141,7 +153,26 @@ given a preview image) — nothing for you to do.
 Allowed files: images, videos and documents (PDF etc.). Unsupported or
 oversized files are rejected with a message telling you why.
 
-## 6. Table of contents
+## 6. FAQ questions
+
+Type **`/faq`** to add a question. **The block's own text is the question, and
+anything you nest underneath it is the answer** — press **Enter** after typing
+the question and the cursor moves into the answer for you.
+
+Add more questions the same way; consecutive ones display as a single
+accordion on the published page, which readers expand one at a time.
+
+Answers are ordinary content: **bold**, links and bullet lists all work.
+
+> **Why it matters:** an article with FAQ blocks automatically tells Google
+> those are questions and answers, which is what can earn the expandable Q&A
+> results in search. That only works because the questions are genuinely on
+> the page — so don't use FAQ blocks for content that isn't really a FAQ.
+
+A question with no answer yet is simply left out of that data, so a
+half-written one does no harm.
+
+## 7. Table of contents
 
 Type **`/toc`** → **Table of contents**. It inserts a "Contents" box that
 lists every Heading 2 and Heading 3 in the article.
@@ -151,7 +182,7 @@ lists every Heading 2 and Heading 3 in the article.
 - On the published page, the entries become links that scroll the reader there.
 - Best placed near the top, right after the intro paragraph.
 
-## 7. Custom HTML & embeds (YouTube, Maps…)
+## 8. Custom HTML & embeds (YouTube, Maps…)
 
 Type **`/html`** → **Custom HTML**. Use it to embed things the normal blocks
 can't:
@@ -165,7 +196,7 @@ The preview is exactly what readers will see. For safety, scripts are removed
 automatically, and iframe embeds only work from **YouTube, Vimeo, Spotify and
 Google Maps** — embeds from other sites are silently dropped.
 
-## 8. Side-by-side columns
+## 9. Side-by-side columns
 
 - Type **`/columns`** and pick **Two** or **Three Columns**, **or** drag a
   block to the **left/right edge** of another block until it snaps in beside it.
@@ -173,7 +204,7 @@ Google Maps** — embeds from other sites are silently dropped.
 - Drag a block out of a column to dissolve it.
 - On phones, columns stack on top of each other automatically.
 
-## 9. Moving & organising blocks
+## 10. Moving & organising blocks
 
 - Hover a block → **⠿ drag handle** appears on the left. Drag it to move the
   block; click it for actions (delete, duplicate, colours…).
@@ -181,7 +212,23 @@ Google Maps** — embeds from other sites are silently dropped.
 - **Tables:** type `/table`. Click into cells to type; hover the edges for
   **+** buttons and handles to add, move or delete rows and columns.
 
-## 10. Saving & publishing
+## 11. The URL (slug)
+
+The **Slug** field in _Post details_ is the article's address —
+`/hive/your-slug`. It is **required** and no longer follows the title, so it
+is yours to choose:
+
+- **Generate** fills it in from the title in one click; edit it freely after.
+- It's checked as you type: **Available**, or which post already uses it —
+  including **drafts**, which the check used to miss.
+- Saving is blocked on a clash rather than quietly renaming it, so you get the
+  URL you chose or a clear reason why not.
+
+> **Careful with published posts:** changing the slug of a live article breaks
+> its existing URL — old links and search results will 404. Only change it if
+> you mean to.
+
+## 12. Saving & publishing
 
 The editor is part of the post form — one save covers everything (body, title,
 cover, tags, SEO…):
@@ -199,4 +246,8 @@ cover, tags, SEO…):
 - **Reuse** media via `/media` instead of uploading the same file twice.
 - **Alt text on every image** — the post won't save without it. Captions are
   optional; add one only when it tells the reader something extra.
+- Link to our own articles with **Link to page** rather than pasting URLs —
+  it can't produce a typo'd or draft link.
+- Use **FAQ questions** for genuine Q&A; it's the part search engines can
+  surface directly.
 - Keep **one idea per block** — easier to reorder and to arrange in columns.

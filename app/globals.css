@@ -472,6 +472,311 @@
   }
 }
 /* Let the BlockNote editor blend into the page like a document. */
+.post-editor {
+  /* Trailing space under the last block, and a floor under short posts, so
+     the caret is never pinned to the very end of the page and a new post
+     opens with a writing area rather than a single line. This is comfort
+     only — the "/" menu placement is handled in Editor.tsx, which is where
+     the squeezed-menu bug actually lived. */
+  padding-bottom: 20vh;
+  min-height: 50vh;
+}
+/* ── FAQ block INSIDE THE EDITOR ──────────────────────────────────────────
+   Rendered with BlockNote's toggle wrapper, which on its own is
+   indistinguishable from a Toggle List — same chevron, same plain text — so
+   nothing told an author which block they were in. These rules give it the
+   shape it will have when published: a card, the question in bold, the answer
+   indented beneath, and a small label so the block names itself.
+
+   Targets BlockNote's own hooks (`data-content-type` on the content element,
+   `.bn-block-group` for children) rather than classes of ours, so the editor
+   keeps full control of the DOM and we only paint it. */
+.post-editor .bn-block:has(> .bn-block-content[data-content-type="faqItem"]) {
+  position: relative;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 1.9rem 1rem 0.85rem;
+  margin: 0.6rem 0;
+}
+/* Name the block, so "what am I editing?" needs no guessing. */
+.post-editor
+  .bn-block:has(> .bn-block-content[data-content-type="faqItem"])::before {
+  content: "FAQ";
+  position: absolute;
+  top: 0.6rem;
+  left: 1rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #ff8a7a;
+  pointer-events: none;
+}
+/* The question reads as the heading it becomes. */
+.post-editor [data-content-type="faqItem"] .bn-inline-content {
+  font-weight: 700;
+  font-size: 1.02em;
+}
+/* The answer — indented and quieter, mirroring the published panel. */
+.post-editor
+  .bn-block:has(> .bn-block-content[data-content-type="faqItem"])
+  > .bn-block-group {
+  margin-top: 0.35rem;
+  padding-left: 1.55rem;
+  border-left: 2px solid #f1f1f0;
+}
+
+/* ── FAQ accordion in published articles ──────────────────────────────────
+   One `<details>` per question. Consecutive items are welded into a single
+   card — shared borders, rounded only at the top and bottom of the run — so a
+   run of questions reads as one FAQ block rather than a stack of loose boxes.
+   No JavaScript: `<details>` is the accordion, and the answer stays in the DOM
+   while collapsed, which is what keeps the FAQPage markup honest. */
+.article-body .article-faq {
+  /* One source for the corner size, so the card and the hover fill inside it
+     can never round differently. */
+  --faq-radius: 0.75rem;
+  /* The summary sits INSIDE the 1px border, so its corners must curve on a
+     slightly smaller radius or the fill bleeds past the card's curve. */
+  --faq-radius-inner: calc(0.75rem - 1px);
+  border: 1px solid var(--color-border, #e4e4e7);
+  background: #fff;
+  margin: 0;
+}
+.article-body .article-faq + .article-faq {
+  /* Collapse the shared edge so neighbours read as one card. */
+  border-top: none;
+}
+.article-body .article-faq:not(:has(+ .article-faq)) {
+  border-bottom-left-radius: var(--faq-radius);
+  border-bottom-right-radius: var(--faq-radius);
+  margin-bottom: 1.5rem;
+}
+.article-body .article-faq:not(.article-faq + .article-faq) {
+  border-top-left-radius: var(--faq-radius);
+  border-top-right-radius: var(--faq-radius);
+  margin-top: 1.5rem;
+}
+
+/* Round the SUMMARY to match, so its hover fill follows the card's corners
+   instead of painting a square over them. Set explicitly per corner rather
+   than with `border-radius: inherit`, because the summary needs the smaller
+   INNER radius — and because only the corners the card itself rounds should
+   round here: a card mid-run is square, and an OPEN card is square along the
+   bottom where the answer continues. */
+.article-body .article-faq:not(.article-faq + .article-faq) > .article-faq-q {
+  border-top-left-radius: var(--faq-radius-inner);
+  border-top-right-radius: var(--faq-radius-inner);
+}
+.article-body
+  .article-faq:not(:has(+ .article-faq)):not([open])
+  > .article-faq-q {
+  border-bottom-left-radius: var(--faq-radius-inner);
+  border-bottom-right-radius: var(--faq-radius-inner);
+}
+
+.article-body .article-faq-q {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1.45;
+  list-style: none; /* Firefox */
+  transition: background-color 0.12s ease;
+}
+.article-body .article-faq-q::-webkit-details-marker {
+  display: none; /* Safari/Chrome's default triangle */
+}
+.article-body .article-faq-q:hover {
+  background: #fafafa;
+}
+/* Chevron, drawn in CSS so the export stays plain HTML. Rotates on open. */
+.article-body .article-faq-q::after {
+  content: "";
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-top: 0.4rem;
+  margin-left: auto;
+  border-right: 2px solid #8a8a93;
+  border-bottom: 2px solid #8a8a93;
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+.article-body .article-faq[open] > .article-faq-q::after {
+  transform: rotate(-135deg);
+}
+/* The question is a <p> inside <summary>; strip the prose margins. */
+.article-body .article-faq-q > p {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+/* Expand / collapse animation.
+ *
+ * A closed <details> hides its content outright, so there is normally nothing
+ * for a transition to act on — height goes from "not rendered" to "rendered"
+ * with no intermediate values. `::details-content` is the browser's handle on
+ * that hidden box, and two newer CSS features make it animatable:
+ *
+ *   - `interpolate-size: allow-keywords` lets `block-size` interpolate TO
+ *     `auto`, so the panel grows to whatever its content needs rather than a
+ *     hard-coded height that would clip long answers.
+ *   - `transition-behavior: allow-discrete` (the `allow-discrete` keyword on
+ *     content-visibility) keeps the content visible for the duration of the
+ *     closing transition instead of vanishing on frame one.
+ *
+ * `interpolate-size` is set on the block, not `:root`: it inherits, so the
+ * accordion gets it without changing how `auto` sizing behaves anywhere else
+ * on the site.
+ *
+ * Progressive enhancement — a browser without `::details-content` ignores all
+ * of this and opens instantly, exactly as it does today. Nothing breaks. */
+.article-body .article-faq {
+  interpolate-size: allow-keywords;
+}
+.article-body .article-faq::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.28s ease,
+    content-visibility 0.28s allow-discrete;
+}
+.article-body .article-faq[open]::details-content {
+  block-size: auto;
+}
+
+.article-body .article-faq-a {
+  padding: 0 1.25rem 1.15rem;
+}
+.article-body .article-faq-a > :first-child {
+  margin-top: 0;
+}
+.article-body .article-faq-a > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-body .article-faq-q,
+  .article-body .article-faq-q::after,
+  .article-body .article-faq::details-content {
+    transition: none;
+  }
+}
+
+/* ── "Link to page" autocomplete (Editor.tsx) ─────────────────────────────
+   A search field with a filtered dropdown beneath it. Row icons carry the
+   page-vs-article distinction, so the list needs no group headings and each
+   row can stay two lines: title, then path. */
+.bn-link-page-picker {
+  display: flex;
+  flex-direction: column;
+  width: 21rem;
+  max-width: 80vw;
+}
+
+/* Search field — the icon sits inside the box, so the whole thing reads as
+   one input rather than an icon next to a border. */
+.bn-link-page-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.5rem;
+  background: #fff;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.bn-link-page-field:focus-within {
+  border-color: #ff8a7a;
+  box-shadow: 0 0 0 3px rgb(255 138 122 / 0.18);
+}
+.bn-link-page-search-icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: #a1a1aa;
+}
+.bn-link-page-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #18181b;
+}
+.bn-link-page-input::placeholder {
+  color: #a1a1aa;
+}
+
+/* Results */
+.bn-link-page-results {
+  margin-top: 0.4rem;
+  max-height: 16.5rem;
+  overflow-y: auto;
+  /* Room for the focus ring on the first/last rows. */
+  padding: 0.15rem;
+}
+.bn-link-page-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+}
+/* Driven by `data-active`, not :hover — the highlight has to follow the arrow
+   keys as well as the mouse, and only one row may ever look chosen. */
+.bn-link-page-item[data-active] {
+  background: #f4f4f5;
+}
+.bn-link-page-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  margin-top: 0.1rem;
+  color: #8a8a93;
+}
+.bn-link-page-item[data-active] .bn-link-page-icon {
+  color: #ff8a7a;
+}
+.bn-link-page-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bn-link-page-title {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: #18181b;
+  /* Long headlines truncate rather than wrapping to four lines. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bn-link-page-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: #8a8a93;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bn-link-page-empty {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #71717a;
+}
+
 .post-editor .bn-editor {
   padding-inline: 0;
   font-size: 1.125rem;

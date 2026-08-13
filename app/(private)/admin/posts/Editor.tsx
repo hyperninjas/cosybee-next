@@ -2,7 +2,7 @@
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
-import { useRef, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -22,6 +22,7 @@ import {
   type LinkToolbarProps,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
+import { flip, offset, shift, size } from "@floating-ui/react";
 import {
   blockHasType,
   combineByGroup,
@@ -44,6 +45,7 @@ import {
   LINK_REL_TOKENS,
   type LinkRelToken,
 } from "@/app/lib/blocknoteSchema";
+import { searchLinkTargets, type LinkTarget } from "@/app/lib/link-targets";
 import { MediaPickerModal } from "@/app/(private)/admin/media/MediaPickerModal";
 
 type SchemaPartialBlock = typeof schema.PartialBlock;
@@ -53,6 +55,55 @@ type Props = {
   initialContent?: PartialBlock[];
   /** Called with the full document on every edit. */
   onChange: (blocks: PartialBlock[]) => void;
+  /** Pages + published articles offered by the internal link picker. */
+  linkTargets?: LinkTarget[];
+  /** Path of the post being edited, so it can't link to itself. */
+  currentPath?: string;
+};
+
+/**
+ * Floating-UI setup for the "/" menu, replacing BlockNote's default.
+ *
+ * THE BUG: BlockNote pairs `autoPlacement` with `size()`, and `size()` writes
+ * a `max-height` onto the menu element. On the NEXT positioning pass the menu
+ * is already shrunk to that height, so the placement middleware measures a
+ * short element, concludes it fits below the caret, and leaves it there. The
+ * result is the behaviour you can watch: a *little* space below gets a
+ * squeezed, half-visible list, and only when there is almost NO space — so
+ * small that even the shrunken menu overflows — does it finally flip above.
+ * The menu shrinks to fit, which removes the very overflow that would have
+ * triggered the flip.
+ *
+ * THE FIX is the floor below. The menu may never be clamped below
+ * `MIN_MENU_HEIGHT`, so in a cramped gap it keeps overflowing, the overflow is
+ * still there on the next pass, and `flip` moves it above the caret where the
+ * room actually is. Where there IS space, `availableHeight` wins and the menu
+ * grows to use it, scrolling internally past that.
+ *
+ * `flip` rather than `autoPlacement` for predictability: below the caret is
+ * the preferred position and it only ever falls back to above, instead of
+ * re-deciding from scratch on every keystroke.
+ */
+const MIN_MENU_HEIGHT = 220;
+
+const SLASH_MENU_FLOATING_OPTIONS = {
+  useFloatingOptions: {
+    placement: "bottom-start" as const,
+    middleware: [
+      offset(10),
+      flip({ fallbackPlacements: ["top-start"], padding: 10 }),
+      shift({ padding: 10 }),
+      size({
+        padding: 10,
+        apply({ elements, availableHeight }) {
+          elements.floating.style.maxHeight = `${Math.max(
+            MIN_MENU_HEIGHT,
+            availableHeight,
+          )}px`;
+        },
+      }),
+    ],
+  },
 };
 
 /** Small image/library icon for the slash menu entry. */
@@ -142,10 +193,14 @@ function FormattingToolbarWithJustify() {
   const rightIdx = items.findIndex((item) => item.key === "textAlignRightButton");
   if (rightIdx >= 0) items.splice(rightIdx + 1, 0, justify);
   else items.push(justify);
+  // Both internal-link helpers sit immediately after the Link button, in the
+  // order an author reaches for them: another page first, a section of THIS
+  // page second.
+  const pageLink = <LinkToPageButton key="linkToPageButton" />;
   const sectionLink = <LinkToSectionButton key="linkToSectionButton" />;
   const linkIdx = items.findIndex((item) => item.key === "createLinkButton");
-  if (linkIdx >= 0) items.splice(linkIdx + 1, 0, sectionLink);
-  else items.push(sectionLink);
+  if (linkIdx >= 0) items.splice(linkIdx + 1, 0, pageLink, sectionLink);
+  else items.push(pageLink, sectionLink);
   // Alt text sits immediately after Caption: the two are the pair an author
   // fills in for every image, and putting them together makes the distinction
   // (visible caption vs screen-reader description) obvious at the point of use.
@@ -266,6 +321,283 @@ function AltTextButton() {
   );
 }
 
+/**
+ * The link picker's data, shared by context rather than props.
+ *
+ * `FormattingToolbarController` takes a COMPONENT, not an element, so there is
+ * nowhere to pass props through it — and an inline wrapper would be a new
+ * component type on every render, remounting the toolbar and dropping its
+ * popover state mid-interaction. Context crosses the portal BlockNote renders
+ * the toolbar into and keeps the component identity stable.
+ */
+const LinkTargetsContext = createContext<{
+  targets: LinkTarget[];
+  currentPath?: string;
+}>({ targets: [] });
+
+/** Row icon: a static site page. */
+function PageIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="bn-link-page-icon"
+      aria-hidden
+    >
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M7 6.5h.01" />
+    </svg>
+  );
+}
+
+/** Row icon: a blog article. */
+function PostIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="bn-link-page-icon"
+      aria-hidden
+    >
+      <path d="M5 3h11l3 3v15H5z" />
+      <path d="M8.5 9h7" />
+      <path d="M8.5 12.5h7" />
+      <path d="M8.5 16h4" />
+    </svg>
+  );
+}
+
+/** Magnifier shown inside the search field. */
+function SearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="bn-link-page-search-icon"
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
+/** Icon for "Link to a page" — a link glyph over a page. */
+function InternalLinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M14 3h5a2 2 0 0 1 2 2v5" />
+      <path d="M21 14v5a2 2 0 0 1-2 2h-5" />
+      <path d="M10 21H5a2 2 0 0 1-2-2v-5" />
+      <path d="M3 10V5a2 2 0 0 1 2-2h5" />
+      <path d="M9.5 12.5h5" />
+      <path d="M12.5 9.5 15 12l-2.5 2.5" />
+    </svg>
+  );
+}
+
+/**
+ * "Link to page" — links the selected text to another page or published
+ * article on this site, without anyone having to know or paste a URL.
+ *
+ * Works the way the Link button does, which is the point: SELECT the words you
+ * want to link, and the selection is used as the search query. Writing "see
+ * our guide to heat pumps" and selecting "heat pumps" surfaces the heat-pump
+ * article immediately, so the common case is select → click → Enter.
+ *
+ * `editor.createLink(path)` with no text argument replaces the selection's
+ * href and leaves the words alone, so the sentence reads as written. Paths are
+ * site-relative, which is what the publish pipeline (decorateArticleLinks)
+ * uses to tell internal links from external ones — internal links keep their
+ * ranking signal and open in the same tab.
+ *
+ * Only PUBLISHED articles are offered: a link to a draft is a link to a 404
+ * until someone remembers to publish it.
+ *
+ * `"use no memo"` — React-Compiler exempt like every component in this file.
+ */
+function LinkToPageButton() {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+  const { targets, currentPath } = useContext(LinkTargetsContext);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  // Which row Enter will take. Reset to the top whenever the query changes,
+  // because the list underneath it has changed.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  if (targets.length === 0) return null;
+
+  const results = searchLinkTargets(targets, query, {
+    excludePath: currentPath,
+  });
+  const active = Math.min(activeIndex, Math.max(0, results.length - 1));
+
+  const apply = (path: string) => {
+    editor.createLink(path);
+    setOpen(false);
+    // Same trick as BlockNote's own colour menu: refocus once the focus trap
+    // has released, or the caret is left nowhere.
+    setTimeout(() => editor.focus());
+  };
+
+  /** Move the highlight and keep it inside the scroll area. */
+  const move = (delta: number) => {
+    if (results.length === 0) return;
+    // Wraps at both ends, so Up from the first row jumps to the last.
+    const next = (active + delta + results.length) % results.length;
+    setActiveIndex(next);
+    listRef.current
+      ?.querySelector(`[data-index="${next}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  };
+
+  /**
+   * Open the picker with the selected words already in the search box.
+   *
+   * Read here, in the trigger's own click handler, and NOT in the popover's
+   * `onOpenChange`: the button toggles `open` itself, so `onOpenChange` only
+   * fires for dismissals and the seeding placed there never ran. This is also
+   * the last moment the editor selection is reliably readable — once the
+   * popover mounts, its focus trap takes the caret away.
+   */
+  const openWithSelection = () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    setQuery(editor.getSelectedText().trim());
+    setActiveIndex(0);
+    setOpen(true);
+  };
+
+  return (
+    <Components.Generic.Popover.Root
+      open={open}
+      // Dismissals only (outside click, Escape) — opening goes through
+      // `openWithSelection` so the selection is captured first.
+      onOpenChange={setOpen}
+    >
+      <Components.Generic.Popover.Trigger>
+        <Components.FormattingToolbar.Button
+          className="bn-button"
+          label="Link to page"
+          mainTooltip="Link this text to a page or article on this site"
+          icon={<InternalLinkIcon />}
+          onClick={openWithSelection}
+        />
+      </Components.Generic.Popover.Trigger>
+      <Components.Generic.Popover.Content
+        className="bn-popover-content bn-form-popover"
+        variant="form-popover"
+      >
+        <div className="bn-link-page-picker">
+          <div className="bn-link-page-field">
+            <SearchIcon />
+            <input
+              className="bn-link-page-input"
+              value={query}
+              autoFocus
+              // Select the seeded text on open, so the selection is a starting
+              // point rather than something to delete: typing replaces it,
+              // Enter accepts the match it already found.
+              onFocus={(e) => e.currentTarget.select()}
+              placeholder="Search pages and articles…"
+              role="combobox"
+              aria-expanded
+              aria-controls="bn-link-page-list"
+              aria-activedescendant={
+                results[active] ? `bn-link-page-opt-${active}` : undefined
+              }
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveIndex(0);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  move(1);
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  move(-1);
+                } else if (e.key === "Enter") {
+                  // ALWAYS swallow Enter, hit or no hit. This input lives
+                  // inside the post <form>, where a bare Enter submits — so a
+                  // query that matched nothing would have SAVED THE POST.
+                  e.preventDefault();
+                  if (results[active]) apply(results[active].path);
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setOpen(false);
+                }
+              }}
+            />
+          </div>
+
+          <div
+            className="bn-link-page-results"
+            id="bn-link-page-list"
+            role="listbox"
+            ref={listRef}
+          >
+            {results.length === 0 ? (
+              <p className="bn-link-page-empty">
+                Nothing matches “{query}”. Use the link button to paste a URL.
+              </p>
+            ) : (
+              results.map((target, index) => (
+                <button
+                  key={target.path}
+                  type="button"
+                  id={`bn-link-page-opt-${index}`}
+                  data-index={index}
+                  role="option"
+                  aria-selected={index === active}
+                  className="bn-link-page-item"
+                  data-active={index === active ? "" : undefined}
+                  // Highlight follows the mouse too, so clicking never selects
+                  // a different row than the one under the cursor.
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => apply(target.path)}
+                >
+                  {target.kind === "post" ? <PostIcon /> : <PageIcon />}
+                  <span className="bn-link-page-text">
+                    <span className="bn-link-page-title">{target.title}</span>
+                    <span className="bn-link-page-path">{target.path}</span>
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      </Components.Generic.Popover.Content>
+    </Components.Generic.Popover.Root>
+  );
+}
+
 /** Small list icon for the table-of-contents slash menu entry. */
 function TocIcon() {
   return (
@@ -284,6 +616,25 @@ function TocIcon() {
       <path d="M3 6h.01" />
       <path d="M5 12h.01" />
       <path d="M5 18h.01" />
+    </svg>
+  );
+}
+
+/** Question-mark-in-a-panel icon for the FAQ slash menu entry. */
+function FaqIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9.6 9.5a2.4 2.4 0 1 1 3.2 2.3c-.5.2-.8.7-.8 1.2v.4" />
+      <path d="M12 16.5h.01" />
     </svg>
   );
 }
@@ -534,10 +885,33 @@ function LinkToolbarWithRel(props: LinkToolbarProps) {
  *
  * Multi-column support comes from @blocknote/xl-multi-column.
  */
-export default function Editor({ initialContent, onChange }: Props) {
+export default function Editor({
+  initialContent,
+  onChange,
+  linkTargets = [],
+  currentPath,
+}: Props) {
   const editor = useCreateBlockNote({
     schema,
     dropCursor: multiColumnDropCursor,
+    links: {
+      /**
+       * Clicking a link in the editor should place the cursor, not navigate.
+       *
+       * BlockNote's link extension installs a ProseMirror click handler that
+       * calls `window.open(href)` — and it is gated on `view.editable`, so the
+       * behaviour applies ONLY while editing: the one mode where following a
+       * link is never what you meant. Clicking a link to put the caret in it
+       * (to fix a typo, or to reach the link toolbar) fired off a new tab
+       * instead.
+       *
+       * Returning `true` marks the click handled, which suppresses the
+       * navigation and leaves ProseMirror's normal caret placement alone. The
+       * link toolbar still offers an explicit "Open" button for the times you
+       * genuinely do want to visit the target.
+       */
+      onClick: () => true,
+    },
     dictionary: {
       ...en,
       multi_column: multiColumnLocales.en,
@@ -608,6 +982,36 @@ export default function Editor({ initialContent, onChange }: Props) {
     },
   };
 
+  // Custom slash-menu entry for a FAQ question. Each insert is ONE Q&A pair:
+  // the block's own text is the question, and anything nested under it is the
+  // answer. Consecutive pairs render as a single accordion card.
+  const faqSlashItem: DefaultReactSuggestionItem = {
+    title: "FAQ question",
+    subtext: "Collapsible Q&A — also emits FAQ schema for search engines",
+    aliases: ["faq", "question", "accordion", "qa", "q&a"],
+    group: "Basic blocks",
+    icon: <FaqIcon />,
+    onItemClick: () => {
+      const current = editor.getTextCursorPosition().block;
+      editor.insertBlocks(
+        [
+          {
+            type: "faqItem",
+            children: [{ type: "paragraph" }],
+          } as SchemaPartialBlock,
+        ],
+        current.id,
+        "after",
+      );
+      if (
+        current.type === "paragraph" &&
+        (current.content as unknown[]).length === 0
+      ) {
+        editor.removeBlocks([current.id]);
+      }
+    },
+  };
+
   // Custom slash-menu entry for the sanitized raw-HTML block (embeds or
   // hand-written markup).
   const htmlSlashItem: DefaultReactSuggestionItem = {
@@ -664,7 +1068,11 @@ export default function Editor({ initialContent, onChange }: Props) {
   }
 
   return (
-    <>
+    // Provider wraps the whole editor so the link picker — rendered inside the
+    // toolbar's portal — can read the targets.
+    <LinkTargetsContext.Provider
+      value={{ targets: linkTargets, currentPath }}
+    >
       <BlockNoteView
         editor={editor}
         theme="light"
@@ -681,12 +1089,13 @@ export default function Editor({ initialContent, onChange }: Props) {
       >
         <SuggestionMenuController
           triggerCharacter="/"
+          floatingUIOptions={SLASH_MENU_FLOATING_OPTIONS}
           getItems={async (query) =>
             filterSuggestionItems(
               combineByGroup(
                 getDefaultReactSlashMenuItems(editor),
                 getMultiColumnSlashMenuItems(editor),
-                [tocSlashItem, htmlSlashItem, mediaSlashItem],
+                [tocSlashItem, faqSlashItem, htmlSlashItem, mediaSlashItem],
               ),
               query,
             )
@@ -706,6 +1115,6 @@ export default function Editor({ initialContent, onChange }: Props) {
         onOpenChange={setPickerOpen}
         onSelect={handlePick}
       />
-    </>
+    </LinkTargetsContext.Provider>
   );
 }

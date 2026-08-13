@@ -2,6 +2,10 @@
   "name": "cosybee-next",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +20,7 @@
     "@blocknote/xl-multi-column": "^0.51.4",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
+    "@floating-ui/react": "0.27.19",
     "@gravity-ui/icons": "^2.18.0",
     "@heroui/react": "^3.1.0",
     "@heroui/styles": "^3.1.0",

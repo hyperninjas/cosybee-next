@@ -371,21 +371,52 @@ export const adminApi = {
     }
   },
 
-  /** Check if slug exists (for uniqueness). */
-  async checkSlugExists(
+  /**
+   * The post occupying `slug` in `blog`, or null when the slug is free.
+   *
+   * Goes through the ADMIN listing, which carries every status. The previous
+   * version asked the public `/api/posts/:blog/:slug`, and that route serves
+   * live posts only — it 404s for drafts, archived and future-scheduled posts
+   * for everyone, admins included. A slug already held by a draft therefore
+   * read as free, the save kept it, and Postgres rejected it on the
+   * `(blog, slug)` unique index as an opaque failure. Two drafts with similar
+   * titles is the likeliest way to collide at all, so that was the common
+   * path, not an edge case.
+   *
+   * `excludeId` is the post being edited: a post never conflicts with itself.
+   */
+  async findPostBySlug(
     blog: string,
     slug: string,
     excludeId?: string,
-  ): Promise<boolean> {
+  ): Promise<{ id: string; title: string; status: string } | null> {
+    const wanted = slug.trim().toLowerCase();
+    if (!wanted) return null;
     try {
-      const post = await fetchApi<AdminPost | null>(
-        `/api/posts/${blog}/${slug}`,
-      );
-      if (!post) return false;
-      if (excludeId && post.id === excludeId) return false;
-      return true;
-    } catch {
-      return false;
+      // The admin list has no slug filter, so walk pages. `limit` is capped at
+      // 100 upstream; the page cap keeps a runaway catalogue from spinning here.
+      const PER_PAGE = 100;
+      const MAX_PAGES = 20;
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const res = await fetchApi<{
+          data: AdminPost[];
+          pagination?: { totalPages?: number };
+        }>(`/api/admin/posts?blog=${blog}&page=${page}&limit=${PER_PAGE}`);
+        const rows = res.data ?? [];
+        const hit = rows.find((p) => p.slug?.toLowerCase() === wanted);
+        if (hit) {
+          if (excludeId && hit.id === excludeId) return null;
+          return { id: hit.id, title: hit.title, status: hit.status };
+        }
+        const totalPages = res.pagination?.totalPages ?? 1;
+        if (rows.length === 0 || page >= totalPages) break;
+      }
+      return null;
+    } catch (e) {
+      // Deliberately rethrown-as-null is NOT safe here: callers treat null as
+      // "free to use". Surface it so the caller can decide.
+      console.error("findPostBySlug error:", e);
+      throw e;
     }
   },
 

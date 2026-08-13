@@ -6,7 +6,7 @@ import {
   getAllCategories,
   getAllTags,
   getAuthors,
-  getInternalRoutes,
+  getLinkTargets,
 } from "@/app/(private)/admin/lib/queries";
 
 export default async function EditPostPage({
@@ -18,12 +18,12 @@ export default async function EditPostPage({
   // admin pages show up in this form's suggestions without a hard reload.
   await connection();
   const { id } = await params;
-  const [post, categories, tags, authors, routes] = await Promise.all([
+  const [post, categories, tags, authors, linkTargets] = await Promise.all([
     getPost(id),
     getAllCategories(),
     getAllTags(),
     getAuthors(),
-    getInternalRoutes(),
+    getLinkTargets(),
   ]);
   if (!post) notFound();
 
@@ -88,7 +88,7 @@ export default async function EditPostPage({
       categories={categories}
       tagSuggestions={tagSuggestions}
       authors={authors}
-      internalRoutes={routes}
+      linkTargets={linkTargets}
     />
   );
 }

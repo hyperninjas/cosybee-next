@@ -81,26 +81,33 @@ export const TWITTER_HANDLE = "@EnergieBee";
  */
 export const ROUTES: ReadonlyArray<{
   path: string;
+  /**
+   * Human name for the page, used wherever a route is offered as a choice
+   * rather than crawled — the editor's internal-link picker and the CTA link
+   * field. Kept here so the canonical page list stays the single place a new
+   * page is registered.
+   */
+  label: string;
   changeFrequency: "daily" | "weekly" | "monthly" | "yearly";
   priority: number;
   /** ISO date, only when the page publishes a revision date of its own. */
   lastModified?: string;
 }> = [
-  { path: "/", changeFrequency: "weekly", priority: 1.0 },
-  { path: "/smart", changeFrequency: "monthly", priority: 0.9 },
-  { path: "/heating", changeFrequency: "monthly", priority: 0.9 },
-  { path: "/solar", changeFrequency: "monthly", priority: 0.9 },
-  { path: "/energy", changeFrequency: "monthly", priority: 0.9 },
-  { path: "/download-app", changeFrequency: "monthly", priority: 0.8 },
-  { path: "/hive", changeFrequency: "weekly", priority: 0.8 },
-  { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
-  { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/", label: "Home", changeFrequency: "weekly", priority: 1.0 },
+  { path: "/smart", label: "Smart Heating", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/heating", label: "Heating", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/solar", label: "Solar", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/energy", label: "Energy", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/download-app", label: "Download the app", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/hive", label: "The Hive (blog)", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/learn", label: "Learn", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/faq", label: "FAQs", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/contact", label: "Contact", changeFrequency: "yearly", priority: 0.5 },
   // Dates below mirror the "Last updated" line each page renders in its footer.
-  { path: "/terms", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
-  { path: "/privacy", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
-  { path: "/cookies", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
-  { path: "/data-security", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-15" },
+  { path: "/terms", label: "Terms & Conditions", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/privacy", label: "Privacy Policy", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/cookies", label: "Cookie Policy", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-01" },
+  { path: "/data-security", label: "Data Security", changeFrequency: "yearly", priority: 0.3, lastModified: "2026-05-15" },
 ];
 
 /** Absolute URL helper for sitemaps, canonicals, OG image refs, etc. */
