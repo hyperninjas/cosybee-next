@@ -43,6 +43,21 @@ export type Tag = {
 };
 
 /**
+ * A category with a live landing page, plus what the sitemap needs to describe
+ * it. Built server-side by `getCategorySummaries`, but declared here because
+ * the chip row and the browse wrapper are client components and `lib/articles`
+ * is `server-only`. Client-safe.
+ */
+export type CategorySummary = {
+  slug: string;
+  name: string;
+  /** Published articles in this blog filed under it. */
+  count: number;
+  /** Newest article in it — the real "last changed" for the listing. */
+  lastModified: Date;
+};
+
+/**
  * The one identifier a tag is addressed by — in `/hive/tag/<x>` URLs, in the
  * chips that link to them, and in the sitemap.
  *

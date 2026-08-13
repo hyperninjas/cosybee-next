@@ -10,11 +10,15 @@ import { ArticleCard } from "./ArticleCard";
 const LOAD_STEP = 6;
 
 /** Derive the section heading from the active filter, if any. */
-function deriveHeading(query: string, category: string, tag: string): string {
+function deriveHeading(
+  query: string,
+  categoryLabel: string,
+  tag: string,
+): string {
   const q = query.trim();
   if (q) return `Results for "${q}"`;
   if (tag) return `#${tag}`;
-  if (category !== "All") return category;
+  if (categoryLabel) return categoryLabel;
   return "Latest Articles";
 }
 
@@ -23,7 +27,10 @@ type Props = {
   articles: Article[];
   basePath: string;
   query?: string;
+  /** Active category *slug*; "" means All. Matches `article.category.slug`. */
   category?: string;
+  /** Display name for the active category — heading copy only. */
+  categoryLabel?: string;
   tag?: string;
   /** Current browse page (1-based). Only used when no filter is active. */
   page?: number;
@@ -51,14 +58,15 @@ export default function BlogLatestArticles({
   articles,
   basePath,
   query = "",
-  category = "All",
+  category = "",
+  categoryLabel = "",
   tag = "",
   page = 1,
   onPageChange,
   showFeatured = false,
 }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
+  const isFiltered = query.trim() !== "" || category !== "" || tag !== "";
   const [visible, setVisible] = useState(ARTICLES_PER_PAGE);
 
   // Reset the Load-More reveal whenever the active filter changes — React's
@@ -77,7 +85,9 @@ export default function BlogLatestArticles({
     // one inside `.filter` (a render-time loop) throws a useMemoCache size
     // mismatch. See the react-compiler-helper-gotcha note.
     return articles.filter((a) => {
-      if (category !== "All" && a.category?.name !== category) return false;
+      // Matched on slug, not name: the slug is what the URL carries and what
+      // /[blog]/category/[slug] resolves, so both views select the same set.
+      if (category && a.category?.slug !== category) return false;
       if (tag && !a.tags.some((t) => t.name === tag)) return false;
       if (!q) return true;
       const haystack =
@@ -98,7 +108,7 @@ export default function BlogLatestArticles({
     : filtered.slice((page - 1) * ARTICLES_PER_PAGE, page * ARTICLES_PER_PAGE);
   const canLoadMore = isFiltered && visible < filtered.length;
 
-  const heading = deriveHeading(query, category, tag);
+  const heading = deriveHeading(query, categoryLabel, tag);
 
   // Scroll the heading into view after a page change — deferred to an effect
   // (not run inline in the click handler) so it fires AFTER React commits the

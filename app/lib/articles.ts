@@ -7,11 +7,18 @@ import {
   type Article,
   type Author,
   type Category,
+  type CategorySummary,
   type Tag,
 } from "./article-types";
 import { SITE_URL } from "./site";
 
-export type { Article, Author, Category, Tag } from "./article-types";
+export type {
+  Article,
+  Author,
+  Category,
+  CategorySummary,
+  Tag,
+} from "./article-types";
 export { formatReadTime, tagSlug } from "./article-types";
 export type { Blog } from "./api";
 
@@ -539,6 +546,77 @@ export function isIndexableAuthor(
   bio: string | null,
 ): boolean {
   return articleCount >= MIN_AUTHOR_ARTICLES || Boolean(bio?.trim());
+}
+
+/**
+ * Minimum published articles before a category landing page is worth indexing.
+ *
+ * Lower than the tag bar on purpose. Categories are a small, curated set the
+ * editors choose and the site navigates by — they are part of the information
+ * architecture, not a long tail, so even a young one is a real destination that
+ * will fill up. Tags are the opposite: anyone can coin one, most collect a
+ * single article, and a page restating one article it links to is what Google
+ * files under "Crawled – currently not indexed".
+ */
+export const MIN_CATEGORY_ARTICLES = 1;
+
+/**
+ * Whether a category landing page should be indexed *and* listed in the
+ * sitemap. One predicate for both, for the same reason as `isIndexableTag`:
+ * the sitemap and the page's own `robots` must never disagree.
+ */
+export function isIndexableCategory(articleCount: number): boolean {
+  return articleCount >= MIN_CATEGORY_ARTICLES;
+}
+
+/**
+ * Categories that a blog's published articles are actually filed under, keyed
+ * by the category's stored slug — the same value the chips link to and the
+ * category route resolves.
+ *
+ * Derived from the posts rather than read from `/categories` deliberately: the
+ * API's list includes categories with nothing published in them, and a chip or
+ * a sitemap entry pointing at an empty category is a 404 we advertised
+ * ourselves. Every URL this produces has at least one article behind it.
+ */
+export async function getCategorySummaries(
+  blog: Blog,
+): Promise<CategorySummary[]> {
+  const articles = await getAllArticles(blog);
+  const bySlug = new Map<string, CategorySummary>();
+  for (const a of articles) {
+    const { slug, name } = a.category;
+    if (!slug) continue;
+    const modified = lastModifiedOf(a);
+    const existing = bySlug.get(slug);
+    if (!existing) {
+      bySlug.set(slug, { slug, name, count: 1, lastModified: modified });
+      continue;
+    }
+    existing.count += 1;
+    if (modified > existing.lastModified) existing.lastModified = modified;
+  }
+  return [...bySlug.values()];
+}
+
+/**
+ * Resolve a `/[blog]/category/[slug]` URL to its label and articles, or null
+ * when no published article is filed under it.
+ *
+ * Matching is on `category.slug` only — the same field the chips build their
+ * hrefs from — so a category renamed in the admin keeps its URL working
+ * instead of stranding every link and sitemap entry pointing at it. (This is
+ * the failure `getTagArticles` documents; categories are matched the same way
+ * so they can't repeat it.)
+ */
+export async function getCategoryArticles(
+  blog: Blog,
+  slug: string,
+): Promise<{ label: string; articles: Article[] } | null> {
+  const articles = await getAllArticles(blog);
+  const matches = articles.filter((a) => a.category.slug === slug);
+  if (matches.length === 0) return null;
+  return { label: matches[0].category.name, articles: matches };
 }
 
 /** A tag with a live landing page, plus what the sitemap needs to describe it. */

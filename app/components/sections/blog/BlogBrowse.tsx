@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type Article } from "@/app/lib/article-types";
+import {
+  type Article,
+  type CategorySummary,
+} from "@/app/lib/article-types";
 import Divider from "@/app/components/ui/Divider";
 import BlogFeatured from "./BlogFeatured";
 import BlogFilterBar from "./BlogFilterBar";
@@ -10,12 +13,12 @@ import BlogLatestArticles from "./BlogLatestArticles";
 type Props = {
   articles: Article[];
   featured: Article[];
-  categories: readonly string[];
+  categories: readonly CategorySummary[];
   /** Link base for article cards/links, e.g. "/hive" or "/learn". */
   basePath: string;
   /** Initial search query from the URL (?q=…). */
   initialQuery?: string;
-  /** Initial category from the URL (?category=…). */
+  /** Initial category *slug* from the URL (?category=…); "" means All. */
   initialCategory?: string;
   /** Initial tag from the URL (?tag=…). */
   initialTag?: string;
@@ -32,6 +35,13 @@ type Props = {
  * All filter state is mirrored into the URL (?q / ?category / ?tag) via the
  * History API so a shared/bookmarked link reproduces the exact filtered view.
  * State is seeded from the server-parsed URL params for a correct first paint.
+ *
+ * Filtering by category here is the *fast* view of something that also exists
+ * as a real page at /[blog]/category/[slug]. The two are kept from competing by
+ * the category slug: this view mirrors `?category=<slug>` and the hub
+ * canonicalises it to that page, so the pretty URL is the one that gets
+ * indexed. Changing the mirrored value to anything other than the slug breaks
+ * that link — see the hub's generateMetadata.
  */
 export default function BlogBrowse({
   articles,
@@ -39,7 +49,7 @@ export default function BlogBrowse({
   categories,
   basePath,
   initialQuery = "",
-  initialCategory = "All",
+  initialCategory = "",
   initialTag = "",
   page: initialPage = 1,
 }: Props) {
@@ -50,7 +60,10 @@ export default function BlogBrowse({
   // re-slices the already-loaded set instantly; the effect below mirrors it
   // into the URL via replaceState, so there's no server round-trip / re-render.
   const [page, setPage] = useState(initialPage);
-  const isFiltered = query.trim() !== "" || category !== "All" || tag !== "";
+  const isFiltered = query.trim() !== "" || category !== "" || tag !== "";
+  // Heading copy wants the display name, the URL and the filter want the slug.
+  const categoryLabel =
+    categories.find((c) => c.slug === category)?.name ?? "";
 
   // Featured carousel visibility. Hidden when filtering or off page 1; the
   // collapse is instant only for the pagination case (see the JSX comment).
@@ -66,7 +79,7 @@ export default function BlogBrowse({
     if (isFiltered) {
       const q = query.trim();
       if (q) params.set("q", q);
-      if (category !== "All") params.set("category", category);
+      if (category) params.set("category", category);
       if (tag) params.set("tag", tag);
     } else if (page > 1) {
       params.set("page", String(page));
@@ -130,6 +143,7 @@ export default function BlogBrowse({
         basePath={basePath}
         query={query}
         category={category}
+        categoryLabel={categoryLabel}
         tag={tag}
         page={page}
         onPageChange={setPage}
