@@ -471,6 +471,27 @@
     font-size: 2rem;
   }
 }
+/* Links in the editor.
+ *
+ * BlockNote ships no styling for them and we never added any, so a link was
+ * indistinguishable from ordinary text — the only way to find one was to hover
+ * and wait for the link toolbar. Mirrors `.article-body a`, so a link looks
+ * while you write the way it will look to a reader.
+ *
+ * Scoped to `.bn-editor` (the document itself) rather than `.post-editor`, so
+ * it can't catch anchors in BlockNote's own menus. */
+.post-editor .bn-editor a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.post-editor .bn-editor a:hover {
+  /* Not `--accent-hover`: that token is referenced by `.article-body a:hover`
+     but never defined anywhere, so that rule has always been inert. */
+  color: color-mix(in oklch, var(--accent) 82%, black);
+}
+
 /* Let the BlockNote editor blend into the page like a document. */
 .post-editor {
   /* Trailing space under the last block, and a floor under short posts, so
