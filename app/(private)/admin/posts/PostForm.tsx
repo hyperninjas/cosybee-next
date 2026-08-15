@@ -206,6 +206,30 @@ function fitToContent(el: HTMLTextAreaElement): void {
   el.style.height = `${el.scrollHeight}px`;
 }
 
+/**
+ * Turn the schedule picker's `"YYYY-MM-DDTHH:mm"` into an absolute instant.
+ *
+ * MUST happen in the browser. That string carries no timezone, and JavaScript
+ * resolves such a string against whatever process parses it — so doing this in
+ * the server action interpreted the author's wall-clock time as the SERVER's
+ * timezone. With the app on UTC and an author on BST, a post scheduled for
+ * 14:30 was stored as 14:30Z, i.e. 15:30 to the author: an hour in the future,
+ * so `publishedAt <= now` stayed false and the post never went live.
+ *
+ * Worse, it compounded. The editor renders the stored instant in the BROWSER's
+ * timezone (correctly), so each save re-read 15:30, re-parsed it as 15:30Z,
+ * and pushed the time an hour later again — a published post could drift into
+ * the future and quietly unpublish itself.
+ *
+ * In winter the two zones agree and nothing looks wrong, which is why this
+ * only ever misbehaved "sometimes".
+ */
+function localDateTimeToInstant(value: string): string {
+  if (!value) return "";
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+}
+
 export default function PostForm({
   post,
   defaultBlog,
@@ -296,10 +320,14 @@ export default function PostForm({
 
   // ── Byline ──────────────────────────────────────────────────────────
   const [authorDate, setAuthorDate] = useState(() => {
-    if (post?.authorDate) {
-      return new Date(post.authorDate).toISOString().split("T")[0];
-    }
-    return new Date().toISOString().split("T")[0]; // Default to today
+    // Slice the date out of the stored ISO string rather than parsing it: the
+    // byline is a CALENDAR DATE, and routing it through a Date only creates an
+    // opportunity for a timezone to shift it.
+    if (post?.authorDate) return post.authorDate.slice(0, 10);
+    // "Today" means the author's today. `toISOString()` would give the UTC
+    // day, so anyone east of UTC editing after their evening cutover — 06:00
+    // in Dhaka, 01:00 in London — was offered yesterday's date.
+    return new Date().toLocaleDateString("en-CA"); // en-CA renders YYYY-MM-DD
   });
 
   // ── SEO / social ────────────────────────────────────────────────────
@@ -470,7 +498,13 @@ export default function PostForm({
       <input type="hidden" name="ogImageAlt" value={ogImageAlt} />
       <input type="hidden" name="canonicalUrl" value={canonicalUrl} />
       <input type="hidden" name="noindex" value={noindex ? "on" : ""} />
-      <input type="hidden" name="publishedAt" value={publishedAt} />
+      {/* Sent as an ABSOLUTE instant, converted here in the browser — see
+          `localDateTimeToInstant`. */}
+      <input
+        type="hidden"
+        name="publishedAt"
+        value={localDateTimeToInstant(publishedAt)}
+      />
 
       <ActionBar
         editing={Boolean(post)}
@@ -670,6 +704,7 @@ export default function PostForm({
             <ScheduleCard
               publishedAt={publishedAt}
               setPublishedAt={setPublishedAt}
+              status={status}
             />
 
             <FeaturedCarouselCard

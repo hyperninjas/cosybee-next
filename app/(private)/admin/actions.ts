@@ -258,9 +258,16 @@ export async function savePost(
   const categoryId = optStr(formData, "categoryId");
   const category = str(formData, "category") || "Uncategorised";
 
-  // Scheduling: convert the datetime-local string from the form to ISO. An
-  // empty string means "publish immediately" — we send null so the backend
-  // uses its server clock.
+  // Scheduling. The form now sends an ABSOLUTE instant (ISO, with a `Z`),
+  // converted in the browser where the author's timezone is actually known —
+  // see `localDateTimeToInstant` in PostForm. Do NOT go back to parsing a bare
+  // "YYYY-MM-DDTHH:mm" here: a string with no offset resolves against THIS
+  // process's timezone, so a UTC server read an author's BST wall-clock time
+  // an hour early, and every save pushed a published post's time further into
+  // the future until it silently stopped being live.
+  //
+  // An empty string still means "publish immediately" — we send null so the
+  // backend uses its own clock.
   const publishedAtRaw = str(formData, "publishedAt");
   const publishedAtIso = (() => {
     if (!publishedAtRaw) return null;

@@ -7,8 +7,37 @@ import {
   DatePicker,
   TimeField,
 } from "@heroui/react";
+import { useSyncExternalStore } from "react";
 import { parseDateTime, type CalendarDateTime } from "@internationalized/date";
 import { Labeled } from "./Labeled";
+
+/**
+ * "Now", read once and then frozen.
+ *
+ * Deciding whether the chosen time is still in the future needs the clock, and
+ * the clock cannot be read during render: the server and the browser would
+ * produce different text and hydration would mismatch. `useSyncExternalStore`
+ * is the sanctioned way to read an outside value — the server snapshot is 0,
+ * so the notice simply isn't rendered until hydration.
+ *
+ * The value is cached at module level so every read returns the same number.
+ * A snapshot that changed on each call would re-render forever. Being a few
+ * minutes stale is irrelevant to "publishes in about 6 hours".
+ */
+let cachedNow = 0;
+const subscribeToClock = () => {
+  "use no memo";
+  return () => {};
+};
+const readClock = () => {
+  "use no memo";
+  if (!cachedNow) cachedNow = Date.now();
+  return cachedNow;
+};
+const readClockOnServer = () => {
+  "use no memo";
+  return 0;
+};
 
 /**
  * Schedule card — set a future `publishedAt` to delay publication. Only
@@ -22,9 +51,12 @@ import { Labeled } from "./Labeled";
 export function ScheduleCard({
   publishedAt,
   setPublishedAt,
+  status,
 }: {
   publishedAt: string;
   setPublishedAt: (v: string) => void;
+  /** Current save status — a future time only bites a PUBLISHED post. */
+  status: string;
 }) {
   // Parse the stored wire-format string into a CalendarDateTime so both
   // the DatePicker and the in-popover TimeField can share the same value.
@@ -43,6 +75,35 @@ export function ScheduleCard({
   const writeValue = (v: CalendarDateTime | null) => {
     setPublishedAt(v ? v.toString().slice(0, 16) : "");
   };
+
+  /**
+   * How far in the future the chosen time is, in plain words — or null when it
+   * is in the past (i.e. live immediately).
+   *
+   * This exists because a future time is INVISIBLE otherwise: the post saves
+   * as PUBLISHED, the admin lists it as published, and it simply is not on the
+   * site. Worth stating out loud, because the field arrives pre-filled when
+   * you reopen a published post — so a time you never chose can be sitting in
+   * it.
+   */
+  const now = useSyncExternalStore(
+    subscribeToClock,
+    readClock,
+    readClockOnServer,
+  );
+  const goesLiveIn = (() => {
+    if (!publishedAt || !now) return null;
+    const when = new Date(publishedAt);
+    if (isNaN(when.getTime())) return null;
+    const ms = when.getTime() - now;
+    if (ms <= 0) return null;
+    const minutes = Math.round(ms / 60000);
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `${hours} hour${hours === 1 ? "" : "s"}`;
+    const days = Math.round(hours / 24);
+    return `${days} day${days === 1 ? "" : "s"}`;
+  })();
 
   return (
     <Card>
@@ -120,6 +181,31 @@ export function ScheduleCard({
               </div>
             </DatePicker.Popover>
           </DatePicker>
+
+          {/* A future time on a PUBLISHED post means the article is not on the
+              site yet — which is otherwise silent: it saves fine and the admin
+              lists it as published. Say so plainly, and offer the one-click
+              way out, because this field pre-fills itself when you reopen a
+              published post. */}
+          {goesLiveIn && (
+            <div className="mt-2 rounded-md bg-warning/10 px-2.5 py-2 text-xs text-warning-foreground">
+              {status === "PUBLISHED" ? (
+                <>
+                  <strong>Not live yet.</strong> This publishes in about{" "}
+                  {goesLiveIn} and stays hidden until then.{" "}
+                  <button
+                    type="button"
+                    className="font-semibold underline underline-offset-2"
+                    onClick={() => setPublishedAt("")}
+                  >
+                    Publish immediately
+                  </button>
+                </>
+              ) : (
+                <>Scheduled for {goesLiveIn} from now, once you publish it.</>
+              )}
+            </div>
+          )}
         </Labeled>
       </Card.Content>
     </Card>
