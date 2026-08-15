@@ -158,11 +158,24 @@ export function formatReadTime(minutes: number): string {
   return `${minutes} min read`;
 }
 
-/** Format an ISO date string for display (e.g. "5 Jun 2026"). */
+/**
+ * Format an ISO date string for display (e.g. "5 Jun 2026").
+ *
+ * Rendered in UTC, deliberately. Every caller passes `authorDate`, which is a
+ * CALENDAR DATE — "10 August", a day the author picked — stored as midnight
+ * UTC because the column holds a timestamp. Formatting that in the reader's
+ * timezone rolls it backwards for anyone west of UTC, so an article dated
+ * 10 August showed as 9 August in New York and Los Angeles. Pinning to UTC
+ * makes every reader see the date the author actually chose.
+ *
+ * A true instant (`publishedAt`, `updatedAt`) is the opposite case and should
+ * be shown in the reader's own zone — don't route those through here.
+ */
 export function formatDate(isoDate: string): string {
   try {
     const date = new Date(isoDate);
     return date.toLocaleDateString("en-GB", {
+      timeZone: "UTC",
       day: "numeric",
       month: "short",
       year: "numeric",
