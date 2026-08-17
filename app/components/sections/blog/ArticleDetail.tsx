@@ -121,9 +121,27 @@ export default async function ArticleDetail({
   // reader sees — which is Google's condition for showing it at all.
   const faqs = collectFaqItems(article.contentJson);
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
+
+  // Link the category only when it is a real stored category. `normalizeCategory`
+  // invents one — id "", name "Uncategorised" — for posts that have none, and
+  // for the legacy string format, and `/[blog]/category/[slug]` calls notFound()
+  // for a slug it can't resolve. A non-empty id is what separates a row that has
+  // a landing page from a placeholder that would link straight to a 404.
+  const categoryHref =
+    article.category?.id && article.category.slug
+      ? `${basePath}/category/${article.category.slug}`
+      : null;
+
+  // The category sits between the blog and the article, mirroring the URL.
+  // `crumbs` also feeds the BreadcrumbList JSON-LD below, so the structured
+  // trail and the visible one cannot disagree — which is the whole point of
+  // building them from one array.
   const crumbs = [
     { name: "Home", path: "/" },
     { name: blogLabel, path: basePath },
+    ...(categoryHref && article.category?.name
+      ? [{ name: article.category.name, path: categoryHref }]
+      : []),
     { name: article.title, path },
   ];
 
@@ -168,13 +186,25 @@ export default async function ArticleDetail({
 
           {/* title + meta */}
           <header className="mt-4 lg:mt-7">
-            <h1 className="text-[24px] font-bold text-foreground sm:text-[28px]">
+            <h1 className="text-[24px] font-bold text-foreground sm:text-[36px]">
               {article.title}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
-              <span className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
-                {article.category?.name ?? "Uncategorised"}
-              </span>
+              {/* Clickable when the category has a landing page; a plain chip
+                  otherwise, so a placeholder category never becomes a dead
+                  link. Hover mirrors the tag chips below it. */}
+              {categoryHref ? (
+                <Link
+                  href={categoryHref}
+                  className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
+                >
+                  {article.category.name}
+                </Link>
+              ) : (
+                <span className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
+                  {article.category?.name ?? "Uncategorised"}
+                </span>
+              )}
               <Dot />
               <span className="text-muted">
                 {formatReadTime(article.readTime)}

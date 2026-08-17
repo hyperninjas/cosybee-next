@@ -54,34 +54,30 @@ export default function TaggedArticles({
         ]}
       />
 
-      <Section spacing="none" overflow="visible">
-        <Container size="blog" className="pt-16 pb-6">
-          <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
-            <Link href={basePath} className="hover:text-foreground">
-              {blogLabel}
-            </Link>
-            <span className="px-2">/</span>
-            <span className="text-foreground">#{label}</span>
-          </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            #{label}
-          </h1>
-          <p className="mt-2 text-base text-muted">
-            {articles.length} article{articles.length === 1 ? "" : "s"} tagged{" "}
-            <span className="font-medium text-foreground">{label}</span>.
-          </p>
-        </Container>
-      </Section>
+      <section className="mx-auto w-full max-w-300 px-4 pt-16 pb-6 sm:px-6 lg:px-30">
+        <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
+          <Link href={basePath} className="hover:text-foreground">
+            {blogLabel}
+          </Link>
+          <span className="px-2">/</span>
+          <span className="text-foreground">#{label}</span>
+        </nav>
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+          #{label}
+        </h1>
+        <p className="mt-2 text-base text-muted">
+          {articles.length} article{articles.length === 1 ? "" : "s"} tagged{" "}
+          <span className="font-medium text-foreground">{label}</span>.
+        </p>
+      </section>
 
-      <Section spacing="none" overflow="visible">
-        <Container size="blog" className="pb-20">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {articles.map((a) => (
-              <ArticleCard key={a.slug} a={a} basePath={basePath} />
-            ))}
-          </div>
-        </Container>
-      </Section>
+      <section className="mx-auto w-full max-w-300 px-4 pb-20 sm:px-6 lg:px-30">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((a) => (
+            <ArticleCard key={a.slug} a={a} basePath={basePath} />
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

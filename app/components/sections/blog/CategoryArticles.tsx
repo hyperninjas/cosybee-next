@@ -1,8 +1,11 @@
-import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { ArticleCard } from "./ArticleCard";
 import CategoryChips from "./CategoryChips";
 import JsonLd from "@/app/components/JsonLd";
-import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
+import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
+import {
+  breadcrumbSchema,
+  collectionPageSchema,
+} from "@/app/lib/structured-data";
 import type { Article, CategorySummary } from "@/app/lib/article-types";
 
 /**
@@ -40,16 +43,21 @@ export default function CategoryArticles({
   articles: Article[];
 }) {
   const path = `${basePath}/category/${categorySlug}`;
+  // One array drives the JSON-LD and the visible trail, the pairing the
+  // Breadcrumbs component asks for. They had already drifted: the schema
+  // listed Home and the rendered nav started at the blog, so the markup
+  // described a trail the page didn't show.
+  const crumbs = [
+    { name: "Home", path: "/" },
+    { name: blogLabel, path: basePath },
+    { name: label, path },
+  ];
 
   return (
     <main className="flex-1">
       <JsonLd
         data={[
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: blogLabel, path: basePath },
-            { name: label, path },
-          ]),
+          breadcrumbSchema(crumbs),
           collectionPageSchema({
             name: `${label} — ${blogLabel}`,
             description: `${label} articles from EnergieBee.`,
@@ -62,14 +70,8 @@ export default function CategoryArticles({
         ]}
       />
 
-      <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-6">
-        <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
-          <Link href={basePath} className="hover:text-foreground">
-            {blogLabel}
-          </Link>
-          <span className="px-2">/</span>
-          <span className="text-foreground">{label}</span>
-        </nav>
+      <section className="mx-auto w-full max-w-360 px-4 pt-16 pb-6 sm:px-6 lg:px-30">
+        <Breadcrumbs items={crumbs} className="mb-4" />
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           {label}
         </h1>
@@ -88,7 +90,7 @@ export default function CategoryArticles({
         />
       </section>
 
-      <section className="mx-auto w-full max-w-300 px-6 pb-20">
+      <section className="mx-auto w-full max-w-360 px-4 pb-20 sm:px-6 lg:px-30">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((a) => (
             <ArticleCard key={a.slug} a={a} basePath={basePath} />
