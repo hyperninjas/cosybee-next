@@ -57,6 +57,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
   const onAuthors = pathname?.startsWith("/admin/authors") ?? false;
   const onCategories = pathname?.startsWith("/admin/categories") ?? false;
   const onTags = pathname?.startsWith("/admin/tags") ?? false;
+  const onPhrases = pathname?.startsWith("/admin/phrases") ?? false;
   const onTariffs = pathname?.startsWith("/admin/tariffs") ?? false;
   const onMedia = pathname?.startsWith("/admin/media") ?? false;
 
@@ -153,6 +154,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             </Link>
           </div>
           <Link
+            href="/admin/phrases"
+            className={buttonVariants({
+              variant: onPhrases ? "secondary" : "ghost",
+              size: "sm",
+            })}
+          >
+            Phrases
+          </Link>
+          <Link
             href="/admin/tariffs"
             className={buttonVariants({
               variant: onTariffs ? "secondary" : "ghost",
@@ -245,6 +255,9 @@ export function AdminHeader({ user }: { user: AdminUser }) {
                 </Dropdown.Item>
                 <Dropdown.Item id="/admin/tags" textValue="Tags">
                   <Label>Tags</Label>
+                </Dropdown.Item>
+                <Dropdown.Item id="/admin/phrases" textValue="Phrases">
+                  <Label>Phrases</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="/admin/tariffs" textValue="Tariffs">
                   <Label>Tariffs</Label>

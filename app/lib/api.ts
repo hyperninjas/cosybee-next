@@ -69,6 +69,22 @@ export interface ApiPost {
   updatedAt: string;
 }
 
+/**
+ * One entry of the footer's phrase rotation, as the backend returns it
+ * (eb-auth `src/modules/phrases`). `articleLabel` is admin-facing only.
+ */
+export interface ApiPhrase {
+  id: string;
+  quote: string;
+  author: string;
+  articlePath: string;
+  articleLabel: string | null;
+  position: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -230,6 +246,18 @@ export const api = {
   /** All authors. */
   async getAuthors(): Promise<DataResponse<Author[]>> {
     return fetchJson(`/api/posts/authors`, { data: [] });
+  },
+
+  /**
+   * Active entries of the footer's "Phrase of the Week" rotation, in the order
+   * an admin arranged them (/admin/phrases).
+   *
+   * Tolerant like the listing reads, not strict: an empty answer here costs one
+   * footer element, which the component covers with its built-in fallback list
+   * — nothing about the site's crawlable surface depends on it.
+   */
+  async getPhrases(): Promise<DataResponse<ApiPhrase[]>> {
+    return fetchJson(`/api/phrases`, { data: [] });
   },
 
   /** Single article by slug (includes contentHtml). */

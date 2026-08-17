@@ -6,6 +6,11 @@
  * patience, measurement) to a piece of our own writing, so the footer quietly
  * points at the blog instead of advertising it.
  *
+ * The rotation is ADMIN-CURATED: the list, its order, and which entries are in
+ * play all come from the backend (`GET /api/phrases`, admin UI at
+ * /admin/phrases). `FALLBACK_PHRASES` below is the list this feature shipped
+ * with, kept only for the case where that read fails — see its own note.
+ *
  * ROTATION is deterministic, never random: the ISO-8601 week number selects
  * the entry. Everyone sees the same phrase for a given week, it changes on
  * Monday, and the same date always produces the same result — which is what
@@ -13,10 +18,6 @@
  *
  * Client-safe and dependency-free, so both the server render and the browser
  * can derive the same value from a date.
- *
- * ⚠️ Every `article` path must point at a PUBLISHED article. A footer link is
- * on every page of the site, so a wrong slug here is a sitewide 404. All
- * entries below were checked against the live published slug list.
  */
 
 export interface Phrase {
@@ -26,7 +27,19 @@ export interface Phrase {
   article: string;
 }
 
-export const PHRASES: readonly Phrase[] = [
+/**
+ * Last-resort rotation, used only when the API returns nothing.
+ *
+ * The footer is on every page, so a phrase block that can go blank is a
+ * sitewide regression the first time the backend hiccups. These entries are the
+ * ones the database was seeded with, and every path points at a published,
+ * evergreen page — so the fallback degrades to real content, not a placeholder.
+ *
+ * ⚠️ Every `article` path must point at a PUBLISHED page. A wrong slug here is
+ * a sitewide 404. (The admin form picks from published targets, so this
+ * constraint only ever needs hand-checking for the entries below.)
+ */
+export const FALLBACK_PHRASES: readonly Phrase[] = [
   {
     quote:
       "We can only see a short distance ahead, but we can see plenty there that needs to be done.",
@@ -40,43 +53,9 @@ export const PHRASES: readonly Phrase[] = [
     article: "/hive/understanding-solar-energy",
   },
   {
-    quote:
-      "When you can measure what you are speaking about, and express it in numbers, you know something about it; but when you cannot measure it, when you cannot express it in numbers, your knowledge is of a meagre and unsatisfactory kind.",
-    author: "Lord Kelvin",
-    article: "/hive/why-energy-bills-dont-match-epc",
-  },
-  {
     quote: "Adopt the pace of nature: her secret is patience.",
     author: "Ralph Waldo Emerson",
     article: "/hive/from-waste-to-wisdom",
-  },
-  {
-    quote: "Time is but the stream I go a-fishing in.",
-    author: "Henry David Thoreau",
-    article: "/learn/am-i-on-the-best-energy-tariff",
-  },
-  {
-    quote:
-      "The butterfly counts not months but moments, and has time enough.",
-    author: "Rabindranath Tagore",
-    article: "/learn/how-to-reduce-heating-energy-waste",
-  },
-  {
-    quote: "Autumn is a second spring when every leaf is a flower.",
-    author: "Albert Camus",
-    article: "/hive/a-warm-hive-a-cosy-home",
-  },
-  {
-    quote:
-      "Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts.",
-    author: "Rachel Carson",
-    article: "/hive/looking-at-beehives-again-steiner",
-  },
-  {
-    quote:
-      "We do not inherit the Earth from our ancestors; we borrow it from our children.",
-    author: "Antoine de Saint-Exupéry",
-    article: "/learn/should-i-upgrade-to-a-heat-pump",
   },
   {
     quote: "Look deep into nature, and then you will understand everything better.",
@@ -87,22 +66,6 @@ export const PHRASES: readonly Phrase[] = [
     quote: "Nature does not hurry, yet everything is accomplished.",
     author: "Lao Tzu",
     article: "/learn/is-solar-right-for-my-home",
-  },
-  {
-    quote: "Trees are poems that the earth writes upon the sky.",
-    author: "Kahlil Gibran",
-    article: "/hive/a-warm-hive-a-cosy-home",
-  },
-  {
-    quote:
-      "What you do makes a difference, and you have to decide what kind of difference you want to make.",
-    author: "Jane Goodall",
-    article: "/learn/is-solar-right-for-my-home",
-  },
-  {
-    quote: "It's the little things citizens do. That's what will make the difference.",
-    author: "Wangari Maathai",
-    article: "/learn/how-to-reduce-heating-energy-waste",
   },
 ];
 
@@ -136,24 +99,35 @@ export function isoWeek(date: Date): number {
 }
 
 /**
- * Index into `PHRASES` for a given date. Exported for the client to recompute
- * (see PhraseOfTheWeek) and to make the rotation directly testable.
+ * Index into a rotation of `length` entries for a given date. Exported for the
+ * client to recompute (see PhraseOfTheWeek) and to make the rotation directly
+ * testable.
+ *
+ * Guards `length <= 0` because the list is now editable: an admin who
+ * deactivates every phrase would otherwise produce `% 0` → NaN, and NaN as an
+ * array index is `undefined` on every page of the site.
  *
  * `"use no memo"` — see `isoWeek`.
  */
-export function phraseIndexForDate(date: Date): number {
+export function phraseIndexForDate(date: Date, length: number): number {
   "use no memo";
-  return (isoWeek(date) - 1) % PHRASES.length;
+  if (length <= 0) return 0;
+  return (isoWeek(date) - 1) % length;
 }
 
 /**
- * The phrase for a given date. Falls back to the first entry rather than
- * returning undefined — the footer renders on every page, so an out-of-range
- * index must degrade to a real quote, never to a blank block.
+ * The phrase for a given date, out of a supplied rotation. Falls back to the
+ * first entry rather than returning undefined — the footer renders on every
+ * page, so an out-of-range index must degrade to a real quote, never to a
+ * blank block.
  *
  * `"use no memo"` — see `isoWeek`.
  */
-export function phraseForDate(date: Date): Phrase {
+export function phraseForDate(
+  date: Date,
+  phrases: readonly Phrase[] = FALLBACK_PHRASES,
+): Phrase | undefined {
   "use no memo";
-  return PHRASES[phraseIndexForDate(date)] ?? PHRASES[0];
+  const list = phrases.length > 0 ? phrases : FALLBACK_PHRASES;
+  return list[phraseIndexForDate(date, list.length)] ?? list[0];
 }

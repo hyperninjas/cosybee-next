@@ -5,7 +5,7 @@ import PhraseOfTheWeek from "./PhraseOfTheWeek";
 import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
 import { SOCIAL } from "@/app/lib/site";
 import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
-import { getLatestArticles } from "@/app/lib/articles";
+import { getLatestArticles, getPhrases } from "@/app/lib/articles";
 
 /** Articles shown in the LATEST BLOGS column. */
 const LATEST_COUNT = 4;
@@ -52,9 +52,12 @@ const LEGAL_LINKS = [
 
 export default async function Footer() {
   // Live from the blog rather than a hand-maintained list, so the column is
-  // genuinely "latest" and publishing an article is the only step. The read is
-  // tagged (CONTENT_TAG), so an admin save refreshes it sitewide.
-  const latest = await getLatestArticles("hive", LATEST_COUNT);
+  // genuinely "latest" and publishing an article is the only step. Both reads
+  // are tagged (CONTENT_TAG), so an admin save refreshes them sitewide.
+  const [latest, phrases] = await Promise.all([
+    getLatestArticles("hive", LATEST_COUNT),
+    getPhrases(),
+  ]);
   const latestLinks = latest.length
     ? latest.map((article) => ({
         label: article.title,
@@ -80,10 +83,14 @@ export default async function Footer() {
           </p> */}
           {/* Phrase of the week — sits under the brand mark, in the column the
               tagline used to occupy: an editorial line belongs with the brand
-              rather than among the link lists. Rotates weekly by ISO week
-              number (see lib/phrase-of-the-week.ts). */}
+              rather than among the link lists. The list and its order are
+              curated at /admin/phrases; the entry shown rotates weekly by ISO
+              week number (see lib/phrase-of-the-week.ts). */}
           <div className="">
-            <PhraseOfTheWeek initialIndex={phraseIndexForDate(new Date())} />
+            <PhraseOfTheWeek
+              phrases={phrases}
+              initialIndex={phraseIndexForDate(new Date(), phrases.length)}
+            />
           </div>
         </div>
         <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.25fr_1.25fr_1fr] text-balance lg:gap-8">

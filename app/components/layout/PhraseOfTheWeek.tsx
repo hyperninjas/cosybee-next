@@ -2,7 +2,11 @@
 
 import { useSyncExternalStore } from "react";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
-import { PHRASES, phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
+import {
+  FALLBACK_PHRASES,
+  phraseIndexForDate,
+  type Phrase,
+} from "@/app/lib/phrase-of-the-week";
 
 /**
  * The week never changes underneath a loaded page, so there is nothing to
@@ -21,8 +25,9 @@ const subscribe = () => {
 
 /**
  * Phrase of the Week — a quiet editorial line in the footer: one quote, its
- * author, and a link to the article it is paired with. Rotates weekly by ISO
- * week number (see lib/phrase-of-the-week.ts).
+ * author, and a link to the article it is paired with. The rotation is curated
+ * by an admin (/admin/phrases) and handed down as `phrases`; which entry shows
+ * is derived from the ISO week number (see lib/phrase-of-the-week.ts).
  *
  * WHY THIS IS A CLIENT COMPONENT, when a footer has no interactivity:
  * the footer lives in the root layout, which renders on fully static pages
@@ -38,22 +43,29 @@ const subscribe = () => {
  * common case — React bails out of the update and nothing flickers.
  */
 export default function PhraseOfTheWeek({
+  phrases,
   initialIndex,
 }: {
+  /** The curated rotation, active entries only, in admin-chosen order. */
+  phrases: readonly Phrase[];
   /** Index computed during the server render, from `phraseIndexForDate`. */
   initialIndex: number;
 }) {
+  // An empty rotation (every phrase deactivated, or the API unreachable) still
+  // has to render a real quote — the footer is on every page of the site.
+  const list = phrases.length > 0 ? phrases : FALLBACK_PHRASES;
+
   // Hydrates with the server's value (so the first client render matches the
   // HTML exactly), then reads the visitor's own clock. Returning a number
   // keeps the snapshot stable across calls, which is what stops
   // `useSyncExternalStore` from looping.
   const index = useSyncExternalStore(
     subscribe,
-    () => phraseIndexForDate(new Date()),
+    () => phraseIndexForDate(new Date(), list.length),
     () => initialIndex,
   );
 
-  const phrase = PHRASES[index] ?? PHRASES[0];
+  const phrase = list[index] ?? list[0];
 
   return (
     <figure className="relative max-w-3xl">

@@ -25,6 +25,7 @@ export function AdminBreadcrumbs() {
 /** Human label for the current admin route. */
 function currentLabel(pathname: string): string {
   if (pathname.startsWith("/admin/manage-users")) return "Users";
+  if (pathname.startsWith("/admin/phrases")) return "Phrase of the Week";
   if (pathname === "/admin/posts/new") return "New post";
   if (/^\/admin\/posts\/[^/]+\/edit$/.test(pathname)) return "Edit post";
   if (/^\/admin\/posts\/[^/]+\/preview$/.test(pathname)) return "Preview post";

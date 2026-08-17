@@ -490,6 +490,51 @@ export const adminApi = {
   },
 
   // ---------------------------------------------------------------
+  // Phrase of the Week (footer rotation)
+  // ---------------------------------------------------------------
+
+  /** Every phrase, active or not, in rotation order. */
+  async listPhrases(): Promise<AdminPhrase[]> {
+    try {
+      const res = await fetchApi<{ data: AdminPhrase[] }>("/api/admin/phrases");
+      return res.data ?? [];
+    } catch (e) {
+      console.error("listPhrases error:", e);
+      return [];
+    }
+  },
+
+  async createPhrase(input: PhraseInput): Promise<AdminPhrase> {
+    return fetchApi<AdminPhrase>("/api/admin/phrases", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updatePhrase(
+    id: string,
+    input: Partial<PhraseInput>,
+  ): Promise<AdminPhrase> {
+    return fetchApi<AdminPhrase>(`/api/admin/phrases/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deletePhrase(id: string): Promise<void> {
+    await fetchApi(`/api/admin/phrases/${id}`, { method: "DELETE" });
+  },
+
+  /** Apply a whole ordering at once. See the backend's reorder endpoint. */
+  async reorderPhrases(ids: string[]): Promise<AdminPhrase[]> {
+    const res = await fetchApi<{ data: AdminPhrase[] }>(
+      "/api/admin/phrases/reorder",
+      { method: "PATCH", body: JSON.stringify({ ids }) },
+    );
+    return res.data ?? [];
+  },
+
+  // ---------------------------------------------------------------
   // Tariff catalog (read: public /api/tariffs, write: /api/admin/tariffs)
   // ---------------------------------------------------------------
 
@@ -614,6 +659,33 @@ export interface TagInput {
   /** Keep the existing slug stable on rename unless explicitly set. */
   slug?: string;
   description?: string | null;
+}
+
+/**
+ * One entry of the footer's "Phrase of the Week" rotation
+ * (eb-auth `src/modules/phrases`).
+ */
+export interface AdminPhrase {
+  id: string;
+  quote: string;
+  author: string;
+  /** Site-relative path of the paired page, e.g. "/hive/why-a-bee". */
+  articlePath: string;
+  /** Title of that page when it was picked — admin display only. */
+  articleLabel: string | null;
+  /** 0-based slot in the rotation. */
+  position: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PhraseInput {
+  quote: string;
+  author: string;
+  articlePath: string;
+  articleLabel?: string | null;
+  isActive?: boolean;
 }
 
 // ---------------------------------------------------------------

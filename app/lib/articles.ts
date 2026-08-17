@@ -11,6 +11,7 @@ import {
   type Tag,
 } from "./article-types";
 import { SITE_URL } from "./site";
+import { FALLBACK_PHRASES, type Phrase } from "./phrase-of-the-week";
 
 export type {
   Article,
@@ -708,4 +709,22 @@ export async function getTagArticles(
     matches[0].tags.find((t) => t.slug === slug)?.name ??
     slug.replace(/-/g, " ");
   return { label, articles: matches };
+}
+
+/**
+ * The footer's phrase rotation, as the site should render it: active entries
+ * in the order an admin arranged at /admin/phrases.
+ *
+ * Returns the built-in fallback list when the backend has nothing to say — the
+ * footer is on every page, so "no phrases" must still be a real quote pointing
+ * at a real article rather than an empty block.
+ */
+export async function getPhrases(): Promise<Phrase[]> {
+  const response = await api.getPhrases();
+  const phrases = (response.data ?? []).map((p) => ({
+    quote: p.quote,
+    author: p.author,
+    article: p.articlePath,
+  }));
+  return phrases.length > 0 ? phrases : [...FALLBACK_PHRASES];
 }
