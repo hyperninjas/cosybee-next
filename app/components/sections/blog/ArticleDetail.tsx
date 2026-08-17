@@ -37,6 +37,45 @@ type Props = {
 };
 
 /**
+ * NewsNow locates an article's body and its author by literal HTML comments in
+ * the served markup — `<!-- Article Start -->` / `<!-- Article End -->` around
+ * the content, `<!-- Author Start -->` / `<!-- Author End -->` around the name.
+ *
+ * They have to be injected as raw HTML. A JSX comment is a JavaScript
+ * construct and never reaches the DOM, and React cannot render a bare comment
+ * node — so a marker written the obvious way would sit in the source and be
+ * absent from the page, which is precisely the failure this guards against.
+ */
+const ARTICLE_START = "<!-- Article Start -->";
+const ARTICLE_END = "<!-- Article End -->";
+
+/** Minimal escaping for text interpolated into a raw-HTML string. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * The author's name, bracketed by NewsNow's author markers.
+ *
+ * A `<span>` is unavoidable: the comments can only be produced through
+ * `dangerouslySetInnerHTML`, which needs a host element. It carries no styling,
+ * so the byline is unchanged visually. The name is escaped because it is
+ * author-supplied data being placed into raw HTML.
+ */
+function MarkedAuthorName({ name }: { name: string }) {
+  return (
+    <span
+      dangerouslySetInnerHTML={{
+        __html: `<!-- Author Start -->${escapeHtml(name)}<!-- Author End -->`,
+      }}
+    />
+  );
+}
+
+/**
  * Renders a full blog article — breadcrumb trail, header/meta, hero image,
  * lede, block body (paragraphs + lists, with auto-linked URLs),
  * optional inline image and end-of-article CTA, plus a related rail.
@@ -106,10 +145,15 @@ export default async function ArticleDetail({
           ...(faqs.length ? [faqPageSchema(faqs)] : []),
         ]}
       />
-      <ReadingProgress targetSelector="#article-body" />
+      <ReadingProgress targetSelector="#post" />
       <div className="mx-auto flex max-w-300 justify-center gap-10 px-0 xl:px-6">
+        {/* `id="post"`, not `article-body`: this element spans the whole post
+            — breadcrumb, header, hero, body, CTA — while `.article-body`
+            below is the prose alone. Sharing one name made it easy to read
+            the two as the same region, and only the inner one is the article
+            as NewsNow (or any extractor) should see it. */}
         <article
-          id="article-body"
+          id="post"
           className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 xl:px-0 lg:pt-18.5 lg:pb-20"
         >
           {/* breadcrumb trail (replaces the old "Back to Blog" button) */}
@@ -172,11 +216,13 @@ export default async function ArticleDetail({
                       href={`/author/${article.author.slug}`}
                       className="font-bold text-lg text-foreground transition-colors hover:text-[#FF8A7A]"
                     >
-                      {article.author.name}
+                      <MarkedAuthorName name={article.author.name} />
                     </Link>
                   ) : (
                     <div className="font-bold text-lg text-foreground">
-                      {article.author?.name ?? "energiebee"}
+                      <MarkedAuthorName
+                        name={article.author?.name ?? "energiebee"}
+                      />
                     </div>
                   )}
                   <time
@@ -238,10 +284,16 @@ export default async function ArticleDetail({
             </p>
           )}
 
-          {/* body — server-rendered HTML from the BlockNote document */}
+          {/* Body — server-rendered HTML from the BlockNote document, wrapped
+              in NewsNow's article markers. They go INSIDE this div, hugging the
+              prose itself: the <article> element around it also carries the
+              breadcrumb, byline and share control, none of which are the
+              article. */}
           <div
             className="article-body mt-10 text-foreground wrap-break-word [&_a]:break-all"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{
+              __html: `${ARTICLE_START}${html}${ARTICLE_END}`,
+            }}
           />
 
           {/* end-of-article CTA */}
