@@ -49,7 +49,7 @@ export default function TaggedArticles({
         ]}
       />
 
-      <section className="mx-auto w-full max-w-300 px-6 pt-16 pb-6">
+      <section className="mx-auto w-full max-w-300 px-4 pt-16 pb-6 sm:px-6 lg:px-30">
         <nav className="mb-4 text-sm text-muted" aria-label="Breadcrumb">
           <Link href={basePath} className="hover:text-foreground">
             {blogLabel}
@@ -66,7 +66,7 @@ export default function TaggedArticles({
         </p>
       </section>
 
-      <section className="mx-auto w-full max-w-300 px-6 pb-20">
+      <section className="mx-auto w-full max-w-300 px-4 pb-20 sm:px-6 lg:px-30">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((a) => (
             <ArticleCard key={a.slug} a={a} basePath={basePath} />
