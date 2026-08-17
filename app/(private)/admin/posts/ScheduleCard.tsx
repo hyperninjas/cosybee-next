@@ -24,16 +24,55 @@ import { Labeled } from "./Labeled";
  * A snapshot that changed on each call would re-render forever. Being a few
  * minutes stale is irrelevant to "publishes in about 6 hours".
  */
-let cachedNow = 0;
-const subscribeToClock = () => {
+/** How often the countdown re-reads the clock. Fine for minutes-and-up
+ *  phrasing, and cheap: one timer shared by every subscriber. */
+const CLOCK_TICK_MS = 30_000;
+
+let clockNow = 0;
+const clockListeners = new Set<() => void>();
+let clockTimer: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Start ticking while anything is watching, and stop when nothing is.
+ *
+ * The first version of this returned a no-op and froze the timestamp, which
+ * did prevent the render loop but also meant the countdown never moved: it
+ * said "publishes in 2 minutes" indefinitely, and the notice stayed up long
+ * after the post had gone live. A real subscription fixes both — React
+ * re-renders on each tick, and once the time passes the notice removes itself.
+ *
+ * `"use no memo"` — React Compiler runs in `compilationMode: "all"` and would
+ * otherwise inject a `useMemoCache` hook into these top-level functions, which
+ * throws when React calls them outside a render.
+ */
+const subscribeToClock = (onStoreChange: () => void) => {
   "use no memo";
-  return () => {};
+  clockListeners.add(onStoreChange);
+  clockTimer ??= setInterval(() => {
+    clockNow = Date.now();
+    for (const listener of clockListeners) listener();
+  }, CLOCK_TICK_MS);
+  return () => {
+    clockListeners.delete(onStoreChange);
+    if (clockListeners.size === 0 && clockTimer) {
+      clearInterval(clockTimer);
+      clockTimer = null;
+    }
+  };
 };
+
+/**
+ * The snapshot must be STABLE between ticks. Returning `Date.now()` on every
+ * call would hand React a new value each render and loop forever, which is why
+ * the timestamp is cached and only the interval above moves it.
+ */
 const readClock = () => {
   "use no memo";
-  if (!cachedNow) cachedNow = Date.now();
-  return cachedNow;
+  if (!clockNow) clockNow = Date.now();
+  return clockNow;
 };
+
+/** 0 on the server, so the notice simply isn't rendered until hydration. */
 const readClockOnServer = () => {
   "use no memo";
   return 0;
@@ -91,18 +130,42 @@ export function ScheduleCard({
     readClock,
     readClockOnServer,
   );
-  const goesLiveIn = (() => {
+  const goesLive = (() => {
     if (!publishedAt || !now) return null;
     const when = new Date(publishedAt);
     if (isNaN(when.getTime())) return null;
     const ms = when.getTime() - now;
     if (ms <= 0) return null;
-    const minutes = Math.round(ms / 60000);
-    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
-    const hours = Math.round(minutes / 60);
-    if (hours < 48) return `${hours} hour${hours === 1 ? "" : "s"}`;
-    const days = Math.round(hours / 24);
-    return `${days} day${days === 1 ? "" : "s"}`;
+
+    // Largest unit that fits, so a two-day wait reads "in 2 days" rather than
+    // "in 48 hours". `numeric: "auto"` also turns the awkward cases into
+    // English — one day out becomes "tomorrow", not "in 1 day".
+    const relativeFormat = new Intl.RelativeTimeFormat("en-GB", {
+      numeric: "auto",
+    });
+    const minutes = Math.round(ms / 60_000);
+    const relative =
+      minutes < 1
+        ? "in under a minute"
+        : minutes < 60
+          ? relativeFormat.format(minutes, "minute")
+          : ms < 86_400_000
+            ? relativeFormat.format(Math.round(ms / 3_600_000), "hour")
+            : relativeFormat.format(Math.round(ms / 86_400_000), "day");
+
+    // The exact moment matters more than the countdown — "in 14 hours" is
+    // hard to act on, "Sat 16 Aug, 09:00" is something you can check against a
+    // calendar. Rendered on the author's own clock, which is the clock they
+    // will compare it to.
+    const exact = when.toLocaleString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return { relative, exact };
   })();
 
   return (
@@ -187,12 +250,13 @@ export function ScheduleCard({
               lists it as published. Say so plainly, and offer the one-click
               way out, because this field pre-fills itself when you reopen a
               published post. */}
-          {goesLiveIn && (
+          {goesLive && (
             <div className="mt-2 rounded-md bg-warning/10 px-2.5 py-2 text-xs text-warning-foreground">
               {status === "PUBLISHED" ? (
                 <>
-                  <strong>Not live yet.</strong> This publishes in about{" "}
-                  {goesLiveIn} and stays hidden until then.{" "}
+                  <strong>Not live yet.</strong> Publishes{" "}
+                  {goesLive.relative} — {goesLive.exact} — and stays hidden
+                  until then.{" "}
                   <button
                     type="button"
                     className="font-semibold underline underline-offset-2"
@@ -202,7 +266,10 @@ export function ScheduleCard({
                   </button>
                 </>
               ) : (
-                <>Scheduled for {goesLiveIn} from now, once you publish it.</>
+                <>
+                  Scheduled for {goesLive.exact} ({goesLive.relative}). Takes
+                  effect once you publish.
+                </>
               )}
             </div>
           )}
