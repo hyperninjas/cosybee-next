@@ -179,7 +179,7 @@ export default async function ArticleDetail({
 
           {/* title + meta */}
           <header className="mt-4 lg:mt-7">
-            <h1 className="text-[24px] font-bold text-foreground sm:text-[28px]">
+            <h1 className="text-[24px] font-bold text-foreground sm:text-[36px]">
               {article.title}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">

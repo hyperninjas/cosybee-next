@@ -115,11 +115,19 @@
 .article-body h3 {
   color: var(--foreground);
   font-weight: 700;
-  /* Match the editor: BlockNote headings inherit the .bn-editor 1.7
-     line-height and aren't width-constrained, so drop the article's tighter
-     line-height + max-width. */
+  /* Matched to the editor, which is why these aren't width-constrained.
+     The 1.7 leading is inherited from `.bn-editor` and is body-copy
+     spacing — on a 2.25rem h2 it opens a 3.8rem line box, so a heading
+     that wraps reads as two loosely separated lines. Headings are set
+     tighter below; the editor gets the same value so what you write still
+     matches what publishes. */
   line-height: 1.7;
   margin-top: 1.5rem;
+}
+/* Headings are display type, not prose: they want leading close to their own
+   size. Applied to h2 only for now — h1 and h3 keep the inherited 1.7. */
+.article-body h2 {
+  line-height: 1.25 !important;
 }
 /* Editor heading sizes are `--level`em × the 1.125rem editor base:
    h1 3em, h2 2em, h3 1.3em — mirrored here in rem. */
@@ -709,7 +717,9 @@
   border: 1px solid #e4e4e7;
   border-radius: 0.5rem;
   background: #fff;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 .bn-link-page-field:focus-within {
   border-color: #ff8a7a;
@@ -803,6 +813,12 @@
   font-size: 1.125rem;
   line-height: 1.7;
   background-color: transparent;
+}
+/* Mirrors `.article-body h2`. The two were deliberately matched, so tightening
+   one alone would mean a heading wrapped differently while writing than when
+   published. */
+.post-editor .bn-editor h2 {
+  line-height: 1.25;
 }
 .post-editor .bn-container {
   background: transparent;
