@@ -6,7 +6,7 @@ import {
   getRelated,
 } from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
-import { RSS_ALTERNATE_TYPES } from "@/app/lib/site";
+import { RSS_ALTERNATE_TYPES, TWITTER_HANDLE } from "@/app/lib/site";
 import {
   openGraphVideos,
   resolveArticleVideos,
@@ -72,6 +72,21 @@ export async function generateMetadata({
       // Spread-or-omit for the same reason as `robots` above: a present key
       // holding an empty array still renders as "this page declares no video".
       ...(videos.length ? { videos } : {}),
+    },
+    // Must be declared even though it largely restates openGraph: X reads the
+    // `twitter:*` tags in preference to `og:*`, and Next merges metadata
+    // shallowly — a page that never mentions `twitter` inherits the root
+    // layout's block WHOLESALE, tagline and site-wide card included. Articles
+    // were therefore shared on X as the generic EnergieBee card, ignoring the
+    // per-article og:image above. Same shallow-merge trap as `robots` and
+    // `videos`, and the reason pageMetadata (lib/seo.ts) always emits both.
+    twitter: {
+      card: "summary_large_image",
+      site: TWITTER_HANDLE,
+      creator: TWITTER_HANDLE,
+      title: `${seoTitle} — EnergieBee`,
+      description: article.seoDescription ?? article.description,
+      images: [`/api/og/article/hive/${article.slug}`],
     },
   };
 }
