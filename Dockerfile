@@ -36,6 +36,11 @@ ENV NODE_ENV=production
 #   NEXT_PUBLIC_CLARITY_PROJECT_ID  Clarity project ID (empty disables Clarity)
 #   NEXT_PUBLIC_APP_STORE_ID        App Store ID, bare digits e.g. 6771356608
 #                                   — NOT a URL (empty → "coming soon")
+#   NEXT_PUBLIC_APP_STORE_STOREFRONT
+#                                   App Store storefront country code for the
+#                                   listing URL (empty → "gb"); must be a country
+#                                   the app is published in, else non-published
+#                                   regions get "not available in your country"
 #   NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME
 #                                   Android application ID e.g. com.energiebee.app
 #                                   — NOT a URL (empty → "coming soon")
@@ -62,6 +67,8 @@ ARG NEXT_PUBLIC_CLARITY_PROJECT_ID
 ENV NEXT_PUBLIC_CLARITY_PROJECT_ID=$NEXT_PUBLIC_CLARITY_PROJECT_ID
 ARG NEXT_PUBLIC_APP_STORE_ID
 ENV NEXT_PUBLIC_APP_STORE_ID=$NEXT_PUBLIC_APP_STORE_ID
+ARG NEXT_PUBLIC_APP_STORE_STOREFRONT
+ENV NEXT_PUBLIC_APP_STORE_STOREFRONT=$NEXT_PUBLIC_APP_STORE_STOREFRONT
 ARG NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME
 ENV NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME=$NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME
 ARG GOOGLE_SITE_VERIFICATION

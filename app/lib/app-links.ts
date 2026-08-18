@@ -9,6 +9,7 @@
  * `https://apps.apple.com/app/idhttps://apps.apple.com/...`) with no error, so
  * set exactly:
  *   NEXT_PUBLIC_APP_STORE_ID=6771356608                 ← bare numeric ID, no "id" prefix
+ *   NEXT_PUBLIC_APP_STORE_STOREFRONT=gb                  ← country code only (optional, defaults to gb)
  *   NEXT_PUBLIC_PLAY_STORE_PACKAGE_NAME=com.energiebee.app
  *
  * `NEXT_PUBLIC_*` values are inlined into the client bundle at build time, so
@@ -34,6 +35,21 @@ function storeId(value: string | undefined): string | null {
 export const APP_STORE_ID: string | null = storeId(
   process.env.NEXT_PUBLIC_APP_STORE_ID,
 );
+
+/**
+ * Storefront segment of the App Store listing URL (an ISO country code).
+ *
+ * A storefront-less `apps.apple.com/app/id…` URL resolves against the
+ * VISITOR's storefront, so anyone outside the countries the app is published
+ * in lands on "not available in your country". Pinning the storefront to a
+ * country the app IS published in (`/gb/app/id…`) makes the listing open for
+ * everyone; iOS still sends buyers to their own storefront when they tap Get.
+ *
+ * Add more publishing countries → this stays as-is; it only needs changing if
+ * the app is ever pulled from this storefront.
+ */
+export const APP_STORE_STOREFRONT: string =
+  storeId(process.env.NEXT_PUBLIC_APP_STORE_STOREFRONT) ?? "gb";
 
 /** Android application ID — the `?id=` query value in the Play listing URL. */
 export const PLAY_STORE_PACKAGE_NAME: string | null = storeId(

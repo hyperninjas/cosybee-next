@@ -1,3 +1,5 @@
+import { APP_STORE_STOREFRONT } from "@/app/lib/app-links";
+
 import AppStoreBadge from "./AppStoreBadge";
 
 /**
@@ -7,7 +9,9 @@ import AppStoreBadge from "./AppStoreBadge";
  * class on the wrapper.
  *
  * Takes the bare numeric App Store ID (see app/lib/app-links.ts) and builds
- * the https listing URL from it. No `itms-apps://` deep link on purpose:
+ * the https listing URL from it, pinned to APP_STORE_STOREFRONT so the listing
+ * opens worldwide instead of 404-ing for visitors whose own storefront the app
+ * has not shipped to yet. No `itms-apps://` deep link on purpose:
  * apps.apple.com is a registered universal link, so iOS opens the App Store
  * app directly from the https URL — and unlike a custom scheme it still
  * works in WebViews and on desktop instead of dead-ending.
@@ -52,7 +56,7 @@ export default function AppStoreButton({
 
   return (
     <a
-      href={`https://apps.apple.com/app/id${appId}`}
+      href={`https://apps.apple.com/${APP_STORE_STOREFRONT}/app/id${appId}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Download on the App Store"
