@@ -13,6 +13,7 @@ import GoogleTagManager, {
 import Clarity from "./components/Clarity";
 import { DeferredClientLayer } from "./components/DeferredClientLayer";
 import {
+  IS_PRODUCTION,
   ORG_ADDRESS,
   ORG_CONTACT_EMAIL,
   ORG_LEGAL_NAME,
@@ -93,18 +94,27 @@ export const metadata: Metadata = {
     site: TWITTER_HANDLE,
     images: [DEFAULT_OG_IMAGE.url],
   },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
+  // Only the canonical production host invites indexing. The sandbox and
+  // preview deploys emit `noindex, nofollow` instead, matching the site-wide
+  // X-Robots-Tag header those builds already send (next.config.ts) — a page
+  // that says "index" in its HTML while the response header says "noindex" is
+  // a contradiction, and crawlers that read only one of the two would take the
+  // wrong half. No per-page metadata sets `index: true`, so gating it here
+  // covers every route on the site.
+  robots: IS_PRODUCTION
+    ? {
+        index: true,
+        follow: true,
+        nocache: false,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      }
+    : { index: false, follow: false, nocache: true },
   // icons are auto-injected by Next from app/icon.tsx and app/apple-icon.tsx
   // — no need to repeat them here.
   referrer: "origin-when-cross-origin",
