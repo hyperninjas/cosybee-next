@@ -9,6 +9,7 @@ import {
   type Category,
   type CategorySummary,
   type Tag,
+  UNCATEGORISED_SLUG,
 } from "./article-types";
 import { SITE_URL } from "./site";
 import { FALLBACK_PHRASES, type Phrase } from "./phrase-of-the-week";
@@ -33,7 +34,7 @@ function normalizeCategory(
       id: "",
       blog,
       name: "Uncategorised",
-      slug: "uncategorised",
+      slug: UNCATEGORISED_SLUG,
       description: null,
     };
   }
@@ -611,7 +612,13 @@ export async function getCategorySummaries(
   const bySlug = new Map<string, CategorySummary>();
   for (const a of articles) {
     const { slug, name } = a.category;
-    if (!slug) continue;
+    // The placeholder for posts with no category is skipped along with the
+    // empty slug: this one function feeds the hub filter chips, the
+    // browse-by-category links, the chip rail on the category pages, the
+    // prerendered category params and the sitemap, so dropping it here removes
+    // it from all of them at once instead of leaving a chip pointing at a URL
+    // the sitemap no longer lists (or the reverse).
+    if (!slug || slug === UNCATEGORISED_SLUG) continue;
     const modified = lastModifiedOf(a);
     const existing = bySlug.get(slug);
     if (!existing) {
@@ -638,6 +645,10 @@ export async function getCategoryArticles(
   blog: Blog,
   slug: string,
 ): Promise<{ label: string; articles: Article[] } | null> {
+  // No landing page for the "no category" placeholder — it is excluded from
+  // the chips and the sitemap, and a page nothing links to but Google can still
+  // reach is exactly the orphan those links exist to avoid.
+  if (slug === UNCATEGORISED_SLUG) return null;
   const articles = await getAllArticles(blog);
   const matches = articles.filter((a) => a.category.slug === slug);
   if (matches.length === 0) return null;
