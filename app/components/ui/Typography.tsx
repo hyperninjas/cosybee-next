@@ -55,7 +55,7 @@ export const textVariants = tv({
   variants: {
     variant: {
       /** Hero sub-headline. */
-      heroLead: "text-base leading-7 sm:text-[18px] md:text-[22px]",
+      heroLead: "text-base sm:text-[18px] md:text-[22px]",
       /** Intro paragraph under a section title. */
       lead: "text-base leading-relaxed sm:text-base",
       /** Default body / description copy. */
