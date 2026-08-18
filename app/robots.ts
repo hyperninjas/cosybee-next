@@ -26,21 +26,59 @@ const AI_CRAWLERS = [
 ];
 
 /**
- * Generates /robots.txt at build time. Allows all crawlers — including the
- * AI crawlers above — everywhere except internal Next.js paths, the admin
- * panel, and the member account section, and points at the sitemap. The admin
- * and account routes are also marked noindex via metadata and an X-Robots-Tag
- * header (see their layouts and next.config.ts).
+ * Search engines that must be able to CRAWL non-production hosts so they can
+ * read the `X-Robots-Tag: noindex` header and drop those URLs. Listing them by
+ * name lets the sandbox block everything else without blocking de-indexing.
+ * Sub-agents (Googlebot-Image, Googlebot-News, ...) are deliberately absent —
+ * they fall through to the wildcard block, which is what we want for staging.
+ */
+const SEARCH_CRAWLERS = [
+  "Googlebot", // Google
+  "Bingbot", // Bing — also powers DuckDuckGo and Yahoo
+  "Slurp", // Yahoo
+  "DuckDuckBot", // DuckDuckGo
+  "YandexBot", // Yandex
+  "Baiduspider", // Baidu
+  "Applebot", // Apple / Siri / Spotlight
+];
+
+/**
+ * Generates /robots.txt at build time, with a different policy per environment.
+ *
+ * On PRODUCTION: allows all crawlers — including the AI crawlers above —
+ * everywhere except internal Next.js paths, the admin panel, and the member
+ * account section, and points at the sitemaps. The admin and account routes are
+ * also marked noindex via metadata and an X-Robots-Tag header (see their
+ * layouts and next.config.ts).
+ *
+ * On every OTHER host (sandbox, previews): search engines may crawl so they can
+ * see the site-wide noindex header, and everything else is blocked outright.
+ * See the comment in the branch below — the asymmetry is deliberate.
  */
 export default function robots(): MetadataRoute.Robots {
-  // Non-production hosts (sandbox, previews) must stay out of search. Crucially
-  // we ALLOW crawling here rather than `Disallow: /`: de-indexing relies on the
-  // site-wide `X-Robots-Tag: noindex` header (next.config.ts), and Google can
-  // only act on that header if it's allowed to fetch the page. A blanket
-  // Disallow would block the crawl and leave already-indexed URLs stuck in the
-  // index as URL-only results. Omit the sitemap so we don't advertise URLs.
+  // Non-production hosts (sandbox, previews) must stay out of search, and the
+  // two rules below do different jobs:
+  //
+  //  1. The named search engines are ALLOWED to crawl. De-indexing relies on
+  //     the site-wide `X-Robots-Tag: noindex` header (next.config.ts), and a
+  //     crawler can only obey a header it is permitted to fetch. Blocking them
+  //     would strand any already-indexed URL in the index as a URL-only result
+  //     with no way to remove it — robots.txt governs crawling, not indexing.
+  //     Each engine gets its own group because Google and Bing apply only the
+  //     single most specific matching group, never the wildcard as well.
+  //
+  //  2. Everything else is BLOCKED. AI scrapers and minor crawlers largely
+  //     ignore X-Robots-Tag, so for them robots.txt is the only lever, and
+  //     unreleased staging content has no business being scraped at all.
+  //
+  // The sitemap is omitted either way so we never advertise the URL list.
   if (!IS_PRODUCTION) {
-    return { rules: [{ userAgent: "*", allow: "/" }] };
+    return {
+      rules: [
+        { userAgent: SEARCH_CRAWLERS, allow: "/" },
+        { userAgent: "*", disallow: "/" },
+      ],
+    };
   }
 
   const disallow = ["/api/", "/admin", "/account"];
