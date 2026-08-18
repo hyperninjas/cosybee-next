@@ -10,11 +10,16 @@ import {
 } from "@gravity-ui/icons";
 
 /**
- * Background video for the download hero, mounted only at md+ (tablet and
- * up). A media query in JS — not CSS hiding — because a `display:none`
- * video with autoplay still downloads; small devices should never fetch
- * the ~13MB file. Until it mounts (and below md, and under
- * prefers-reduced-motion) the hero shows the background photo underneath.
+ * Background video for the hero, mounted only at md+ (tablet and up). A media
+ * query in JS — not CSS hiding — because a `display:none` video with autoplay
+ * still downloads; small devices should never fetch the ~13MB file. Until it
+ * mounts (and below md, and under prefers-reduced-motion) the hero shows the
+ * background photo underneath.
+ *
+ * Plays through exactly once: it pauses whenever the hero scrolls out of view
+ * (and resumes on the way back, unless the viewer pressed pause), and on
+ * `ended` it fades out to reveal the photo again rather than looping. The play
+ * button restarts it from the top.
  *
  * Renders two sibling layers: the video at -z-10 (above the -z-20 photo,
  * below the gradient the parent places after this component) and a
@@ -23,9 +28,13 @@ import {
  */
 export default function HeroBackgroundVideo({ src }: { src: string }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  // The viewer's intent, kept out of state so the observer never restarts a
+  // video they deliberately paused.
+  const wantsPlaybackRef = useRef(true);
   const [show, setShow] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [hasEnded, setHasEnded] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -35,13 +44,40 @@ export default function HeroBackgroundVideo({ src }: { src: string }) {
     return () => mq.removeEventListener("change", update);
   }, []);
 
+  // Pause offscreen so a hero scrolled past isn't decoding frames nobody sees.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (wantsPlaybackRef.current && !video.ended) void video.play();
+        } else if (!video.paused) {
+          video.pause();
+        }
+      },
+      // Any sliver of the hero counts — the element is usually taller than the
+      // viewport, so a ratio-based threshold would never fire.
+      { threshold: 0 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [show]);
+
   if (!show) return null;
 
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) void video.play();
-    else video.pause();
+    if (video.paused || video.ended) {
+      if (video.ended) video.currentTime = 0;
+      wantsPlaybackRef.current = true;
+      void video.play();
+    } else {
+      wantsPlaybackRef.current = false;
+      video.pause();
+    }
   };
 
   const toggleMute = () => {
@@ -58,13 +94,21 @@ export default function HeroBackgroundVideo({ src }: { src: string }) {
         src={src}
         autoPlay
         muted
-        loop
         playsInline
         preload="auto"
         aria-hidden
-        onPlay={() => setIsPlaying(true)}
+        onPlay={() => {
+          setIsPlaying(true);
+          setHasEnded(false);
+        }}
         onPause={() => setIsPlaying(false)}
-        className="absolute inset-0 -z-10 h-full w-full object-cover object-center motion-reduce:hidden"
+        onEnded={() => {
+          wantsPlaybackRef.current = false;
+          setHasEnded(true);
+        }}
+        className={`absolute inset-0 -z-10 h-full w-full object-cover object-center transition-opacity duration-700 motion-reduce:hidden ${
+          hasEnded ? "opacity-0" : "opacity-100"
+        }`}
       />
 
       {/* controls — same look as VideoCarousel's; hidden with the video

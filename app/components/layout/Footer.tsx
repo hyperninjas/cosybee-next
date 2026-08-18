@@ -2,7 +2,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
 import PhraseOfTheWeek from "./PhraseOfTheWeek";
-import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
+import EnergieBeeLogo from "@/public/energieBee-logo-colored-version.svg";
 import { SOCIAL } from "@/app/lib/site";
 import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
 import { getLatestArticles, getPhrases } from "@/app/lib/articles";
@@ -73,7 +73,7 @@ export default async function Footer() {
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
-            className="h-auto w-30"
+            className="h-auto w-65"
             quality={85}
             loading="eager"
           />

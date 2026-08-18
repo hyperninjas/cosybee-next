@@ -1,9 +1,11 @@
 "use client";
-
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
+// import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
+import EnergieBeeLogo from "@/public/energieBee-logo-colored-version.svg";
+
 import { CTA_BASE_CLASSES, CTA_SIZE_CLASSES } from "@/app/components/ui/Cta";
 // Hidden for now — restore alongside the nav cluster below.
 // import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
@@ -153,7 +155,14 @@ export default function Navbar({
         className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30"
       >
         <Link href="/" aria-label="Cosybee home" className="shrink-0">
-          <CosybeeLogo className="h-12 w-auto lg:h-14" />
+          {/* <CosybeeLogo className="h-12 w-auto lg:h-14" /> */}
+          <Image
+            src={EnergieBeeLogo}
+            alt="EnergieBee"
+            className="h-auto w-65"
+            quality={85}
+            loading="eager"
+          />
         </Link>
 
         <ul className="hidden items-center gap-8 lg:flex xl:gap-12">

@@ -1,10 +1,10 @@
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
-import VideoCarousel from "@/app/components/ui/VideoCarousel";
-import heroBgImg from "@/public/energibee-hero-image.jpg";
+// import VideoCarousel from "@/app/components/ui/VideoCarousel";
+import heroBgImg from "@/public/homepage-images/hero-bg-fallback.png";
 import { downloadQrSvg } from "@/app/lib/download-qr";
-import { HERO_VIDEO_LANDSCAPE, HERO_VIDEOS } from "@/app/lib/hero-videos";
+import { HERO_VIDEO_LANDSCAPE } from "@/app/lib/hero-videos";
 import HeroDownloadCta from "../download-app/HeroDownloadCta";
 import HeroBackgroundVideo from "../download-app/HeroBackgroundVideo";
 
@@ -20,7 +20,7 @@ export default async function HomeHero() {
     <Section
       spacing="none"
       surface="dark"
-      className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[93vh]"
+      className="isolate flex flex-col justify-end min-h-[75vh] md:min-h-[93vh]"
     >
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
@@ -53,17 +53,19 @@ export default async function HomeHero() {
         className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]"
       />
 
-      <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
-        <div className="max-w-175">
-          <Heading as="h1" variant="display">
-            One app.
-            <br />
-            Total energy clarity.
-          </Heading>
-          <Text variant="heroLead" className="mt-5 max-w-129.5">
-            <strong>EnergieBee</strong> shows how your home uses energy day by
-            day. Understand heating, solar and energy balance in one place.
-          </Text>
+      <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:py-25 ">
+        <div className="w-full justify-between items-end flex flex-wrap">
+          <div>
+            <Heading as="h1" variant="display">
+              One app.
+              <br />
+              Total energy clarity.
+            </Heading>
+            <Text variant="heroLead" className="mt-5 max-w-129.5">
+              <strong>EnergieBee</strong> shows how your home uses energy day by
+              day. Understand heating, solar and energy balance in one place.
+            </Text>
+          </div>
           <div className="mt-8 w-fit">
             <HeroDownloadCta qrSvg={qrSvg} />
           </div>
