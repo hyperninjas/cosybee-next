@@ -43,6 +43,18 @@ export type Tag = {
 };
 
 /**
+ * The placeholder category `normalizeCategory` invents for a post that is
+ * filed under nothing.
+ *
+ * A display fallback only, never a destination: it gets no filter chip, no
+ * landing page and no sitemap entry (see `getCategorySummaries` and
+ * `getCategoryArticles`). "Uncategorised" names the *absence* of a category,
+ * so offering it as a filter asks the reader to browse by a subject that
+ * doesn't exist.
+ */
+export const UNCATEGORISED_SLUG = "uncategorised";
+
+/**
  * A category with a live landing page, plus what the sitemap needs to describe
  * it. Built server-side by `getCategorySummaries`, but declared here because
  * the chip row and the browse wrapper are client components and `lib/articles`
