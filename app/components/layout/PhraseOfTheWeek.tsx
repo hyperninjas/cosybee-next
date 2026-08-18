@@ -69,9 +69,9 @@ export default function PhraseOfTheWeek({
 
   return (
     <figure className="relative max-w-3xl">
-      <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">
+      {/* <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">
         Phrase of the Week
-      </h3>
+      </h3> */}
 
       {/* Curly quotes in the markup, not CSS `quotes` — they need to survive
           into the text a visitor copies, and into the RSS-style previews some
@@ -82,7 +82,9 @@ export default function PhraseOfTheWeek({
 
       <figcaption className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
         {/* Not <cite>: that element is for the title of a work, not a person. */}
-        <span className="font-medium text-white/60">&mdash; {phrase.author}</span>
+        <span className="font-medium text-white/60">
+          &mdash; {phrase.author}
+        </span>
 
         {/* `after:absolute after:inset-0` stretches this link over the whole
             figure, so the quote itself is clickable while the page keeps a

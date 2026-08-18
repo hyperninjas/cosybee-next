@@ -116,7 +116,7 @@ export default async function Footer() {
                   <Link
                     href={link.href}
                     title={link.label}
-                    className="line-clamp-2 text-[15px] font-medium text-muted transition-colors hover:text-white"
+                    className="line-clamp-2 text-[15px] font-medium text-white/80 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
