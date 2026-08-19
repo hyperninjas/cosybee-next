@@ -48,7 +48,7 @@ export default function HeatingSolutions() {
           }}
         />
         {/* text — right */}
-        <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-163.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto z-9">
+        <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-183.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto z-9">
           <SectionTitle>Heating Solutions</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard

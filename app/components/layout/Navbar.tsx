@@ -24,7 +24,7 @@ const NAV_LINKS = [
 const MENU_ID = "site-mobile-menu";
 
 /** The one place the header CTA's destination and wording are defined. */
-const DOWNLOAD_CTA = { label: "Download Free App", href: "/download-app" };
+const DOWNLOAD_CTA = { label: "Download free app", href: "/download-app" };
 
 // function SearchIcon() {
 //   return (
@@ -149,7 +149,7 @@ export default function Navbar({
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 bg-black text-white">
+    <header className="sticky top-0 z-50 bg-foreground text-white">
       <nav
         ref={navRef}
         className="relative mx-auto flex h-16 max-w-360 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-30"
@@ -159,20 +159,20 @@ export default function Navbar({
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
-            className="h-auto w-65"
+            className="h-10 w-auto"
             quality={85}
             loading="eager"
           />
         </Link>
 
-        <ul className="hidden items-center gap-8 lg:flex xl:gap-12">
+        <ul className="hidden items-center gap-8 min-[1150px]:flex xl:gap-12">
           {NAV_LINKS.map((link) => {
             const isActive = isLinkActive(link.href);
             return (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`text-[15px] font-medium tracking-wide transition-colors hover:text-white ${
+                  className={`text-base font-medium tracking-wide leading-[100%] transition-colors hover:text-white ${
                     isActive ? "text-white" : "text-white/80"
                   }`}
                 >
@@ -225,7 +225,7 @@ export default function Navbar({
             aria-expanded={open}
             aria-controls={MENU_ID}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-md transition-colors hover:bg-surface/5 lg:hidden"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-md transition-colors hover:bg-surface/5 min-[1150px]:hidden"
           >
             <MenuToggleIcon open={open} className="h-9 w-7" />
           </button>
@@ -238,7 +238,7 @@ export default function Navbar({
         <div
           id={MENU_ID}
           aria-hidden={!open}
-          className={`absolute inset-x-0 top-full origin-top border-t border-neutral-800 bg-black/95 backdrop-blur shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] lg:hidden
+          className={`absolute inset-x-0 top-full origin-top border-t border-neutral-800 bg-black/95 backdrop-blur shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] min-[1150px]:hidden
             transition-[opacity,transform] duration-300 ease-out
             motion-reduce:transition-none
             ${

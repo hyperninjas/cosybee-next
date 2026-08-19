@@ -18,12 +18,12 @@ type CtaSize = "sm" | "md" | "lg";
  * blows up as an invalid hook call. A string can't.
  */
 export const CTA_BASE_CLASSES =
-  "inline-flex shrink-0 items-center justify-center rounded-lg bg-[#E6DA00] font-semibold text-black transition hover:brightness-110";
+  "inline-flex shrink-0 items-center justify-center rounded-lg bg-accent font-semibold text-[#0C0C0C] transition hover:brightness-110";
 
 export const CTA_SIZE_CLASSES: Record<CtaSize, string> = {
   // Navbar scale — has to clear the 64px mobile / 80px desktop header.
-  sm: "h-10 px-5 text-sm lg:h-11 lg:px-6",
-  md: "h-12 lg:h-[58.66px] px-6 text-base lg:text-lg leading-[135%]",
+  sm: "h-10 px-4 text-base leading-[100%] lg:h-11 lg:px-5",
+  md: "h-12 lg:h-[58.66px] px-6 text-base lg:text-lg leading-[100%]",
   lg: "px-10 py-4 text-lg sm:px-12 sm:text-xl",
 };
 

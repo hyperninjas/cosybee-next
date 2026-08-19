@@ -19,6 +19,7 @@ type Props = {
   crumbs?: Crumb[];
   /** The hero copy — heading, lead text, and any CTA. */
   children: ReactNode;
+  minHeight?: string;
 };
 
 /**
@@ -33,6 +34,7 @@ export default function PageHero({
   bgImage,
   bgImageMobile,
   imageAlt = "",
+  minHeight = "min-h-[50vh] md:min-h-[73vh]",
   crumbs,
   children,
 }: Props) {
@@ -40,7 +42,7 @@ export default function PageHero({
     <Section
       surface="dark"
       spacing="none"
-      className="isolate flex flex-col justify-center min-h-[50vh] md:min-h-[73vh]"
+      className={`isolate flex flex-col justify-center ${minHeight}`}
     >
       {/* background photo + gradient */}
       <div aria-hidden className="absolute inset-0 -z-20">

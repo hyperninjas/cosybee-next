@@ -16,7 +16,7 @@ import Dot from "@/app/components/ui/Dot";
 /** Pill overlaying the cover with the article's category. */
 function CategoryBadge({ name }: { name: string }) {
   return (
-    <span className="absolute left-4 top-4 rounded-full bg-background px-3 py-1 text-xs font-semibold text-accent">
+    <span className="absolute left-4 top-4 rounded-full leading-[100%] bg-background px-3 py-1 text-xs font-semibold text-primary">
       {name}
     </span>
   );
@@ -82,7 +82,9 @@ function AuthorByline({ author }: { author: Article["author"] }) {
         ) : (
           <div className="flex items-center gap-3">
             {avatar}
-            <span className="text-sm font-semibold text-foreground">{name}</span>
+            <span className="text-sm font-semibold text-foreground">
+              {name}
+            </span>
           </div>
         )}
       </div>

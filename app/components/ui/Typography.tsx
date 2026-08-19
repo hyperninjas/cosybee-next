@@ -17,16 +17,16 @@ export const headingVariants = tv({
     variant: {
       /** Hero headline (~75px at lg). */
       display:
-        "text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl min-[1000px]:text-[60px]! min-[1200px]:text-[75px]!",
+        "text-4xl font-bold leading-[110%] tracking-tight sm:text-4xl md:text-5xl min-[1000px]:text-[60px]! min-[1200px]:text-[75px]!",
       /** Section title (~40px at lg). 28px on small devices — between
        *  cardTitle (24px) and display (36px) so the hierarchy holds.
        *  `text-balance` evens out the lines so a long title never drops a
        *  single orphan word onto its own line. Unlike `text-nowrap` it leaves
        *  min-content width alone, so grid/flex columns keep their size. */
       title:
-        "text-[28px] font-extrabold leading-tight tracking-tight text-balance sm:text-4xl lg:text-[40px]",
+        "text-[28px] font-bold leading-[110%] tracking-tight text-balance sm:text-4xl lg:text-[48px]",
       /** Card / sub-section title (~24px). */
-      cardTitle: "text-2xl font-extrabold leading-tight sm:text-[24px]",
+      cardTitle: "text-2xl font-extrabold sm:text-[24px]",
     },
   },
   defaultVariants: {
@@ -55,11 +55,12 @@ export const textVariants = tv({
   variants: {
     variant: {
       /** Hero sub-headline. */
-      heroLead: "text-base sm:text-[18px] md:text-[22px]",
+      heroLead:
+        "text-base font-medium opacity-80 sm:text-[18px] md:text-[20px] md:leading-[32px]",
       /** Intro paragraph under a section title. */
-      lead: "text-base leading-relaxed sm:text-base",
+      lead: "text-base sm:text-base",
       /** Default body / description copy. */
-      body: "text-sm leading-relaxed",
+      body: "text-sm",
     },
     tone: {
       default: "",

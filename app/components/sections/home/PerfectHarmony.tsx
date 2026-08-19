@@ -27,8 +27,10 @@ export default function PerfectHarmony() {
         />
         {/* text — left */}
         <div className="min-[1200px]:max-w-170.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
-          <SectionTitle>Everything connected in one place</SectionTitle>
-          <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-muted">
+          <SectionTitle className="whitespace-pre-line">
+            {"Everything connected \n in one place"}
+          </SectionTitle>
+          <p className="mt-4 max-w-lg text-[20px] leading-8 text-muted min-[550px]:max-[1200px]:text-center font-medium">
             A single app to see how your home performs in real conditions and
             understand your energy balance.
           </p>

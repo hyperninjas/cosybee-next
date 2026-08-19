@@ -301,22 +301,20 @@ export function FeatureCard({
   descClassName?: string;
 }) {
   return (
-    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-surface p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
         src={GLYPH_SVGS[glyph]}
-        alt=""
+        alt={`glyph icon - ${glyph}`}
         aria-hidden
-        className="h-11 w-12 lg:h-10 lg:w-11 mt-1.5"
+        className="h-11 w-12 lg:h-12 lg:w-13"
       />
-      <div>
+      <div className="w-full">
         <h3
-          className={`text-lg font-bold text-foreground sm:text-lg  ${titleClassName}`}
+          className={`text-lg leading-[100%] font-semibold text-foreground sm:text-[20px]  ${titleClassName}`}
         >
           {title}
         </h3>
-        <p
-          className={`mt-1 text-sm leading-relaxed text-muted ${descClassName}`}
-        >
+        <p className={`mt-2 text-base w-[75%] text-muted ${descClassName}`}>
           {description}
         </p>
       </div>

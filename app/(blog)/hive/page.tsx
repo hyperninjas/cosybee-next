@@ -9,7 +9,10 @@ import {
 } from "@/app/lib/articles";
 import { browsePageCount } from "@/app/lib/article-types";
 import JsonLd from "@/app/components/JsonLd";
-import { breadcrumbSchema, collectionPageSchema } from "@/app/lib/structured-data";
+import {
+  breadcrumbSchema,
+  collectionPageSchema,
+} from "@/app/lib/structured-data";
 import { url } from "@/app/lib/site";
 import { pageMetadata } from "@/app/lib/seo";
 import { hubIndexing, resolveCategorySlug } from "@/app/lib/blog-hub";
@@ -128,7 +131,10 @@ export default async function HivePage({ searchParams }: PageProps<"/hive">) {
           by anyone browsing with JS off. Removing this section orphans every
           category page: the sitemap would list URLs nothing on the site links,
           which is how a URL ends up "unknown to Google". */}
-      <section className="mx-auto w-full max-w-360 px-6 pb-16 sm:px-10 lg:px-30">
+      <section
+        aria-hidden
+        className="mx-auto hidden w-full max-w-360 px-6 pb-16 sm:px-10 lg:px-30"
+      >
         <h2 className="text-lg font-bold tracking-[0.08em] text-foreground">
           BROWSE BY CATEGORY
         </h2>

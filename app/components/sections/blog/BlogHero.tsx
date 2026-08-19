@@ -23,7 +23,12 @@ export default function BlogHero({
   crumbs,
 }: Props) {
   return (
-    <PageHero bgImage={bgImage} bgImageMobile={bgImageMobile} crumbs={crumbs}>
+    <PageHero
+      bgImage={bgImage}
+      bgImageMobile={bgImageMobile}
+      crumbs={crumbs}
+      minHeight="min-h-[30vh] md:min-h-[35vh]"
+    >
       <h1 className="text-4xl font-extrabold leading-[110%] tracking-tight sm:text-4xl md:text-5xl lg:text-[75px] ">
         {title}
       </h1>
