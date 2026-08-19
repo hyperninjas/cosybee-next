@@ -38,9 +38,8 @@ const CONTACT_INFO: ContactInfo[] = [
   {
     icon: <Smartphone className="size-5" />,
     title: "Phone Number",
-    detail: "(555) 123-4567-8901",
-    href: "tel:+15551234567",
-    copy: "(555) 123-4567-8901",
+    detail: "+44 1282 940095",
+    href: "tel:+441282940095",
   },
   {
     icon: <Envelope className="size-5" />,
