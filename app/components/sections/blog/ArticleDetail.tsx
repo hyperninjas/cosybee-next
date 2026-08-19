@@ -5,6 +5,7 @@ import {
   formatDate,
   formatReadTime,
   isExternalUrl,
+  UNCATEGORISED_SLUG,
 } from "@/app/lib/article-types";
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
@@ -122,13 +123,19 @@ export default async function ArticleDetail({
   const faqs = collectFaqItems(article.contentJson);
   const blogLabel = basePath === "/hive" ? "The Hive" : "Learn";
 
-  // Link the category only when it is a real stored category. `normalizeCategory`
+  // Link the category only when it has a landing page. `normalizeCategory`
   // invents one — id "", name "Uncategorised" — for posts that have none, and
   // for the legacy string format, and `/[blog]/category/[slug]` calls notFound()
   // for a slug it can't resolve. A non-empty id is what separates a row that has
   // a landing page from a placeholder that would link straight to a 404.
+  //
+  // The slug is checked as well as the id, because "uncategorised" now 404s
+  // whichever way it arrives: `getCategoryArticles` refuses it outright, so even
+  // a real stored row named that has no page to point at.
   const categoryHref =
-    article.category?.id && article.category.slug
+    article.category?.id &&
+    article.category.slug &&
+    article.category.slug !== UNCATEGORISED_SLUG
       ? `${basePath}/category/${article.category.slug}`
       : null;
 
