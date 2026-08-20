@@ -155,12 +155,12 @@ export function CtaCard({
       )}
       <Card.Header className="flex-1 gap-0 p-0">
         <Card.Title
-          className={`text-2xl font-extrabold leading-tight tracking-tight text-balance sm:text-3xl lg:text-[40px] ${titleClassName}`}
+          className={`text-2xl font-extrabold leading-[110%] tracking-tight text-balance sm:text-3xl lg:text-[40px] ${titleClassName}`}
         >
           {title}
         </Card.Title>
         <Card.Description
-          className={`mt-2 max-w-188.25 text-sm leading-relaxed text-foreground/80 sm:text-base ${descClassName}`}
+          className={`mt-4 max-w-188.25 text-sm font-medium whitespace-pre-line text-muted sm:text-base ${descClassName}`}
         >
           {description}
         </Card.Description>

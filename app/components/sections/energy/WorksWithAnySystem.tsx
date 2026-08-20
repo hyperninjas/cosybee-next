@@ -12,7 +12,9 @@ export default function WorksWithAnySystem() {
       <div className="mx-auto max-w-360 pb-11 pt-4 px-4 lg:px-30">
         <CtaCard
           title="Works With Any Energy Setup"
-          description="Compatible with smart meters, inverters, batteries, and EV chargers from all major brands. Plug-and-play setup in minutes."
+          description={
+            "Compatible with smart meters, inverters, batteries, and EV chargers from all major brands. \n Plug-and-play setup in minutes."
+          }
           buttonText="Get Started Today"
           href="/download-app"
         />

@@ -52,7 +52,7 @@ export default function EnergyMonitoring() {
           <p className="mt-3 max-w-xl text-base min-[550px]:max-[1200px]:text-center leading-relaxed text-muted">
             See what&apos;s happening across your home energy system.
           </p>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Live Solar Tracking"
               description="Monitor solar production in real time."

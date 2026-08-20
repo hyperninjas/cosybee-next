@@ -39,7 +39,7 @@ export default function EnergyAnalytics() {
           <SectionTitle align="left">
             Energy &amp; Savings Analytics
           </SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Bill Forecasting"
               description="Project your monthly and annual electricity costs based on real consumption patterns — never get blindsided by a bill again."

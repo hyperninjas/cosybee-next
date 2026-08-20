@@ -59,7 +59,10 @@ export default function HeroBackgroundVideo({ src }: { src: string }) {
       },
       // Any sliver of the hero counts — the element is usually taller than the
       // viewport, so a ratio-based threshold would never fire.
-      { threshold: 0 },
+      {
+        threshold: 0.5,
+        rootMargin: "-80px 0px 0px 0px",
+      },
     );
     observer.observe(video);
     return () => observer.disconnect();

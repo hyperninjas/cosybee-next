@@ -64,7 +64,7 @@ export default function ConnectedEcosystem() {
             Today we optimise and forecast energy. Tomorrow we actively connect
             and control it.
           </SectionLead>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Home Energy Hub Integration"
               description="A central intelligence layer for managing energy across your entire home."

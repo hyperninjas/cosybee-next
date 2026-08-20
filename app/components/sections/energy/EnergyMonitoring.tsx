@@ -46,7 +46,7 @@ export default function EnergyMonitoring() {
         {/* text */}
         <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
           <SectionTitle>Whole-Home Monitoring</SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Live Consumption Tracking"
               description="Real-time view of how much power your home is using, where it's coming from, and where it's going."

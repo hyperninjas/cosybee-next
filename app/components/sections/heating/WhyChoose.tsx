@@ -72,7 +72,7 @@ export default function WhyChoose() {
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Smarter by Design"
               description="Built on predictive models that continuously learn from real household energy patterns."

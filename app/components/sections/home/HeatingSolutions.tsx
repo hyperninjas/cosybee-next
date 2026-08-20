@@ -20,7 +20,7 @@ import windowCoffeeImg from "@/public/ss-image/ss-small-3.png";
 export default function HeatingSolutions() {
   return (
     <Section spacing="lg" surface="surface" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-6">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1fr] min-[1200px]:gap-20">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#F7F2E1"
@@ -48,7 +48,7 @@ export default function HeatingSolutions() {
           }}
         />
         {/* text — right */}
-        <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-183.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto z-9">
+        <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-183.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto  z-9">
           <SectionTitle>Heating Solutions</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
@@ -72,7 +72,7 @@ export default function HeatingSolutions() {
               title="Daily Energy Overview"
               descClassName="whitespace-pre-line"
               description={
-                "Understand how energy changes throughout the day.\n See patterns and peak demand."
+                "Understand how energy changes throughout the day. See patterns and peak demand."
               }
             />
           </div>

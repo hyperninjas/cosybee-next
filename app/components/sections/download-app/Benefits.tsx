@@ -3,7 +3,7 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import type { StaticImageData } from "next/image";
-import hexaDevice from "@/public/hexa-device.svg";
+import hexaDevice from "@/public/simplified.svg";
 import hexaChart from "@/public/hexa-chart.svg";
 import hexaDollar from "@/public/hexa-dollar.svg";
 

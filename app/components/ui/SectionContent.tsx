@@ -6,9 +6,10 @@ import hexaCheck from "@/public/hexa-check.svg";
 import hexaSun from "@/public/hexa-sun.svg";
 import hexaDollar from "@/public/hexa-dollar.svg";
 import hexaChart from "@/public/hexa-chart.svg";
-import hexaDevice from "@/public/hexa-device.svg";
-import hexaConnector from "@/public/hexa-holo-connector.svg";
-import hexaPie from "@/public/hexa-pie-chart.svg";
+import hexaDevice from "@/public/simplified.svg";
+import hexaConnector from "@/public/connection.svg";
+// import hexaPie from "@/public/hexa-pie-chart.svg";
+import hexaPie from "@/public/Home.svg";
 
 const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   check: hexaCheck,
@@ -225,7 +226,7 @@ export function SectionTitle({
   return (
     <Heading
       variant="title"
-      className={`min-[550px]:text-center ${desktopAlign} text-foreground ${className}`}
+      className={`min-[550px]:text-left ${desktopAlign} text-foreground ${className}`}
     >
       {children}
     </Heading>
@@ -256,26 +257,33 @@ export function SectionLead({
  * description. Uses the static /public/hexa-check.svg.
  */
 export function FeatureItem({
+  glyph,
   title,
   description,
+  titleClassName,
+  descClassName,
 }: {
+  glyph?: GlyphName;
   title: string;
   description: string;
+  titleClassName?: string;
+  descClassName?: string;
 }) {
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
         src={hexaCheck}
-        alt=""
+        alt={`glyph icon - `}
         aria-hidden
-        // className="mt-1 h-6 w-7 lg:h-10 lg:w-8.5"
-        className="mt-1.5"
+        className="h-11 w-12 lg:h-12 lg:w-13"
       />
-      <div>
-        <h3 className="text-base font-bold text-foreground sm:text-lg">
+      <div className="w-full">
+        <h3
+          className={`text-lg leading-[100%] font-semibold text-foreground sm:text-[20px]  ${titleClassName}`}
+        >
           {title}
         </h3>
-        <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-muted sm:text-sm">
+        <p className={`mt-2 text-base w-[75%] text-muted ${descClassName}`}>
           {description}
         </p>
       </div>

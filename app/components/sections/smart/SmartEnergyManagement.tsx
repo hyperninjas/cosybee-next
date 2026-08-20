@@ -22,7 +22,7 @@ export default function SmartEnergyManagement() {
             Bring your solar system, battery and connected devices together in
             one intelligent platform.
           </p>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Connected Devices"
               description="See how your smart home systems work together."

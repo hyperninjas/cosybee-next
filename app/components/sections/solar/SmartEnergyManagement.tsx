@@ -18,7 +18,7 @@ export default function SmartEnergyManagement() {
         {/* text — left */}
         <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
           <SectionTitle>Smart Energy Management</SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Battery Optimisation"
               description="Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency."

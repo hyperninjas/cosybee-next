@@ -37,10 +37,13 @@ export default function WhyEnergieBee() {
 
         {/* middle: title + lead + feature cards */}
         <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
-          <SectionTitle align="center" className="min-[550px]:text-center">
+          <SectionTitle
+            align="left"
+            className="min-[550px]:text-center lg:px-6"
+          >
             Works With Your Smart Home
           </SectionTitle>
-          <SectionLead className="min-[550px]:text-center self-center lg:px-6">
+          <SectionLead className="min-[550px]:text-left self-left lg:px-6">
             Part of the EnergieBee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>

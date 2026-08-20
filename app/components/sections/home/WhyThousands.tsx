@@ -3,7 +3,8 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import hexaChart from "@/public/hexa-wand-icon.svg";
-import hexaSun from "@/public/hexa-connector-icon.svg";
+// import hexaSun from "@/public/hexa-connector-icon.svg";
+import hexaSun from "@/public/connection.svg";
 import hexaDollar from "@/public/hexa-dollar.svg";
 import Hexagon from "@/app/components/ui/Hexagon";
 

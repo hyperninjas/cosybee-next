@@ -40,7 +40,7 @@ export default function EnergyAnalytics() {
           <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
             Understand the impact of your energy choices.
           </p>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Track Savings"
               description="See how solar generation reduces your energy costs."

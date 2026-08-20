@@ -26,7 +26,7 @@ export default function AccurateIntelligence() {
           <SectionTitle>
             Accurate Intelligence for a Smarter, Greener Home
           </SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="High-Accuracy Energy Forecasting"
               description="Our models analyse real-time usage, system behaviour, and external conditions to predict heating demand with high precision."

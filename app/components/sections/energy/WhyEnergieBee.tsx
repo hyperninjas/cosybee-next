@@ -30,10 +30,10 @@ export default function WhyEnergieBee() {
 
         {/* middle: title + lead + feature cards */}
         <div className="min-[1200px]:max-w-155 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
-          <SectionTitle align="center">
+          <SectionTitle align="left" className="lg:px-6">
             Why Choose EnergieBee Energy?
           </SectionTitle>
-          <SectionLead className="sm:text-center mx-auto lg:px-6">
+          <SectionLead className="sm:text-left lg:px-6">
             Part of the EnergieBee app — one dashboard for every kilowatt-hour,
             every device, every cost.
           </SectionLead>

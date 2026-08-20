@@ -31,7 +31,7 @@ export default function UnderstandOptimise() {
           <SectionTitle align="left">
             Understand and Optimise Your Home Energy Today
           </SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Real-Time Energy Forecasting"
               description="Predict heating demand using live usage patterns and system behaviour."

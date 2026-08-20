@@ -18,7 +18,7 @@ export default function SmartEnergyManagement() {
         {/* text — left */}
         <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
           <SectionTitle>Smart Tariff Control</SectionTitle>
-          <div className="mt-6 md:mt-8 space-y-8">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
               title="Dynamic Tariff Switching"
               description="Plug into time-of-use tariffs and let EnergieBee shift loads to the cheapest windows automatically."

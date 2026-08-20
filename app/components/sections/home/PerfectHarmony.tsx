@@ -26,7 +26,7 @@ export default function PerfectHarmony() {
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
         />
         {/* text — left */}
-        <div className="min-[1200px]:max-w-170.5 flex flex-col min-[550px]:max-[1200px]:items-center z-9">
+        <div className="min-[1200px]:max-w-170.5 flex flex-col min-[550px]:max-[1200px]:items-start z-9">
           <SectionTitle className="whitespace-pre-line">
             {"Everything connected \n in one place"}
           </SectionTitle>
