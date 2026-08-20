@@ -116,7 +116,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         </div>
         <div className="flex flex-1 flex-col p-6">
           <ArticleMeta readTime={a.readTime} date={a.authorDate} />
-          <h3 className="mt-3 line-clamp-3 text-lg font-extrabold leading-snug text-foreground">
+          <h3 className="mt-3 line-clamp-3 text-lg font-bold text-foreground">
             {/* Stretched link: the pseudo-element covers the whole card, so
                 the card is still one big click target for the article while
                 the tag/author links inside it stay individually clickable. */}
@@ -128,7 +128,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
               {a.title}
             </Link>
           </h3>
-          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">
+          <p className="mt-3 line-clamp-3 text-base font-medium text-muted">
             {a.description}
           </p>
           <TagList tags={a.tags} basePath={basePath} />
