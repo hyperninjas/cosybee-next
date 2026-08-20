@@ -36,19 +36,19 @@ export default function PerfectHarmony() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
-              glyph="pie"
+              glyph="house"
               descClassName="whitespace-pre-line"
               title="Unified view of your home"
               description="See heating, solar, and energy data side by side. Spot patterns instantly."
             />
             <FeatureCard
-              glyph="connector"
+              glyph="connect"
               descClassName="whitespace-pre-line"
               title="Smart connections"
               description="Energy insights help your home adapt to changing conditions."
             />
             <FeatureCard
-              glyph="device"
+              glyph="phone"
               descClassName="whitespace-pre-line"
               title="Simplified information"
               description="Understand what is happening and why it changes."

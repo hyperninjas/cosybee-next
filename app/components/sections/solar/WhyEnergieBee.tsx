@@ -1,14 +1,12 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import {
   FeatureCard,
   GlyphName,
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/why-energieBee.png";
 import Image, { type StaticImageData } from "next/image";
 import deviceImg from "@/public/energy-saving-device.png";
+import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export type FeatureCardContent = {
@@ -21,9 +19,7 @@ export type WhyEnergieBeeProps = {
   title?: string;
   lead?: string;
   cards?: FeatureCardContent[];
-  /** Cluster photo on the right (mirrored). */
-  clusterSrc?: string;
-  /** Phone-mockup image on the left. */
+  /** Phone-mockup image on the right. */
   deviceSrc?: StaticImageData | string;
   deviceAlt?: string;
 };
@@ -53,44 +49,22 @@ export default function WhyEnergieBee({
   title = "Why Choose EnergieBee Solar?",
   lead = "Part of the EnergieBee app — everything you need to monitor and optimise your solar energy system.",
   cards = DEFAULT_CARDS,
-  clusterSrc = sideImage.src,
   deviceSrc = deviceImg,
   deviceAlt = "energy analytics dashboard",
 }: WhyEnergieBeeProps = {}) {
-  // Edge-bleed side images → inner wrapper is bespoke, not Container.
+  // Two-column band: title + lead + feature cards on the left, phone mockup on
+  // the right.
   return (
-    <Section surface="base" spacing="lg" className="px-6 lg:px-0">
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: phone (absolute, bleeds into the section) — wrapper
-            has explicit width, image fills it via w-full h-auto so it
-            scales proportionally instead of rendering at intrinsic size */}
-        <div className="absolute -top-7 left-0 hidden w-[345.3px] min-[1200px]:block">
-          <Image
-            src={deviceSrc}
-            alt={deviceAlt}
-            sizes="(min-width: 1024px) 350px, 280px"
-            quality={85}
-            className="h-auto w-full"
-          />
-        </div>
-
-        {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center max-[1200px]:items-center z-9">
-          <SectionTitle>{title}</SectionTitle>
-          <SectionLead className="max-[1200px]:text-center lg:px-6">
-            {lead}
-          </SectionLead>
-          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-[345.3px] min-[1200px]:hidden mt-8">
-            <Image
-              src={deviceSrc}
-              alt={deviceAlt}
-              sizes="(min-width: 1024px) 350px, 280px"
-              quality={85}
-              className="h-auto w-full"
-            />
-          </div>
-          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
+    <Section surface="base" spacing="lg">
+      <Container
+        size="wide"
+        className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
+      >
+        {/* text — left */}
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-145">
+          <SectionTitle align="left">{title}</SectionTitle>
+          <SectionLead>{lead}</SectionLead>
+          <div className="mt-6 md:mt-8 space-y-4">
             {cards.map((c) => (
               <FeatureCard
                 key={c.title}
@@ -102,19 +76,18 @@ export default function WhyEnergieBee({
           </div>
         </div>
 
-        {/* right: 3-hex hive cluster (mirrored, installer photo) —
-            wrapper holds the absolute positioning + explicit width so
-            the inner `w-full` has a definite reference */}
-        <div className="absolute -right-55! min-[1200px]:-right-40! top-15 hidden w-125.5 lg:block">
-          <SharedImageHexCluster
-            src={clusterSrc}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-            className="w-full transform-[scaleX(-1)]"
+        {/* phone — right. Wrapper owns the width; the image fills it via
+            w-full h-auto so it scales proportionally. */}
+        <div className="mx-auto w-full max-w-86.5">
+          <Image
+            src={deviceSrc}
+            alt={deviceAlt}
+            sizes="(min-width: 1200px) 346px, 280px"
+            quality={85}
+            className="h-auto w-full"
           />
         </div>
-      </div>
+      </Container>
     </Section>
   );
 }

@@ -1,41 +1,20 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/smart/energiebee-app-weekly-energy-spend-overview.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export default function EnergyAnalytics() {
-  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
-  // bleeding side images. Inner wrapper is bespoke, not Container.
+  // Two-column band: title + features on the left, phone mockup on the right.
+  // Stacks text-then-phone below 1200px.
   return (
-    <Section
-      surface="base"
-      spacing="lg"
-      className="min-[1200px]:py-32! px-6 lg:px-0"
-    >
-      {/* decorative light hex bleeding from left edge */}
-      {/* <Hexagon
-        color="#E5E7EB"
-        className="pointer-events-none absolute -left-32 top-1/2 hidden w-56 -translate-y-1/2 sm:block sm:-right-27 sm:w-88 lg:w-76.75"
-      /> */}
-
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
-            positioning + explicit width so the inner `w-full` resolves
-            against a non-zero containing block */}
-        <div className="absolute -left-50 -top-15 hidden w-125.5 min-[1200px]:block">
-          <SharedImageHexCluster
-            src={sideImage.src}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-            className="w-full"
-          />
-        </div>
-        {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-111.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+    <Section surface="base" spacing="lg">
+      <Container
+        size="wide"
+        className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
+      >
+        {/* text — left */}
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-111.5">
           <SectionTitle align="left">Energy &amp; Savings</SectionTitle>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
             Understand the impact of your energy choices.
@@ -54,29 +33,20 @@ export default function EnergyAnalytics() {
               description="Track your carbon savings and environmental contribution."
             />
           </div>
-          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
-            <Image
-              src={deviceImg}
-              alt="energy analytics dashboard"
-              sizes="(min-width: 1024px) 300px, 280px"
-              quality={85}
-              className="h-auto w-full"
-            />
-          </div>
         </div>
-        {/* right: analytics phone — wrapper has explicit width, image
-            fills it via w-full h-auto so it scales proportionally */}
-        <div className="absolute -top-25 right-0 hidden w-75 min-[1200px]:block">
+
+        {/* phone — right. Wrapper owns the width; the image fills it via
+            w-full h-auto so it scales proportionally. */}
+        <div className="mx-auto w-full max-w-75">
           <Image
             src={deviceImg}
             alt="energy analytics dashboard"
-            sizes="(min-width: 1024px) 300px, 280px"
+            sizes="(min-width: 1200px) 300px, 280px"
             quality={85}
             className="h-auto w-full"
           />
         </div>
-      </div>
+      </Container>
     </Section>
   );
 }

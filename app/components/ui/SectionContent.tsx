@@ -8,8 +8,17 @@ import hexaDollar from "@/public/hexa-dollar.svg";
 import hexaChart from "@/public/hexa-chart.svg";
 import hexaDevice from "@/public/simplified.svg";
 import hexaConnector from "@/public/connection.svg";
-// import hexaPie from "@/public/hexa-pie-chart.svg";
-import hexaPie from "@/public/Home.svg";
+import hexaPie from "@/public/hexa-home.svg";
+import energy from "@/public/energy.svg";
+import insights from "@/public/insights.svg";
+import weather from "@/public/weather.svg";
+import solarSun from "@/public/solar-sun.svg";
+import money from "@/public/track-savings.svg";
+import poundSign from "@/public/pound-sign.svg";
+import homeConnect from "@/public/home-connect.svg";
+import house from "@/public/home.svg";
+import phone from "@/public/device.svg";
+import connect from "@/public/connect-energy.svg";
 
 const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   check: hexaCheck,
@@ -19,6 +28,16 @@ const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   device: hexaDevice,
   connector: hexaConnector,
   pie: hexaPie,
+  energy,
+  insights,
+  weather,
+  solar: solarSun,
+  savings: money,
+  pound: poundSign,
+  home: homeConnect,
+  house,
+  phone,
+  connect,
 };
 
 /** Names of the glyph drawn inside a yellow hex badge. */
@@ -29,7 +48,17 @@ export type GlyphName =
   | "chart"
   | "device"
   | "connector"
-  | "pie";
+  | "pie"
+  | "energy"
+  | "insights"
+  | "weather"
+  | "solar"
+  | "savings"
+  | "pound"
+  | "home"
+  | "house"
+  | "phone"
+  | "connect";
 
 /** Subset of GlyphName that has an inline-SVG implementation for HexBadge.
  *  The newer glyphs (device, connector, pie) are rendered as standalone
@@ -272,8 +301,8 @@ export function FeatureItem({
   return (
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
-        src={hexaCheck}
-        alt={`glyph icon - `}
+        src={glyph ? GLYPH_SVGS[glyph] : hexaCheck}
+        alt={`glyph icon - ${glyph}`}
         aria-hidden
         className="h-11 w-12 lg:h-12 lg:w-13"
       />
@@ -311,7 +340,7 @@ export function FeatureCard({
   return (
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
-        src={GLYPH_SVGS[glyph]}
+        src={glyph ? GLYPH_SVGS[glyph] : hexaCheck}
         alt={`glyph icon - ${glyph}`}
         aria-hidden
         className="h-11 w-12 lg:h-12 lg:w-13"

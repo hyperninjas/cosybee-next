@@ -52,7 +52,7 @@ export default function HeatingSolutions() {
           <SectionTitle>Heating Solutions</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
-              glyph="check"
+              glyph="solar"
               title="Live Solar Production Tracking"
               descClassName="whitespace-pre-line"
               description={
@@ -60,7 +60,7 @@ export default function HeatingSolutions() {
               }
             />
             <FeatureCard
-              glyph="check"
+              glyph="weather"
               title="Weather-Based Forecasts"
               descClassName="whitespace-pre-line"
               description={
@@ -68,7 +68,7 @@ export default function HeatingSolutions() {
               }
             />
             <FeatureCard
-              glyph="check"
+              glyph="energy"
               title="Daily Energy Overview"
               descClassName="whitespace-pre-line"
               description={

@@ -15,45 +15,12 @@ import gatewayImg from "@/public/ss-image/ss-small-6.png";
 export default function HomeEnergyManagement() {
   return (
     <Section spacing="lg" className="text-white">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-20">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
-          color="#F7F2E1"
-          className="pointer-events-none absolute -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
+          color="#F7F2E2"
+          className="pointer-events-none absolute -top-10 w-[18rem] sm:-right-28 sm:w-88 lg:w-76.75"
         />
-        {/* text — left */}
-        <div className=" flex flex-col max-[1200px]:items-center  z-9">
-          <div className="max-w-163.5">
-            <SectionTitle>Energy Management</SectionTitle>
-            {/* <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
-              A clear view of how energy is used, timed, and distributed across
-              your home.
-            </p> */}
-            <div className="mt-6 md:mt-8 space-y-4">
-              <FeatureCard
-                glyph="sun"
-                title="Energy Use"
-                description={"See where and when energy is used."}
-                descClassName="whitespace-pre-line"
-              />
-              <FeatureCard
-                glyph="dollar"
-                title="Cost Awareness"
-                description={"Understand how energy patterns affect costs."}
-                descClassName="whitespace-pre-line"
-              />
-              <FeatureCard
-                glyph="chart"
-                title="System Behaviour"
-                description={
-                  "See how weather, solar and home activity interact."
-                }
-                descClassName={"whitespace-pre-line"}
-              />
-            </div>
-          </div>
-        </div>
-
         {/* cluster — right */}
         <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
@@ -74,6 +41,38 @@ export default function HomeEnergyManagement() {
             ),
           }}
         />
+        {/* text — left */}
+        <div className=" flex flex-col max-[1200px]:items-center  z-9">
+          <div className="max-w-163.5">
+            <SectionTitle>Energy Management</SectionTitle>
+            {/* <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
+              A clear view of how energy is used, timed, and distributed across
+              your home.
+            </p> */}
+            <div className="mt-6 md:mt-8 space-y-4">
+              <FeatureCard
+                glyph="energy"
+                title="Energy Use"
+                description={"See where and when energy is used."}
+                descClassName="whitespace-pre-line"
+              />
+              <FeatureCard
+                glyph="pound"
+                title="Cost Awareness"
+                description={"Understand how energy patterns affect costs."}
+                descClassName="whitespace-pre-line"
+              />
+              <FeatureCard
+                glyph="home"
+                title="System Behaviour"
+                description={
+                  "See how weather, solar and home activity interact."
+                }
+                descClassName={"whitespace-pre-line"}
+              />
+            </div>
+          </div>
+        </div>
       </Container>
     </Section>
   );

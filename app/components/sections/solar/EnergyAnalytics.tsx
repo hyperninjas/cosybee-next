@@ -1,17 +1,13 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/solar/energiebee-app-solar-system-overview.png";
 import Image, { type StaticImageData } from "next/image";
 import type { FeatureItemContent } from "./EnergyMonitoring";
+import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export type EnergyAnalyticsProps = {
   title?: string;
   features?: FeatureItemContent[];
-  /** Side photo masked through the hex cluster on the left. */
-  clusterSrc?: string;
   /** Phone-mockup image on the right. */
   deviceSrc?: StaticImageData | string;
   deviceAlt?: string;
@@ -38,33 +34,18 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
 export default function EnergyAnalytics({
   title = "Energy & Savings Analytics",
   features = DEFAULT_FEATURES,
-  clusterSrc = sideImage.src,
   deviceSrc = deviceImg,
   deviceAlt = "energy analytics dashboard",
 }: EnergyAnalyticsProps = {}) {
-  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
-  // bleeding side images. Inner wrapper is bespoke, not Container.
+  // Two-column band: title + features on the left, phone mockup on the right.
   return (
-    <Section
-      surface="base"
-      spacing="lg"
-      className="min-[1200px]:py-32! px-6 lg:px-0"
-    >
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: uniform 3-hex hive cluster — wrapper holds the absolute
-            positioning + explicit width so the inner `w-full` resolves
-            against a non-zero containing block */}
-        <div className="absolute -left-50 -top-14 hidden w-125.5 min-[1200px]:block">
-          <SharedImageHexCluster
-            src={clusterSrc}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-            className="w-full"
-          />
-        </div>
-        {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-130 max-[1200px]:max-w-160 flex flex-col justify-center">
+    <Section surface="base" spacing="lg">
+      <Container
+        size="wide"
+        className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
+      >
+        {/* text — left */}
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-130">
           <SectionTitle align="left">{title}</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">
             {features.map((f) => (
@@ -75,30 +56,19 @@ export default function EnergyAnalytics({
               />
             ))}
           </div>
-          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
-            <Image
-              src={deviceSrc}
-              alt={deviceAlt}
-              sizes="(min-width: 1024px) 300px, 280px"
-              quality={85}
-              className="h-auto w-full"
-            />
-          </div>
         </div>
-        {/* right: analytics phone — wrapper has explicit width, image
-            fills it via w-full h-auto so it scales proportionally
-            instead of rendering at intrinsic size */}
-        <div className="absolute -top-23 right-0 hidden w-75 min-[1200px]:block">
+
+        {/* phone — right */}
+        <div className="mx-auto w-full max-w-75">
           <Image
             src={deviceSrc}
             alt={deviceAlt}
-            sizes="(min-width: 1024px) 300px, 280px"
+            sizes="(min-width: 1200px) 300px, 280px"
             quality={85}
             className="h-auto w-full"
           />
         </div>
-      </div>
+      </Container>
     </Section>
   );
 }

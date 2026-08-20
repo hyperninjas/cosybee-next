@@ -1,33 +1,19 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/energy-analytics-side.png";
 import deviceImg from "@/public/heating/energiebee-app-heating-system-overview.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
+import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export default function UnderstandOptimise() {
-  // Standard rhythm below 1200px; py-32! above is deliberate headroom for the
-  // bleeding side images. Inner wrapper is bespoke, not Container.
+  // Two-column band: title + features on the left, phone mockup on the right.
   return (
-    <Section
-      surface="base"
-      spacing="lg"
-      className="min-[1200px]:py-32! px-6 lg:px-0"
-    >
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: uniform 3-hex hive cluster */}
-        <div className="absolute -left-50 -top-10 hidden w-125.5 min-[1200px]:block">
-          <SharedImageHexCluster
-            src={sideImage.src}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-            className="w-full"
-          />
-        </div>
-        {/* middle: title + features */}
-        <div className="min-[1200px]:max-w-120.5 max-[1200px]:max-w-160 flex flex-col justify-center">
+    <Section surface="base" spacing="lg">
+      <Container
+        size="wide"
+        className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
+      >
+        {/* text — left */}
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-120.5">
           <SectionTitle align="left">
             Understand and Optimise Your Home Energy Today
           </SectionTitle>
@@ -45,28 +31,19 @@ export default function UnderstandOptimise() {
               description="A simple breakdown of energy usage, efficiency, and production every day."
             />
           </div>
-          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-75 mx-auto min-[1200px]:hidden mt-10">
-            <Image
-              src={deviceImg}
-              alt="energy dashboard"
-              sizes="(min-width: 1024px) 300px, 280px"
-              quality={85}
-              className="h-auto w-full"
-            />
-          </div>
         </div>
-        {/* right: phone mockup */}
-        <div className="absolute -top-18 right-0 hidden w-75 min-[1200px]:block">
+
+        {/* phone — right */}
+        <div className="mx-auto w-full max-w-75">
           <Image
             src={deviceImg}
             alt="energy dashboard"
-            sizes="(min-width: 1024px) 300px, 280px"
+            sizes="(min-width: 1200px) 300px, 280px"
             quality={85}
             className="h-auto w-full"
           />
         </div>
-      </div>
+      </Container>
     </Section>
   );
 }

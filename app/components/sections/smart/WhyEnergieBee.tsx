@@ -1,63 +1,31 @@
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import {
   FeatureCard,
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/why-energieBee.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/smart/energiebee-app-energy-at-a-glance.png";
+import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export default function WhyEnergieBee() {
-  // Edge-bleed side images → inner wrapper is bespoke, not Container.
-  // Tight bottom below 1200px: the WorksWithAnySystem CTA follows directly on
-  // /smart, so this band hugs it (same idiom as WhyEnergiebeeSolar). At 1200px+
-  // the bottom stays generous — the bleeding phone needs the height.
+  // Two-column band: title + lead + feature cards on the left, phone mockup on
+  // the right. Tight bottom below 1200px — the WorksWithAnySystem CTA follows
+  // directly on /smart, so this band hugs it.
   return (
-    <Section
-      surface="base"
-      spacing="lg"
-      className="px-6 lg:px-0 pb-8 min-[1200px]:pb-20"
-    >
-      <div className="relative mx-auto flex flex-col max-w-7xl grid-cols-1 items-center gap-12 lg:gap-10">
-        {/* left: phone — wrapper has explicit width, image fills it
-            via w-full h-auto so it scales proportionally instead of
-            rendering at intrinsic size */}
-        <div className="absolute -top-14 left-0 hidden w-[345.3px] min-[1200px]:block">
-          <Image
-            src={deviceImg}
-            alt="energy analytics dashboard"
-            sizes="(min-width: 1024px) 350px, 280px"
-            quality={85}
-            className="h-auto w-full"
-          />
-        </div>
-
-        {/* middle: title + lead + feature cards */}
-        <div className="min-[1200px]:max-w-145 max-[1200px]:max-w-160 flex flex-col justify-center z-9">
-          <SectionTitle
-            align="left"
-            className="min-[550px]:text-center lg:px-6"
-          >
-            Works With Your Smart Home
-          </SectionTitle>
-          <SectionLead className="min-[550px]:text-left self-left lg:px-6">
+    <Section surface="base" spacing="lg" className="pb-8 min-[1200px]:pb-20">
+      <Container
+        size="wide"
+        className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
+      >
+        {/* text — left */}
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-145">
+          <SectionTitle align="left">Works With Your Smart Home</SectionTitle>
+          <SectionLead>
             Part of the EnergieBee app - everything you need to monitor and
             optimise your solar energy system.
           </SectionLead>
-          {/* inline phone for tablet/mobile — side images hidden below 1200px */}
-          <div className="w-[345.3px] mx-auto min-[1200px]:hidden mt-8">
-            <Image
-              src={deviceImg}
-              alt="energy analytics dashboard"
-              sizes="(min-width: 1024px) 350px, 280px"
-              quality={85}
-              className="h-auto w-full"
-            />
-          </div>
-          <div className="mt-6 md:mt-8 space-y-4 lg:px-6">
+          <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
               glyph="sun"
               title="Maximise Production"
@@ -76,19 +44,17 @@ export default function WhyEnergieBee() {
           </div>
         </div>
 
-        {/* right: 3-hex hive cluster (mirrored) — wrapper holds the
-            absolute positioning + explicit width so the inner `w-full`
-            has a definite reference */}
-        <div className="absolute -right-55! min-[1200px]:-right-40! top-15 hidden w-125.5 lg:block">
-          <SharedImageHexCluster
-            src={sideImage.src}
-            viewBox={HIVE_3_VIEWBOX}
-            placements={HIVE_3_PLACEMENTS}
-            fallbackColor="#3a4a5c"
-            className="w-full transform-[scaleX(-1)]"
+        {/* phone — right */}
+        <div className="mx-auto w-full max-w-86.5">
+          <Image
+            src={deviceImg}
+            alt="energy analytics dashboard"
+            sizes="(min-width: 1200px) 346px, 280px"
+            quality={85}
+            className="h-auto w-full"
           />
         </div>
-      </div>
+      </Container>
     </Section>
   );
 }
