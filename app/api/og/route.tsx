@@ -12,7 +12,7 @@ const LOGO_RATIO = 512 / 80;
 const LOGO_HEIGHT = 52;
 
 /** Brand yellow — matches the refreshed logo marks in /public. */
-const YELLOW = "#E6DA00";
+const YELLOW = "#EFDF18";
 
 /**
  * Open Graph card for every page that doesn't ship its own image, served at
@@ -61,101 +61,99 @@ export async function GET(request: Request) {
   const titleSize = title.length > 72 ? 50 : title.length > 46 ? 58 : 66;
 
   const card = new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          padding: "80px",
-          color: "white",
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          // The hero photo when the page has one; otherwise the brand gradient.
-          ...(cover
-            ? { backgroundImage: `url(${cover})`, backgroundSize: "1200px 630px" }
-            : {
-                background:
-                  "linear-gradient(135deg, #0a0a0a 0%, #1a1a0a 50%, #2a2410 100%)",
-              }),
-        }}
-      >
-        {/* Scrim — same idea as PageHero's gradient: darkens the photo so the
-            copy stays legible whatever the crop happens to contain. */}
-        {cover ? (
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "1200px",
-              height: "630px",
-              display: "flex",
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        padding: "80px",
+        color: "white",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        // The hero photo when the page has one; otherwise the brand gradient.
+        ...(cover
+          ? { backgroundImage: `url(${cover})`, backgroundSize: "1200px 630px" }
+          : {
               background:
-                "linear-gradient(105deg, rgba(8,8,6,0.94) 0%, rgba(8,8,6,0.82) 46%, rgba(8,8,6,0.42) 100%)",
-            }}
-          />
-        ) : null}
-
-        {/* logo — the same lockup the navbar uses */}
-        {logo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={logo}
-            width={Math.round(LOGO_HEIGHT * LOGO_RATIO)}
-            height={LOGO_HEIGHT}
-            alt={SITE_NAME}
-          />
-        ) : (
-          <span style={{ fontSize: 36, fontWeight: 700, letterSpacing: -1 }}>
-            {SITE_NAME}
-          </span>
-        )}
-
-        {/* headline — the page's own social title */}
+                "linear-gradient(135deg, #0a0a0a 0%, #1a1a0a 50%, #2a2410 100%)",
+            }),
+      }}
+    >
+      {/* Scrim — same idea as PageHero's gradient: darkens the photo so the
+            copy stays legible whatever the crop happens to contain. */}
+      {cover ? (
         <div
           style={{
-            marginTop: "48px",
-            fontSize: titleSize,
-            fontWeight: 800,
-            lineHeight: 1.1,
-            letterSpacing: -2,
-            maxWidth: "1040px",
-          }}
-        >
-          {title}
-        </div>
-
-        {/* accent rule */}
-        <div
-          style={{
-            marginTop: "36px",
-            width: "96px",
-            height: "6px",
-            borderRadius: "9999px",
-            backgroundColor: YELLOW,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "1200px",
+            height: "630px",
+            display: "flex",
+            background:
+              "linear-gradient(105deg, rgba(8,8,6,0.94) 0%, rgba(8,8,6,0.82) 46%, rgba(8,8,6,0.42) 100%)",
           }}
         />
+      ) : null}
 
-        {/* subtitle — the page's own social description */}
-        {subtitle ? (
-          <div
-            style={{
-              marginTop: "32px",
-              fontSize: 30,
-              fontWeight: 500,
-              lineHeight: 1.35,
-              color: "rgba(255,255,255,0.78)",
-              maxWidth: "900px",
-            }}
-          >
-            {subtitle}
-          </div>
-        ) : null}
+      {/* logo — the same lockup the navbar uses */}
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logo}
+          width={Math.round(LOGO_HEIGHT * LOGO_RATIO)}
+          height={LOGO_HEIGHT}
+          alt={SITE_NAME}
+        />
+      ) : (
+        <span style={{ fontSize: 36, fontWeight: 700, letterSpacing: -1 }}>
+          {SITE_NAME}
+        </span>
+      )}
+
+      {/* headline — the page's own social title */}
+      <div
+        style={{
+          marginTop: "48px",
+          fontSize: titleSize,
+          fontWeight: 800,
+          lineHeight: 1.1,
+          letterSpacing: -2,
+          maxWidth: "1040px",
+        }}
+      >
+        {title}
       </div>
-    ),
+
+      {/* accent rule */}
+      <div
+        style={{
+          marginTop: "36px",
+          width: "96px",
+          height: "6px",
+          borderRadius: "9999px",
+          backgroundColor: YELLOW,
+        }}
+      />
+
+      {/* subtitle — the page's own social description */}
+      {subtitle ? (
+        <div
+          style={{
+            marginTop: "32px",
+            fontSize: 30,
+            fontWeight: 500,
+            lineHeight: 1.35,
+            color: "rgba(255,255,255,0.78)",
+            maxWidth: "900px",
+          }}
+        >
+          {subtitle}
+        </div>
+      ) : null}
+    </div>,
     { ...SIZE },
   );
 

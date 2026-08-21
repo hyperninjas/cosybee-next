@@ -19,7 +19,7 @@
 [data-theme="default"] {
   color-scheme: light;
   /* Theme Colors (Light Mode) */
-  --accent: oklch(87% 0.185 105.6);
+  --accent: oklab(88.86800000000001% -0.04513 0.17872);
   --accent-foreground: oklch(21.891% 0.00155 16.394);
   --background: oklch(97.02% 0.0015 49.85);
   --border: oklch(90% 0.0015 49.85);
