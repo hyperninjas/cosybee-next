@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { coverKeyForPath } from "./og-covers";
 import {
   SITE_NAME,
   SITE_TAGLINE,
@@ -26,8 +27,10 @@ import {
 type OgImage = { url: string; width?: number; height?: number; alt?: string };
 
 /**
- * Default social-share image: the dynamic, on-brand 1200×630 card served by the
- * /api/og route handler. It's a route (not the `app/opengraph-image.tsx` file
+ * Bare social-share image: the on-brand 1200×630 card served by the /api/og
+ * route handler with no page copy, so it falls back to the site tagline. Used
+ * by the root layout for pages that never call `pageMetadata()` (e.g. auth).
+ * Pages that do call it get {@link ogImageFor} instead. It's a route (not the `app/opengraph-image.tsx` file
  * convention) on purpose — file-based metadata outranks `generateMetadata`, so
  * a root convention would override per-page `og:image` (e.g. article covers).
  * As a metadata default it can be overridden per page. `metadataBase` (root
@@ -40,6 +43,31 @@ export const DEFAULT_OG_IMAGE: OgImage = {
   alt: `${SITE_NAME} — ${SITE_TAGLINE}`,
 };
 
+/**
+ * Per-page social card — the same /api/og template with the page's own
+ * headline, subtitle and hero cover passed as query params. Without this every
+ * static page shared one card showing the site tagline, so /solar, /privacy and
+ * the home page were indistinguishable in a link preview.
+ */
+function ogImageFor(
+  title: string,
+  description: string,
+  path: string,
+): OgImage {
+  const cover = coverKeyForPath(path);
+  const query = new URLSearchParams({
+    t: title,
+    d: description,
+    ...(cover ? { bg: cover } : {}),
+  });
+  return {
+    url: `/api/og?${query.toString()}`,
+    width: 1200,
+    height: 630,
+    alt: title,
+  };
+}
+
 export type PageMetaInput = {
   /** Page title. The brand suffix (" — EnergieBee") is appended automatically
    *  to the OG/Twitter title; the <title> tag gets it from the root template. */
@@ -50,7 +78,8 @@ export type PageMetaInput = {
   path: string;
   /** Optional punchier copy for social cards. Defaults to `description`. */
   ogDescription?: string;
-  /** Social image. Defaults to the site-wide OG card. */
+  /** Social image. Defaults to the shared OG card, rendered with this page's
+   *  own title and description. */
   image?: OgImage;
   /** og:type. Defaults to "website". */
   type?: "website" | "article" | "profile";
@@ -67,7 +96,7 @@ export function pageMetadata({
   description,
   path,
   ogDescription,
-  image = DEFAULT_OG_IMAGE,
+  image,
   type = "website",
   keywords,
   index = true,
@@ -77,6 +106,10 @@ export function pageMetadata({
   // here — unless the caller already passed a full, absolute title.
   const socialTitle = absoluteTitle ? title : `${title} — ${SITE_NAME}`;
   const socialDescription = ogDescription ?? description;
+  // The card draws the EnergieBee logo above the headline, so it takes the
+  // unbranded title — `socialTitle`'s " — EnergieBee" suffix would say the
+  // brand twice and push longer titles onto an extra line.
+  const socialImage = image ?? ogImageFor(title, socialDescription, path);
 
   return {
     title: absoluteTitle ? { absolute: title } : title,
@@ -91,7 +124,7 @@ export function pageMetadata({
       url: path,
       title: socialTitle,
       description: socialDescription,
-      images: [image],
+      images: [socialImage],
     },
     twitter: {
       card: "summary_large_image",
@@ -99,7 +132,7 @@ export function pageMetadata({
       creator: TWITTER_HANDLE,
       title: socialTitle,
       description: socialDescription,
-      images: [image.url],
+      images: [socialImage.url],
     },
   };
 }
