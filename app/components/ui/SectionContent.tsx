@@ -312,7 +312,9 @@ export function FeatureItem({
         >
           {title}
         </h3>
-        <p className={`mt-2 text-base w-[75%] text-muted ${descClassName}`}>
+        <p
+          className={`mt-2 text-base font-medium w-[75%] text-muted ${descClassName}`}
+        >
           {description}
         </p>
       </div>
@@ -351,7 +353,9 @@ export function FeatureCard({
         >
           {title}
         </h3>
-        <p className={`mt-2 text-base w-[75%] text-muted ${descClassName}`}>
+        <p
+          className={`mt-2 text-base font-medium w-[75%] text-muted ${descClassName}`}
+        >
           {description}
         </p>
       </div>

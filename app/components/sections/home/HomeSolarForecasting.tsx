@@ -12,7 +12,7 @@ import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png
  */
 export default function HomeSolarForecasting() {
   return (
-    <Section surface="secondary" spacing="lg" className="text-foreground">
+    <Section surface="surface" spacing="lg" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6">
         {/* text — left */}
         <div className="z-9 flex flex-col max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-163.5">

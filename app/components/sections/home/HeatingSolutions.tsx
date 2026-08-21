@@ -15,11 +15,11 @@ import windowCoffeeImg from "@/public/ss-image/ss-small-3.png";
  * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
  * positions flipped: hive cluster on the left, title + check-glyph
  * feature cards on the right, cream decorative hex bleeding in from
- * the top-right (instead of top-left).
+ * the top-right (instead of top-left).bg-[#f7f7f7]
  */
 export default function HeatingSolutions() {
   return (
-    <Section spacing="lg" surface="surface" className="text-foreground">
+    <Section spacing="lg" surface="none" className="text-foreground ">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1fr] min-[1200px]:gap-20">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

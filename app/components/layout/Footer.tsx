@@ -96,13 +96,13 @@ export default async function Footer() {
         <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.25fr_1.25fr_1fr] text-balance lg:gap-8">
           {/* why EnergieBee */}
           <div>
-            <h3 className="text-lg font-bold tracking-[0.08em]">
+            <h3 className="text-[20px] leading-[100%] font-bold">
               LATEST BLOGS
             </h3>
             {/* text-balance on the <li>, not the <a>: text-wrap only applies
                 to block containers, so on the inline link it would be a no-op.
                 Keeps long labels from dropping a single orphan word. */}
-            <ul className="mt-5 space-y-4.5">
+            <ul className="mt-5 space-y-3">
               {latestLinks.map((link) => (
                 // Keyed on href, not label: two posts can share a title, but
                 // never a slug.
@@ -116,7 +116,7 @@ export default async function Footer() {
                   <Link
                     href={link.href}
                     title={link.label}
-                    className="line-clamp-2 text-[15px] font-medium text-white/80 transition-colors hover:text-white"
+                    className="line-clamp-2 text-base font-medium text-white/80 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -127,13 +127,13 @@ export default async function Footer() {
 
           {/* get started */}
           <div>
-            <h3 className="text-lg font-bold tracking-[0.08em]">GET STARTED</h3>
-            <ul className="mt-5 space-y-4.5">
+            <h3 className="text-[20px] font-bold">GET STARTED</h3>
+            <ul className="mt-5 space-y-3">
               {GET_STARTED_LINKS.map((link) => (
                 <li key={link.label} className="text-balance">
                   <Link
                     href={link.href}
-                    className="text-[15px] font-medium text-white/80 transition-colors hover:text-white"
+                    className="text-base font-medium text-white/80 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -144,9 +144,7 @@ export default async function Footer() {
 
           {/* social — hex hive cluster */}
           <div className="w-fit md:justify-self-end">
-            <h3 className="text-lg font-bold tracking-[0.08em]">
-              SOCIAL MEDIA
-            </h3>
+            <h3 className="text-[20px] font-bold">SOCIAL MEDIA</h3>
             <SocialCluster className="mt-5 h-auto pb-1 w-46" {...SOCIAL} />
           </div>
         </div>

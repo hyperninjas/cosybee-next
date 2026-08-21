@@ -209,7 +209,7 @@ export function HomeFeaturedArticlesView({
   if (articles.length === 0) return null;
 
   return (
-    <Section spacing="none" className="bg-linear-to-b from-white to-[#f6f5f4]">
+    <Section spacing="none" className="bg-linear-to-b from-white to-base">
       <div className="mx-auto max-w-360 px-6 pt-12 pb-2 sm:px-10 lg:px-30 ">
         <Header viewAllHref={viewAllHref} />
         {articles.length > 3 ? (

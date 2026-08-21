@@ -50,7 +50,7 @@ export function CtaButton({
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES[size]} ${className} capitalize`}
+      className={`${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES[size]} ${className}`}
     >
       {children}
     </a>

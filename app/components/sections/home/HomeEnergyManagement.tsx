@@ -14,7 +14,7 @@ import gatewayImg from "@/public/ss-image/ss-small-6.png";
  */
 export default function HomeEnergyManagement() {
   return (
-    <Section spacing="lg" className="text-white">
+    <Section spacing="lg" surface="base" className="text-white">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-20">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
