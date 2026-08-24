@@ -62,7 +62,9 @@ export function CtaButton({
 const HEX_TILE = encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 52'><polygon points='15,0 45,0 60,26 45,52 15,52 0,26' fill='none' stroke='rgba(0,0,0,0.07)' stroke-width='1.2'/></svg>`,
 );
-const HEX_PATTERN_BG = {
+/** Repeating honeycomb wash. Exported so other surfaces (the 404 page) can
+ *  wear the same texture instead of inventing a second honeycomb. */
+export const HEX_PATTERN_BG = {
   backgroundImage: `url("data:image/svg+xml;utf8,${HEX_TILE}"), url("data:image/svg+xml;utf8,${HEX_TILE}")`,
   backgroundPosition: "0 0, 30px 26px",
   backgroundSize: "60px 52px, 60px 52px",

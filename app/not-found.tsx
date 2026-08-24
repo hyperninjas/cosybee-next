@@ -1,31 +1,18 @@
 import type { Metadata } from "next";
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+import NotFoundView from "@/app/components/sections/NotFoundView";
 
 export const metadata: Metadata = {
   title: "Page not found",
-  description: "The page you're looking for doesn't exist or has moved.",
+  description:
+    "This page has moved or been tidied away. Nothing's broken — here's the way back to solar, smart heating and the Hive.",
   robots: { index: false, follow: false },
 };
 
 export default function NotFound() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-      <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-        404
-      </p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-        Page not found
-      </h1>
-      <p className="mt-4 max-w-md text-base text-muted">
-        The page you&rsquo;re looking for doesn&rsquo;t exist or has been
-        moved. Try heading back to the homepage.
-      </p>
-      <Link
-        href="/"
-        className="mt-8 inline-flex items-center justify-center rounded-xl bg-accent px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
-      >
-        Back to home
-      </Link>
-    </main>
+    <NotFoundView
+      title="Well, this is a quiet corner of the hive."
+      lead="The page you wanted isn't here any more. We've been having a bit of a tidy-up and things move around — nothing you did, and nothing worth worrying about. Let's find you somewhere warmer."
+    />
   );
 }

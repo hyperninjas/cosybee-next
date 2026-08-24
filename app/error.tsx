@@ -19,7 +19,6 @@ export default function ErrorBoundary({
 }) {
   useEffect(() => {
     // Wire your error reporter (Sentry, etc.) here.
-    // eslint-disable-next-line no-console
     console.error("[ErrorBoundary]", error);
   }, [error]);
 
@@ -32,8 +31,8 @@ export default function ErrorBoundary({
         We hit a snag
       </h1>
       <p className="mt-4 max-w-md text-base text-muted">
-        An unexpected error occurred while loading this page. The team has
-        been notified. Try again, or head back to the homepage.
+        An unexpected error occurred while loading this page. The team has been
+        notified. Try again, or head back to the homepage.
       </p>
 
       {error.digest && (

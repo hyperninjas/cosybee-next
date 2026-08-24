@@ -1,35 +1,59 @@
-import { AppLink as Link } from "@/app/components/ui/AppLink";
+import NotFoundView, {
+  DEFAULT_DESTINATIONS,
+  type NotFoundDestination,
+} from "@/app/components/sections/NotFoundView";
+
+/** Card copy for each blog, used when it is offered from the *other* blog. */
+const BLOGS: Record<string, NotFoundDestination> = {
+  "/hive": {
+    href: "/hive",
+    title: "The Hive",
+    description:
+      "Catch up on the hive of activity: product updates, energy news and stories from other homes.",
+  },
+  "/learn": {
+    href: "/learn",
+    title: "Learn",
+    description:
+      "Plain-English guides to solar, heating and the numbers on your energy bill.",
+  },
+};
 
 type Props = {
-  /** Link target for the back button, e.g. "/hive" or "/learn". */
+  /** Link target for the primary CTA, e.g. "/hive" or "/learn". */
   basePath: string;
-  /** Back-button label, e.g. "Back to Hive". */
+  /** Primary CTA label, e.g. "Back to Hive". */
   backLabel: string;
 };
 
 /**
- * Shared 404 body for blog article subtrees. Each route supplies its
- * own basePath + label so the back button returns to the right blog.
+ * Shared 404 body for blog article subtrees. Renders the site-wide
+ * {@link NotFoundView} with article-flavoured copy: the CTA returns to the
+ * blog the reader was already in, and the third card offers the *other*
+ * blog (there's no point suggesting the listing they're one click from).
  */
 export default function BlogNotFound({ basePath, backLabel }: Props) {
+  const siblingPath = basePath === "/learn" ? "/hive" : "/learn";
+  const sibling = BLOGS[siblingPath];
+
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-      <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-        404
-      </p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-        Article not found
-      </h1>
-      <p className="mt-4 max-w-md text-base text-muted">
-        The article you&rsquo;re looking for doesn&rsquo;t exist or has been
-        moved. Try heading back to the blog.
-      </p>
-      <Link
-        href={basePath}
-        className="mt-8 inline-flex items-center justify-center rounded-xl bg-accent px-8 py-3 text-base font-medium text-white shadow-[0_15px_30px_-10px_rgba(238,61,26,0.6)] transition hover:brightness-110"
-      >
-        {backLabel}
-      </Link>
-    </main>
+    <NotFoundView
+      status="Article not found"
+      title="This one has flown the nest."
+      lead="The article you were after has been retired, renamed or moved somewhere sunnier. The rest of the hive is still busy, though — here's what's worth a read."
+      primary={{ href: basePath, label: backLabel }}
+      destinations={[
+        // The two product stories, then whichever blog they weren't reading.
+        ...DEFAULT_DESTINATIONS.filter((d) => d.href !== "/hive"),
+        sibling,
+      ]}
+      shortcutsLabel="Had something specific in mind?"
+      shortcuts={[
+        { href: "/search", label: "Search articles" },
+        { href: "/", label: "Home" },
+        { href: "/faq", label: "FAQs" },
+        { href: "/contact", label: "Just ask us" },
+      ]}
+    />
   );
 }
