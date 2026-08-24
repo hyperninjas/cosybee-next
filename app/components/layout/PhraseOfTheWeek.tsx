@@ -76,7 +76,7 @@ export default function PhraseOfTheWeek({
       {/* Curly quotes in the markup, not CSS `quotes` — they need to survive
           into the text a visitor copies, and into the RSS-style previews some
           browsers generate from selections. */}
-      <blockquote className="mt-3 text-balance font-medium! text-sm! italic text-white/90 sm:text-base">
+      <blockquote className="mt-3 text-balance font-medium! leading-[150%] text-[13px]! italic text-white/90 sm:text-base">
         &ldquo;{phrase.quote}&rdquo;
       </blockquote>
 

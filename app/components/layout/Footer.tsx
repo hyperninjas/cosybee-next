@@ -69,7 +69,7 @@ export default async function Footer() {
     <footer className="bg-black text-white">
       <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.25fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-4">
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
@@ -96,7 +96,7 @@ export default async function Footer() {
         <div className="mx-auto grid grid-cols-1 gap-12 w-full md:grid-cols-[1.25fr_1.25fr_1fr] text-balance lg:gap-8">
           {/* why EnergieBee */}
           <div>
-            <h3 className="text-[20px] leading-[100%] font-bold">
+            <h3 className="text-[20px] leading-[100%] tracking-wider font-bold">
               LATEST BLOGS
             </h3>
             {/* text-balance on the <li>, not the <a>: text-wrap only applies
@@ -127,7 +127,9 @@ export default async function Footer() {
 
           {/* get started */}
           <div>
-            <h3 className="text-[20px] font-bold">GET STARTED</h3>
+            <h3 className="text-[20px] leading-[100%] tracking-wider font-bold">
+              GET STARTED
+            </h3>
             <ul className="mt-5 space-y-3">
               {GET_STARTED_LINKS.map((link) => (
                 <li key={link.label} className="text-balance">
@@ -144,7 +146,9 @@ export default async function Footer() {
 
           {/* social — hex hive cluster */}
           <div className="w-fit md:justify-self-end">
-            <h3 className="text-[20px] font-bold">SOCIAL MEDIA</h3>
+            <h3 className="text-[20px] leading-[100%] tracking-wider font-bold">
+              SOCIAL MEDIA
+            </h3>
             <SocialCluster className="mt-5 h-auto pb-1 w-46" {...SOCIAL} />
           </div>
         </div>
@@ -161,7 +165,7 @@ export default async function Footer() {
               <li key={link.label} className="min-w-22.5">
                 <Link
                   href={link.href}
-                  className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+                  className="text-[13px] leading-[100%] font-medium text-white/80 transition-colors hover:text-white"
                 >
                   {link.label}
                 </Link>

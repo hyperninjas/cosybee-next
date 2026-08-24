@@ -165,7 +165,7 @@ export default function Navbar({
           />
         </Link>
 
-        <ul className="hidden items-center gap-8 min-[1150px]:flex xl:gap-12">
+        <ul className="hidden items-center mr-4 gap-8 min-[1150px]:flex xl:gap-12">
           {NAV_LINKS.map((link) => {
             const isActive = isLinkActive(link.href);
             return (

@@ -7,6 +7,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { Section } from "@/app/components/ui/Section";
 import type { Article } from "@/app/lib/article-types";
 import { ArticleCard } from "@/app/components/sections/blog/ArticleCard";
+import Hexagon from "../../ui/Hexagon";
 
 /** Per-article blog hub path (articles span both blogs on the home page). */
 function basePathFor(a: Article): string {
@@ -45,13 +46,13 @@ function ChevronRight() {
 /** Heading + "View all blog" pill, shared by the grid and carousel layouts. */
 function Header({ viewAllHref }: { viewAllHref: string }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="relative flex items-center justify-between gap-4 z-10">
       <h2 className="text-2xl font-bold text-foreground sm:text-[32px]">
         Featured articles
       </h2>
       <Link
         href={viewAllHref}
-        className="shrink-0 rounded-lg bg-surface-secondary px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-surface-tertiary sm:text-base"
+        className="shrink-0 bg-[#f7f7f7f7] h-11 flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-tertiary sm:text-base leading-[100%]"
       >
         View all articles
       </Link>
@@ -121,6 +122,8 @@ function FeaturedCarousel({ articles }: { articles: Article[] }) {
           gutter so the first/last cards' side shadows have room without any
           adjacent slide peeking in; py gives the vertical shadow breathing
           space before the pagination row. */}
+      {/* cream decorative hex bleeding from the top-right */}
+
       <div
         className="mt-8 -mx-5 overflow-x-clip overflow-y-visible px-5 py-2"
         ref={emblaRef}
@@ -210,8 +213,12 @@ export function HomeFeaturedArticlesView({
 
   return (
     <Section spacing="none" className="bg-linear-to-b from-white to-base">
-      <div className="mx-auto max-w-360 px-6 pt-12 pb-2 sm:px-10 lg:px-30 ">
+      <div className="mx-auto max-w-360 relative px-6 pt-12 pb-2 sm:px-10 lg:px-30 ">
         <Header viewAllHref={viewAllHref} />
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -left-24 top-6 w-[18rem] sm:-right-36 sm:w-88 lg:w-76.75 z-0"
+        />
         {articles.length > 3 ? (
           <FeaturedCarousel articles={articles} />
         ) : (

@@ -20,7 +20,7 @@ import windowCoffeeImg from "@/public/ss-image/ss-small-3.png";
 export default function HeatingSolutions() {
   return (
     <Section spacing="lg" surface="none" className="text-foreground ">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1fr] min-[1200px]:gap-20">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1fr] min-[1200px]:gap-38">
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
           color="#F7F2E1"

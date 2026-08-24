@@ -16,7 +16,7 @@ import Dot from "@/app/components/ui/Dot";
 /** Pill overlaying the cover with the article's category. */
 function CategoryBadge({ name }: { name: string }) {
   return (
-    <span className="absolute left-4 top-4 rounded-full leading-[100%] bg-background px-3 py-1 text-xs font-semibold text-primary">
+    <span className="absolute left-4 top-4 rounded-full leading-[100%] bg-white/80 px-3 py-1.5 text-[13px] font-semibold text-primary">
       {name}
     </span>
   );
@@ -25,7 +25,7 @@ function CategoryBadge({ name }: { name: string }) {
 /** Read-time · date meta row. */
 function ArticleMeta({ readTime, date }: { readTime: number; date: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+    <div className="flex flex-wrap items-center gap-2 text-[13px] leading-[100%] text-muted">
       <span>{formatReadTime(readTime)}</span>
       <Dot />
       <span>{formatDate(date)}</span>
@@ -74,7 +74,7 @@ function AuthorByline({ author }: { author: Article["author"] }) {
         {author?.slug ? (
           <Link
             href={`/author/${author.slug}`}
-            className="relative z-10 flex items-center gap-3 text-sm font-semibold text-foreground transition-colors hover:text-[#FF8A7A]"
+            className="relative z-10 flex items-center gap-3 text-base leading-[100%] font-semibold text-foreground transition-colors hover:text-[#FF8A7A]"
           >
             {avatar}
             {name}
@@ -116,7 +116,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
         </div>
         <div className="flex flex-1 flex-col p-6">
           <ArticleMeta readTime={a.readTime} date={a.authorDate} />
-          <h3 className="mt-3 line-clamp-3 text-lg font-bold text-foreground">
+          <h3 className="mt-3 line-clamp-3 text-[20px] leading-[130%] font-bold text-foreground">
             {/* Stretched link: the pseudo-element covers the whole card, so
                 the card is still one big click target for the article while
                 the tag/author links inside it stay individually clickable. */}

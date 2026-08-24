@@ -19,7 +19,7 @@ export default function ReadyToReduce() {
       // className="max-w-360 mx-auto px-6 pb-20 pt-16 sm:px-10 lg:px-30 lg:pb-25 lg:pt-21"
     >
       <div className="max-w-360 mx-auto px-6 pb-20 pt-16 sm:px-10 lg:px-30 lg:pb-25 lg:pt-21">
-        <div className="mx-auto max-w-360 relative flex flex-col items-center gap-8 rounded-3xl bg-surface p-8 shadow-[0_30px_30px_-15px_rgba(0,0,0,0.15)] sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
+        <div className="mx-auto max-w-360 relative flex flex-col items-center gap-8 rounded-3xl bg-surface p-8 border borderss-[#e5e5e5e5s] border-border sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
           {/* phone */}
           <div className="shrink-0 absolute bottom-0 hidden min-[1200px]:block">
             <Image
@@ -33,18 +33,18 @@ export default function ReadyToReduce() {
           <div className="h-auto hidden min-[1200px]:block w-44 lg:w-59"></div>
           {/* text + buttons */}
           <div className="flex-1 md:text-center min-[1200px]:text-left!">
-            <p className="mt-1.5 mb-3 text-base text-[#424242] tracking-wide uppercase font-bold leading-relaxed sm:text-lg">
+            <p className="mt-1.5 mb-3 text-base text-[#424242] tracking-wider uppercase font-bold leading-[100%]">
               More time for what matters
             </p>
-            <h2 className="text-2xl tracking-[-2%] leading-[110%] font-extrabold text-foreground sm:text-3xl min-[1200px]:text-[38px]!">
+            <h3 className="text-2xl tracking-[-2%] leading-[110%] font-extrabold text-foreground sm:text-3xl min-[1200px]:text-[40px]!">
               Bring clarity to your home energy.
-            </h2>
-            <p className="mt-2.5 max-w-xl text-base tracking-wide leading-[150%] font-medium text-muted sm:text-lg">
+            </h3>
+            <p className="mt-3 max-w-162.5 text-base tracking-wide leading-[150%] font-medium text-muted sm:text-[20px]">
               EnergieBee helps you understand your home energy in a simple and
               connected way. One system. One view. Total clarity.
             </p>{" "}
             <div className="mt-6 flex flex-wrap items-center md:justify-center gap-4 min-[1200px]:justify-start!">
-              <CtaButton href="/download-app" size="md">
+              <CtaButton href="/download-app" size="sm">
                 Download free app
               </CtaButton>
               {/* <AppStoreButton appId={APP_STORE_ID} />
