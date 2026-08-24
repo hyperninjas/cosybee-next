@@ -12,7 +12,9 @@ export default function NotFound() {
   return (
     <NotFoundView
       title="Well, this is a quiet corner of the hive."
-      lead="The page you wanted isn't here any more. We've been having a bit of a tidy-up and things move around — nothing you did, and nothing worth worrying about. Let's find you somewhere warmer."
+      lead={
+        "The page you wanted isn't available. \n Let's find you somewhere warmer."
+      }
     />
   );
 }

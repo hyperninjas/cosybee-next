@@ -132,9 +132,9 @@ type Props = {
  * missing URL still feels like the rest of the site: honeycomb wash, brand
  * type scale, and the same card language as the marketing sections.
  *
- * The status code is deliberately demoted to a footnote: a visitor who has
- * lost their way needs reassurance first, and the number only matters to the
- * handful of people who came looking for it.
+ * The status code is carried by the background watermark rather than the
+ * copy: a visitor who has lost their way needs reassurance first, and the
+ * number is orientation, not the message.
  *
  * Server component. Each route supplies its own copy; the destination cards
  * fall back to {@link DEFAULT_DESTINATIONS}.
@@ -143,7 +143,7 @@ export default function NotFoundView({
   status = "Page not found",
   title,
   lead,
-  primary = { href: "/", label: "Take me home" },
+  primary = { href: "/", label: "Back to home" },
   destinations = DEFAULT_DESTINATIONS,
   shortcuts = DEFAULT_SHORTCUTS,
   shortcutsLabel = "Not quite what you were after?",
@@ -153,7 +153,7 @@ export default function NotFoundView({
       <Section
         spacing="lg"
         surface="none"
-        className="bg-linear-to-b from-[#FDF8EA] via-background to-background text-foreground dark:from-surface"
+        className="flex min-h-[90vh] flex-col justify-center bg-linear-to-b from-[#FDF8EA] via-background to-background text-foreground dark:from-surface"
       >
         {/* Honeycomb wash — the same tile the CTA banner wears, faded out
             downwards so the cards sit on clean background. */}
@@ -174,20 +174,29 @@ export default function NotFoundView({
             className="pointer-events-none absolute bottom-2 -left-14 hidden w-28 sm:block sm:w-36 dark:opacity-15"
           />
 
+          {/* 404 watermark — centred on the copy block (which is z-10) and
+              carrying the status code visually, so the words never have to. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 text-center text-[12rem] leading-none font-extrabold tracking-tighter text-[#f5e0a92d] select-none sm:text-[14rem] lg:text-[32rem] dark:text-white/3"
+          >
+            404
+          </span>
+
           <div className="relative z-10 mx-auto max-w-3xl text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm font-semibold text-[#7A6A1F] shadow-[0_1px_3px_0_rgba(0,0,0,0.06)] ring-1 ring-[#EFE3BE] dark:text-accent dark:ring-border">
               <HexDot />
               {status}
             </p>
 
-            <Heading as="h1" variant="title" className="mt-6 text-foreground">
+            <Heading as="h1" variant="display" className="mt-6 text-foreground">
               {title}
             </Heading>
 
             <Text
               variant="lead"
               tone="muted"
-              className="mx-auto mt-5 max-w-2xl text-balance"
+              className="mx-auto mt-2 max-w-2xl whitespace-pre-line  text-balance"
             >
               {lead}
             </Text>
@@ -202,13 +211,13 @@ export default function NotFoundView({
             </div>
           </div>
 
-          {destinations.length > 0 && (
+          {/* {destinations.length > 0 && (
             <div className="relative z-10 mt-12 grid gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
               {destinations.map((d) => (
                 <DestinationCard key={d.href} {...d} />
               ))}
             </div>
-          )}
+          )} */}
 
           {shortcuts.length > 0 && (
             <p className="relative z-10 mt-10 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 text-sm font-medium text-muted">
@@ -222,7 +231,7 @@ export default function NotFoundView({
                   )}
                   <Link
                     href={s.href}
-                    className="font-semibold text-foreground underline-offset-4 transition-colors hover:text-accent hover:underline"
+                    className="font-semibold text-foreground underline-offset-4 transition-colors hover:underline"
                   >
                     {s.label}
                   </Link>
@@ -230,11 +239,6 @@ export default function NotFoundView({
               ))}
             </p>
           )}
-
-          {/* The technical bit, kept where it belongs: out of the way. */}
-          <p className="relative z-10 mt-8 text-center text-xs text-muted/70">
-            For the record, that&rsquo;s a 404.
-          </p>
         </Container>
       </Section>
     </main>
