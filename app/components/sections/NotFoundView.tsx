@@ -178,7 +178,7 @@ export default function NotFoundView({
               carrying the status code visually, so the words never have to. */}
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 text-center text-[12rem] leading-none font-extrabold tracking-tighter text-[#f5e0a92d] select-none sm:text-[14rem] lg:text-[32rem] dark:text-white/3"
+            className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 text-center text-[12rem] leading-none font-extrabold tracking-tighter text-[#f5e0a943] select-none sm:text-[14rem] lg:text-[32rem] dark:text-white/3"
           >
             404
           </span>
@@ -196,7 +196,7 @@ export default function NotFoundView({
             <Text
               variant="lead"
               tone="muted"
-              className="mx-auto mt-2 max-w-2xl whitespace-pre-line  text-balance"
+              className="mx-auto mt-2 max-w-lg whitespace-pre-line"
             >
               {lead}
             </Text>

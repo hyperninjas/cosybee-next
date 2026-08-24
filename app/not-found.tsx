@@ -13,7 +13,7 @@ export default function NotFound() {
     <NotFoundView
       title="Well, this is a quiet corner of the hive."
       lead={
-        "The page you wanted isn't available. \n Let's find you somewhere warmer."
+        "The page you wanted isn't available. Let's find you somewhere warmer."
       }
     />
   );
