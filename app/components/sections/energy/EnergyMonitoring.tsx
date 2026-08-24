@@ -50,6 +50,7 @@ export default function EnergyMonitoring() {
             <FeatureItem
               title="Live Consumption Tracking"
               description="Real-time view of how much power your home is using, where it's coming from, and where it's going."
+              descWidth="w-[80%]"
             />
             <FeatureItem
               title="Per-Device Breakdown"

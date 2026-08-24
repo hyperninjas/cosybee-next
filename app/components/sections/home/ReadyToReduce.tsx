@@ -19,7 +19,7 @@ export default function ReadyToReduce() {
       // className="max-w-360 mx-auto px-6 pb-20 pt-16 sm:px-10 lg:px-30 lg:pb-25 lg:pt-21"
     >
       <div className="max-w-360 mx-auto px-6 pb-20 pt-16 sm:px-10 lg:px-30 lg:pb-25 lg:pt-21">
-        <div className="mx-auto max-w-360 relative flex flex-col items-center gap-8 rounded-3xl bg-surface p-8 border borderss-[#e5e5e5e5s] border-border sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
+        <div className="mx-auto max-w-360 relative flex flex-col items-center gap-8 rounded-3xl bg-surface p-8 border border-border sm:p-10 lg:flex-row lg:gap-12 lg:p-14">
           {/* phone */}
           <div className="shrink-0 absolute bottom-0 hidden min-[1200px]:block">
             <Image

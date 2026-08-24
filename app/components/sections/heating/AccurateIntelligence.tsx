@@ -30,14 +30,17 @@ export default function AccurateIntelligence() {
             <FeatureItem
               title="High-Accuracy Energy Forecasting"
               description="Our models analyse real-time usage, system behaviour, and external conditions to predict heating demand with high precision."
+              descWidth="w-full"
             />
             <FeatureItem
               title="Climate-Aware Intelligence"
               description="We integrate live weather and environmental data to continuously adapt energy predictions and reduce wasted heating cycles."
+              descWidth="w-full"
             />
             <FeatureItem
               title="Efficiency-First System Design"
               description="Every insight is built to reduce unnecessary energy consumption — helping you save money while lowering your carbon footprint."
+              descWidth="w-full"
             />
           </div>
         </div>

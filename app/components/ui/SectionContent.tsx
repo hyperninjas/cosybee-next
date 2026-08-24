@@ -164,12 +164,14 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto text-left min-[550px]:text-center ${className}`}>
+    <div
+      className={`mx-auto text-left min-[550px]:text-center z-9 ${className}`}
+    >
       <Heading variant="title" className="text-foreground">
         {title}
       </Heading>
       {description && (
-        <p className="mx-auto mt-1.5 text-base leading-relaxed text-muted sm:text-lg">
+        <p className="mx-auto mt-4 text-base text-muted sm:text-[20px] font-medium leading-8">
           {description}
         </p>
       )}
@@ -291,12 +293,14 @@ export function FeatureItem({
   description,
   titleClassName,
   descClassName,
+  descWidth = "w-[75%]",
 }: {
   glyph?: GlyphName;
   title: string;
   description: string;
   titleClassName?: string;
   descClassName?: string;
+  descWidth?: string;
 }) {
   return (
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
@@ -313,7 +317,7 @@ export function FeatureItem({
           {title}
         </h3>
         <p
-          className={`mt-2 text-base font-medium w-[75%] text-muted ${descClassName}`}
+          className={`mt-2 text-base font-medium ${descWidth} text-muted ${descClassName}`}
         >
           {description}
         </p>
@@ -332,12 +336,14 @@ export function FeatureCard({
   description,
   titleClassName,
   descClassName,
+  descWidth = "w-[75%]",
 }: {
   glyph: GlyphName;
   title: string;
   description: string;
   titleClassName?: string;
   descClassName?: string;
+  descWidth?: string;
 }) {
   return (
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
@@ -354,7 +360,7 @@ export function FeatureCard({
           {title}
         </h3>
         <p
-          className={`mt-2 text-base font-medium w-[75%] text-muted ${descClassName}`}
+          className={`mt-2 text-base font-medium ${descWidth} text-muted ${descClassName}`}
         >
           {description}
         </p>

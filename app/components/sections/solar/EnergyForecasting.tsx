@@ -4,17 +4,29 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/smart/energiebee-energy-usage.png";
 import deviceWeatherImg from "@/public/smart/energiebee-weather-forecasts.png";
 import { Section } from "../../ui/Section";
+import Hexagon from "../../ui/Hexagon";
+import { Container } from "@/app/components/ui/Container";
 
 export default function EnergyForecasting() {
   return (
     <Section surface="surface" spacing="md" overflow="visible">
-      <div className="mx-auto max-w-225 px-4 lg:px-0">
+      <Container className="mx-auto max-w-225 px-4 lg:px-0">
+        {/* cream decorative hex bleeding from the top-left */}
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-56 sm:w-88 lg:w-76.75 z-0"
+        />
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -right-24 -bottom-10 w-[18rem] sm:-right-56 sm:w-88 lg:w-76.75 z-0"
+        />
         <SectionHeader
+          className="relative z-10"
           title="Intelligent Energy Forecasting"
           description="EnergieBee uses advanced weather data and AI to predict your solar energy production, helping you plan energy usage and maximise savings"
         />
 
-        <div className=" grid justify-center mt-6 gap-6 min-[870px]:grid-cols-2 lg:gap-8">
+        <div className=" grid justify-center mt-6 gap-6 min-[870px]:grid-cols-2 lg:gap-8 relative z-9">
           <MediaCard
             media={
               <Image
@@ -63,7 +75,7 @@ export default function EnergyForecasting() {
           buttonClassName="!text-lg"
         />
       </div> */}
-      </div>
+      </Container>
     </Section>
   );
 }

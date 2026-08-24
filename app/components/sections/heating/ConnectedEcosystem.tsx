@@ -15,7 +15,7 @@ import { Section } from "@/app/components/ui/Section";
 
 export default function ConnectedEcosystem() {
   return (
-    <Section spacing="md" className="bg-surface text-foreground">
+    <Section spacing="md" surface="surface" className="text-foreground">
       {/* Early-access launch banner. An <aside>, not a heading block: it sits
           above the section's own <h2>, so an <h3> here inverted the document
           order. Its headline is also deliberately smaller than SectionTitle —
@@ -23,16 +23,16 @@ export default function ConnectedEcosystem() {
       <Container className="mb-20">
         <aside
           aria-label="Early access"
-          className="flex flex-col gap-5 rounded-2xl border border-border bg-surface-secondary p-6 shadow-[9px_9px_13px_0_rgba(0,0,0,0.04),-11px_-8px_14px_0_rgba(0,0,0,0.03)] sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10"
+          className="flex flex-col gap-5 rounded-2xl border border-border bg-background p-6 sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10"
         >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+            <p className="text-base font-semibold leading-[100%] uppercase tracking-[0.18em] text-primary">
               Early access
             </p>
-            <p className="mt-2 text-2xl font-extrabold leading-tight text-foreground sm:text-[28px]">
+            <p className="mt-2 text-2xl font-extrabold leading-[100%] text-foreground sm:text-[28px]">
               Launching August 2026
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
+            <p className="mt-4 text-sm leading-[100%] text-muted sm:text-base">
               Be part of the first wave of connected home energy intelligence.
             </p>
           </div>
@@ -43,7 +43,7 @@ export default function ConnectedEcosystem() {
             >
               Pre-order access
             </a> */}
-            <CtaButton href="/contact" size="md">
+            <CtaButton href="/contact" size="sm">
               Register Interest
             </CtaButton>
           </div>

@@ -20,7 +20,7 @@ const PROBLEMS = [
 
 export default function WhyChoose() {
   return (
-    <Section spacing="md" className="bg-surface-secondary text-foreground">
+    <Section spacing="md" surface="base" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* 3-hex hive cluster — three distinct cells */}
         <HiveHexCluster
@@ -60,7 +60,7 @@ export default function WhyChoose() {
           <SectionLead className="max-w-163.5">
             Smarter energy. Lower cost. Smaller footprint.
           </SectionLead>
-          <p className="mt-4 text-base leading-relaxed text-muted">
+          <p className="mt-4 text-base text-muted">
             EnergieBee is designed to solve three problems at once:
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-left text-muted marker:text-muted">
@@ -68,7 +68,7 @@ export default function WhyChoose() {
               <li key={p}>{p}</li>
             ))}
           </ul>
-          <p className="mt-4 text-base max-w-135 leading-relaxed text-muted">
+          <p className="mt-4 text-base max-w-135 text-muted">
             By combining forecasting intelligence with real-world energy
             behaviour, we help homes use only what they need — and nothing more.
           </p>

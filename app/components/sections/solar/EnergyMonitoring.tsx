@@ -45,7 +45,7 @@ export default function EnergyMonitoring({
 }: EnergyMonitoringProps = {}) {
   return (
     <Section surface="surface" spacing="md" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-34">
         {/* uniform 3-hex hive cluster */}
 
         <HiveHexCluster
@@ -79,7 +79,7 @@ export default function EnergyMonitoring({
           className="pointer-events-none absolute -right-24 -top-13.5 w-[18rem] sm:-right-27 sm:w-88 lg:w-76.75"
         />
         {/* text */}
-        <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-163.5">
+        <div className="z-9 flex flex-col min-[550px]:max-[1200px]:items-center min-[1200px]:max-w-165">
           <SectionTitle>{title}</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-8">
             {features.map((f) => (
@@ -87,6 +87,7 @@ export default function EnergyMonitoring({
                 key={f.title}
                 title={f.title}
                 description={f.description}
+                descWidth="w-full"
               />
             ))}
           </div>

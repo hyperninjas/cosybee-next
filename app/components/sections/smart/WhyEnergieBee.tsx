@@ -7,6 +7,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import deviceImg from "@/public/smart/energiebee-app-energy-at-a-glance.png";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
+import Hexagon from "../../ui/Hexagon";
 
 export default function WhyEnergieBee() {
   // Two-column band: title + lead + feature cards on the left, phone mockup on
@@ -18,8 +19,13 @@ export default function WhyEnergieBee() {
         size="wide"
         className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
       >
+        {/* cream decorative hex bleeding from the top-right */}
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-36 sm:w-88 lg:w-76.75"
+        />
         {/* text — left */}
-        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-145">
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-163">
           <SectionTitle align="left">Works With Your Smart Home</SectionTitle>
           <SectionLead>
             Part of the EnergieBee app - everything you need to monitor and

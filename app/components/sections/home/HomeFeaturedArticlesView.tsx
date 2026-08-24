@@ -122,7 +122,6 @@ function FeaturedCarousel({ articles }: { articles: Article[] }) {
           gutter so the first/last cards' side shadows have room without any
           adjacent slide peeking in; py gives the vertical shadow breathing
           space before the pagination row. */}
-      {/* cream decorative hex bleeding from the top-right */}
 
       <div
         className="mt-8 -mx-5 overflow-x-clip overflow-y-visible px-5 py-2"

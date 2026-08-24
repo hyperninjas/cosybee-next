@@ -13,7 +13,7 @@ import { Section } from "@/app/components/ui/Section";
 export default function EnergyMonitoring() {
   return (
     <Section surface="surface" spacing="md" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-38">
         {/* uniform 3-hex hive cluster */}
 
         <HiveHexCluster

@@ -58,7 +58,7 @@ export const textVariants = tv({
       heroLead:
         "text-base font-medium opacity-80 sm:text-[18px] md:text-[20px] md:leading-[32px]",
       /** Intro paragraph under a section title. */
-      lead: "text-base sm:text-base",
+      lead: "text-base sm:text-[20px] leading-[32px] font-medium ",
       /** Default body / description copy. */
       body: "text-sm",
     },

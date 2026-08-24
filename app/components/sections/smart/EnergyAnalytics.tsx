@@ -3,6 +3,7 @@ import deviceImg from "@/public/smart/energiebee-app-weekly-energy-spend-overvie
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
+import Hexagon from "../../ui/Hexagon";
 
 export default function EnergyAnalytics() {
   // Two-column band: title + features on the left, phone mockup on the right.
@@ -13,6 +14,11 @@ export default function EnergyAnalytics() {
         size="wide"
         className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1.25fr_1fr] min-[1200px]:gap-6"
       >
+        {/* cream decorative hex bleeding from the top-left */}
+        <Hexagon
+          color="#F7F2E1"
+          className="pointer-events-none absolute -left-28 -top-13.5 w-[18rem] sm:-left-27 sm:w-88 lg:w-76.75"
+        />
         {/* text — left */}
         <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-111.5">
           <SectionTitle align="left">Energy &amp; Savings</SectionTitle>
