@@ -531,21 +531,14 @@ function DetailContent({
               <ul className="divide-y divide-border rounded-lg border border-border">
                 {media.providerUsages.map((p) => (
                   <li key={p.providerId}>
-                    <a
-                      href={`/admin/tariffs?editProvider=${p.providerId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Edit provider in a new tab"
-                      className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
-                    >
-                      <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                    <div className="flex items-center gap-3 px-3 py-2 text-xs">
+                      <span className="min-w-0 flex-1 truncate text-foreground">
                         {p.name}
                       </span>
                       <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
                         logo
                       </span>
-                      <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
-                    </a>
+                    </div>
                   </li>
                 ))}
               </ul>
