@@ -116,6 +116,12 @@ type Props = {
   title: ReactNode;
   /** Reassuring paragraph under the headline. */
   lead: ReactNode;
+  /**
+   * Tailwind max-width utility for the lead column, e.g. "max-w-xl". Pass a
+   * wider one when the copy runs long enough to look cramped at the default.
+   * Must be a literal class in the caller's source so Tailwind emits it.
+   */
+  leadWidth?: string;
   /** Filled brand CTA. Defaults to the home page. */
   primary?: NotFoundShortcut;
   /** Cards offered under the copy. Defaults to solar / heating / the Hive. */
@@ -143,6 +149,7 @@ export default function NotFoundView({
   status = "Page not found",
   title,
   lead,
+  leadWidth = "max-w-lg",
   primary = { href: "/", label: "Back to home" },
   // destinations = DEFAULT_DESTINATIONS,
   shortcuts = DEFAULT_SHORTCUTS,
@@ -183,7 +190,7 @@ export default function NotFoundView({
             404
           </span>
 
-          <div className="relative z-10 mx-auto max-w-3xl text-center">
+          <div className="relative z-10 mx-auto max-w-4xl text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm font-semibold text-[#7A6A1F] shadow-[0_1px_3px_0_rgba(0,0,0,0.06)] ring-1 ring-[#EFE3BE] dark:text-accent dark:ring-border">
               <HexDot />
               {status}
@@ -196,7 +203,7 @@ export default function NotFoundView({
             <Text
               variant="lead"
               tone="muted"
-              className="mx-auto mt-2 max-w-lg whitespace-pre-line"
+              className={`mx-auto mt-3 ${leadWidth} whitespace-pre-line`}
             >
               {lead}
             </Text>

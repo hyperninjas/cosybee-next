@@ -40,7 +40,8 @@ export default function BlogNotFound({ basePath, backLabel }: Props) {
     <NotFoundView
       status="Article not found"
       title="The article is no longer available or doesn’t exist."
-      lead="The article you were after has been retired, renamed or moved somewhere sunnier. The rest of the hive is still busy, though — here's what's worth a read."
+      lead="The article you were after has been retired, renamed or moved somewhere sunnier. The rest of the hive is still busy, so here's what's worth a read."
+      leadWidth="max-w-3xl"
       primary={{ href: basePath, label: backLabel }}
       destinations={[
         // The two product stories, then whichever blog they weren't reading.
