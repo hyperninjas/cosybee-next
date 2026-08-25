@@ -4,7 +4,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 // import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
-import EnergieBeeLogo from "@/public/energieBee-logo-colored-version.svg";
+import EnergieBeeLogo from "@/public/energiebee-brand-horizontal.svg";
 
 import { CTA_BASE_CLASSES, CTA_SIZE_CLASSES } from "@/app/components/ui/Cta";
 // Hidden for now — restore alongside the nav cluster below.
@@ -159,7 +159,7 @@ export default function Navbar({
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
-            className="h-10 w-auto"
+            className="h-11 w-auto"
             quality={85}
             loading="eager"
           />
