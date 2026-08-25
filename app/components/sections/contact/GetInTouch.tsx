@@ -180,7 +180,7 @@ export default function GetInTouch() {
     <Section spacing="md" surface="base">
       <Container size="wide">
         {/* heading */}
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-lg text-center">
           {/* <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
             Contact
           </p> */}
