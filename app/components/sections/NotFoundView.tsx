@@ -64,50 +64,50 @@ function HexDot() {
   );
 }
 
-function ArrowRight() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-      aria-hidden="true"
-    >
-      <line x1="4" y1="12" x2="19" y2="12" />
-      <polyline points="13 6 19 12 13 18" />
-    </svg>
-  );
-}
+// function ArrowRight() {
+//   return (
+//     <svg
+//       viewBox="0 0 24 24"
+//       fill="none"
+//       stroke="currentColor"
+//       strokeWidth="2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+//       aria-hidden="true"
+//     >
+//       <line x1="4" y1="12" x2="19" y2="12" />
+//       <polyline points="13 6 19 12 13 18" />
+//     </svg>
+//   );
+// }
 
 /**
  * Destination card — title, description, and a "Have a look" affordance.
  * The title carries a stretched link so the whole card is one click target
  * while the markup stays a single, honest anchor.
  */
-function DestinationCard({ href, title, description }: NotFoundDestination) {
-  return (
-    <article className="group relative flex h-full flex-col rounded-3xl border border-border bg-surface p-6 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none sm:p-7">
-      <h3 className="text-[20px] leading-[130%] font-bold text-foreground">
-        {/* Stretched link: the pseudo-element covers the card, so the whole
-            tile is clickable without wrapping everything in an anchor. */}
-        <Link
-          href={href}
-          className="after:absolute after:inset-0 after:content-['']"
-        >
-          {title}
-        </Link>
-      </h3>
-      <p className="mt-3 text-base font-medium text-muted">{description}</p>
-      <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-        Have a look
-        <ArrowRight />
-      </span>
-    </article>
-  );
-}
+// function DestinationCard({ href, title, description }: NotFoundDestination) {
+//   return (
+//     <article className="group relative flex h-full flex-col rounded-3xl border border-border bg-surface p-6 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none sm:p-7">
+//       <h3 className="text-[20px] leading-[130%] font-bold text-foreground">
+//         {/* Stretched link: the pseudo-element covers the card, so the whole
+//             tile is clickable without wrapping everything in an anchor. */}
+//         <Link
+//           href={href}
+//           className="after:absolute after:inset-0 after:content-['']"
+//         >
+//           {title}
+//         </Link>
+//       </h3>
+//       <p className="mt-3 text-base font-medium text-muted">{description}</p>
+//       <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+//         Have a look
+//         <ArrowRight />
+//       </span>
+//     </article>
+//   );
+// }
 
 type Props = {
   /** Warm sentence-case label above the headline, e.g. "Page not found". */
@@ -144,7 +144,7 @@ export default function NotFoundView({
   title,
   lead,
   primary = { href: "/", label: "Back to home" },
-  destinations = DEFAULT_DESTINATIONS,
+  // destinations = DEFAULT_DESTINATIONS,
   shortcuts = DEFAULT_SHORTCUTS,
   shortcutsLabel = "Not quite what you were after?",
 }: Props) {
