@@ -2,7 +2,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
 import PhraseOfTheWeek from "./PhraseOfTheWeek";
-import EnergieBeeLogo from "@/public/energiebee-vertical-logo.svg";
+import EnergieBeeLogo from "@/public/energiebee-brand.svg";
 import { SOCIAL } from "@/app/lib/site";
 import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
 import { getLatestArticles, getPhrases } from "@/app/lib/articles";
