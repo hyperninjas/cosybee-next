@@ -39,7 +39,7 @@ export default function BlogNotFound({ basePath, backLabel }: Props) {
   return (
     <NotFoundView
       status="Article not found"
-      title="This one has flown the nest."
+      title="The article is no longer available or doesn’t exist."
       lead="The article you were after has been retired, renamed or moved somewhere sunnier. The rest of the hive is still busy, though — here's what's worth a read."
       primary={{ href: basePath, label: backLabel }}
       destinations={[
