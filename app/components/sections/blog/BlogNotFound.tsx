@@ -49,7 +49,6 @@ export default function BlogNotFound({ basePath, backLabel }: Props) {
       ]}
       shortcutsLabel="Had something specific in mind?"
       shortcuts={[
-        { href: "/search", label: "Search articles" },
         { href: "/", label: "Home" },
         { href: "/faq", label: "FAQs" },
         { href: "/contact", label: "Just ask us" },
