@@ -74,8 +74,8 @@ function CoverToggle({
         onPress={onPress}
         className={`size-7 min-h-0 min-w-0 rounded-full p-0 shadow-sm ring-1 ring-black/10 backdrop-blur transition-colors ${
           active
-            ? "bg-warning text-white hover:bg-warning/90"
-            : "bg-surface/95 text-muted hover:bg-surface hover:text-foreground"
+            ? "bg-accent/80 hover:bg-warning/90"
+            : "bg-surface/70 text-muted hover:bg-surface hover:text-foreground"
         }`}
       >
         {active ? (
@@ -183,7 +183,7 @@ export function PostCard({
             <Focusable>
               <Link
                 href={`/admin/posts/${row.id}/edit`}
-                className="mt-3 line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors hover:text-accent"
+                className="mt-3 mb-2 overflow-visible line-clamp-2 text-base font-semibold leading-[130%] text-foreground transition-colors hover:underline"
               >
                 {row.title}
               </Link>

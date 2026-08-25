@@ -400,9 +400,9 @@ export function PublicImageUpload({
           </>
         ) : (
           <>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-danger-soft">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-background">
               <svg
-                className="h-5 w-5 text-accent"
+                className="h-7 w-7 text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -433,7 +433,7 @@ export function PublicImageUpload({
           type="button"
           disabled={disabled}
           onClick={() => setPickerOpen(true)}
-          className="flex w-full items-center justify-center gap-1.5 rounded-3xl border border-border bg-surface px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-1.5 rounded-3xl border border-border bg-surface px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-accent hover:bg-accent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           <svg
             viewBox="0 0 24 24"

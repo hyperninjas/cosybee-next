@@ -77,19 +77,17 @@ function ScopeButton({
 }) {
   return (
     <Button
-      variant="ghost"
+      variant={active ? "secondary" : "ghost"}
       fullWidth
       onPress={onPress}
-      className={`h-auto justify-start gap-2 rounded-3xl px-2.5 py-2 text-left text-sm font-normal ${
-        active ? "bg-accent/10 font-semibold text-accent" : "text-foreground"
-      }`}
+      className={`h-auto justify-start gap-2 rounded-3xl px-2.5 py-2 text-left text-sm font-normal `}
     >
       {icon}
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {count != null && (
         <span
           className={`text-xs ${
-            active ? "font-semibold text-accent" : "text-foreground"
+            active ? "font-semibold text-warning" : "text-foreground"
           }`}
         >
           {count}

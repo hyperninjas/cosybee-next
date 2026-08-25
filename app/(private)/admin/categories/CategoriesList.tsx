@@ -67,7 +67,7 @@ export function CategoriesList({ categories }: { categories: Category[] }) {
               <button
                 type="button"
                 onClick={() => openEdit(c)}
-                className="text-sm font-medium text-accent transition-colors hover:underline"
+                className="text-sm font-medium text-warning transition-colors hover:underline"
               >
                 Edit
               </button>

@@ -619,7 +619,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 <Tabs.ListContainer className="overflow-x-auto">
                   <Tabs.List
                     aria-label="Filter by type"
-                    className="w-fit *:h-7 *:w-fit *:px-2 *:data-[selected=true]:text-accent-foreground"
+                    className="w-fit *:h-7 *:w-fit *:px-2 *:data-[selected=true]:text-warning-foreground"
                   >
                     {KIND_TABS.map((t) => (
                       <Tabs.Tab key={t.key} id={t.key}>
@@ -639,7 +639,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 <Tabs.ListContainer>
                   <Tabs.List
                     aria-label="View mode"
-                    className="w-fit *:h-7 *:w-fit *:px-2 *:data-[selected=true]:text-accent-foreground"
+                    className="w-fit *:h-7 *:w-fit *:px-2 *:data-[selected=true]:text-warning-foreground"
                   >
                     {VIEW_MODES.map((v) => (
                       <Tooltip key={v.key} delay={300}>
@@ -699,11 +699,11 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
             className={`relative rounded-xl border-2 border-dashed p-0 sm:p-0 transition-colors ${
-              dragging ? "border-accent bg-accent/5" : "border-transparent"
+              dragging ? "border-warning bg-warning/5" : "border-transparent"
             }`}
           >
             {dragging && (
-              <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-accent/5 text-sm font-semibold text-accent">
+              <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-warning/5 text-sm font-semibold text-warning">
                 Drop files to upload
               </div>
             )}
@@ -857,10 +857,7 @@ export function MediaLibrary({ allTags }: { allTags: Tag[] }) {
                 </span>
               )}
             </span>
-            <span
-              aria-hidden
-              className="hidden h-6 w-px bg-border sm:block"
-            />
+            <span aria-hidden className="hidden h-6 w-px bg-border sm:block" />
             <div className="flex items-center gap-2">
               <Button
                 size="sm"

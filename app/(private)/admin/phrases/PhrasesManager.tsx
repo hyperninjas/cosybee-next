@@ -213,7 +213,7 @@ export function PhrasesManager({
                 onDragEnd={() => setDragIndex(null)}
                 className={`flex items-start gap-3 p-4 transition-colors hover:bg-background ${
                   dragIndex === index ? "opacity-50" : ""
-                } ${isLive ? "bg-accent/5" : ""}`}
+                } ${isLive ? "bg-warning/5" : ""}`}
               >
                 {/* Order controls */}
                 <div className="flex shrink-0 flex-col items-center gap-1 pt-0.5">
@@ -253,7 +253,7 @@ export function PhrasesManager({
                       <span
                         className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                           isLive
-                            ? "bg-accent text-white"
+                            ? "bg-warning text-white"
                             : "bg-border text-muted"
                         }`}
                       >
@@ -270,7 +270,7 @@ export function PhrasesManager({
                       href={phrase.articlePath}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-mono text-accent hover:underline"
+                      className="font-mono text-warning hover:underline"
                     >
                       {phrase.articleLabel ?? phrase.articlePath}
                     </a>
@@ -291,7 +291,7 @@ export function PhrasesManager({
                   <button
                     type="button"
                     onClick={() => openEdit(phrase)}
-                    className="text-sm font-medium text-accent transition-colors hover:underline"
+                    className="text-sm font-medium text-warning transition-colors hover:underline"
                   >
                     Edit
                   </button>

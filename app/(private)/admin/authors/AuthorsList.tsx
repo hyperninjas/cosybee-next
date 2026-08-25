@@ -95,7 +95,7 @@ export function AuthorsList({ authors }: { authors: Author[] }) {
               <button
                 type="button"
                 onClick={() => openEdit(a)}
-                className="text-sm font-medium text-accent transition-colors hover:underline"
+                className="text-sm font-medium text-warning transition-colors hover:underline"
               >
                 Edit
               </button>

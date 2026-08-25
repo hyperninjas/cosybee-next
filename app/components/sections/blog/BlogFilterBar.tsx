@@ -56,7 +56,7 @@ export default function BlogFilterBar({
           <Button
             variant={category === "" ? "primary" : "tertiary"}
             onPress={() => onCategoryChange("")}
-            className="shrink-0 rounded-full whitespace-nowrap"
+            className="shrink-0 rounded-full whitespace-nowrap leading-[100%]!"
           >
             All
           </Button>
@@ -65,7 +65,7 @@ export default function BlogFilterBar({
               key={cat.slug}
               variant={category === cat.slug ? "primary" : "tertiary"}
               onPress={() => onCategoryChange(cat.slug)}
-              className="shrink-0 rounded-full whitespace-nowrap"
+              className="shrink-0 rounded-full whitespace-nowrap leading-[100%]! overflow-visible"
             >
               {cat.name}
             </Button>

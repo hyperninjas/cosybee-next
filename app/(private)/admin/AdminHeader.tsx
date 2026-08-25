@@ -1,5 +1,12 @@
 "use client";
+import { AppImage as Image } from "@/app/components/ui/AppImage";
 
+import EnergieBeeLogo from "@/public/energiebee-black-logo.svg";
+import { buttonVariants } from "@heroui/styles";
+import { AppLink as Link } from "@/app/components/ui/AppLink";
+import { AppAvatar } from "@/app/components/ui/AppAvatar";
+import { authClient } from "@/app/lib/auth-client";
+import { LogoutButton } from "./LogoutButton";
 import { useRouter, usePathname } from "next/navigation";
 import { Dropdown, Label, Separator } from "@heroui/react";
 
@@ -41,12 +48,6 @@ function ChevronDownIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-import { buttonVariants } from "@heroui/styles";
-import { AppLink as Link } from "@/app/components/ui/AppLink";
-import { AppAvatar } from "@/app/components/ui/AppAvatar";
-import CosybeeLogo from "@/app/components/ui/CosybeeLogo";
-import { authClient } from "@/app/lib/auth-client";
-import { LogoutButton } from "./LogoutButton";
 
 type AdminUser = { name: string; email: string; image?: string | null };
 
@@ -80,9 +81,15 @@ export function AdminHeader({ user }: { user: AdminUser }) {
       <div className="mx-auto flex h-16 max-w-360 items-center justify-between gap-4 px-4 sm:px-6">
         {/* Brand → dashboard */}
         <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
-          <CosybeeLogo className="h-8 w-auto shrink-0" />
-          <span className="truncate text-base font-extrabold tracking-tight text-foreground sm:text-lg">
-            EnergieBee <span className="text-accent">admin</span>
+          <Image
+            src={EnergieBeeLogo}
+            alt="EnergieBee"
+            className="h-11 w-auto"
+            quality={85}
+            loading="eager"
+          />
+          <span className="truncate text-lg font-bold overflow-visible text-foreground sm:text-xl leading-[100%]">
+            energie<span className="font-medium">bee</span> admin
           </span>
         </Link>
 
@@ -128,7 +135,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
               href="/admin/authors"
               className={buttonVariants({
                 variant: onAuthors ? "secondary" : "ghost",
-                size: "sm",
+                size: "md",
               })}
             >
               Authors
@@ -137,7 +144,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
               href="/admin/categories"
               className={buttonVariants({
                 variant: onCategories ? "secondary" : "ghost",
-                size: "sm",
+                size: "md",
               })}
             >
               Categories
@@ -146,7 +153,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
               href="/admin/tags"
               className={buttonVariants({
                 variant: onTags ? "secondary" : "ghost",
-                size: "sm",
+                size: "md",
               })}
             >
               Tags
@@ -156,7 +163,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             href="/admin/phrases"
             className={buttonVariants({
               variant: onPhrases ? "secondary" : "ghost",
-              size: "sm",
+              size: "md",
             })}
           >
             Phrases
@@ -165,7 +172,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             href="/admin/media"
             className={buttonVariants({
               variant: onMedia ? "secondary" : "ghost",
-              size: "sm",
+              size: "md",
             })}
           >
             Media
@@ -174,7 +181,7 @@ export function AdminHeader({ user }: { user: AdminUser }) {
             href="/admin/manage-users"
             className={buttonVariants({
               variant: onUsers ? "secondary" : "ghost",
-              size: "sm",
+              size: "md",
             })}
           >
             Users

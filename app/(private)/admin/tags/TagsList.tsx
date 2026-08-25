@@ -61,7 +61,7 @@ export function TagsList({ tags }: { tags: Tag[] }) {
               <button
                 type="button"
                 onClick={() => openEdit(t)}
-                className="text-sm font-medium text-accent transition-colors hover:underline"
+                className="text-sm font-medium text-warning transition-colors hover:underline"
               >
                 Edit
               </button>
