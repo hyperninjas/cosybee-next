@@ -115,6 +115,43 @@ export function decorateMediaPlayers(html: string): string {
 }
 
 /**
+ * Props BlockNote stamps onto an exported CTA card, which must come back off.
+ *
+ * BlockNote copies every non-default prop of a custom block onto the element
+ * its `toExternalHTML` returns, as `data-<kebab-prop>`. For the CTA that
+ * duplicates ALL of its copy into attributes — and does so UNESCAPED, because
+ * `<` and `>` are legal inside an attribute value. A card headed
+ * `Use <h2> tags` therefore publishes as:
+ *
+ *   <div class="article-cta" data-heading="Use <h2> tags">
+ *
+ * and every regex that walks the article HTML — `buildToc`, the video
+ * extractor, `decorateArticleLinks` — sees a heading that does not exist. So
+ * this is a correctness fix, not a tidy-up.
+ *
+ * `data-image` and `data-anchor` are OURS (the layout hooks the CSS reads)
+ * and stay; the nine stamped names below go. Same reasoning as the `data-html` strip beneath.
+ */
+const CTA_STAMPED_PROPS =
+  /\s+data-(?:eyebrow|heading|body|button-label|button-href|image-url|image-alt|image-position|image-anchor)="[^"]*"/g;
+
+/**
+ * Remove the stamped props from every `.article-cta` opening tag.
+ *
+ * The tag is matched attribute-by-attribute rather than with `<div[^>]*>`
+ * precisely because a value may legally contain `>` — the bug above.
+ */
+function stripCtaStampedProps(html: string): string {
+  return html.replace(
+    /<div((?:\s+[\w-]+(?:="[^"]*")?)*)\s*>/g,
+    (tag, attrs: string) =>
+      attrs.includes('class="article-cta"')
+        ? `<div${attrs.replace(CTA_STAMPED_PROPS, "")}>`
+        : tag,
+  );
+}
+
+/**
  * Convert BlockNote JSON blocks to HTML string.
  * Uses server-side rendering for generating the HTML.
  *
@@ -140,10 +177,9 @@ export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   // Also drop the `data-html` attribute BlockNote's block wrapper stamps on
   // exported htmlBlocks — it duplicates the RAW (unsanitized) source next to
   // the sanitized markup; the raw source belongs only in contentJson.
-  return decorateMediaPlayers(decorateArticleLinks(html)).replace(
-    /\s*data-html="[^"]*"/g,
-    "",
-  );
+  return stripCtaStampedProps(
+    decorateMediaPlayers(decorateArticleLinks(html)),
+  ).replace(/\s*data-html="[^"]*"/g, "");
 }
 
 /**

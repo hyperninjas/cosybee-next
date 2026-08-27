@@ -513,6 +513,327 @@
   padding-bottom: 20vh;
   min-height: 50vh;
 }
+/* ── Call-to-action card ──────────────────────────────────────────────────
+   Not scoped to `.article-body`: the same class set styles the editor preview,
+   so the card an author arranges looks like the one that publishes. Mirrors
+   the marketing ReadyToReduce card, rebuilt in plain CSS because the article
+   body is injected as an HTML string and can host no React. */
+.article-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  padding: 4.25rem 2.75rem !important;
+  border: 1px solid rgb(229, 227, 227) !important;
+  border-radius: 1.5rem;
+  /* The image column's width and the card's own padding, as tokens: a pinned
+     image is positioned against the CARD, so it has to line up with a column
+     it is no longer sitting in. One place to change both. */
+  --cta-media-w: 11rem;
+  --cta-pad: 1.75rem;
+  /* Warm wash over white. The design tool lists the opaque white FIRST, but
+     CSS paints the first background layer on top — taken literally it would
+     hide both gradients and render the card flat white. Only that layer is
+     moved (to the base); the two gradients keep the order they were given. */
+  background:
+    linear-gradient(
+      98.88deg,
+      rgba(239, 235, 191, 0.277) 0%,
+      rgba(248, 212, 168, 0.3) 34.13%,
+      rgba(239, 221, 191, 0.3) 67.07%,
+      rgba(239, 235, 191, 0.3) 100%
+    ),
+    linear-gradient(
+      98.88deg,
+      #fae4c6 0%,
+      rgba(252, 249, 240, 0) 50%,
+      #faf5c5 100%
+    ),
+    #ffffff;
+  /* The design's shadow ramp, combined into ONE declaration — as five separate
+     `box-shadow` lines each would simply override the last, leaving only the
+     bottom one. The first two carry zero alpha; they're kept so the ramp stays
+     intact if the opacities are ever tuned. */
+  box-shadow:
+    0px 0.34px 2.96px 0px rgba(0, 0, 0, 0),
+    0px 3.33px 7.32px 0px rgba(0, 0, 0, 0),
+    0px 11.26px 14.65px 0px rgba(0, 0, 0, 0.01),
+    0px 30.92px 29.68px 0px rgba(0, 0, 0, 0.01),
+    0px 100px 80px 0px rgba(0, 0, 0, 0.04);
+}
+@media (min-width: 900px) {
+  .article-cta {
+    flex-direction: row;
+    gap: 2.5rem;
+    padding: 2.5rem;
+    --cta-media-w: 14.75rem;
+    --cta-pad: 2.5rem;
+  }
+  /* The one job of `data-image`: which side the art sits on. `row-reverse`
+     rather than a second markup order, so the DOM keeps copy-before-image and
+     a screen reader hears the message first either way. */
+  .article-cta[data-image="right"] {
+    flex-direction: row-reverse;
+  }
+}
+.article-cta[data-image="none"] {
+  flex-direction: column;
+}
+
+.article-cta-media {
+  flex: none;
+  width: var(--cta-media-w);
+}
+.article-cta-media img {
+  display: block;
+  width: 100%;
+  max-height: calc(100% - 40px);
+  height: auto;
+  margin: 0;
+  border-radius: 0 !important;
+}
+
+/* ── Pinned image ─────────────────────────────────────────────────────
+   The image leaves the flow and sits against an edge of the card, so a tall
+   mockup can stand ON the card's border instead of floating in the middle —
+   the same effect the marketing ReadyToReduce card gets from `absolute
+   bottom-0` plus a spacer div.
+
+   No spacer element is needed here: `.article-cta-media` keeps its width but
+   collapses to zero height once its only child is out of flow, which is
+   exactly what a spacer is. The copy therefore still starts after the column
+   and never runs underneath the picture.
+
+   Wide screens only. In the stacked mobile layout there is no side column to
+   pin to, and an out-of-flow image would simply land on top of the text — so
+   below 900px this is ignored and the image behaves normally. */
+@media (min-width: 900px) {
+  .article-cta[data-anchor="top"],
+  .article-cta[data-anchor="bottom"] {
+    position: relative;
+  }
+  .article-cta[data-anchor="top"] .article-cta-media img,
+  .article-cta[data-anchor="bottom"] .article-cta-media img {
+    position: absolute;
+    /* Bounded by BOTH axes and sized naturally, so the aspect ratio is never
+       distorted: at most as wide as the column it vacated, and at most as tall
+       as the card MINUS one card padding.
+
+       That subtraction is the whole point. A pinned image is flush against one
+       edge by design — that's what makes a phone mockup stand ON the card's
+       border — so the height cap is what keeps clear space at the OPPOSITE
+       edge. Without it a tall image fills the card corner to corner and the
+       artwork collides with the card's top edge.
+
+       `max-height` alone (rather than `object-fit`) because a fixed-width box
+       would letterbox a tall image: transparent bars either side, the picture
+       floating away from the edge it's meant to be flush with. */
+    width: auto;
+    height: auto;
+    max-width: var(--cta-media-w);
+    max-height: calc(100% - var(--cta-pad));
+  }
+  .article-cta[data-anchor="top"] .article-cta-media img {
+    top: 0;
+  }
+  .article-cta[data-anchor="bottom"] .article-cta-media img {
+    bottom: 0;
+  }
+  /* Line the pinned image up with the column it vacated — one card padding
+     in from whichever edge its side is on. */
+  .article-cta[data-image="left"][data-anchor="top"] .article-cta-media img,
+  .article-cta[data-image="left"][data-anchor="bottom"] .article-cta-media img {
+    left: var(--cta-pad);
+  }
+  .article-cta[data-image="right"][data-anchor="top"] .article-cta-media img,
+  .article-cta[data-image="right"][data-anchor="bottom"]
+    .article-cta-media
+    img {
+    right: var(--cta-pad);
+  }
+}
+
+.article-cta-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+@media (min-width: 900px) {
+  .article-cta-copy {
+    text-align: left;
+  }
+  .article-cta[data-image="none"] .article-cta-copy {
+    text-align: center;
+  }
+}
+
+.article-cta-eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  color: #424242;
+}
+/* A <p>, not a heading — see buildCtaDom. Sized like one so it still reads as
+   the loudest thing in the card. */
+.article-cta-heading {
+  margin: 0;
+  font-size: 2rem !important;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1 !important;
+  color: var(--foreground);
+}
+@media (min-width: 900px) {
+  .article-cta-heading {
+    font-size: 2rem;
+  }
+}
+.article-cta-body {
+  margin: 0.75rem 0 0;
+  max-width: 40rem;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: var(--muted);
+}
+@media (min-width: 900px) {
+  .article-cta-body {
+    font-size: 1.125rem;
+  }
+}
+
+.article-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+@media (min-width: 900px) {
+  .article-cta[data-image="left"] .article-cta-actions,
+  .article-cta[data-image="right"] .article-cta-actions {
+    justify-content: flex-start;
+  }
+}
+/* Matches CtaButton's md size so the in-article card and the marketing pages
+   present the same button. */
+.article-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: 3rem;
+  padding: 0 1.5rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #0c0c0c !important;
+  text-decoration: none !important;
+  transition: filter 0.15s ease;
+}
+.article-cta-button:hover {
+  filter: brightness(1.1);
+  color: #fff;
+}
+/* The article prose rules underline every link; the button is not prose. */
+.article-body .article-cta-button {
+  text-decoration: none;
+}
+
+/* ── CTA block, editor chrome ─────────────────────────────────────────── */
+.bn-cta-block {
+  margin: 0.6rem 0;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  background: #fafaf9;
+  overflow: hidden;
+}
+.bn-cta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eeecea;
+}
+.bn-cta-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #ff8a7a;
+}
+.bn-cta-toggle {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bn-cta-preview {
+  padding: 0.75rem;
+}
+/* The preview shows the real card; drop its outer spacing so it sits neatly
+   inside the block chrome. */
+.bn-cta-preview .article-cta {
+  margin: 0;
+}
+.bn-cta-form {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border-top: 1px solid #eeecea;
+  background: #fff;
+}
+.bn-cta-field {
+  display: grid;
+  gap: 0.2rem;
+}
+.bn-cta-field > span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+.bn-cta-field input,
+.bn-cta-field textarea {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  font: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+}
+.bn-cta-field input:focus-visible,
+.bn-cta-field textarea:focus-visible {
+  outline: none;
+  border-color: #ff8a7a;
+}
+.bn-cta-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.bn-cta-action,
+.bn-cta-select {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 /* ── FAQ block INSIDE THE EDITOR ──────────────────────────────────────────
    Rendered with BlockNote's toggle wrapper, which on its own is
    indistinguishable from a Toggle List — same chevron, same plain text — so

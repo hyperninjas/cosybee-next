@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NextImage from "next/image";
 import {
+  Button,
   Input,
   Modal,
   Pagination,
@@ -14,11 +15,13 @@ import {
 import {
   listMedia,
   listMediaTags,
+  validateLibraryFile,
   type MediaItem,
   type MediaKind,
   type MediaListResult,
   type MediaTagCount,
 } from "@/app/lib/storage";
+import { uploadLibraryMedia } from "@/app/lib/media-upload";
 import { KindIcon, VideoThumb } from "./media-utils";
 import { TagFilter } from "./TagFilter";
 
@@ -128,6 +131,56 @@ function PickerBody({
     };
   }, []);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  /**
+   * Upload one file straight into the library and hand it back as the pick.
+   *
+   * Uploading from here means "I want THIS file", so the picker selects it and
+   * closes rather than making you hunt for it in the grid — but only once it
+   * has been read back from the library, so the caller always receives a real
+   * MediaItem (with its id, thumbnail and derived alt) and never a stub.
+   */
+  async function handleUpload(file: File) {
+    const problem = validateLibraryFile(file);
+    if (problem) {
+      toast.danger(`${file.name}: ${problem}`);
+      return;
+    }
+    // Honour the caller's narrowing — a cover-image picker must not be a
+    // side door for uploading a PDF.
+    if (accept && !file.type.startsWith(`${accept === "image" ? "image" : accept}/`)) {
+      toast.danger(`This picker only accepts ${accept} files.`);
+      return;
+    }
+    if (acceptMime && !acceptMime.includes(file.type)) {
+      toast.danger(`Unsupported type here: ${file.type || "unknown"}.`);
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const confirmed = await uploadLibraryMedia(file);
+      // Read it back so the caller gets the full record, not a hand-built one.
+      const fresh = await listMedia({ page: 1, pageSize: PAGE_SIZE });
+      const item = fresh.items.find((m) => m.key === confirmed.key);
+      if (item) {
+        onPick(item);
+        return;
+      }
+      // Uploaded fine but not visible yet — show it in the grid instead of
+      // failing, so the work isn't lost.
+      setResult(fresh);
+      setPage(1);
+      toast.success("Uploaded — select it below.");
+    } catch (e) {
+      toast.danger((e as Error).message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   // Debounce search; reset to page 1.
   useEffect(() => {
     const t = setTimeout(() => {
@@ -214,6 +267,33 @@ function PickerBody({
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
           />
+          <input
+            ref={fileInputRef}
+            type="file"
+            hidden
+            accept={
+              acceptMime?.join(",") ??
+              (accept === "image"
+                ? "image/*"
+                : accept === "video"
+                  ? "video/*"
+                  : accept === "pdf"
+                    ? "application/pdf"
+                    : "image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            }
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) handleUpload(file);
+            }}
+          />
+          <Button
+            variant="primary"
+            isDisabled={uploading}
+            onPress={() => fileInputRef.current?.click()}
+          >
+            {uploading ? "Uploading…" : "Upload"}
+          </Button>
         </div>
       </div>
 
@@ -226,7 +306,7 @@ function PickerBody({
           </div>
         ) : items.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted">
-            No media found. Upload files in the Media library first.
+            No media found. Use Upload above to add one.
           </p>
         ) : (
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-4">
