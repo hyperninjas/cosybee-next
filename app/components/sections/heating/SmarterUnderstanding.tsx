@@ -25,17 +25,17 @@ export default function SmarterUnderstanding() {
           </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
-              glyph="sun"
+              glyph="energy"
               title="Battery Optimisation Insights"
               description="Improve how stored energy is used across your home system."
             />
             <FeatureCard
-              glyph="dollar"
+              glyph="home"
               title="Connected Home Signals"
               description="Prepare your home for real-time energy coordination and future smart integrations."
             />
             <FeatureCard
-              glyph="chart"
+              glyph="weather"
               title="Indoor Air Quality Awareness"
               description="Monitor air quality conditions that affect comfort, health, and energy efficiency."
             />

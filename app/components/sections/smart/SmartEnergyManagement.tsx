@@ -32,10 +32,12 @@ export default function SmartEnergyManagement() {
               descWidth="md:w-[85%]"
             />
             <FeatureItem
+              glyph="energy"
               title="Smart Energy Management"
               description="AI-powered recommendations help you use, store and save energy more effectively."
             />
             <FeatureItem
+              glyph="insights"
               title="Performance Tracking"
               description="Monitor long-term system performance and solar investment value."
             />

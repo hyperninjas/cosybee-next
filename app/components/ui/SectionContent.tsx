@@ -306,7 +306,7 @@ export function FeatureItem({
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
         src={glyph ? GLYPH_SVGS[glyph] : hexaCheck}
-        alt={`glyph icon - ${glyph}`}
+        alt={`glyph icon - ${glyph} icon`}
         aria-hidden
         className="h-11 w-12 lg:h-12 lg:w-13"
       />
@@ -349,7 +349,7 @@ export function FeatureCard({
     <div className="flex flex-col md:flex-row items-start gap-4 rounded-2xl bg-inherit py-2 w-full">
       <Image
         src={glyph ? GLYPH_SVGS[glyph] : hexaCheck}
-        alt={`glyph icon - ${glyph}`}
+        alt={`glyph icon - ${glyph} icon`}
         aria-hidden
         className="h-11 w-12 lg:h-12 lg:w-13"
       />

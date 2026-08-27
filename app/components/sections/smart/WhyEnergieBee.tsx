@@ -33,12 +33,12 @@ export default function WhyEnergieBee() {
           </SectionLead>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
-              glyph="sun"
+              glyph="insights"
               title="Maximise Production"
               description="Track real-time solar generation and get insights to optimise energy production."
             />
             <FeatureCard
-              glyph="dollar"
+              glyph="savings"
               title="Track Savings"
               description="See exactly how much money you're saving with detailed analytics and historical comparisons."
             />

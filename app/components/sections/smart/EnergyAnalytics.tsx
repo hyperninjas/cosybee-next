@@ -27,10 +27,12 @@ export default function EnergyAnalytics() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="savings"
               title="Track Savings"
               description="See how solar generation reduces your energy costs."
             />
             <FeatureItem
+              glyph="energy"
               title="Energy Independence"
               description="Understand how much energy comes from solar versus the grid."
             />

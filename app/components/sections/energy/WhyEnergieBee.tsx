@@ -28,7 +28,7 @@ export default function WhyEnergieBee() {
           </SectionLead>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureCard
-              glyph="sun"
+              glyph="house"
               title="See Everything"
               description="Grid, solar, battery, and individual devices — all on one timeline, with the same units and the same clarity."
             />

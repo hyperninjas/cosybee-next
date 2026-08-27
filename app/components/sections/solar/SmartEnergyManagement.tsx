@@ -27,16 +27,19 @@ export default function SmartEnergyManagement() {
           <SectionTitle>Smart Energy Management</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="energy"
               title="Battery Optimisation"
               description="Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency."
               descWidth="md:w-[85%]"
             />
             <FeatureItem
+              glyph="connect"
               title="Smart Device Integration"
               description="Connect to your smart home devices and optimise their energy usage based on your solar production patterns."
               descWidth="md:w-[85%]"
             />
             <FeatureItem
+              glyph="savings"
               title="ROI Tracking"
               description="Track your return on investment with detailed financial calculations. See exactly how long until your solar panels pay for themselves."
               descWidth="md:w-[90%]"

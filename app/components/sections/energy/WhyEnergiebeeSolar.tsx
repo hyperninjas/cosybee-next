@@ -54,16 +54,19 @@ export default function WhyEnergieBeeSolar() {
               glyph="sun"
               title="Smart Charging"
               description="Batteries and EVs charge from solar surplus first, off-peak grid second. The right power, the right time."
+              descWidth="w-full"
             />
             <FeatureCard
               glyph="dollar"
               title="Grid Export Optimisation"
               description="Sell to the grid when prices are high, store when they're low. Maximise export value automatically."
+              descWidth="w-full"
             />
             <FeatureCard
-              glyph="chart"
+              glyph="home"
               title="Outage-Aware"
-              description="When the grid drops, batteries take over critical loads automatically — fridge, lights, internet stay on."
+              description="When the grid drops, batteries take over critical loads automatically - fridge, lights, internet stay on."
+              descWidth="w-full"
             />
           </div>
         </div>
