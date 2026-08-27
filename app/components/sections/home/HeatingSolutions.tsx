@@ -9,7 +9,7 @@ import { Section } from "@/app/components/ui/Section";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";
 import radiatorValveImg from "@/public/ss-image/ss-small-2.png";
-import windowCoffeeImg from "@/public/ss-image/ss-small-3.png";
+import tempControllerImg from "@/public/hex-images/temperature-controller.avif";
 
 /**
  * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
@@ -32,10 +32,18 @@ export default function HeatingSolutions() {
           className="order-2 min-[1200px]:order-1 mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
           gap={5}
           cornerInset={4}
-          left={{ src: radiatorValveImg, color: "#E8E6E0" }}
-          topRight={{ src: windowCoffeeImg, color: "#9AA08C" }}
+          left={{
+            src: radiatorValveImg,
+            color: "#E8E6E0",
+            alt: "heating radiator valve image",
+          }}
+          topRight={{
+            src: tempControllerImg,
+            color: "#9AA08C",
+            alt: "temperature controller device image",
+          }}
           bottomRight={{
-            color: "#E9E19E",
+            color: "#e6e6e5",
             children: (
               <Image
                 src={deviceImg}

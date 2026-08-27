@@ -3,6 +3,7 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
 import SocialCluster from "./SocialCluster";
 import PhraseOfTheWeek from "./PhraseOfTheWeek";
 import EnergieBeeLogo from "@/public/energiebee-brand.svg";
+import MaidInBritain from "@/public/MiB_Logo_Stacked_Colour-RGB.png";
 import { SOCIAL } from "@/app/lib/site";
 import { phraseIndexForDate } from "@/app/lib/phrase-of-the-week";
 import { getLatestArticles, getPhrases } from "@/app/lib/articles";
@@ -69,7 +70,7 @@ export default async function Footer() {
     <footer className="bg-black text-white">
       <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 px-6 pt-16 pb-12 sm:px-10 min-[1200px]:grid-cols-[1.25fr_3fr] lg:gap-8 lg:px-30 lg:pt-20 lg:pb-14">
         {/* brand + tagline */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center gap-4">
           <Image
             src={EnergieBeeLogo}
             alt="EnergieBee"
@@ -86,7 +87,7 @@ export default async function Footer() {
               rather than among the link lists. The list and its order are
               curated at /admin/phrases; the entry shown rotates weekly by ISO
               week number (see lib/phrase-of-the-week.ts). */}
-          <div className="">
+          <div className="px-4">
             <PhraseOfTheWeek
               phrases={phrases}
               initialIndex={phraseIndexForDate(new Date(), phrases.length)}
@@ -149,7 +150,14 @@ export default async function Footer() {
             <h3 className="text-[20px] leading-[100%] tracking-wider font-bold">
               SOCIAL MEDIA
             </h3>
-            <SocialCluster className="mt-5 h-auto pb-1 w-46" {...SOCIAL} />
+            <SocialCluster className="mt-5 h-auto pb-4 w-46" {...SOCIAL} />
+            <Image
+              src={MaidInBritain}
+              alt="EnergieBee"
+              className="h-auto w-50 -ml-2"
+              quality={85}
+              loading="eager"
+            />
           </div>
         </div>
       </div>
