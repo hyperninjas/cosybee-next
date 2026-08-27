@@ -1,0 +1,24 @@
+/**
+ * Public entry point for the Energy Flow Home dashboard module. Everything
+ * a caller (a page, a story, a test) should import comes from this file so
+ * the internal component layout can move around without ripple.
+ */
+export { DashboardHeader } from "./DashboardHeader";
+export { EnergyFlowDiagram } from "./EnergyFlowDiagram";
+export { TariffCard } from "./TariffCard";
+export { DailyCostCard } from "./DailyCostCard";
+export { StatStrip } from "./StatStrip";
+export { PowerHistoryChart } from "./PowerHistoryChart";
+export { getDashboardData } from "./data";
+export type {
+  BatteryState,
+  DailyCost,
+  DashboardData,
+  EnergyFlowSnapshot,
+  FlowChannel,
+  FlowDirection,
+  PowerHistory,
+  PowerHistoryPoint,
+  StatTile,
+  TariffInfo,
+} from "./types";
