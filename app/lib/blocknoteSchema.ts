@@ -702,6 +702,403 @@ const faqItemBlock = createBlockSpec(
   ],
 );
 
+// ── ctaBlock (customisable call-to-action card) ──────────────────────────
+
+/** Where the image sits relative to the copy. */
+const CTA_IMAGE_POSITIONS = ["left", "right", "none"] as const;
+
+/**
+ * How the image is anchored in its column.
+ *
+ * `"none"` keeps it in normal flow, centred against the copy. `"top"` and
+ * `"bottom"` lift it OUT of flow and pin it to that edge of the card — the
+ * trick the marketing ReadyToReduce card uses to stand its phone mockup on
+ * the card's bottom edge. The column stays open at its usual width either
+ * way, so the copy never slides underneath.
+ */
+const CTA_IMAGE_ANCHORS = ["none", "top", "bottom"] as const;
+
+type CtaProps = {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  buttonLabel: string;
+  buttonHref: string;
+  imageUrl: string;
+  imageAlt: string;
+  imagePosition: string;
+  imageAnchor: string;
+};
+
+/**
+ * Build the CTA card's DOM.
+ *
+ * ONE builder for both the editor preview and the published export, so the
+ * card an author arranges is the card that ships — the two cannot drift into
+ * looking different. Plain elements and class names only: the published
+ * article body is injected as an HTML string, so it can host no React and no
+ * `next/image`, and this same code runs in server-util's jsdom during export.
+ *
+ * Empty fields are omitted rather than rendered blank, so a card with no
+ * eyebrow or no button simply doesn't have one.
+ */
+function buildCtaDom(props: CtaProps): HTMLElement {
+  const position = CTA_IMAGE_POSITIONS.includes(
+    props.imagePosition as (typeof CTA_IMAGE_POSITIONS)[number],
+  )
+    ? props.imagePosition
+    : "left";
+
+  const anchor = CTA_IMAGE_ANCHORS.includes(
+    props.imageAnchor as (typeof CTA_IMAGE_ANCHORS)[number],
+  )
+    ? props.imageAnchor
+    : "none";
+
+  const card = document.createElement("div");
+  card.className = "article-cta";
+  card.setAttribute("data-image", props.imageUrl ? position : "none");
+  // Only meaningful while there IS an image in a side column.
+  card.setAttribute(
+    "data-anchor",
+    props.imageUrl && position !== "none" ? anchor : "none",
+  );
+
+  if (props.imageUrl && position !== "none") {
+    const figure = document.createElement("div");
+    figure.className = "article-cta-media";
+    const img = document.createElement("img");
+    img.setAttribute("src", props.imageUrl);
+    // Alt is required on content images; an empty one marks it decorative,
+    // which is the honest default for a CTA illustration.
+    img.setAttribute("alt", props.imageAlt || "");
+    img.setAttribute("loading", "lazy");
+    figure.appendChild(img);
+    card.appendChild(figure);
+  }
+
+  const copy = document.createElement("div");
+  copy.className = "article-cta-copy";
+
+  if (props.eyebrow) {
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "article-cta-eyebrow";
+    eyebrow.textContent = props.eyebrow;
+    copy.appendChild(eyebrow);
+  }
+  if (props.heading) {
+    // A <p>, not a heading: this is an advert inside an article, and letting
+    // it into the outline would put "Download the app" in the table of
+    // contents and in the document's heading structure.
+    const heading = document.createElement("p");
+    heading.className = "article-cta-heading";
+    heading.textContent = props.heading;
+    copy.appendChild(heading);
+  }
+  if (props.body) {
+    const body = document.createElement("p");
+    body.className = "article-cta-body";
+    body.textContent = props.body;
+    copy.appendChild(body);
+  }
+  if (props.buttonLabel && props.buttonHref) {
+    const actions = document.createElement("div");
+    actions.className = "article-cta-actions";
+    const link = document.createElement("a");
+    link.className = "article-cta-button";
+    link.setAttribute("href", props.buttonHref);
+    link.textContent = props.buttonLabel;
+    actions.appendChild(link);
+    copy.appendChild(actions);
+  }
+
+  card.appendChild(copy);
+  return card;
+}
+
+/** One labelled field in the editor's CTA form. */
+function ctaField(
+  label: string,
+  value: string,
+  onInput: (next: string) => void,
+  options: { multiline?: boolean; placeholder?: string } = {},
+): HTMLElement {
+  const wrap = document.createElement("label");
+  wrap.className = "bn-cta-field";
+  const name = document.createElement("span");
+  name.textContent = label;
+  const input = document.createElement(
+    options.multiline ? "textarea" : "input",
+  ) as HTMLInputElement | HTMLTextAreaElement;
+  input.value = value;
+  if (options.placeholder) input.placeholder = options.placeholder;
+  if (options.multiline) (input as HTMLTextAreaElement).rows = 3;
+  // BlockNote listens for keys on the editor root; without this, typing in a
+  // field triggers its shortcuts (Enter splits a block, "/" opens the menu).
+  for (const type of ["keydown", "keypress", "keyup", "paste", "cut", "mousedown"]) {
+    input.addEventListener(type, (e) => e.stopPropagation());
+  }
+  // Typing only ever repaints the preview. Writing back to the document is
+  // deliberately NOT done here — see the block's `persist` for why.
+  input.addEventListener("input", () => onInput(input.value));
+  wrap.append(name, input);
+  return wrap;
+}
+
+/**
+ * Whether each CTA's edit form is open, keyed by block id.
+ *
+ * Lives OUTSIDE the block because `editor.updateBlock` tears the node view
+ * down and builds a new one: without this, every save snapped the form shut
+ * and the author had to click Edit again to carry on.
+ */
+const ctaFormOpen = new Map<string, boolean>();
+
+/**
+ * One `<select>` in the editor's CTA form.
+ *
+ * `mousedown` is stopped for the same reason the text fields stop keys:
+ * BlockNote treats a mousedown inside the block as a click on the block and
+ * would steal the selection before the dropdown ever opens.
+ */
+function ctaSelect(
+  ariaLabel: string,
+  options: ReadonlyArray<{ value: string; label: string }>,
+  selected: string,
+  onChange: (next: string) => void,
+): HTMLSelectElement {
+  const select = document.createElement("select");
+  select.className = "bn-cta-select";
+  select.setAttribute("aria-label", ariaLabel);
+  for (const option of options) {
+    const el = document.createElement("option");
+    el.value = option.value;
+    el.textContent = option.label;
+    if (option.value === selected) el.selected = true;
+    select.appendChild(el);
+  }
+  select.addEventListener("mousedown", (e) => e.stopPropagation());
+  select.addEventListener("change", () => onChange(select.value));
+  return select;
+}
+
+/**
+ * Event the block fires to ask the React layer to open the media library.
+ * A block spec is vanilla DOM and cannot mount the picker itself, so it
+ * announces the request and Editor.tsx listens (see MEDIA_PICK_EVENT there).
+ */
+export const CTA_PICK_IMAGE_EVENT = "energiebee:cta-pick-image";
+
+const ctaBlock = createBlockSpec(
+  {
+    type: "cta",
+    propSchema: {
+      eyebrow: { default: "" },
+      heading: { default: "" },
+      body: { default: "" },
+      buttonLabel: { default: "" },
+      buttonHref: { default: "" },
+      imageUrl: { default: "" },
+      imageAlt: { default: "" },
+      imagePosition: { default: "left" },
+      imageAnchor: { default: "none" },
+    },
+    content: "none",
+  },
+  {
+    /**
+     * Editor: the finished card, with a form underneath for editing it.
+     * Same toggle shape as the Custom HTML block, so the two behave alike.
+     */
+    render(block, editor) {
+      const dom = document.createElement("div");
+      dom.className = "bn-cta-block";
+      dom.contentEditable = "false";
+
+      const header = document.createElement("div");
+      header.className = "bn-cta-header";
+      const label = document.createElement("span");
+      label.className = "bn-cta-label";
+      label.textContent = "Call to action";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "bn-cta-toggle";
+      header.append(label, toggle);
+
+      const preview = document.createElement("div");
+      preview.className = "bn-cta-preview";
+
+      const form = document.createElement("div");
+      form.className = "bn-cta-form";
+
+      /** Current values, mirrored so a field edit doesn't lose the others. */
+      const draft: CtaProps = {
+        eyebrow: block.props.eyebrow,
+        heading: block.props.heading,
+        body: block.props.body,
+        buttonLabel: block.props.buttonLabel,
+        buttonHref: block.props.buttonHref,
+        imageUrl: block.props.imageUrl,
+        imageAlt: block.props.imageAlt,
+        imagePosition: block.props.imagePosition,
+        imageAnchor: block.props.imageAnchor,
+      };
+
+      const renderPreview = () => {
+        preview.replaceChildren(buildCtaDom(draft));
+      };
+
+      /**
+       * Write the draft back to the document.
+       *
+       * This RE-MOUNTS the block: BlockNote rebuilds the node view from
+       * scratch whenever a prop changes, because a vanilla DOM tree can't be
+       * diffed. So every call throws away the very inputs the author is using
+       * — which is why it must never fire while they are still in the form.
+       * `dirty` keeps it to the moments that matter.
+       */
+      let dirty = false;
+      const persist = () => {
+        if (!dirty) return;
+        dirty = false;
+        editor.updateBlock(block, { props: { ...draft } });
+      };
+
+      const set = (key: keyof CtaProps) => (next: string) => {
+        draft[key] = next;
+        dirty = true;
+        renderPreview();
+      };
+
+      form.append(
+        ctaField("Eyebrow", draft.eyebrow, set("eyebrow"), {
+          placeholder: "More time for what matters",
+        }),
+        ctaField("Heading", draft.heading, set("heading"), {
+          placeholder: "Bring clarity to your home energy.",
+        }),
+        ctaField("Body", draft.body, set("body"), {
+          multiline: true,
+          placeholder: "One system. One view. Total clarity.",
+        }),
+        ctaField("Button text", draft.buttonLabel, set("buttonLabel"), {
+          placeholder: "Download free app",
+        }),
+        ctaField("Button link", draft.buttonHref, set("buttonHref"), {
+          placeholder: "/download-app",
+        }),
+        ctaField("Image alt text", draft.imageAlt, set("imageAlt"), {
+          placeholder: "Describe the image",
+        }),
+      );
+
+      // Image controls: pick from the library, drop it, and choose a side.
+      const imageRow = document.createElement("div");
+      imageRow.className = "bn-cta-image-row";
+
+      const pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "bn-cta-action";
+      pick.textContent = draft.imageUrl ? "Replace image" : "Choose image";
+      pick.addEventListener("click", () => {
+        // Hand off to React — see CTA_PICK_IMAGE_EVENT.
+        document.dispatchEvent(
+          new CustomEvent(CTA_PICK_IMAGE_EVENT, {
+            detail: { blockId: block.id },
+          }),
+        );
+      });
+
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.className = "bn-cta-action";
+      clear.textContent = "Remove image";
+      // Nothing to remove until there is an image.
+      clear.hidden = !draft.imageUrl;
+      clear.addEventListener("click", () => {
+        draft.imageUrl = "";
+        draft.imageAlt = "";
+        dirty = true;
+        clear.hidden = true;
+        pick.textContent = "Choose image";
+        renderPreview();
+      });
+
+      const side = ctaSelect(
+        "Image side",
+        CTA_IMAGE_POSITIONS.map((value) => ({
+          value,
+          label: value === "none" ? "No image" : `Image on the ${value}`,
+        })),
+        draft.imagePosition,
+        (next) => {
+          draft.imagePosition = next;
+          dirty = true;
+          renderPreview();
+        },
+      );
+
+      const anchor = ctaSelect(
+        "Image anchor",
+        [
+          { value: "none", label: "In line with the text" },
+          { value: "top", label: "Pinned to the top edge" },
+          { value: "bottom", label: "Pinned to the bottom edge" },
+        ],
+        draft.imageAnchor,
+        (next) => {
+          draft.imageAnchor = next;
+          dirty = true;
+          renderPreview();
+        },
+      );
+
+      imageRow.append(pick, clear, side, anchor);
+      form.appendChild(imageRow);
+
+      // Moving BETWEEN fields must not save — saving re-mounts the block, and
+      // the field being clicked into would be destroyed underneath the cursor.
+      // So the trigger is focus leaving the card altogether: clicking another
+      // block, tabbing out, or the media modal taking focus (it portals
+      // outside this DOM, so opening it flushes pending edits first — which is
+      // what stops a picked image from landing on a stale draft).
+      dom.addEventListener("focusout", (event) => {
+        const next = (event as FocusEvent).relatedTarget;
+        if (next instanceof Node && dom.contains(next)) return;
+        persist();
+      });
+
+      let editing = false;
+      const setEditing = (next: boolean) => {
+        editing = next;
+        ctaFormOpen.set(block.id, next);
+        toggle.textContent = next ? "Done" : "Edit";
+        form.style.display = next ? "" : "none";
+      };
+      toggle.addEventListener("click", () => {
+        const next = !editing;
+        setEditing(next);
+        // Done is an explicit "I'm finished" — flush without waiting for focus
+        // to wander off.
+        if (!next) persist();
+      });
+
+      renderPreview();
+      // Reopen exactly as the author left it. Only a card never seen before
+      // falls back to "open if there's nothing to show yet".
+      setEditing(ctaFormOpen.get(block.id) ?? (!draft.heading && !draft.body));
+
+      dom.append(header, preview, form);
+      return { dom };
+    },
+
+    /** Published: the same card, built by the same function. */
+    toExternalHTML(block) {
+      return { dom: buildCtaDom(block.props as CtaProps) };
+    },
+  },
+);
+
 // ── schema ───────────────────────────────────────────────────────────────
 
 export const blockNoteSchema = withMultiColumn(
@@ -713,6 +1110,7 @@ export const blockNoteSchema = withMultiColumn(
       // loading unchanged — they simply pick up the "" default.
       image: imageWithAltBlock(),
       faqItem: faqItemBlock(),
+      cta: ctaBlock(),
       tableOfContents: tableOfContentsBlock(),
       htmlBlock: htmlBlock(),
     },

@@ -2,7 +2,7 @@
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -40,6 +40,7 @@ import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
 import { uploadLibraryMedia } from "@/app/lib/media-upload";
 import { altFromFileName } from "@/app/lib/image-alt";
 import {
+  CTA_PICK_IMAGE_EVENT,
   blockNoteSchema as schema,
   collectHeadingAnchors,
   LINK_REL_TOKENS,
@@ -620,6 +621,25 @@ function TocIcon() {
   );
 }
 
+/** Megaphone icon for the call-to-action slash menu entry. */
+function CtaIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z" />
+      <path d="M15.5 9a3.5 3.5 0 0 1 0 6" />
+      <path d="M18.5 6.5a7 7 0 0 1 0 11" />
+    </svg>
+  );
+}
+
 /** Question-mark-in-a-panel icon for the FAQ slash menu entry. */
 function FaqIcon() {
   return (
@@ -953,6 +973,23 @@ export default function Editor({
   });
 
   const [pickerOpen, setPickerOpen] = useState(false);
+  // When set, the next media pick updates THIS cta block's image instead of
+  // inserting a new media block. A block spec is vanilla DOM and cannot mount
+  // the picker itself, so it dispatches CTA_PICK_IMAGE_EVENT and this listens.
+  const ctaTargetRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const onPickRequest = (event: Event) => {
+      const blockId = (event as CustomEvent<{ blockId?: string }>).detail
+        ?.blockId;
+      if (!blockId) return;
+      ctaTargetRef.current = blockId;
+      setPickerOpen(true);
+    };
+    document.addEventListener(CTA_PICK_IMAGE_EVENT, onPickRequest);
+    return () =>
+      document.removeEventListener(CTA_PICK_IMAGE_EVENT, onPickRequest);
+  }, []);
   // The block where "/" was typed — we insert the picked media after it.
   const insertAfterRef = useRef<string | null>(null);
 
@@ -1012,6 +1049,29 @@ export default function Editor({
     },
   };
 
+  // Custom slash-menu entry for the call-to-action card.
+  const ctaSlashItem: DefaultReactSuggestionItem = {
+    title: "Call to action",
+    subtext: "Promo card with a heading, image and button",
+    aliases: ["cta", "button", "promo", "banner", "download"],
+    group: "Basic blocks",
+    icon: <CtaIcon />,
+    onItemClick: () => {
+      const current = editor.getTextCursorPosition().block;
+      editor.insertBlocks(
+        [{ type: "cta" } as SchemaPartialBlock],
+        current.id,
+        "after",
+      );
+      if (
+        current.type === "paragraph" &&
+        (current.content as unknown[]).length === 0
+      ) {
+        editor.removeBlocks([current.id]);
+      }
+    },
+  };
+
   // Custom slash-menu entry for the sanitized raw-HTML block (embeds or
   // hand-written markup).
   const htmlSlashItem: DefaultReactSuggestionItem = {
@@ -1050,6 +1110,20 @@ export default function Editor({
   };
 
   function handlePick(media: MediaItem) {
+    // A CTA is waiting for an image — fill its props rather than inserting a
+    // block, and clear the target so the next pick behaves normally again.
+    const ctaId = ctaTargetRef.current;
+    if (ctaId) {
+      ctaTargetRef.current = null;
+      editor.updateBlock(ctaId, {
+        props: {
+          imageUrl: media.url ?? "",
+          imageAlt: media.alt || media.title || altFromFileName(media.name),
+        },
+      } as SchemaPartialBlock);
+      return;
+    }
+
     const block = blockForMedia(media);
     const refId =
       insertAfterRef.current ?? editor.getTextCursorPosition().block.id;
@@ -1095,7 +1169,7 @@ export default function Editor({
               combineByGroup(
                 getDefaultReactSlashMenuItems(editor),
                 getMultiColumnSlashMenuItems(editor),
-                [tocSlashItem, faqSlashItem, htmlSlashItem, mediaSlashItem],
+                [tocSlashItem, faqSlashItem, ctaSlashItem, htmlSlashItem, mediaSlashItem],
               ),
               query,
             )
@@ -1112,7 +1186,15 @@ export default function Editor({
 
       <MediaPickerModal
         isOpen={pickerOpen}
-        onOpenChange={setPickerOpen}
+        onOpenChange={(open) => {
+          // Dismissing without picking must DISARM the CTA. Otherwise the
+          // block id stays queued and the next ordinary /media insert would
+          // silently overwrite that card's image instead of adding a block.
+          // Safe to clear here because the modal calls onSelect *before* it
+          // closes, so a real pick has already consumed the id.
+          if (!open) ctaTargetRef.current = null;
+          setPickerOpen(open);
+        }}
         onSelect={handlePick}
       />
     </LinkTargetsContext.Provider>

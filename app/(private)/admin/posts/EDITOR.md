@@ -24,6 +24,7 @@ Type **`/`** anywhere to open the insert menu, then start typing to filter
 | Divider | Horizontal rule |
 | **Media library** | Insert an image/video/file you already uploaded (opens the gallery picker) |
 | **FAQ question** | Collapsible Q&A — also tells Google it's an FAQ (see **FAQ** below) |
+| **Call to action** | Promo card with a heading, image and button (see **Call to action** below) |
 | **Table of contents** | Auto‑updating list of this article's H2/H3 headings |
 | **Custom HTML** | Embeds (YouTube, Vimeo, Spotify, Maps) or hand‑written markup |
 | Columns (multi‑column) | Side‑by‑side layout (see **Layout** below) |
@@ -121,6 +122,55 @@ Answers are ordinary content: **bold**, links, bullet lists all work.
 
 A question with no answer yet is simply left out of that data, so a
 half‑written one does no harm.
+
+## Call to action
+
+Type **`/cta`** to drop in a promo card — the same card design the marketing
+pages use, but with every part under your control.
+
+The card opens with its form showing. Fill in what you want and leave the rest
+blank; **anything you leave empty simply isn't shown**, so a card with no
+eyebrow, or no button, just doesn't have one.
+
+| Field | What it is |
+| --- | --- |
+| Eyebrow | Small upper‑case line above the heading |
+| Heading | The big line — the main message |
+| Body | A sentence or two underneath |
+| Button text + Button link | The button. **Both** are needed for it to appear |
+| Image | **Choose image** opens the media library; **Remove image** takes it out |
+| Image alt text | Describes the image (fills in from the library when it has one) |
+| Image on the left / right / No image | Which side the picture sits on |
+| In line / Pinned to the top / Pinned to the bottom | How the picture sits in its column (see below) |
+
+Click **Done** when you're finished and the form folds away, leaving the card
+exactly as readers will see it. Click **Edit** to change it again.
+
+The **Button link** can be an internal path (`/download`, `/solar`) or a full
+external address. Internal links stay in the same tab; external ones open in a
+new tab automatically.
+
+> **A note on the heading:** it looks like a heading but deliberately isn't one
+> — it stays out of the table of contents and out of the article's heading
+> structure, so an advert never gets counted as part of the article's outline.
+
+### Pinning the image
+
+**In line with the text** is the normal setting — the picture is centred
+against the copy.
+
+**Pinned to the top / bottom edge** lifts it out and stands it against that
+edge of the card, so a tall image (a phone mockup, say) touches the border
+instead of floating in the middle. It's the look the app-download card on the
+homepage uses.
+
+The column stays the same width either way, so the text never runs underneath.
+A pinned image is never allowed to grow taller than the card, and pinning is
+ignored when there's no image, or when the side is set to **No image**.
+
+On narrow screens the image moves above the text and the card centres itself,
+whichever side you picked — and pinning is ignored there too, since a stacked
+card has no side column to pin against.
 
 ## Layout — multi‑column
 
