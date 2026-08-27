@@ -7,6 +7,17 @@ export const HEX_PATH =
   "M33,0 L67,0 Q75,0 79,6.93 L96,36.37 Q100,43.3 96,50.23 L79,79.67 Q75,86.6 67,86.6 L33,86.6 Q25,86.6 21,79.67 L4,50.23 Q0,43.3 4,36.37 L21,6.93 Q25,0 33,0 Z";
 
 /**
+ * Badge hex — the outlined icon-tile shape from `public/home.svg`, whose
+ * corners are tighter than `HEX_PATH`'s. Converted to this 100×86.6 space,
+ * that reference insets its corners by 4.05 and strokes at 3.24, so this is
+ * `buildHexPath(4)` and callers stroke it at ~3.25. Kept as a literal rather
+ * than a call so client components can hold it at module scope (the React
+ * Compiler instruments module-level function calls).
+ */
+export const HEX_PATH_BADGE =
+  "M29,0 L71,0 Q75,0 77,3.46 L98,39.84 Q100,43.3 98,46.76 L77,83.14 Q75,86.6 71,86.6 L29,86.6 Q25,86.6 23,83.14 L2,46.76 Q0,43.3 2,39.84 L23,3.46 Q25,0 29,0 Z";
+
+/**
  * Build the rounded flat-top hex path for the 100×86.6 box, with a
  * tunable corner inset. The inset is how many units along each edge the
  * straight segment ends before the quadratic curve begins — smaller =

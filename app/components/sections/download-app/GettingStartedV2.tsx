@@ -5,12 +5,18 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
-import { HEX_PATH } from "@/app/lib/hex";
+import { HEX_PATH_BADGE } from "@/app/lib/hex";
 import type { StaticImageData } from "next/image";
 import downloadImg from "@/public/download-app/download_app-full.png";
 import accountImg from "@/public/download-app/create_account-full.png";
 import connectImg from "@/public/download-app/connect_home-full.png";
 import homeImg from "@/public/download-app/app_home-full.png";
+
+// Badge palette, lifted straight from the reference tile in
+// `public/home.svg`: pale face, gold outline, dark-olive glyph.
+const HEX_FACE = "#FFF89D";
+const HEX_STROKE = "#D4C60F";
+const HEX_LABEL = "#544E08";
 
 // A real sequence the user performs in order — numbering carries information.
 const STEPS: ReadonlyArray<{
@@ -45,13 +51,13 @@ const STEPS: ReadonlyArray<{
  * (desktop): a tall runway wrapper provides scroll distance while the section
  * content sticks to the viewport, so the page appears to pause here until all
  * four steps have played through. Scroll progress through the runway — not
- * clicks — drives which step is active: the active step's hex turns solid
- * yellow and the full app screenshot in the cream panel on the left
- * crossfades to that step's shot (the complete `-full` phone mockups).
+ * clicks — drives which step is active: the reached step's hex fills from
+ * pale to solid yellow and the full app screenshot in the cream panel on the
+ * left crossfades to that step's shot (the complete `-full` phone mockups).
  *
  * Below `lg` there's no pinning: the timeline renders as a plain readable
- * list (every hex solid yellow), the panel shows the first screenshot, and
- * the scroll listener never attaches.
+ * list (every hex in its pale outlined resting state), the panel shows the
+ * first screenshot, and the scroll listener never attaches.
  */
 export default function GettingStartedV2() {
   // Continuous scroll progress through the runway (0–1). It drives the
@@ -186,21 +192,29 @@ export default function GettingStartedV2() {
                     )}
 
                     <div className="flex items-start gap-6">
+                      {/* viewBox is padded by half the stroke width on every
+                          side: the path touches 0/100 and 0/86.6, so a centred
+                          outline would be clipped in half by a plain
+                          0 0 100 86.6 box. */}
                       <svg
-                        viewBox="0 0 100 86.6"
+                        viewBox="-1.63 -1.63 103.26 89.86"
                         className="h-12 w-14 shrink-0 sm:h-13 sm:w-15"
                         aria-hidden
                       >
-                        {/* Below lg every hex stays solid yellow (no scroll
-                            tracking there); at lg+ a hex lights up once scroll
-                            reaches it and stays lit — a cumulative progress
-                            stepper that matches the connector fill. */}
+                        {/* Resting look: pale yellow face with a gold outline.
+                            Below lg it stays that way for every hex (no scroll
+                            tracking there); at lg+ a hex fills solid yellow
+                            once scroll reaches it and stays lit — a cumulative
+                            progress stepper matching the connector fill. */}
                         <path
-                          d={HEX_PATH}
+                          d={HEX_PATH_BADGE}
+                          fill={HEX_FACE}
+                          stroke={HEX_STROKE}
+                          strokeWidth={3.25}
                           className={`transition-[fill] duration-300 ${
                             progress * STEPS.length >= i
-                              ? "fill-[#EFDF18]"
-                              : "fill-[#EFDF18] lg:fill-[#F7F0CE]"
+                              ? "lg:fill-[#EFDF18]"
+                              : ""
                           }`}
                         />
                         <text
@@ -210,11 +224,7 @@ export default function GettingStartedV2() {
                           dominantBaseline="middle"
                           fontSize="30"
                           fontWeight="800"
-                          className={
-                            progress * STEPS.length >= i
-                              ? "fill-[#26272B]"
-                              : "fill-[#26272B] lg:fill-[#BFAC2A]"
-                          }
+                          fill={HEX_LABEL}
                         >
                           {String(i + 1).padStart(2, "0")}
                         </text>
