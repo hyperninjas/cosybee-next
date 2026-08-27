@@ -293,7 +293,7 @@ export function FeatureItem({
   description,
   titleClassName,
   descClassName,
-  descWidth = "w-[75%]",
+  descWidth = "md:w-[75%]",
 }: {
   glyph?: GlyphName;
   title: string;
@@ -336,7 +336,7 @@ export function FeatureCard({
   description,
   titleClassName,
   descClassName,
-  descWidth = "w-[75%]",
+  descWidth = "md:w-[75%]",
 }: {
   glyph: GlyphName;
   title: string;

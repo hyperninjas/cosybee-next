@@ -59,7 +59,7 @@ export default function EnergyAnalytics({
                 key={f.title}
                 title={f.title}
                 description={f.description}
-                descWidth="w-[80%]"
+                descWidth="md:w-[80%]"
               />
             ))}
           </div>

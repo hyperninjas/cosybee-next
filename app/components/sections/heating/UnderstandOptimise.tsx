@@ -27,17 +27,17 @@ export default function UnderstandOptimise() {
             <FeatureItem
               title="Real-Time Energy Forecasting"
               description="Predict heating demand using live usage patterns and system behaviour."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
             <FeatureItem
               title="Weather-Adaptive Insights"
               description="Adjust energy expectations based on local climate conditions."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
             <FeatureItem
               title="Daily Energy Overview"
               description="A simple breakdown of energy usage, efficiency, and production every day."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
           </div>
         </div>

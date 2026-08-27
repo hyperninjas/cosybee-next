@@ -29,7 +29,7 @@ export default function SmartEnergyManagement() {
             <FeatureItem
               title="Connected Devices"
               description="See how your smart home systems work together."
-              descWidth="w-[85%]"
+              descWidth="md:w-[85%]"
             />
             <FeatureItem
               title="Smart Energy Management"

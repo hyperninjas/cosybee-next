@@ -29,17 +29,17 @@ export default function SmartEnergyManagement() {
             <FeatureItem
               title="Battery Optimisation"
               description="Get intelligent recommendations on when to store or use your solar energy to maximise savings and reduce grid dependency."
-              descWidth="w-[85%]"
+              descWidth="md:w-[85%]"
             />
             <FeatureItem
               title="Smart Device Integration"
               description="Connect to your smart home devices and optimise their energy usage based on your solar production patterns."
-              descWidth="w-[85%]"
+              descWidth="md:w-[85%]"
             />
             <FeatureItem
               title="ROI Tracking"
               description="Track your return on investment with detailed financial calculations. See exactly how long until your solar panels pay for themselves."
-              descWidth="w-[90%]"
+              descWidth="md:w-[90%]"
             />
           </div>
         </div>
