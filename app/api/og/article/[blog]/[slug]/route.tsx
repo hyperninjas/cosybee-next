@@ -1,21 +1,36 @@
 import { ImageResponse } from "next/og";
 import sharp from "sharp";
 import { getArticleBySlug } from "@/app/lib/articles";
+import { validImageOrNull } from "@/app/lib/article-types";
 import { SITE_URL, url } from "@/app/lib/site";
 
 /**
- * Per-article Open Graph card.
+ * Per-article Open Graph image. Every article's `og:image` points here, and
+ * this route decides what that means:
  *
- * Renders a branded 1200×630 social card (tilted cover photo + domain pill +
- * title + "Read Blog" button) with `next/og`, then transcodes the PNG to a
- * compressed JPEG via sharp so it stays under WhatsApp's ~300 KB link-preview
- * limit (Satori only emits PNG, which for a photo would blow past it — and
- * WhatsApp shows NO image when the file is too big, unlike Facebook). The
- * article's `og:image` points here.
+ * 1. The article specifies its own OG image → that image, at its own framing.
+ *    See `shareImage`.
+ * 2. Otherwise → a branded 1200×630 card (tilted cover photo + domain pill +
+ *    title + "Read Blog" button) rendered with `next/og`.
+ *
+ * Either way the bytes go out as a JPEG under WhatsApp's ~300 KB link-preview
+ * limit, because WhatsApp shows NO image when the file is too big rather than
+ * scaling it down like Facebook. For the card that also means transcoding
+ * Satori's output, since it only emits PNG and a photo in PNG blows the budget.
+ *
+ * Keeping both behind one URL means the tag never changes when an editor adds
+ * or clears a share image, so links crawlers cached long ago still resolve to
+ * the current picture.
  */
 
 const SIZE = { width: 1200, height: 630 };
 const MAX_BYTES = 280_000; // headroom under WhatsApp's ~300 KB
+/** Longest edge for a passed-through share image. 1200 is the width every
+ *  major crawler renders a large card at; past that is bytes nobody sees. */
+const MAX_EDGE = 1200;
+/** Formats every major crawler decodes. WebP is the notable absentee: Facebook
+ *  handles it, X and LinkedIn are unreliable with it, so it gets transcoded. */
+const CRAWLER_SAFE = new Set(["jpeg", "png"]);
 const DOMAIN = (() => {
   try {
     return new URL(SITE_URL).host.replace(/^www\./, "");
@@ -23,6 +38,75 @@ const DOMAIN = (() => {
     return "energiebee.com";
   }
 })();
+
+/** Encode to JPEG, stepping quality down until it fits the byte budget. */
+async function compressToLimit(pipeline: sharp.Sharp): Promise<Buffer> {
+  let quality = 82;
+  // `clone` per attempt: an output call consumes the pipeline, and re-running
+  // the decode/resize from scratch each time would cost far more than it saves.
+  let out = await pipeline.clone().jpeg({ quality, mozjpeg: true }).toBuffer();
+  while (out.length > MAX_BYTES && quality > 40) {
+    quality -= 12;
+    out = await pipeline.clone().jpeg({ quality, mozjpeg: true }).toBuffer();
+  }
+  return out;
+}
+
+/**
+ * Serve an article's own OG image — the editor's chosen file, not a rendition
+ * of it inset into the branded card.
+ *
+ * Passed through byte-for-byte when it's already a JPEG or PNG inside the size
+ * budget, so a well-prepared image reaches crawlers untouched and lossless.
+ * Only an image that would actually fail gets rebuilt: WebP and AVIF, which X
+ * and LinkedIn render unreliably; SVG, which almost nothing accepts as
+ * og:image; and anything over WhatsApp's limit, where the preview is dropped
+ * entirely rather than shown scaled down.
+ *
+ * Aspect ratio is preserved — cropping to 1200×630 is the card's job, and the
+ * whole point here is that the editor picked this framing. Returns null if the
+ * source can't be read, so the caller can fall back to the generated card.
+ */
+async function shareImage(
+  src: string,
+): Promise<{ body: Buffer; type: string } | null> {
+  const abs = /^https?:\/\//i.test(src) ? src : url(src);
+  try {
+    const res = await fetch(abs);
+    if (!res.ok) return null;
+    const raw = Buffer.from(await res.arrayBuffer());
+
+    const { format, width, height } = await sharp(raw).metadata();
+    const fits = raw.length <= MAX_BYTES;
+    const small = (width ?? 0) <= MAX_EDGE && (height ?? 0) <= MAX_EDGE;
+    if (format && CRAWLER_SAFE.has(format) && fits && small) {
+      return { body: raw, type: `image/${format}` };
+    }
+
+    const pipeline = sharp(raw, { density: 300 })
+      // EXIF orientation is applied on decode and then dropped, so a phone
+      // photo would otherwise re-encode sideways.
+      .rotate()
+      .resize(MAX_EDGE, MAX_EDGE, { fit: "inside", withoutEnlargement: true })
+      // JPEG carries no alpha, and sharp mattes transparency onto black —
+      // which turns a logo on a clear background into a black slab.
+      .flatten({ background: "#ffffff" });
+    return { body: await compressToLimit(pipeline), type: "image/jpeg" };
+  } catch {
+    return null;
+  }
+}
+
+/** Shared cache policy: a card only changes when the article does. */
+function imageResponse(body: Buffer, type: string): Response {
+  return new Response(new Uint8Array(body), {
+    headers: {
+      "Content-Type": type,
+      "Cache-Control":
+        "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  });
+}
 
 /** The cover is drawn at 430×500, so 2× keeps it crisp at a sane payload. */
 const COVER = { width: 860, height: 1000 };
@@ -73,6 +157,18 @@ export async function GET(
 
   const article = await getArticleBySlug(blog, slug);
   if (!article) return Response.redirect(url("/api/og"), 307);
+
+  // An article that specifies its own OG image shares as that image. Both
+  // branches answer on this one URL so the choice stays server-side: an editor
+  // can add or clear a share image and the tag crawlers already cached still
+  // resolves to the right picture.
+  const explicit = validImageOrNull(article.ogImage);
+  if (explicit) {
+    const direct = await shareImage(explicit);
+    // Null means the file couldn't be read at all — fall through to the
+    // generated card rather than serve nothing.
+    if (direct) return imageResponse(direct.body, direct.type);
+  }
 
   // The cover photo for the tilted card (resolved: cover → og → placeholder).
   const cover = await loadImage(article.coverImage);
@@ -195,24 +291,10 @@ export async function GET(
   // card: crawlers cache the miss, so the article shares as a bare link long
   // after the cause is fixed. Fall back to the generic card instead, the same
   // way a missing article does above.
-  let out: Buffer;
   try {
     const png = Buffer.from(await card.arrayBuffer());
-    let quality = 82;
-    out = await sharp(png).jpeg({ quality, mozjpeg: true }).toBuffer();
-    while (out.length > MAX_BYTES && quality > 40) {
-      quality -= 12;
-      out = await sharp(png).jpeg({ quality, mozjpeg: true }).toBuffer();
-    }
+    return imageResponse(await compressToLimit(sharp(png)), "image/jpeg");
   } catch {
     return Response.redirect(url("/api/og"), 307);
   }
-
-  return new Response(new Uint8Array(out), {
-    headers: {
-      "Content-Type": "image/jpeg",
-      "Cache-Control":
-        "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
-    },
-  });
 }
