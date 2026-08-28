@@ -119,6 +119,13 @@ export function getDashboardData(): DashboardData {
       },
       grid: { watts: 1360, direction: "out" },
       home: { watts: 2220, direction: "in" },
+      // Green share of the imported grid mix — populates the Low Carbon
+      // hex on the flow diagram. Realistic UK midday value (~30% wind
+      // + solar + nuclear on a sunny weekday).
+      nonFossilPercentage: 30,
+      // Individually metered loads. Adding entries here adds a hex to
+      // the diagram automatically — no other files need to change.
+      individuals: [{ label: "EV", watts: 700 }],
       updatedAt: "2026-08-27T11:52:00Z",
       netLabel: "0.14 kW export",
       netTone: "positive",

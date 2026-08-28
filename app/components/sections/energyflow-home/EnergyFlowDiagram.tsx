@@ -1,28 +1,35 @@
+"use client";
+
 import { Card, Chip } from "@heroui/react";
 import {
-  HouseFill,
-  PlugConnection,
-  Sun,
-  ThunderboltFill,
-} from "@gravity-ui/icons";
-import { FlowNode } from "./FlowNode";
-import { FlowConnections } from "./FlowConnections";
+  EnergyFlowDiagram as BaseEnergyFlowDiagram,
+  fromSigned,
+  kilowattsFormat,
+  type EnergyFlowInput,
+  type EnergyFlowPalette,
+} from "@/app/components/energy-flow-diagram";
 import type { EnergyFlowSnapshot } from "./types";
 
 /**
- * The big left-column card of the dashboard: a radial "energy hub" showing
- * Solar / Battery / Grid feeding a central net node that drives the Home
- * load. Uses HeroUI's compound-card composition
- * (`Card.Header` / `Card.Title` / `Card.Description` / `Card.Content`) so
- * spacing and semantics come from the design system rather than ad-hoc
- * className strings. All color decisions route through theme tokens.
+ * Dashboard wrapper around the reusable `energy-flow-diagram` module.
+ *
+ * The vendored module (see {@link ../../energy-flow-diagram}) owns the
+ * animated diagram itself — solver, layout, ring, dots. This file's job is
+ * only to:
+ *
+ *   1. Present the diagram inside the dashboard's HeroUI `Card` shell, so
+ *      spacing, title, and the "Updated N h ago" chip match the rest of
+ *      the dashboard.
+ *   2. Translate the app's {@link EnergyFlowSnapshot} shape (unsigned watts
+ *      + explicit direction) into the module's `EnergyFlowInput` shape
+ *      (signed kilowatts) via `fromSigned`.
+ *   3. Wire the palette to the site's semantic tokens (`--efh-*`) so the
+ *      rings and flow lines follow the active theme without touching this
+ *      file.
+ *
+ * Everything downstream — the diagram, the maths, the animation — stays in
+ * the vendor module and is reusable from any other page.
  */
-
-function formatWatts(watts: number): string {
-  if (watts === 0) return "0 W";
-  if (Math.abs(watts) >= 1000) return `${(watts / 1000).toFixed(2)} kW`;
-  return `${Math.round(watts)} W`;
-}
 
 function relativeUpdate(iso: string, now: Date): string {
   const diffMs = now.getTime() - new Date(iso).getTime();
@@ -33,24 +40,80 @@ function relativeUpdate(iso: string, now: Date): string {
   return `${hrs} h ago`;
 }
 
-// Central "net" hub tone. Each state resolves to a semantic token; the glow
-// tints itself off the same color via `currentColor`, so a theme change
-// re-tints the hub without touching this file.
-const NET_TONE_CLASSES: Record<EnergyFlowSnapshot["netTone"], string> = {
-  positive:
-    "border-success text-success shadow-[0_0_30px_-4px_currentColor]",
-  neutral: "border-border text-foreground",
-  negative:
-    "border-danger text-danger shadow-[0_0_30px_-4px_currentColor]",
+/**
+ * Snapshot → library input. The library takes *signed* kilowatts using
+ * physics conventions (positive grid = import, positive battery =
+ * discharge — matching the library defaults `gridPositiveIsExport: false`
+ * and `batteryPositiveIsCharge: false`). Our snapshot carries unsigned
+ * watts plus an explicit direction, so we sign it here.
+ */
+function toEnergyFlowInput(flow: EnergyFlowSnapshot): EnergyFlowInput {
+  const gridKw = flow.grid.watts / 1000;
+  const solarKw = flow.solar.watts / 1000;
+  const batteryKw = flow.battery.watts / 1000;
+
+  const gridSigned =
+    flow.grid.direction === "out"
+      ? -gridKw
+      : flow.grid.direction === "in"
+        ? gridKw
+        : 0;
+  const batterySigned =
+    flow.battery.direction === "out"
+      ? batteryKw
+      : flow.battery.direction === "in"
+        ? -batteryKw
+        : 0;
+
+  return fromSigned({
+    gridPower: gridSigned,
+    solarProduction: solarKw,
+    batteryPower: batterySigned,
+    batteryStateOfCharge: flow.battery.soc,
+    // Only pass the optional low-carbon / individual-load inputs when
+    // they are populated on the snapshot — the library hides the
+    // corresponding hex if the input is undefined.
+    ...(flow.nonFossilPercentage !== undefined
+      ? { nonFossilPercentage: flow.nonFossilPercentage }
+      : {}),
+    ...(flow.individuals && flow.individuals.length > 0
+      ? {
+          individuals: flow.individuals.map((load) => ({
+            label: load.label,
+            value: load.watts / 1000,
+          })),
+        }
+      : {}),
+    showExportNode: true,
+  });
+}
+
+/**
+ * Semantic tokens the site already defines under `.efh-scope` in
+ * globals.css. Import / export share the grid hue (we only publish one
+ * "grid" token), and the battery in/out share the battery hue for the
+ * same reason. When a future palette adds distinct export / discharge
+ * tokens, wire them here — nothing else needs to change.
+ */
+const PALETTE: EnergyFlowPalette = {
+  gridImport: "var(--efh-grid)",
+  gridExport: "var(--efh-grid)",
+  solar: "var(--efh-solar)",
+  batteryIn: "var(--efh-battery)",
+  batteryOut: "var(--efh-battery)",
+  lowCarbon: "var(--success)",
+  individuals: ["var(--efh-home)", "var(--warning)"],
 };
 
 export interface EnergyFlowDiagramProps {
   flow: EnergyFlowSnapshot;
-  /** Injected so the component stays a pure server render — no Date.now(). */
+  /** Injected so the wrapper stays a pure render — no Date.now(). */
   now: Date;
 }
 
 export function EnergyFlowDiagram({ flow, now }: EnergyFlowDiagramProps) {
+  const input = toEnergyFlowInput(flow);
+
   return (
     <Card variant="default" className="flex h-full w-full flex-col">
       <Card.Header className="flex-row items-start justify-between gap-2">
@@ -65,64 +128,19 @@ export function EnergyFlowDiagram({ flow, now }: EnergyFlowDiagramProps) {
       </Card.Header>
 
       <Card.Content>
-        <div className="relative mx-auto flex h-[360px] w-full max-w-[520px] items-center justify-center">
-          {/* Solar (top) */}
-          <div className="absolute left-1/2 top-0 -translate-x-1/2">
-            <FlowNode
-              icon={<Sun className="size-5" />}
-              label="Solar"
-              value={formatWatts(flow.solar.watts)}
-              tone="solar"
-            />
-          </div>
-
-          {/* Battery (left) */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2">
-            <FlowNode
-              icon={<PlugConnection className="size-5" />}
-              label="Battery"
-              value={formatWatts(flow.battery.watts)}
-              sub={flow.battery.label}
-              tone="battery"
-              meta={`${flow.battery.direction === "out" ? "↓" : "↑"} ${flow.battery.soc}%`}
-            />
-          </div>
-
-          {/* Grid (right) */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2">
-            <FlowNode
-              icon={<ThunderboltFill className="size-5" />}
-              label="Grid"
-              value={formatWatts(flow.grid.watts)}
-              tone="grid"
-            />
-          </div>
-
-          {/* Home (bottom) */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
-            <FlowNode
-              icon={<HouseFill className="size-5" />}
-              label="Home Load"
-              value={formatWatts(flow.home.watts)}
-              tone="home"
-            />
-          </div>
-
-          {/* Central "net" hub */}
-          <div
-            className={`relative z-10 flex h-28 w-28 items-center justify-center rounded-full border-2 bg-background text-center ${NET_TONE_CLASSES[flow.netTone]}`}
-          >
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-muted">
-                Net
-              </div>
-              <div className="text-sm font-bold">
-                {flow.netLabel.replace(/^Net\s*/i, "")}
-              </div>
-            </div>
-          </div>
-
-          <FlowConnections flow={flow} />
+        <div className="mx-auto w-full max-w-130">
+          {/* No battery in/out words. The arrows + colours carry the
+              direction, and dropping the words stops "0.0 kW out" from
+              being clipped inside the hexagon at the dashboard column's
+              width. Set inLabel/outLabel to bring the words back if the
+              node is ever made wider. */}
+          <BaseEnergyFlowDiagram
+            input={input}
+            style={{
+              palette: PALETTE,
+              format: kilowattsFormat(),
+            }}
+          />
         </div>
       </Card.Content>
     </Card>

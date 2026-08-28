@@ -19,11 +19,34 @@ export interface BatteryState extends FlowChannel {
   label: string;
 }
 
+/**
+ * A single named consumer wired into the flow diagram — e.g. "EV", "Heat
+ * Pump". Rendered as its own hexagon flowing off the Home node so the
+ * split between whole-home load and the tracked device is visible.
+ */
+export interface IndividualLoad {
+  /** Short label shown under the node. */
+  label: string;
+  /** Instantaneous draw in watts. */
+  watts: number;
+}
+
 export interface EnergyFlowSnapshot {
   solar: FlowChannel;
   battery: BatteryState;
   grid: FlowChannel;
   home: FlowChannel;
+  /**
+   * Share of grid supply that is currently zero-carbon, 0–100. Present
+   * whenever a low-carbon reading is available; when present, the flow
+   * diagram draws a Low Carbon node feeding home consumption.
+   */
+  nonFossilPercentage?: number;
+  /**
+   * Individually-metered loads (EV chargers, heat pumps, etc.). Each
+   * entry becomes its own node on the diagram.
+   */
+  individuals?: IndividualLoad[];
   /** ISO 8601 timestamp of the sample. */
   updatedAt: string;
   /** Live label, e.g. "Net zero" or "0.14 kW draw". */
