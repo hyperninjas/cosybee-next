@@ -36,6 +36,7 @@ export default function EnergyAnalytics() {
               descWidth="w-full"
             />
             <FeatureItem
+              glyph="carbon"
               title="Carbon Footprint Impact"
               description="Track lifetime CO2 savings from every smart automation and every renewable kilowatt-hour you produce."
               descWidth="w-full"

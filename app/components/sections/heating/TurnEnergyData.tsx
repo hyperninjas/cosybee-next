@@ -37,6 +37,7 @@ export default function TurnEnergyData() {
               description="Measure how much energy your home is saving from external grid dependency."
             />
             <FeatureItem
+              glyph="carbon"
               title="Carbon & Efficiency Metrics"
               description="Understand your environmental impact through clear, actionable energy metrics."
             />

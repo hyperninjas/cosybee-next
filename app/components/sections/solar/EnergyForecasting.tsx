@@ -10,7 +10,7 @@ import { Container } from "@/app/components/ui/Container";
 export default function EnergyForecasting() {
   return (
     <Section surface="surface" spacing="md" overflow="visible">
-      <Container className="mx-auto max-w-225 px-4 lg:px-0">
+      <Container className="mx-auto max-w-235 px-4 lg:px-0">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
           color="#F7F2E1"

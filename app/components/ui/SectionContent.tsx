@@ -19,6 +19,9 @@ import homeConnect from "@/public/home-connect.svg";
 import house from "@/public/home.svg";
 import phone from "@/public/device.svg";
 import connect from "@/public/connect-energy.svg";
+import greenFuture from "@/public/Built-for-a-Greener-Future.svg";
+import carbonEfficiency from "@/public/Carbon-Footprint-Impact.svg";
+import envImpact from "@/public/Environmental-Impact.svg";
 
 const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   check: hexaCheck,
@@ -38,10 +41,15 @@ const GLYPH_SVGS: Record<GlyphName, StaticImageData> = {
   house,
   phone,
   connect,
+  carbon: carbonEfficiency,
+  green: greenFuture,
+  environment: envImpact,
 };
 
 /** Names of the glyph drawn inside a yellow hex badge. */
 export type GlyphName =
+  | "environment"
+  | "green"
   | "check"
   | "sun"
   | "dollar"
@@ -58,6 +66,7 @@ export type GlyphName =
   | "home"
   | "house"
   | "phone"
+  | "carbon"
   | "connect";
 
 /** Subset of GlyphName that has an inline-SVG implementation for HexBadge.
@@ -198,7 +207,7 @@ export function MediaCard({
   mediaBg?: string;
 }) {
   return (
-    <article className="overflow-hidden max-w-108.25 rounded-3xl border border-border bg-surface shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
+    <article className="overflow-hidden max-w-115 rounded-3xl border border-border bg-surface shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
       {media && (
         <div
           className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-6 overflow-hidden max-h-100"
@@ -208,10 +217,10 @@ export function MediaCard({
         </div>
       )}
       <div className="p-6 sm:p-7">
-        <h3 className="text-2xl font-extrabold leading-tight text-foreground sm:text-[24px]">
+        <h3 className="text-2xl font-bold text-foreground sm:text-[20px] leading-[100%]">
           {title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
+        <p className="mt-3 text-sm text-muted sm:text-base font-medium">
           {description}
         </p>
         {bullets && bullets.length > 0 && (
@@ -222,9 +231,9 @@ export function MediaCard({
                   src={hexaCheck}
                   alt=""
                   aria-hidden
-                  className="h-5 w-6 lg:h-6 lg:w-7"
+                  className="h-5 w-6 lg:h-6.5 lg:w-7.5"
                 />
-                <span className="text-sm text-foreground sm:text-base">
+                <span className="text-sm text-muted sm:text-base leading-[100%] font-medium">
                   {b}
                 </span>
               </li>

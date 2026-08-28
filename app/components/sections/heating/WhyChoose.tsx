@@ -84,6 +84,7 @@ export default function WhyChoose() {
               description="Every optimisation is designed to reduce cost, not just display data."
             />
             <FeatureItem
+              glyph="green"
               title="Built for a Greener Future"
               description="Less wasted energy means lower emissions — without changing your comfort or lifestyle."
             />

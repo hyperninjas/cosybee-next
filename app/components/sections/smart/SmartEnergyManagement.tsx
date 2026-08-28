@@ -27,6 +27,7 @@ export default function SmartEnergyManagement() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="device"
               title="Connected Devices"
               description="See how your smart home systems work together."
               descWidth="md:w-[85%]"

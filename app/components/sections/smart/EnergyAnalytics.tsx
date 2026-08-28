@@ -37,6 +37,7 @@ export default function EnergyAnalytics() {
               description="Understand how much energy comes from solar versus the grid."
             />
             <FeatureItem
+              glyph="environment"
               title="Environmental Impact"
               description="Track your carbon savings and environmental contribution."
             />

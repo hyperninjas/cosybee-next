@@ -28,6 +28,7 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
       "Monitor your energy independence level. Understand how much of your power comes from solar vs. the grid.",
   },
   {
+    glyph: "carbon",
     title: "Carbon Footprint Impact",
     description:
       "Visualise your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet.",
