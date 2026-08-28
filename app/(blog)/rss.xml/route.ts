@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
  * The public blog feed — the one linked for auto-discovery from every page
  * (RSS_ALTERNATE_TYPES in lib/site.ts) and the URL readers subscribe to.
  *
- * The syndication partners get their own paths under `/news/` so a change made
- * for one of them can't disturb this feed; all three share the builder and the
- * article list, so they can't drift apart by accident either.
+ * The syndication partners each get a path of their own (see `FEEDS`) so a
+ * change made for one of them can't disturb this feed; all three share the
+ * builder and the article list, so they can't drift apart by accident either.
  */
 export async function GET() {
   const articles = await getFeedArticles();
