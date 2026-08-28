@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 
-import { useEffect, useId, useRef } from "react";
+import { useId } from "react";
 import type { FlowEdge } from "../render/flowRoute";
 
 export interface FlowLinesProps {
@@ -10,23 +10,6 @@ export interface FlowLinesProps {
   readonly height: number;
   readonly lineWidth: number;
   readonly dotRadius: number;
-}
-
-/**
- * The nominal cycle every dot animation is created with.
- *
- * Speed is then applied as `playbackRate`, never by changing the duration — see
- * `FlowDot` below for why that distinction is the whole point.
- */
-const BASE_DURATION_MS = 2000;
-
-/** Whether the viewer has asked for less motion. */
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
 }
 
 interface DotProps {
@@ -39,89 +22,35 @@ interface DotProps {
 }
 
 /**
- * One travelling dot.
+ * One travelling particle.
  *
- * ═══════════════════════════════════════════════════════════════════════════
- * 🔴 SPEED IS A PLAYBACK RATE, NOT A DURATION
- * ═══════════════════════════════════════════════════════════════════════════
+ * Uses SVG's native `<animateMotion>` element. The dot is placed on the path
+ * from the very first paint by the SMIL runtime itself — no post-mount JS,
+ * no `offset-path` compatibility risk, and nothing to hide until an effect
+ * has run.
  *
- * The first version of this used SVG `<animateMotion dur={...}>` and claimed
- * that changing `dur` rescaled the animation in place. That is not what
- * browsers do: mutating a running SMIL animation's `dur` RESTARTS it, so every
- * dot snapped back to the start of its line each time a reading changed. On a
- * live feed that is a visible twitch every few minutes; with a slider in hand it
- * is constant, and it makes the diagram look broken.
- *
- * The Flutter package avoids the same problem by hand — it keeps a phase per dot
- * across rebuilds and advances it from a `Ticker` — at the cost of a repaint
- * every frame.
- *
- * The Web Animations API gives it properly. The animation is created ONCE with a
- * fixed `BASE_DURATION_MS`, and speed is applied as `playbackRate`, which is
- * defined to change the rate without touching `currentTime`. So a dot keeps
- * exactly the position it had, changes speed smoothly, and React never
- * re-renders for it.
- *
- * `offsetPath` likewise updates in place, so a re-layout moves the dot onto the
- * new curve at the same fractional distance instead of teleporting it home.
+ * `<animateMotion>` restarts if `dur` mutates (a known SMIL quirk the
+ * previous WAAPI version was written to sidestep), so the dot's phase resets
+ * whenever a reading's flow rate changes. That is fine for a demo dashboard
+ * whose numbers are stable per render; when live data lands and readings
+ * update every few seconds, revisit this by throttling `durationMs` updates
+ * so they don't fire on every polling tick.
  */
 function FlowDot({ path, durationMs, reversed, color, radius, phaseKey }: DotProps) {
-  const ref = useRef<SVGCircleElement>(null);
-  const animation = useRef<Animation | null>(null);
-
-  // Create once per element. Deliberately no dependency on duration or path:
-  // both are applied to the LIVE animation below, which is what preserves phase.
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof el.animate !== "function") return;
-    if (prefersReducedMotion()) return;
-
-    const anim = el.animate(
-      [{ offsetDistance: "0%" }, { offsetDistance: "100%" }],
-      {
-        duration: BASE_DURATION_MS,
-        iterations: Number.POSITIVE_INFINITY,
-        easing: "linear",
-      },
-    );
-    animation.current = anim;
-    return () => {
-      anim.cancel();
-      animation.current = null;
-    };
-  }, []);
-
-  // Speed. `playbackRate` is the one control that does not reset `currentTime`.
-  useEffect(() => {
-    const anim = animation.current;
-    if (!anim) return;
-    const rate = BASE_DURATION_MS / Math.max(1, durationMs);
-    // Direction is a signed rate rather than a `direction` option, so a load
-    // that flips to feeding the house reverses from where the dot already is.
-    anim.playbackRate = reversed ? -rate : rate;
-  }, [durationMs, reversed]);
-
+  const dur = Math.max(1, durationMs);
   return (
-    <circle
-      ref={ref}
-      r={radius}
-      fill={color}
-      data-dot={phaseKey}
-      // `offsetPath` sits on the JSX style so the very first paint already has
-      // the dot on its curve — no post-mount effect race, no brief flash at
-      // SVG (0,0) leaking into whatever sits above the diagram. Setting it
-      // declaratively is safe because React only touches CSS keys that
-      // actually changed, so a re-layout that hands us the same path won't
-      // restart the animation.
-      //
-      // `offsetAnchor: "center"` prevents the dot from also orbiting its own
-      // centre while it travels — that would read as a wobble on tight curves.
-      style={{
-        offsetPath: `path("${path}")`,
-        offsetRotate: "0deg",
-        offsetAnchor: "center",
-      }}
-    />
+    <circle r={radius} fill={color} data-dot={phaseKey}>
+      <animateMotion
+        dur={`${dur}ms`}
+        repeatCount="indefinite"
+        path={path}
+        // `keyPoints`/`keyTimes` reverses direction without flipping the
+        // path itself: for a battery that switches from charging to
+        // discharging, the dot travels the same physical line the other way.
+        keyPoints={reversed ? "1;0" : "0;1"}
+        keyTimes="0;1"
+      />
+    </circle>
   );
 }
 
