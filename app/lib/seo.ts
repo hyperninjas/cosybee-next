@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import type { Article } from "./article-types";
+import { validImageOrNull } from "./article-types";
 import { coverKeyForPath } from "./og-covers";
 import {
   SITE_NAME,
@@ -66,6 +68,42 @@ function ogImageFor(
     height: 630,
     alt: title,
   };
+}
+
+/**
+ * Social-share image for one article — the single source of truth for both
+ * `og:image` and `twitter:image`, on both blogs.
+ *
+ * An article that specifies its own OG image shares as that image; the rest
+ * get the generated card. Both resolve to the SAME /api/og/article/* URL — the
+ * route picks. Keeping the choice server-side means an editor can add or clear
+ * a share image without the tag changing, so the URL crawlers have already
+ * cached keeps resolving to the right picture. The route passes a well-formed
+ * image through untouched and only rebuilds one that would otherwise fail —
+ * see `shareImage` there.
+ *
+ * `validImageOrNull` rather than a truthiness check, so a stale-seed
+ * `/images/…` path is treated as absent, matching what the route decides.
+ *
+ * The only thing that differs is the dimensions, and only because a specified
+ * image keeps its own aspect ratio — its size isn't knowable here, the media
+ * API hands back a URL and nothing else. A wrong `og:image:width` is worse
+ * than an absent one: crawlers lay out against what the tag claims, so a
+ * mismatch letterboxes or crops the preview. Omitted, they measure the file.
+ *
+ * Lives here, not inline in the two article pages, because they carried this
+ * block verbatim — and duplicated og:image logic is exactly how the generated
+ * card drifted out of sync with /api/og in the first place.
+ */
+export function articleSocialImage(
+  article: Pick<Article, "slug" | "ogImage" | "ogImageAlt" | "coverImageAlt">,
+  blog: Article["blog"],
+): OgImage {
+  const alt = article.ogImageAlt ?? article.coverImageAlt;
+  const url = `/api/og/article/${blog}/${article.slug}`;
+  return validImageOrNull(article.ogImage)
+    ? { url, alt }
+    : { url, width: 1200, height: 630, alt };
 }
 
 export type PageMetaInput = {
