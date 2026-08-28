@@ -524,13 +524,13 @@
   align-items: center;
   gap: 1.5rem;
   margin: 2rem 0;
-  padding: 4.25rem 2.75rem !important;
+  padding: 2.5rem 2rem !important;
   border: 1px solid rgb(229, 227, 227) !important;
   border-radius: 1.5rem;
   /* The image column's width and the card's own padding, as tokens: a pinned
      image is positioned against the CARD, so it has to line up with a column
      it is no longer sitting in. One place to change both. */
-  --cta-media-w: 11rem;
+  --cta-media-w: 16rem;
   --cta-pad: 1.75rem;
   /* Warm wash over white. The design tool lists the opaque white FIRST, but
      CSS paints the first background layer on top — taken literally it would
@@ -565,10 +565,10 @@
 @media (min-width: 900px) {
   .article-cta {
     flex-direction: row;
-    gap: 2.5rem;
-    padding: 2.5rem;
+    gap: 0.5rem;
+    padding: 0rem;
     --cta-media-w: 14.75rem;
-    --cta-pad: 2.5rem;
+    --cta-pad: 1rem 2rem;
   }
   /* The one job of `data-image`: which side the art sits on. `row-reverse`
      rather than a second markup order, so the DOM keeps copy-before-image and
@@ -588,7 +588,7 @@
 .article-cta-media img {
   display: block;
   width: 100%;
-  max-height: calc(100% - 40px);
+  max-height: 100%;
   height: auto;
   margin: 0;
   border-radius: 0 !important;
@@ -631,8 +631,8 @@
        floating away from the edge it's meant to be flush with. */
     width: auto;
     height: auto;
-    max-width: var(--cta-media-w);
-    max-height: calc(100% - var(--cta-pad));
+    /* max-width: var(--cta-media-w); */
+    max-height: calc(100% - 1rem);
   }
   .article-cta[data-anchor="top"] .article-cta-media img {
     top: 0;
@@ -644,13 +644,13 @@
      in from whichever edge its side is on. */
   .article-cta[data-image="left"][data-anchor="top"] .article-cta-media img,
   .article-cta[data-image="left"][data-anchor="bottom"] .article-cta-media img {
-    left: var(--cta-pad);
+    left: 2.5rem;
   }
   .article-cta[data-image="right"][data-anchor="top"] .article-cta-media img,
   .article-cta[data-image="right"][data-anchor="bottom"]
     .article-cta-media
     img {
-    right: var(--cta-pad);
+    right: 2.5rem;
   }
 }
 
