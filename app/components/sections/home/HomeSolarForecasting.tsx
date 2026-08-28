@@ -2,13 +2,10 @@ import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-// import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png";
-// import Hexagon from "../../ui/Hexagon";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import deviceWeatherImg from "@/public/hex-images/weather-forecasting.png";
 import solarWorker from "@/public/hex-images/solar-worker-attaching-solar-panel.avif";
 import roofTopSolar from "@/public/hex-images/roof-top-solar-installation.avif";
-import deviceImg from "@/public/hex-images/app-ss-connecting-devices.png";
 import Hexagon from "@/app/components/ui/Hexagon";
 
 /**

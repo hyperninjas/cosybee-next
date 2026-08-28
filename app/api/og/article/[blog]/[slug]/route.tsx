@@ -24,16 +24,39 @@ const DOMAIN = (() => {
   }
 })();
 
-/** Fetch an image and inline it as a data URL (null if it can't be loaded). */
+/** The cover is drawn at 430×500, so 2× keeps it crisp at a sane payload. */
+const COVER = { width: 860, height: 1000 };
+
+/**
+ * Fetch a cover and inline it as a data URL (null if it can't be loaded).
+ *
+ * Always re-encoded to JPEG through sharp, never passed through raw. Satori
+ * accepts only PNG/APNG/JPEG/GIF/SVG and *throws* on anything else — WebP and
+ * AVIF included, which it sniffs by magic bytes purely to reject. That throw
+ * lands inside `ImageResponse`'s stream, so it surfaced as an empty 500 from
+ * this route and the article shipped with no og:image at all (a hard fail:
+ * every article with a .webp cover had no share card anywhere). Any
+ * media-library upload can end up here, so normalise the format rather than
+ * branch on it. Resizing is the other half — raw covers run to several MB and
+ * base64 adds a third again on top, all of which Satori has to decode.
+ */
 async function loadImage(src: string | null): Promise<string | null> {
   if (!src) return null;
   const abs = /^https?:\/\//i.test(src) ? src : url(src);
   try {
     const res = await fetch(abs);
     if (!res.ok) return null;
-    const type = res.headers.get("content-type") ?? "image/jpeg";
-    const b64 = Buffer.from(await res.arrayBuffer()).toString("base64");
-    return `data:${type};base64,${b64}`;
+    // `density` bites on vector input only, where sharp would otherwise
+    // rasterise an SVG cover at a blurry 72dpi. Ignored for raster formats.
+    const jpeg = await sharp(Buffer.from(await res.arrayBuffer()), {
+      density: 300,
+    })
+      // Centre crop, matching the `objectFit: "cover"` Satori was applying to
+      // the full-size image, so cards that already render are untouched.
+      .resize(COVER.width, COVER.height, { fit: "cover" })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toBuffer();
+    return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
   } catch {
     return null;
   }
@@ -71,19 +94,20 @@ export async function GET(
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        {/* Left: tilted cover card */}
-        <div
-          style={{
-            display: "flex",
-            width: "46%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px",
-          }}
-        >
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
+        {/* Left: tilted cover card. Dropped entirely when the cover can't be
+            loaded — an empty 46% column just reads as a lopsided blank card. */}
+        {cover ? (
+          <div
+            style={{
+              display: "flex",
+              width: "46%",
+              height: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "40px",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cover}
               width={430}
@@ -97,8 +121,8 @@ export async function GET(
                 transform: "rotate(-5deg)",
               }}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
         {/* Right: domain + title + CTA */}
         <div
@@ -106,10 +130,10 @@ export async function GET(
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            width: "54%",
+            width: cover ? "54%" : "100%",
             height: "100%",
             paddingRight: 72,
-            paddingLeft: 12,
+            paddingLeft: cover ? 12 : 72,
             gap: 30,
           }}
         >
@@ -164,12 +188,24 @@ export async function GET(
   );
 
   // Satori → PNG → compressed JPEG (≤ WhatsApp's limit).
-  const png = Buffer.from(await card.arrayBuffer());
-  let quality = 82;
-  let out = await sharp(png).jpeg({ quality, mozjpeg: true }).toBuffer();
-  while (out.length > MAX_BYTES && quality > 40) {
-    quality -= 12;
+  //
+  // Guarded because Satori defers its work to this `arrayBuffer()` call, so
+  // anything it dislikes throws *here* rather than at construction. Unhandled,
+  // that returns a bodyless 500 — and a 500 on og:image is worse than a plain
+  // card: crawlers cache the miss, so the article shares as a bare link long
+  // after the cause is fixed. Fall back to the generic card instead, the same
+  // way a missing article does above.
+  let out: Buffer;
+  try {
+    const png = Buffer.from(await card.arrayBuffer());
+    let quality = 82;
     out = await sharp(png).jpeg({ quality, mozjpeg: true }).toBuffer();
+    while (out.length > MAX_BYTES && quality > 40) {
+      quality -= 12;
+      out = await sharp(png).jpeg({ quality, mozjpeg: true }).toBuffer();
+    }
+  } catch {
+    return Response.redirect(url("/api/og"), 307);
   }
 
   return new Response(new Uint8Array(out), {
