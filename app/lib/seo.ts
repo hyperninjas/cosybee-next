@@ -74,36 +74,40 @@ function ogImageFor(
  * Social-share image for one article — the single source of truth for both
  * `og:image` and `twitter:image`, on both blogs.
  *
- * An article that specifies its own OG image shares as that image; the rest
- * get the generated card. Both resolve to the SAME /api/og/article/* URL — the
- * route picks. Keeping the choice server-side means an editor can add or clear
- * a share image without the tag changing, so the URL crawlers have already
- * cached keeps resolving to the right picture. The route passes a well-formed
- * image through untouched and only rebuilds one that would otherwise fail —
- * see `shareImage` there.
+ * An article shares as its own picture when it has one that works — the OG
+ * image it nominates, else its cover — and as the generated card otherwise.
+ * Both resolve to the SAME /api/og/article/* URL; the route picks, because
+ * only it can see the file. Keeping the choice server-side means an editor can
+ * add, change or clear a picture without the tag moving, so the URL crawlers
+ * cached long ago keeps resolving to the right image.
  *
- * `validImageOrNull` rather than a truthiness check, so a stale-seed
- * `/images/…` path is treated as absent, matching what the route decides.
+ * All this decides is whether the dimensions can be stated. An article with no
+ * picture at all is certain to get the card, which is always 1200×630. Once
+ * there IS one the outcome turns on its shape and byte size, which needs the
+ * file itself — so the tag stays quiet and crawlers measure it. A wrong
+ * `og:image:width` is worse than an absent one: they lay out against what the
+ * tag claims, so a mismatch letterboxes or crops the preview.
  *
- * The only thing that differs is the dimensions, and only because a specified
- * image keeps its own aspect ratio — its size isn't knowable here, the media
- * API hands back a URL and nothing else. A wrong `og:image:width` is worse
- * than an absent one: crawlers lay out against what the tag claims, so a
- * mismatch letterboxes or crops the preview. Omitted, they measure the file.
+ * `coverImageReal` rather than `coverImage`, which resolves through ogImage to
+ * a placeholder and so is never null — it would report every article as having
+ * a picture. `validImageOrNull` for the same reason, so a stale-seed
+ * `/images/…` path reads as absent here exactly as it does in the route.
  *
  * Lives here, not inline in the two article pages, because they carried this
  * block verbatim — and duplicated og:image logic is exactly how the generated
  * card drifted out of sync with /api/og in the first place.
  */
 export function articleSocialImage(
-  article: Pick<Article, "slug" | "ogImage" | "ogImageAlt" | "coverImageAlt">,
+  article: Pick<
+    Article,
+    "slug" | "ogImage" | "ogImageAlt" | "coverImageReal" | "coverImageAlt"
+  >,
   blog: Article["blog"],
 ): OgImage {
   const alt = article.ogImageAlt ?? article.coverImageAlt;
   const url = `/api/og/article/${blog}/${article.slug}`;
-  return validImageOrNull(article.ogImage)
-    ? { url, alt }
-    : { url, width: 1200, height: 630, alt };
+  const own = validImageOrNull(article.ogImage) ?? article.coverImageReal;
+  return own ? { url, alt } : { url, width: 1200, height: 630, alt };
 }
 
 export type PageMetaInput = {

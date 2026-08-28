@@ -31,6 +31,20 @@ const MAX_EDGE = 1200;
 /** Formats every major crawler decodes. WebP is the notable absentee: Facebook
  *  handles it, X and LinkedIn are unreliable with it, so it gets transcoded. */
 const CRAWLER_SAFE = new Set(["jpeg", "png"]);
+/**
+ * The band a picture has to sit in to work as a share image on its own.
+ *
+ * Open Graph's large card is 1.91:1 and X's `summary_large_image` is 2:1, so
+ * anything from 3:2 to a shade past 2:1 renders essentially as shot. Outside
+ * it the crawler letterboxes or centre-crops to fit — a portrait cover loses
+ * its top and bottom, a square one gets pillarboxed. The floor is Facebook's
+ * stated minimum for a large preview; under it the card silently degrades to
+ * the small thumbnail layout. A picture that misses any of these is better
+ * served by the generated card, which composes it into a correct 1200×630
+ * instead of letting the crawler guess.
+ */
+const OG_RATIO = { min: 1.5, max: 2.4 };
+const OG_MIN = { width: 600, height: 315 };
 const DOMAIN = (() => {
   try {
     return new URL(SITE_URL).host.replace(/^www\./, "");
@@ -53,8 +67,8 @@ async function compressToLimit(pipeline: sharp.Sharp): Promise<Buffer> {
 }
 
 /**
- * Serve an article's own OG image — the editor's chosen file, not a rendition
- * of it inset into the branded card.
+ * Serve the article's own picture — its OG image, else its cover — as the
+ * share image, rather than a rendition of it inset into the branded card.
  *
  * Passed through byte-for-byte when it's already a JPEG or PNG inside the size
  * budget, so a well-prepared image reaches crawlers untouched and lossless.
@@ -63,9 +77,12 @@ async function compressToLimit(pipeline: sharp.Sharp): Promise<Buffer> {
  * og:image; and anything over WhatsApp's limit, where the preview is dropped
  * entirely rather than shown scaled down.
  *
- * Aspect ratio is preserved — cropping to 1200×630 is the card's job, and the
- * whole point here is that the editor picked this framing. Returns null if the
- * source can't be read, so the caller can fall back to the generated card.
+ * Scaling only ever shrinks, and never changes the shape — a picture that
+ * isn't already card-shaped is refused rather than cropped here, because
+ * choosing what to keep is the generated card's job.
+ *
+ * Returns null when the picture can't be used as-is — unreadable, or outside
+ * {@link OG_RATIO}/{@link OG_MIN} — so the caller falls back to that card.
  */
 async function shareImage(
   src: string,
@@ -76,9 +93,26 @@ async function shareImage(
     if (!res.ok) return null;
     const raw = Buffer.from(await res.arrayBuffer());
 
-    const { format, width, height } = await sharp(raw).metadata();
+    const { format, width, height, orientation } = await sharp(raw).metadata();
+    // EXIF orientations 5-8 turn the picture a quarter turn on display, so the
+    // stored dimensions are transposed from how anyone actually sees it.
+    const turned = (orientation ?? 1) >= 5;
+    const w = (turned ? height : width) ?? 0;
+    const h = (turned ? width : height) ?? 0;
+    if (!w || !h) return null;
+
+    const ratio = w / h;
+    if (
+      ratio < OG_RATIO.min ||
+      ratio > OG_RATIO.max ||
+      w < OG_MIN.width ||
+      h < OG_MIN.height
+    ) {
+      return null;
+    }
+
     const fits = raw.length <= MAX_BYTES;
-    const small = (width ?? 0) <= MAX_EDGE && (height ?? 0) <= MAX_EDGE;
+    const small = w <= MAX_EDGE && h <= MAX_EDGE;
     if (format && CRAWLER_SAFE.has(format) && fits && small) {
       return { body: raw, type: `image/${format}` };
     }
@@ -158,15 +192,20 @@ export async function GET(
   const article = await getArticleBySlug(blog, slug);
   if (!article) return Response.redirect(url("/api/og"), 307);
 
-  // An article that specifies its own OG image shares as that image. Both
-  // branches answer on this one URL so the choice stays server-side: an editor
-  // can add or clear a share image and the tag crawlers already cached still
-  // resolves to the right picture.
-  const explicit = validImageOrNull(article.ogImage);
-  if (explicit) {
-    const direct = await shareImage(explicit);
-    // Null means the file couldn't be read at all — fall through to the
-    // generated card rather than serve nothing.
+  // An article shares as its own picture when it has one that works: the OG
+  // image it nominates, else its cover. `coverImageReal` rather than
+  // `coverImage`, which resolves through ogImage to a placeholder — sharing
+  // the site's placeholder bee as though it illustrated the article is worse
+  // than the generated card, which at least carries the headline.
+  //
+  // Both branches answer on this one URL so the choice stays server-side: an
+  // editor can add, change or clear a picture and the tag crawlers already
+  // cached still resolves to the right image.
+  const own = validImageOrNull(article.ogImage) ?? article.coverImageReal;
+  if (own) {
+    const direct = await shareImage(own);
+    // Null means it can't stand on its own — unreadable, or the wrong shape.
+    // Fall through to the card, which composes it properly.
     if (direct) return imageResponse(direct.body, direct.type);
   }
 
