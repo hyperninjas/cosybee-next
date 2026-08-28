@@ -70,7 +70,7 @@ export const FEEDS = {
   },
   /** Polled by NewsNow; the title is what shows in their directory. */
   newsnow: {
-    path: "/news/newsnow.xml",
+    path: "/newsnow/newsnow.xml",
     title: `${SITE_NAME} — News`,
   },
   /** Polled by Apple News; the title becomes the channel name in the app. */

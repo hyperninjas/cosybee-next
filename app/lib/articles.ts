@@ -346,7 +346,7 @@ export async function getAllArticles(blog: Blog): Promise<Article[]> {
 
 /**
  * Every published article across both blogs, newest first — the article list
- * behind every RSS feed (`/rss.xml` and the syndication feeds under `/news/`).
+ * behind every RSS feed (`/rss.xml` and the syndication feeds — see `FEEDS`).
  *
  * Shared so the feeds cannot disagree about what has been published or in what
  * order. A backend error yields an EMPTY list rather than throwing: a feed is

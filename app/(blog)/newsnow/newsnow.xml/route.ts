@@ -6,7 +6,7 @@ import { buildRssFeed, FEED_HEADERS, FEEDS } from "@/app/lib/rss-feed";
 export const dynamic = "force-dynamic";
 
 /**
- * `/news/newsnow.xml` — the feed given to NewsNow.
+ * `/newsnow/newsnow.xml` — the feed given to NewsNow.
  *
  * Identical content to `/rss.xml` for now; it exists as its own URL so the
  * aggregator's polling is visible separately in logs, and so anything NewsNow
