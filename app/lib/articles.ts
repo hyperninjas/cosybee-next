@@ -344,6 +344,30 @@ export async function getAllArticles(blog: Blog): Promise<Article[]> {
   return posts.map(toArticle);
 }
 
+/**
+ * Every published article across both blogs, newest first — the article list
+ * behind every RSS feed (`/rss.xml` and the syndication feeds under `/news/`).
+ *
+ * Shared so the feeds cannot disagree about what has been published or in what
+ * order. A backend error yields an EMPTY list rather than throwing: a feed is
+ * refetched constantly, so serving an empty channel for one poll is recoverable
+ * in a way that a 500 in a partner's ingest log is not. That is the opposite
+ * trade-off to the sitemap reads, which throw so a blip can't cache "these
+ * pages are gone".
+ */
+export async function getFeedArticles(): Promise<Article[]> {
+  const [hive, learn] = await Promise.all([
+    getAllArticles("hive").catch(() => [] as Article[]),
+    getAllArticles("learn").catch(() => [] as Article[]),
+  ]);
+
+  return [...hive, ...learn].sort((a, b) => {
+    const ta = new Date(a.publishedAt ?? a.authorDate ?? 0).getTime();
+    const tb = new Date(b.publishedAt ?? b.authorDate ?? 0).getTime();
+    return tb - ta;
+  });
+}
+
 /** Does an author object carry any profile detail worth a page header? */
 function hasAuthorDetail(a: Author): boolean {
   return Boolean(a.bio || a.avatarUrl || a.role);
