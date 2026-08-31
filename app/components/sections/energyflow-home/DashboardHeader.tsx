@@ -6,22 +6,33 @@ import {
   Sun,
 } from "@gravity-ui/icons";
 import type { DashboardData } from "./types";
+import { PropertySwitcher } from "./PropertySwitcher";
+import type { ActiveProperty } from "@/app/lib/property-state";
 
 /**
- * Top strip of the dashboard: page title, an optional achievement chip, and
- * the date navigator. The nav is a HeroUI {@link ButtonGroup} so its
- * segmented look and focus ring come from the design system rather than
- * ad-hoc classes. The two chevron buttons are visual-only in this first
- * pass — they become interactive when the parent gains a client component
- * for day switching.
+ * Top strip of the dashboard: page title, optional achievement chip,
+ * property switcher (multi-property only — a passive chip for single-
+ * property users), and the date navigator.
+ *
+ * `properties` / `activePropertyId` are optional so the demo path
+ * (`?demo=1`) can render the header without a real property list —
+ * PropertySwitcher self-hides when the array is empty. The nav is a
+ * HeroUI {@link ButtonGroup} so its segmented look and focus ring come
+ * from the design system rather than ad-hoc classes. The two chevron
+ * buttons are visual-only in this first pass — they become interactive
+ * when the parent gains a client component for day switching.
  */
 
 export function DashboardHeader({
   achievement,
   dayLabel,
+  properties = [],
+  activePropertyId = null,
 }: {
   achievement: DashboardData["achievement"];
   dayLabel: string;
+  properties?: ActiveProperty[];
+  activePropertyId?: string | null;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -36,6 +47,7 @@ export function DashboardHeader({
             <span className="ml-2 text-muted">{achievement.message}</span>
           </Chip>
         )}
+        <PropertySwitcher properties={properties} activeId={activePropertyId} />
       </div>
 
       <ButtonGroup size="sm" variant="tertiary">
