@@ -97,7 +97,10 @@ const nextConfig: NextConfig = {
     // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
     // size ladders above.
     qualities: [75, 85, 90],
-    // Allow external images from the backend API and S3
+    // Allow external images from the backend API, S3, and Google account
+    // photos. Every pattern is as narrow as the source allows — an
+    // over-broad entry would let anyone route arbitrary images through our
+    // optimizer.
     remotePatterns: [
       {
         protocol: "https",
@@ -108,6 +111,19 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "energiebee.s3.eu-west-2.amazonaws.com",
         pathname: "/**",
+      },
+      {
+        // Profile photos for users who signed in with Google (better-auth
+        // stores the provider URL in `user.image`, which <AppAvatar> renders
+        // through next/image). Google hands these out across lh3–lh6, so the
+        // subdomain is wildcarded — `*` matches exactly one label. The size is
+        // encoded in the path (…=s96-c), never a query string, so `search: ""`
+        // stays safe and keeps the pattern tight; a URL that did carry a query
+        // would simply fail to load and the avatar falls back to initials.
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+        pathname: "/**",
+        search: "",
       },
     ],
   },
