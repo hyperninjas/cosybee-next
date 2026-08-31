@@ -1,34 +1,43 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Spinner } from "@heroui/react";
-import { authClient } from "@/app/lib/auth-client";
+import { getServerSession } from "@/app/lib/server-session";
+import { listProperties } from "@/app/lib/property-state";
 
 /**
- * Post-login landing. Resolves the destination from the session role so
- * credential and social sign-in share one decision: admins → dashboard,
- * everyone else → home (banned → /banned, no session → /login). The actual
- * access control still lives server-side in the /admin and /account layouts —
- * this only routes. It renders a full loading screen until the redirect lands,
- * so the user never sees a bare page while the session resolves.
+ * Post-login landing.
+ *
+ * One decision, one round-trip, then a redirect:
+ *   • no session yet          → /login (the auth flow will bounce back
+ *                                once the cookie is set)
+ *   • banned                  → /banned
+ *   • admin                   → /admin
+ *   • signed-in, no property  → /onboarding/address (funnel start)
+ *   • signed-in, has property → /energyflow-home (dashboard)
+ *
+ * The onboarding gate is DERIVED from "does the user own ≥ 1 non-archived
+ * property?" — no durable `hasCompletedOnboarding` flag. Self-correcting:
+ * a user who archives all their homes gets funnelled back through
+ * address → EPC → property. No new backend field required.
+ *
+ * Server component: reads cookies via `getServerSession`, no client-side
+ * spinner-then-fetch dance. The fallback spinner below is only visible for
+ * the brief moment while the redirect is being issued.
  */
-export default function PostLoginPage() {
-  const router = useRouter();
-  const { data, isPending } = authClient.useSession();
+export default async function PostLoginPage() {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
 
-  useEffect(() => {
-    if (isPending) return; // wait for the session to resolve
-    const user = data?.user;
-    if (!user) {
-      router.replace("/login");
-    } else if (user.banned) {
-      router.replace("/banned");
-    } else {
-      router.replace(user.role === "admin" ? "/admin" : "/");
-    }
-  }, [isPending, data, router]);
+  const { user } = session;
+  if (user.banned) redirect("/banned");
+  if (user.role === "admin") redirect("/admin");
 
+  const properties = await listProperties();
+  if (properties.length === 0) redirect("/onboarding/address");
+  redirect("/energyflow-home");
+}
+
+/** Fallback for the split-second before Next issues the 3xx. */
+export function PostLoginFallback() {
   return (
     <main className="flex min-h-[70vh] flex-col items-center justify-center gap-4 px-4">
       <Spinner size="lg" aria-label="Signing you in…" />

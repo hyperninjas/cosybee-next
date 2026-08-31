@@ -1,0 +1,217 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+
+/**
+ * Server Actions + server helpers backing the onboarding funnel.
+ *
+ * Sits alongside `connect-actions.ts` (initial provider connect) and
+ * `provider-actions.ts` (post-connect management). Split by phase: this
+ * file owns the pre-dashboard funnel — address retrieval, EPC lookup,
+ * property creation.
+ *
+ * Every call proxies an eb-auth endpoint the mobile app already uses; no
+ * new backend surface is introduced. Endpoints and shapes are documented
+ * in `eb-auth/src/modules/{address,epc,properties}`.
+ */
+
+const API_URL = process.env["API_URL"] ?? "http://localhost:4000";
+
+// ── Cookie helper ────────────────────────────────────────────────────────
+
+async function cookieHeader(): Promise<string | null> {
+  const store = await cookies();
+  const header = store
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  return header.length > 0 ? header : null;
+}
+
+// ── Types ────────────────────────────────────────────────────────────────
+
+export interface ResolvedAddress {
+  key: string;
+  uprn: string;
+  udprn: string;
+  street: string;
+  locality: string;
+  town: string;
+  county: string;
+  postcode: string;
+  country: string;
+  countryIso: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface EpcCertificateRow {
+  certificateNumber: string;
+  address?: string;
+  postcode?: string;
+  currentEnergyRating?: string;
+  propertyType?: string;
+  builtForm?: string;
+  totalFloorArea?: string;
+  lodgementDate?: string;
+}
+
+export type PropertyCreateResult =
+  | { ok: true; propertyId: string }
+  | { ok: false; error: string; code?: string };
+
+// ── Address retrieve (server-side, for SSR) ──────────────────────────────
+
+/**
+ * Resolve a full address from an opaque AFD `key` (returned by search).
+ * Server-side so the SSR pass of `/onboarding/building-profile` has the
+ * postcode ready to hand to the EPC lookup without a second round-trip
+ * from the client.
+ */
+export async function retrieveAddress(key: string): Promise<ResolvedAddress | null> {
+  if (key.trim().length === 0) return null;
+  const cookie = await cookieHeader();
+  if (cookie === null) return null;
+  const upstream = new URL(`${API_URL}/api/address/retrieve`);
+  upstream.searchParams.set("key", key);
+  upstream.searchParams.set("country", "GBR");
+  // A synthetic per-render session id is fine here — the SSR pass is a
+  // single lookup, not a debounced typing burst.
+  upstream.searchParams.set("sessionId", `ssr-${Date.now()}`);
+
+  try {
+    const res = await fetch(upstream.toString(), {
+      headers: { Cookie: cookie },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { address: ResolvedAddress | null };
+    return body.address;
+  } catch {
+    return null;
+  }
+}
+
+// ── EPC search (server-side) ─────────────────────────────────────────────
+
+/**
+ * List EPC certificates for a postcode. Returns `[]` when the address has
+ * no EPC on the register — a normal outcome for new-builds and some
+ * non-domestic addresses. The building-profile page interprets `[]` as the
+ * signal to fall back to the no-EPC create path.
+ */
+export async function searchEpcByPostcode(postcode: string): Promise<EpcCertificateRow[]> {
+  if (postcode.trim().length === 0) return [];
+  const cookie = await cookieHeader();
+  if (cookie === null) return [];
+
+  const upstream = new URL(`${API_URL}/api/epc/search`);
+  upstream.searchParams.set("postcode", postcode);
+
+  try {
+    const res = await fetch(upstream.toString(), {
+      headers: { Cookie: cookie },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { rows?: EpcCertificateRow[] };
+    return body.rows ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ── Property create ──────────────────────────────────────────────────────
+
+/**
+ * Read a `{message, code}` error envelope defensively. Returns the fallback
+ * copy when the backend body is missing or malformed.
+ */
+async function readError(res: Response, fallback: string): Promise<PropertyCreateResult> {
+  const body = (await res.json().catch(() => null)) as
+    | { message?: string; code?: string }
+    | null;
+  return {
+    ok: false,
+    error: body?.message ?? fallback,
+    ...(body?.code ? { code: body.code } : {}),
+  };
+}
+
+/**
+ * Create a property from a chosen EPC certificate. Backend derives the
+ * full address, postcode, uprn, and coordinates from the EPC record and
+ * marks the property active — a single POST does the job of what mobile's
+ * property_location + building_profile screens are wired to on device.
+ */
+export async function createPropertyFromEpc(input: {
+  certificateNumber: string;
+  label?: string;
+}): Promise<PropertyCreateResult> {
+  if (input.certificateNumber.trim().length === 0) {
+    return { ok: false, error: "Missing EPC certificate number." };
+  }
+  const cookie = await cookieHeader();
+  if (cookie === null) return { ok: false, error: "You need to sign in first." };
+
+  try {
+    const res = await fetch(`${API_URL}/api/properties`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        certificateNumber: input.certificateNumber.trim(),
+        ...(input.label && input.label.trim().length > 0
+          ? { label: input.label.trim() }
+          : {}),
+      }),
+      cache: "no-store",
+    });
+    if (!res.ok) return readError(res, "Couldn't create your home from that EPC.");
+    const body = (await res.json()) as { id?: string };
+    if (!body.id) return { ok: false, error: "Backend returned no property id." };
+    // The dashboard reads properties on next paint — invalidate now so the
+    // subsequent redirect from onboarding lands on live state.
+    revalidatePath("/energyflow-home");
+    return { ok: true, propertyId: body.id };
+  } catch {
+    return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
+  }
+}
+
+/**
+ * Create a property without an EPC — used when the address search returned
+ * no matching EPC on the register (new-builds, non-domestic, etc.). Mobile
+ * takes the equivalent path via the same endpoint.
+ */
+export async function createPropertyWithoutEpc(input: {
+  label: string;
+  address: string;
+  postcode: string;
+}): Promise<PropertyCreateResult> {
+  const label = input.label.trim();
+  const address = input.address.trim();
+  const postcode = input.postcode.trim().toUpperCase();
+  if (label.length === 0) return { ok: false, error: "A home name is required." };
+  if (address.length === 0) return { ok: false, error: "Address is required." };
+  if (postcode.length === 0) return { ok: false, error: "Postcode is required." };
+
+  const cookie = await cookieHeader();
+  if (cookie === null) return { ok: false, error: "You need to sign in first." };
+
+  try {
+    const res = await fetch(`${API_URL}/api/properties/no-epc`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({ label, address, postcode }),
+      cache: "no-store",
+    });
+    if (!res.ok) return readError(res, "Couldn't save your home details.");
+    const body = (await res.json()) as { id?: string };
+    if (!body.id) return { ok: false, error: "Backend returned no property id." };
+    revalidatePath("/energyflow-home");
+    return { ok: true, propertyId: body.id };
+  } catch {
+    return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
+  }
+}
