@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button, Card, toast } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
 import { isFreshSessionError } from "@/app/lib/api-error";
@@ -31,7 +30,6 @@ export function SetPasswordForm({
   email: string;
   destination: string;
 }) {
-  const router = useRouter();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -63,11 +61,27 @@ export function SetPasswordForm({
       return;
     }
 
+    // Force one uncached session read before leaving. `changePassword` emits
+    // the session-cache cookie THREE times — expire, re-write from the
+    // pre-change user, expire again — and only some of those survive the trip
+    // back through /api/auth/[...path], leaving the browser holding a cache
+    // that still says `mustChangePassword`. `disableCookieCache` skips the
+    // cached copy, reads the row, and re-writes the cookie from it, so the
+    // server gate on the next page sees the cleared flag instead of bouncing
+    // the user back here.
+    await authClient.getSession({ query: { disableCookieCache: true } });
+
     toast.success("Password updated. You're all set.");
-    router.replace(destination);
-    // Drop the client router cache too, so nothing renders from an RSC payload
-    // produced while the account was still flagged.
-    router.refresh();
+    // A full page load, not router.replace(). This request changed the session
+    // out from under Next's client router cache, which still holds what it got
+    // for `destination` while the account was flagged — a redirect back to this
+    // page. Replaying that lands the user right back here, and router.refresh()
+    // can't prevent it because the navigation has already resolved from cache
+    // by then. A hard navigation drops that cache and the client session store,
+    // so every gate re-evaluates against the new session. `replace` rather than
+    // `assign` keeps this page out of history: Back should never return to a
+    // forced-change screen that no longer applies.
+    window.location.replace(destination);
   }
 
   return (
