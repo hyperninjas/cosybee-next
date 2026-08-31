@@ -12,8 +12,9 @@ export function LogoutButton() {
     setLoading(true);
     try {
       await authClient.signOut();
-      // There is no /admin/login route — the login page lives at /login.
-      // Refresh so any cached server UI drops the now-signed-out session.
+      // The login page lives at /login for every area of the site (there is
+      // no /admin/login). Refresh so any cached server UI drops the
+      // now-signed-out session.
       router.push("/login");
       router.refresh();
     } catch (err) {

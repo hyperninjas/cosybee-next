@@ -24,6 +24,10 @@ export default function PostLoginPage() {
       router.replace("/login");
     } else if (user.banned) {
       router.replace("/banned");
+    } else if (user.mustChangePassword) {
+      // Admin-provisioned account still on its emailed password — the server
+      // gate would bounce them here anyway; going direct saves a hop.
+      router.replace("/set-password");
     } else {
       router.replace(user.role === "admin" ? "/admin" : "/");
     }

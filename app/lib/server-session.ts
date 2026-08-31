@@ -29,6 +29,13 @@ export interface SessionUser {
   /** Provided by the better-auth admin plugin. */
   role?: string | null;
   banned?: boolean | null;
+  /**
+   * Set by the auth server when an admin created this account with a password
+   * they chose. True means the user must replace it before using the app —
+   * see `requireUser` / `requireAdmin` below. Always false/absent for
+   * self-service sign-ups and OAuth users.
+   */
+  mustChangePassword?: boolean | null;
   twoFactorEnabled?: boolean | null;
   createdAt: string;
   updatedAt: string;
@@ -76,6 +83,13 @@ export const getServerSession = cache(async (): Promise<ServerSession | null> =>
   }
 });
 
+/**
+ * Where a user carrying `mustChangePassword` is sent. The page itself checks
+ * the session directly rather than through these helpers — otherwise the gate
+ * would redirect the very page meant to clear it, in a loop.
+ */
+const FORCED_PASSWORD_ROUTE = "/set-password";
+
 /** Require any authenticated user. Redirects to login when absent. */
 export async function requireUser(redirectTo?: string): Promise<ServerSession> {
   const session = await getServerSession();
@@ -87,6 +101,7 @@ export async function requireUser(redirectTo?: string): Promise<ServerSession> {
     );
   }
   if (session.user.banned) redirect("/banned");
+  if (session.user.mustChangePassword) redirect(FORCED_PASSWORD_ROUTE);
   return session;
 }
 
@@ -98,6 +113,7 @@ export async function requireAdmin(): Promise<ServerSession> {
   const session = await getServerSession();
   if (!session) redirect("/login?redirect=/admin");
   if (session.user.banned) redirect("/banned");
+  if (session.user.mustChangePassword) redirect(FORCED_PASSWORD_ROUTE);
   if (session.user.role !== "admin") redirect("/");
   return session;
 }
