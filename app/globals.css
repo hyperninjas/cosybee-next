@@ -102,46 +102,64 @@
   --warning: oklch(82.03% 0.1392 51.86);
   --warning-foreground: oklch(21.03% 0.0059 51.86);
 }
-/* Server-rendered article body (BlockNote -> HTML). Mirrors the prior
-   hand-built renderer's typography. */
+/* Server-rendered article body (BlockNote -> HTML). The type scale below is
+   the published spec; `.post-editor .bn-editor` mirrors it so a post reads the
+   same while it is written as it does once it publishes. Sizes are in rem with
+   the px they resolve to in a comment, because the spec is written in px. */
 .article-body > * + * {
   margin-top: 1rem;
 }
 .article-body p {
-  /* Match the editor's body text (.post-editor .bn-editor: 1.125rem / 1.7) so
-     the published article reads at the same size it was authored at. */
-  font-size: 1.125rem;
-  line-height: 1.7;
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
 }
+/* Headings are display type, not prose: leading close to their own size, and a
+   touch of negative tracking on the three large levels so the wide Manrope
+   caps don't drift apart. h1/h2 stay bold; h3 and below are semibold. */
 .article-body h1,
 .article-body h2,
-.article-body h3 {
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6 {
   color: var(--foreground);
-  font-weight: 700;
-  /* Matched to the editor, which is why these aren't width-constrained.
-     The 1.7 leading is inherited from `.bn-editor` and is body-copy
-     spacing — on a 2.25rem h2 it opens a 3.8rem line box, so a heading
-     that wraps reads as two loosely separated lines. Headings are set
-     tighter below; the editor gets the same value so what you write still
-     matches what publishes. */
-  line-height: 1.7;
   margin-top: 1.5rem;
 }
-/* Headings are display type, not prose: they want leading close to their own
-   size. Applied to h2 only for now — h1 and h3 keep the inherited 1.7. */
-.article-body h2 {
-  line-height: 1.25 !important;
-}
-/* Editor heading sizes are `--level`em × the 1.125rem editor base:
-   h1 3em, h2 2em, h3 1.3em — mirrored here in rem. */
 .article-body h1 {
-  font-size: 3.375rem;
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 .article-body h2 {
-  font-size: 2.25rem;
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 .article-body h3 {
-  font-size: 1.4625rem;
+  font-size: 1.75rem; /* 28px */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.article-body h4 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  line-height: 1.25;
+}
+.article-body h5 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  line-height: 1.25;
+}
+/* h6 has no line in the spec. BlockNote lets an author pick it, and an
+   unstyled h6 renders as plain body text — so it continues the ladder's 4px
+   step at the body size, semibold like the levels above it. */
+.article-body h6 {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.25;
 }
 .article-body ul,
 .article-body ol {
@@ -153,14 +171,25 @@
 .article-body ol {
   list-style: decimal;
 }
+/* List items sit one step below body copy. The lossy export writes them as
+   `<li><p>`, so the inner paragraph has to be named too — otherwise
+   `.article-body p` wins on the child and the item reads at body size. */
+.article-body li,
+.article-body li > p {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.4;
+}
 .article-body li {
-  font-size: 1.125rem;
-  line-height: 1.7;
   margin-top: 0.5rem;
 }
 .article-body li::marker {
   color: var(--muted);
 }
+/* A link takes the size and leading of whatever it sits in: that lands on
+   16px / 1.4 in body copy, and keeps a link inside a heading or a list item
+   the size of the text around it. Setting them on the anchor itself would
+   shrink links in headings and make the lines that contain one taller than
+   the lines that don't. */
 .article-body a {
   color: rgb(117, 117, 239);
   text-decoration: underline;
@@ -202,14 +231,18 @@
 /* offset anchor jumps so headings clear the sticky navbar */
 .article-body h1,
 .article-body h2,
-.article-body h3 {
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6 {
   scroll-margin-top: 6rem;
 }
 .article-body blockquote {
   margin-top: 1.5rem;
   border-left: 3px solid var(--accent);
   padding: 0.25rem 0 0.25rem 1.25rem;
-  font-size: 1.25rem;
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
   font-style: italic;
   color: var(--muted);
 }
@@ -217,7 +250,7 @@
   background: var(--surface-secondary);
   border-radius: 0.3rem;
   padding: 0.12em 0.38em;
-  font-size: 0.9em;
+  font-size: 1em; /* 16px in body copy */
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 /* Code blocks stay intentionally dark in both themes (a deliberate "terminal"
@@ -229,8 +262,8 @@
   background: #1b1f24;
   color: #e6e6e6;
   padding: 1.1rem 1.25rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
 }
 .article-body pre code {
   background: transparent;
@@ -243,6 +276,7 @@
 .article-body figcaption {
   margin-top: 0.5rem;
   font-size: 0.85rem;
+  line-height: 1;
   color: var(--muted);
 }
 /* Honour BlockNote's per-block image alignment. The lossy export emits
@@ -306,8 +340,13 @@
   vertical-align: top;
   text-align: left;
 }
+.article-body th,
+.article-body th > p {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1;
+}
 .article-body th {
-  font-weight: 700;
   color: var(--foreground);
 }
 /* Empty cells still get a row height (editor parity). */
@@ -1132,17 +1171,101 @@
   color: #71717a;
 }
 
+/* The editor mirrors the published type scale (`.article-body`, top of this
+   file). The two are deliberately matched: changing one alone would mean a
+   heading wraps differently while it is written than when it publishes. */
 .post-editor .bn-editor {
   padding-inline: 0;
-  font-size: 1.125rem;
-  line-height: 1.7;
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
   background-color: transparent;
 }
-/* Mirrors `.article-body h2`. The two were deliberately matched, so tightening
-   one alone would mean a heading wrapped differently while writing than when
-   published. */
-.post-editor .bn-editor h2 {
+/* @blocknote/core sets `line-height: 1.5` directly on every block wrapper, and
+   a rule on the element beats leading inherited from `.bn-editor` above — so
+   body leading has to be set here to actually take. */
+.post-editor .bn-block-outer {
+  line-height: 1.4;
+}
+/* Heading sizes in the editor come from BlockNote's `--level` em multiplier
+   (3em / 2em / 1.3em / 1em / .9em / .8em of the editor base). Re-point that
+   ladder at the published one — 36 / 32 / 28 / 24 / 20 / 16px against the 1rem
+   base above. `--prev-level` is the same ladder for BlockNote's transient
+   block-transition state, so a heading doesn't flash the old size mid-change. */
+.post-editor [data-content-type="heading"] {
+  --level: 2.25em;
+}
+.post-editor [data-content-type="heading"][data-level="2"] {
+  --level: 2em;
+}
+.post-editor [data-content-type="heading"][data-level="3"] {
+  --level: 1.75em;
+}
+.post-editor [data-content-type="heading"][data-level="4"] {
+  --level: 1.5em;
+}
+.post-editor [data-content-type="heading"][data-level="5"] {
+  --level: 1.25em;
+}
+.post-editor [data-content-type="heading"][data-level="6"] {
+  --level: 1em;
+}
+.post-editor [data-prev-level="1"] {
+  --prev-level: 2.25em;
+}
+.post-editor [data-prev-level="2"] {
+  --prev-level: 2em;
+}
+.post-editor [data-prev-level="3"] {
+  --prev-level: 1.75em;
+}
+.post-editor [data-prev-level="4"] {
+  --prev-level: 1.5em;
+}
+.post-editor [data-prev-level="5"] {
+  --prev-level: 1.25em;
+}
+.post-editor [data-prev-level="6"] {
+  --prev-level: 1em;
+}
+/* Leading and tracking to match the published headings. BlockNote hard-codes
+   `font-weight: 700` on a five-class selector, so the semibold levels are
+   written long enough to out-specify it rather than with `!important`. */
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"] {
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="3"] {
+  font-weight: 600;
   line-height: 1.25;
+}
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="4"],
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="5"],
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="6"] {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: normal;
+}
+/* Mirrors `.article-body li` — list items sit one step below body copy. */
+.post-editor .bn-editor [data-content-type="bulletListItem"],
+.post-editor .bn-editor [data-content-type="numberedListItem"],
+.post-editor .bn-editor [data-content-type="checkListItem"],
+.post-editor .bn-editor [data-content-type="toggleListItem"] {
+  font-size: 0.9375rem; /* 15px */
 }
 .post-editor .bn-container {
   background: transparent;
