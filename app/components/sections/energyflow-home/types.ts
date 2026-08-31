@@ -35,6 +35,13 @@ export interface EnergyFlowSnapshot {
   solar: FlowChannel;
   battery: BatteryState;
   grid: FlowChannel;
+  /**
+   * Measured house consumption in watts (positive, direction always "in").
+   *
+   * 🔴 The backend measures the house directly; the diagram is told to render
+   * THIS number rather than the figure the solver would derive from the other
+   * three legs. Same rule the mobile card uses (`homeOverride: rt.houseKw`).
+   */
   home: FlowChannel;
   /**
    * Share of grid supply that is currently zero-carbon, 0–100. Present
@@ -47,7 +54,17 @@ export interface EnergyFlowSnapshot {
    * entry becomes its own node on the diagram.
    */
   individuals?: IndividualLoad[];
-  /** ISO 8601 timestamp of the sample. */
+  /**
+   * Inverter self-consumption in watts (standby power + conversion loss).
+   * Rendered as "Your inverter uses N W of this itself" beneath the diagram
+   * when > noise floor. Absent on a pre-upgrade backend.
+   */
+  systemOverheadWatts?: number;
+  /**
+   * ISO 8601 UTC. Inverter's `measuredAt` when available (the mobile's
+   * `realTime.measuredAt`), else the server timestamp. This is the value
+   * ageing/freshness is computed against — NOT `Date.now()` at fetch time.
+   */
   updatedAt: string;
   /** Live label, e.g. "Net zero" or "0.14 kW draw". */
   netLabel: string;
