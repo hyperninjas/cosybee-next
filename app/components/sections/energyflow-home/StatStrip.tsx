@@ -21,7 +21,7 @@ import type { StatTile } from "./types";
  * (with a slight amber lean for solar and sky lean for grid — kept only so
  * the flow diagram's rings stay distinguishable). Home is the sole rose
  * channel — the "consumption" cue. Every color routes through the scoped
- * `--efh-*` channel tokens plus semantic theme tokens; no color literals.
+ * scoped channel tokens plus semantic theme tokens; no color literals.
  */
 
 type Tone = StatTile["tone"];

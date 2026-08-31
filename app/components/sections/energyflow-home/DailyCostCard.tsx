@@ -23,7 +23,7 @@ import type { DailyCost } from "./types";
  *     zero-cost day it degrades gracefully to a muted rail so it still
  *     anchors the card rather than vanishing.
  *
- * Every color routes through a semantic theme token or a scoped `--efh-*`
+ * Every color routes through a semantic theme token or a scoped efh
  * channel var — no color literals live in this file.
  */
 
