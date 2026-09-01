@@ -21,7 +21,9 @@ export default function Breadcrumbs({
   const base = isDark ? "text-white/70" : "text-muted";
   const current = isDark ? "text-white" : "text-muted";
   const sep = isDark ? "text-white/40" : "text-muted";
-  const hover = isDark ? "hover:text-white" : "hover:text-accent";
+  const hover = isDark
+    ? "hover:text-white"
+    : "hover:underline hover:text-foreground";
 
   return (
     <nav aria-label="Breadcrumb" className={className}>

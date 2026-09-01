@@ -367,9 +367,9 @@ export default async function ArticleDetail({
 
             {related.length > 0 && (
               <div>
-                <h2 className="text-lg font-extrabold text-foreground">
+                <h3 className="text-lg font-extrabold text-foreground">
                   More blogs
-                </h2>
+                </h3>
                 <div className="mt-4 flex flex-col gap-1">
                   {related.map((a) => (
                     <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
