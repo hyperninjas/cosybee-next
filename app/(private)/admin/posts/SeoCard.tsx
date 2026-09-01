@@ -30,6 +30,7 @@ export function SeoCard({
   noindex,
   setNoindex,
   coverImage,
+  onImageMeta,
 }: {
   blog: string;
   title: string;
@@ -49,6 +50,15 @@ export function SeoCard({
   noindex: boolean;
   setNoindex: (v: boolean) => void;
   coverImage: string;
+  /** Reports the image's byte size + dimensions so the form can check it
+   *  against the recommended sizes. Advisory only. */
+  onImageMeta?: (meta: {
+    url: string;
+    name?: string;
+    bytes?: number;
+    width?: number;
+    height?: number;
+  }) => void;
 }) {
   const metaTitle = (seoTitle || title || "Untitled").trim();
   const metaDesc = (seoDescription || description).trim();
@@ -189,6 +199,7 @@ export function SeoCard({
               const a = m.alt || m.caption || m.title;
               if (a) setOgImageAlt(a);
             }}
+            onImageMeta={onImageMeta}
             alt={ogImageAlt || title}
           />
         </Labeled>

@@ -2,13 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { revalidateContent } from "@/app/lib/revalidate";
-import { redirect } from "next/navigation";
 import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
-import { adminApi } from "./lib/api";
-import type { SaveState } from "./lib/form-state";
+import { adminApi, type AdminPost } from "./lib/api";
+import type { EntitySaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
 
 const BLOGS = new Set(["hive", "learn"]);
@@ -133,13 +132,15 @@ export async function checkSlug(
 }
 
 /**
- * Create or update a post. Returns a {@link SaveState} with inline
- * field errors on validation failure; on success it redirects to dashboard.
+ * Create or update a post. Returns an {@link EntitySaveState} with inline field
+ * errors on validation failure; on success it returns the saved post and
+ * stays put — the editor toasts and keeps the author where they were rather
+ * than bouncing to the dashboard.
  */
 export async function savePost(
-  _prev: SaveState,
+  _prev: EntitySaveState<AdminPost>,
   formData: FormData,
-): Promise<SaveState> {
+): Promise<EntitySaveState<AdminPost>> {
   await assertAdmin();
 
   const id = optStr(formData, "id");
@@ -333,12 +334,11 @@ export async function savePost(
     ...(contentHtml !== undefined ? { contentHtml } : {}),
   };
 
+  let saved: AdminPost;
   try {
-    if (id) {
-      await adminApi.updatePost(id, data);
-    } else {
-      await adminApi.createPost(data);
-    }
+    saved = id
+      ? await adminApi.updatePost(id, data)
+      : await adminApi.createPost(data);
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };
   }
@@ -347,7 +347,11 @@ export async function savePost(
   revalidateContent();
   revalidatePath(`/${blog}`);
   revalidatePath(`/${blog}/${slug}`);
-  redirect(`/admin?saved=${blog}/${slug}&status=${status}`);
+  // The saved record rides back with the state so the form can adopt it. That
+  // matters most for a CREATE: the editor stays open, and without the new id
+  // its `id` field would still be empty and the next save would write a
+  // second post instead of updating this one.
+  return { ok: true, entity: saved };
 }
 
 /** Result of a dashboard quick-action — the caller toasts on this. */

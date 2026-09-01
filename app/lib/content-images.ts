@@ -96,6 +96,40 @@ function walk(nodes: unknown[], state: { count: number; missing: MissingAlt[] })
   }
 }
 
+function collectSrcs(nodes: unknown[], out: string[]) {
+  for (const raw of nodes) {
+    const node = asNode(raw);
+    if (!node) continue;
+    if (node.type === "image") {
+      const src = imageSrc(node);
+      if (src) out.push(src);
+    }
+    if (Array.isArray(node.children)) collectSrcs(node.children, out);
+    if (Array.isArray(node.content)) collectSrcs(node.content, out);
+  }
+}
+
+/**
+ * Every image URL in the document, in document order and de-duplicated.
+ *
+ * Same traversal and same accepted shapes as the alt check above — the point
+ * is that both see exactly the same set of images, so an image can't be
+ * checked for alt text but missed by the size checks.
+ */
+export function findContentImageUrls(
+  blocks: unknown[] | { blocks?: unknown[] } | null | undefined,
+): string[] {
+  if (!blocks) return [];
+  const root = Array.isArray(blocks)
+    ? blocks
+    : Array.isArray(blocks.blocks)
+      ? blocks.blocks
+      : [];
+  const out: string[] = [];
+  collectSrcs(root, out);
+  return [...new Set(out)];
+}
+
 /** Returns the 1-based ordinals of every image in the document that has no alt. */
 export function findContentImagesMissingAlt(
   blocks: unknown[] | { blocks?: unknown[] } | null | undefined,

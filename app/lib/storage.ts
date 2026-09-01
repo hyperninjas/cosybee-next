@@ -192,7 +192,7 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
  * Read an image's natural pixel dimensions client-side. Uses an object URL
  * and a hidden Image — fast, no server round-trip. Revokes the URL when done.
  */
-function readImageDimensions(
+export function readImageDimensions(
   file: File,
 ): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -479,6 +479,26 @@ export function listMedia(params: ListMediaParams = {}): Promise<MediaListResult
   return api<MediaListResult>(`/api/storage/media${query ? `?${query}` : ""}`, {
     method: "GET",
   });
+}
+
+/**
+ * Find a library item by its public URL.
+ *
+ * The registry has no url index, but `q` searches the storage key (see
+ * storage.media-repository.ts) and `keyFromUrl` turns a public URL into
+ * exactly that key — so a key search plus an exact match on the way back is a
+ * reliable lookup. `contains` can match more than one row (one key being the
+ * prefix of another), which is why the match is re-checked here rather than
+ * trusting the first hit.
+ *
+ * Returns null for anything the library doesn't know about — an external URL,
+ * or a file uploaded outside the media library.
+ */
+export async function findMediaByUrl(url: string): Promise<MediaItem | null> {
+  const key = keyFromUrl(url);
+  if (!key) return null;
+  const { items } = await listMedia({ q: key, pageSize: 5 });
+  return items.find((m) => m.key === key) ?? null;
 }
 
 /** Fetch a single media item with its tags + post usages. */

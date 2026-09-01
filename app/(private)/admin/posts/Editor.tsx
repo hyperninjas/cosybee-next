@@ -36,7 +36,11 @@ import {
   getMultiColumnSlashMenuItems,
   locales as multiColumnLocales,
 } from "@blocknote/xl-multi-column";
-import { validateLibraryFile, type MediaItem } from "@/app/lib/storage";
+import {
+  validateLibraryFile,
+  readImageDimensions,
+  type MediaItem,
+} from "@/app/lib/storage";
 import { uploadLibraryMedia } from "@/app/lib/media-upload";
 import { altFromFileName } from "@/app/lib/image-alt";
 import {
@@ -60,6 +64,16 @@ type Props = {
   linkTargets?: LinkTarget[];
   /** Path of the post being edited, so it can't link to itself. */
   currentPath?: string;
+  /** Reports the byte size + dimensions of every image added to the body this
+   *  session, so the form can check them against the recommended sizes before
+   *  publishing. Advisory only — nothing here blocks an upload. */
+  onImageMeta?: (meta: {
+    url: string;
+    name?: string;
+    bytes?: number;
+    width?: number;
+    height?: number;
+  }) => void;
 };
 
 /**
@@ -910,6 +924,7 @@ export default function Editor({
   onChange,
   linkTargets = [],
   currentPath,
+  onImageMeta,
 }: Props) {
   const editor = useCreateBlockNote({
     schema,
@@ -967,6 +982,18 @@ export default function Editor({
         // "" for camera-roll and screenshot names, so the author is prompted
         // for real alt text instead of nudged into keeping "IMG_5169".
         props.alt = altFromFileName(file.name);
+        // Hand the measurements to the form's pre-publish checks. The file is
+        // already uploaded by this point — this only records what it was.
+        if (onImageMeta) {
+          const dims = await readImageDimensions(file).catch(() => null);
+          onImageMeta({
+            url: result.fileUrl,
+            name: file.name,
+            bytes: file.size,
+            width: dims?.width,
+            height: dims?.height,
+          });
+        }
       }
       return { props };
     },
@@ -1122,6 +1149,18 @@ export default function Editor({
         },
       } as SchemaPartialBlock);
       return;
+    }
+
+    // A picked image carries its size in the registry, so the pre-publish
+    // checks can see it without re-reading the file.
+    if (media.url && media.kind === "image") {
+      onImageMeta?.({
+        url: media.url,
+        name: media.name ?? undefined,
+        bytes: media.sizeBytes ?? undefined,
+        width: media.width ?? undefined,
+        height: media.height ?? undefined,
+      });
     }
 
     const block = blockForMedia(media);

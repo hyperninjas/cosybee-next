@@ -1,11 +1,22 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import dynamic from "next/dynamic";
-import { Alert, Spinner } from "@heroui/react";
+import { Alert, Spinner, toast } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
 import { savePost } from "@/app/(private)/admin/actions";
-import { initialSaveState } from "@/app/(private)/admin/lib/form-state";
+import {
+  initialSaveState,
+  type EntitySaveState,
+} from "@/app/(private)/admin/lib/form-state";
+import type { AdminPost } from "@/app/(private)/admin/lib/api";
 import { useUnsavedChangesWarning } from "@/app/hooks/useUnsavedChangesWarning";
 import {
   PLACEHOLDER_COVER,
@@ -14,10 +25,16 @@ import {
   type Tag,
 } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
-import { findContentImagesMissingAlt } from "@/app/lib/content-images";
+import {
+  findContentImagesMissingAlt,
+  findContentImageUrls,
+} from "@/app/lib/content-images";
+import { collectPostIssues, type ImageFacts } from "@/app/lib/post-issues";
+import { findMediaByUrl } from "@/app/lib/storage";
 import type { LinkTarget } from "@/app/lib/link-targets";
 import TagInput from "./TagInput";
 import { ActionBar, type PostStatus } from "./ActionBar";
+import { PublishIssuesDialog } from "./PublishIssuesDialog";
 import { AuthorPickerCard } from "./AuthorPickerCard";
 import { CategoryPickerCard } from "./CategoryPickerCard";
 import { CoverImageCard } from "./CoverImageCard";
@@ -87,6 +104,18 @@ export type FormPost = {
 
   // Content
   contentJson: Record<string, unknown> | null;
+};
+
+/**
+ * Identity of the post as the server last knows it. Starts as the post being
+ * edited (absent for a new one) and is replaced by whatever each successful
+ * save returns — that is what turns a just-created post into an edit.
+ */
+type SavedRecord = {
+  id: string;
+  blog: string;
+  slug: string;
+  status: PostStatus;
 };
 
 type Props = {
@@ -238,12 +267,21 @@ export default function PostForm({
   authors = [],
   linkTargets = [],
 }: Props) {
-  const [state, formAction, isPending] = useActionState(
-    savePost,
-    initialSaveState,
-  );
+  const [state, formAction, isPending] = useActionState<
+    EntitySaveState<AdminPost>,
+    FormData
+  >(savePost, initialSaveState);
   const errors = state?.fieldErrors ?? {};
   const initialBlocks = parseInitialBlocks(post?.contentJson);
+
+  const [saved, setSaved] = useState<SavedRecord | undefined>(
+    post && {
+      id: post.id,
+      blog: post.blog,
+      slug: post.slug,
+      status: post.status,
+    },
+  );
 
   const statusRef = useRef<HTMLInputElement>(null);
 
@@ -362,10 +400,122 @@ export default function PostForm({
   const [ctaEnabled, setCtaEnabled] = useState(Boolean(post?.ctaLabel));
 
   // Every content image must carry alt text or the backend rejects the save.
+  // This is the one HARD blocker — it disables the save buttons outright.
   const missingAlts = useMemo(
     () => findContentImagesMissingAlt(blocks as unknown[]),
     [blocks],
   );
+
+  // Byte size + dimensions of every image in the post, keyed by URL. Two
+  // sources feed it: the upload widgets and the editor report a file the
+  // browser just handled, and the effect below looks up everything that was
+  // already in the post when it opened.
+  // Every URL whose size has been settled — measured by the browser or looked
+  // up in the registry, hit or miss. Makes each URL a one-shot: the effect
+  // below re-runs on every keystroke and must not re-query what it has seen.
+  const measuredImages = useRef(new Set<string>());
+  const [imageMeta, setImageMeta] = useState<
+    Record<string, { name?: string; bytes?: number; width?: number; height?: number }>
+  >({});
+  const recordImageMeta = useCallback(
+    (meta: {
+      url: string;
+      name?: string;
+      bytes?: number;
+      width?: number;
+      height?: number;
+    }) => {
+      const { url, ...rest } = meta;
+      // The browser measured this file itself, so the registry lookup below
+      // has nothing to add — and must not run, since a row with a null size
+      // would otherwise overwrite a number we already know.
+      measuredImages.current.add(url);
+      // Merged, not replaced: a later partial report can fill gaps but never
+      // erase a dimension that is already known.
+      setImageMeta((prev) => ({ ...prev, [url]: { ...prev[url], ...rest } }));
+    },
+    [],
+  );
+
+  const blocksJson = useMemo(() => JSON.stringify(blocks), [blocks]);
+
+  // Images already in the post when it loaded — a cover set months ago, body
+  // images from the original draft — were never handled by this browser, so
+  // nothing reported their size. The media registry knows it, so ask.
+  const documentImageUrls = useMemo(
+    () => findContentImageUrls(blocks as unknown[]),
+    [blocks],
+  );
+  useEffect(() => {
+    const pending = [coverUrl, ogImage, ...documentImageUrls].filter(
+      (url) => url && !measuredImages.current.has(url),
+    );
+    if (pending.length === 0) return;
+    for (const url of pending) measuredImages.current.add(url);
+
+    let cancelled = false;
+    void Promise.all(
+      pending.map(async (url) => {
+        // A miss is normal (external URL, or a file uploaded outside the
+        // library) and simply leaves that image unchecked.
+        const item = await findMediaByUrl(url).catch(() => null);
+        if (cancelled || !item || item.kind !== "image") return;
+        recordImageMeta({
+          url,
+          name: item.name ?? undefined,
+          bytes: item.sizeBytes ?? undefined,
+          width: item.width ?? undefined,
+          height: item.height ?? undefined,
+        });
+      }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [coverUrl, ogImage, documentImageUrls, recordImageMeta]);
+
+  // Advisory pre-publish checks. Never block — they surface in a dialog on
+  // Publish/Update and the author is free to go ahead anyway.
+  const issues = useMemo(() => {
+    const images: ImageFacts[] = [];
+    const seen = new Set<string>();
+    const add = (slot: ImageFacts["slot"], url: string) => {
+      const meta = imageMeta[url];
+      if (!url || seen.has(url) || !meta) return;
+      seen.add(url);
+      images.push({ slot, url, ...meta });
+    };
+    add("cover", coverUrl);
+    add("og", ogImage);
+    // Body images: only those still present in the document. An image the
+    // author uploaded and then deleted shouldn't keep nagging.
+    for (const url of Object.keys(imageMeta)) {
+      if (blocksJson.includes(url)) add("content", url);
+    }
+    return collectPostIssues({
+      images,
+      coverUrl,
+      coverImageAlt,
+      description,
+      categoryId,
+      categoryName,
+      tags: tagNames,
+      seoTitle,
+      seoDescription,
+    });
+  }, [
+    imageMeta,
+    blocksJson,
+    coverUrl,
+    ogImage,
+    coverImageAlt,
+    description,
+    categoryId,
+    categoryName,
+    tagNames,
+    seoTitle,
+    seoDescription,
+  ]);
 
   // Warn before leaving with unsaved edits. We snapshot every controlled field
   // (+ the editor content) and compare against the first render's snapshot;
@@ -409,22 +559,81 @@ export default function PostForm({
     blocks,
   });
   // Capture the first render's snapshot as the baseline (lazy state init runs
-  // once); reading state during render is allowed, reading a ref isn't.
-  const [initialSnapshot] = useState(snapshot);
+  // once); reading state during render is allowed, reading a ref isn't. A
+  // successful save moves the baseline forward — see below.
+  const [initialSnapshot, setInitialSnapshot] = useState(snapshot);
   useUnsavedChangesWarning(snapshot !== initialSnapshot && !isPending);
 
+  // What was in the form when the save was submitted. The success effect
+  // rebases on this rather than on the live snapshot, so anything typed while
+  // the save was in flight still counts as unsaved.
+  const submittedSnapshot = useRef(snapshot);
+
+  // Saving keeps the author in the editor rather than bouncing to the
+  // dashboard, so everything the old redirect used to settle happens here:
+  // adopt the record the action just wrote (a brand-new post learns its id,
+  // and the action bar switches from Publish to Update), move the
+  // unsaved-changes baseline forward so the browser stops warning about edits
+  // that are now on the server, and say so with a toast.
+  //
+  // `firedFor` guards it: an effect keyed on `state` re-runs on React's
+  // development double-invoke, which would stack two toasts per save.
+  const firedFor = useRef<typeof state | null>(null);
+  useEffect(() => {
+    if (!state.ok || !state.entity || firedFor.current === state) return;
+    firedFor.current = state;
+    const entity = state.entity;
+    const wasPublished = saved?.status === "PUBLISHED";
+    setSaved({
+      id: entity.id,
+      blog: entity.blog,
+      slug: entity.slug,
+      status: entity.status,
+    });
+    setInitialSnapshot(submittedSnapshot.current);
+    const href = `/${entity.blog}/${entity.slug}`;
+    toast.success(
+      entity.status === "PUBLISHED"
+        ? wasPublished
+          ? "Post updated"
+          : "Post published"
+        : entity.status === "ARCHIVED"
+          ? "Post archived"
+          : "Draft saved",
+      entity.status === "PUBLISHED"
+        ? {
+            actionProps: {
+              children: "View post",
+              onPress: () => window.open(href, "_blank", "noopener"),
+            },
+          }
+        : undefined,
+    );
+  }, [state, saved]);
+
   const liveHref =
-    post && post.status === "PUBLISHED"
-      ? `/${post.blog}/${post.slug}`
-      : undefined;
+    saved?.status === "PUBLISHED" ? `/${saved.blog}/${saved.slug}` : undefined;
 
   function setStatusForSubmit(s: string) {
     setStatus(s as PostStatus);
     if (statusRef.current) statusRef.current.value = s;
   }
 
+  // Publishing with open issues goes through the dialog once. `bypassIssues`
+  // is what the dialog's confirm button flips before re-submitting the form,
+  // so the second pass sails through instead of reopening the dialog.
+  const formRef = useRef<HTMLFormElement>(null);
+  const [issuesOpen, setIssuesOpen] = useState(false);
+  const bypassIssues = useRef(false);
+
+  function publishAnyway() {
+    bypassIssues.current = true;
+    formRef.current?.requestSubmit();
+  }
+
   return (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={(e) => {
         // The BlockNote toolbar renders <button>s that portal INSIDE this form
@@ -435,15 +644,30 @@ export default function PostForm({
         const submitter = (e.nativeEvent as SubmitEvent).submitter;
         if (submitter instanceof Element && submitter.closest(".bn-container")) {
           e.preventDefault();
+          return;
         }
+        // Only going live is worth interrupting: drafts and archiving save
+        // straight through. `statusRef` already holds the status the pressed
+        // button wrote in its onPress, which runs before this.
+        if (
+          statusRef.current?.value === "PUBLISHED" &&
+          issues.length > 0 &&
+          !bypassIssues.current
+        ) {
+          e.preventDefault();
+          setIssuesOpen(true);
+          return;
+        }
+        bypassIssues.current = false;
+        submittedSnapshot.current = snapshot;
       }}
     >
       {/* Hidden inputs — every editable field needs one so a stable
           field set reaches the server action regardless of what the
           drawer/cards happen to be showing. */}
-      {post && <input type="hidden" name="id" value={post.id} />}
+      {saved && <input type="hidden" name="id" value={saved.id} />}
       <input type="hidden" name="coverImage" value={coverUrl} />
-      <input type="hidden" name="contentJson" value={JSON.stringify(blocks)} />
+      <input type="hidden" name="contentJson" value={blocksJson} />
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
@@ -507,13 +731,24 @@ export default function PostForm({
       />
 
       <ActionBar
-        editing={Boolean(post)}
+        editing={Boolean(saved)}
         status={status}
         blog={blog}
         setBlog={setBlog}
         onSetStatus={setStatusForSubmit}
         liveHref={liveHref}
         disabled={missingAlts.length > 0}
+        hasIssues={issues.length > 0}
+      />
+
+      <PublishIssuesDialog
+        isOpen={issuesOpen}
+        onOpenChange={setIssuesOpen}
+        issues={issues}
+        confirmLabel={
+          saved?.status === "PUBLISHED" ? "Update anyway" : "Publish anyway"
+        }
+        onConfirm={publishAnyway}
       />
 
       {state?.error && (
@@ -544,6 +779,7 @@ export default function PostForm({
                   if (m.caption) setCoverImageCaption(m.caption);
                   if (m.credit) setCoverImageCredit(m.credit);
                 }}
+                onImageMeta={recordImageMeta}
                 alt={coverImageAlt || title}
                 previewHeight="h-60"
               />
@@ -619,6 +855,7 @@ export default function PostForm({
               <Editor
                 initialContent={initialBlocks}
                 onChange={setBlocks}
+                onImageMeta={recordImageMeta}
                 linkTargets={linkTargets}
                 currentPath={slug ? `/${blog}/${slug}` : undefined}
               />
@@ -645,6 +882,7 @@ export default function PostForm({
               setCoverImageCaption={setCoverImageCaption}
               coverImageCredit={coverImageCredit}
               setCoverImageCredit={setCoverImageCredit}
+              onImageMeta={recordImageMeta}
             />
 
             <AuthorPickerCard
@@ -699,6 +937,7 @@ export default function PostForm({
               noindex={noindex}
               setNoindex={setNoindex}
               coverImage={coverUrl}
+              onImageMeta={recordImageMeta}
             />
 
             <ScheduleCard
