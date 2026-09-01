@@ -494,6 +494,15 @@ export default function PostForm({
     }
     return collectPostIssues({
       images,
+      // A live post changing address is worth saying out loud: the old URL
+      // keeps working via a redirect, but anything that hard-codes it (a
+      // newsletter, a printed QR code) now takes an extra hop.
+      movedFrom:
+        saved &&
+        saved.status === "PUBLISHED" &&
+        (saved.blog !== blog || saved.slug !== slug)
+          ? { blog: saved.blog, slug: saved.slug }
+          : undefined,
       coverUrl,
       coverImageAlt,
       description,
@@ -515,6 +524,9 @@ export default function PostForm({
     tagNames,
     seoTitle,
     seoDescription,
+    saved,
+    blog,
+    slug,
   ]);
 
   // Warn before leaving with unsaved edits. We snapshot every controlled field
@@ -666,6 +678,15 @@ export default function PostForm({
           field set reaches the server action regardless of what the
           drawer/cards happen to be showing. */}
       {saved && <input type="hidden" name="id" value={saved.id} />}
+      {/* The address the post currently occupies on the server. The action
+          revalidates it when the post moves, so the page cached at the old
+          URL doesn't keep serving instead of the new redirect. */}
+      {saved && (
+        <>
+          <input type="hidden" name="previousBlog" value={saved.blog} />
+          <input type="hidden" name="previousSlug" value={saved.slug} />
+        </>
+      )}
       <input type="hidden" name="coverImage" value={coverUrl} />
       <input type="hidden" name="contentJson" value={blocksJson} />
       <input type="hidden" name="slug" value={slug} />

@@ -250,6 +250,27 @@ export async function getArticleBySlug(
   return toArticle(post);
 }
 
+/**
+ * The address a retired URL should redirect to, or null to 404.
+ *
+ * Renaming a post's slug (or moving it between blogs) leaves the old URL with
+ * nothing behind it; the backend records the address the post vacated, and
+ * this asks where it went. Null covers both "never existed" and "the post has
+ * since been unpublished" — redirecting to a draft would only land the visitor
+ * on a second 404, so both cases stay a plain 404 here.
+ */
+export async function resolveRetiredSlug(
+  blog: Blog,
+  slug: string,
+): Promise<string | null> {
+  const target = await api.resolvePostSlug(blog, slug);
+  if (!target || !target.isLive) return null;
+  // Guard against a row that somehow points at itself: redirecting a URL to
+  // itself is an infinite loop in the browser, and a 404 is the safer failure.
+  if (target.blog === blog && target.slug === slug) return null;
+  return `/${target.blog}/${target.slug}`;
+}
+
 /** Related articles for the in-article footer (excludes current). */
 export async function getRelated(
   blog: Blog,

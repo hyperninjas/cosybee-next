@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   getArticleBySlug,
   getPublishedSlugs,
   getRelated,
+  resolveRetiredSlug,
 } from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 import { RSS_ALTERNATE_TYPES, TWITTER_HANDLE } from "@/app/lib/site";
@@ -92,7 +93,16 @@ export default async function HiveArticlePage({
 }: PageProps<"/hive/[slug]">) {
   const { slug } = await params;
   const article = await getArticleBySlug("hive", slug);
-  if (!article) notFound();
+  if (!article) {
+    // Nothing lives here — but the post may have moved. Renaming a slug (or
+    // moving a post to the other blog) retires the old address rather than
+    // deleting it, so ask where it went before giving up. `permanentRedirect`
+    // sends a 308, which search engines treat as a 301 and which passes the
+    // old URL's ranking on to the new one.
+    const moved = await resolveRetiredSlug("hive", slug);
+    if (moved) permanentRedirect(moved);
+    notFound();
+  }
 
   const related = await getRelated("hive", slug);
 

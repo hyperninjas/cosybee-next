@@ -142,6 +142,8 @@ function imageIssues(img: ImageFacts): PostIssue[] {
 export interface PostIssueInput {
   /** Images currently in the post whose size the session knows. */
   images: ImageFacts[];
+  /** Set when a LIVE post is about to change address, with the one it leaves. */
+  movedFrom?: { blog: string; slug: string };
   coverUrl: string;
   coverImageAlt: string;
   description: string;
@@ -159,6 +161,15 @@ export interface PostIssueInput {
  */
 export function collectPostIssues(input: PostIssueInput): PostIssue[] {
   const issues: PostIssue[] = input.images.flatMap(imageIssues);
+
+  if (input.movedFrom) {
+    issues.push({
+      id: "url-change",
+      title: `The URL changes from /${input.movedFrom.blog}/${input.movedFrom.slug}`,
+      detail:
+        "The old address keeps working — it redirects here permanently — but anything that hard-codes it, like a printed QR code, gains a hop.",
+    });
+  }
 
   if (!input.coverUrl.trim()) {
     issues.push({
