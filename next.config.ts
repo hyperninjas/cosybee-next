@@ -113,6 +113,13 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
+        // Profile photos for users who signed in with Google (better-auth
+        // stores the provider URL in `user.image`, which <AppAvatar> renders
+        // through next/image). Google hands these out across lh3–lh6, so the
+        // subdomain is wildcarded — `*` matches exactly one label. The size is
+        // encoded in the path (…=s96-c), never a query string, so `search: ""`
+        // stays safe and keeps the pattern tight; a URL that did carry a query
+        // would simply fail to load and the avatar falls back to initials.
         protocol: "https",
         hostname: "*.googleusercontent.com",
         pathname: "/**",
@@ -280,9 +287,7 @@ const nextConfig: NextConfig = {
         ? [
             {
               source: "/(.*)",
-              headers: [
-                { key: "X-Robots-Tag", value: "noindex, nofollow" },
-              ],
+              headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
             },
           ]
         : []),

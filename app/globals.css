@@ -102,6 +102,10 @@
   --warning: oklch(82.03% 0.1392 51.86);
   --warning-foreground: oklch(21.03% 0.0059 51.86);
 }
+/* Server-rendered article body (BlockNote -> HTML). The type scale below is
+   the published spec; `.post-editor .bn-editor` mirrors it so a post reads the
+   same while it is written as it does once it publishes. Sizes are in rem with
+   the px they resolve to in a comment, because the spec is written in px. */
 
 /* Energy Flow dashboard channel palette. The site-wide semantic tokens
    above cover success / warning / danger / accent — but the energy-flow
@@ -128,11 +132,7 @@
  * follows whichever theme the site is in — no `.dark` wrapper on the page.
  */
 .efh-scope {
-  /* Material amber 500 (#ff9800) — client-specified brand amber for the
-     solar channel. Applied as the semantic token so every surface that
-     names the solar channel (node border, flow dots, ring segment, stat
-     tile accent, icon) picks it up in one change. */
-  --efh-solar: #ff9800;
+  --efh-solar: oklch(58% 0.16 85);
   --efh-battery: var(--success);
   --efh-grid: oklch(52% 0.17 240);
   --efh-home: oklch(55% 0.22 355);
@@ -142,7 +142,7 @@
 
 .dark .efh-scope,
 [data-theme="dark"] .efh-scope {
-  --efh-solar: #ff9800;
+  --efh-solar: oklch(82% 0.16 100);
   --efh-battery: var(--success);
   --efh-grid: oklch(72% 0.13 240);
   --efh-home: oklch(72% 0.22 355);
