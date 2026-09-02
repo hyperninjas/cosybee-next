@@ -22,10 +22,12 @@ Recent additions to the editor:
 - **Link to page** — link selected text to another page or article on this
   site without knowing its URL. See section 4.
 - **You choose the URL** — the slug no longer follows the title, and is
-  checked for clashes as you type. See section 11.
+  checked for clashes as you type. See section 12.
 - **Alt text for images** — images now have their own **Alt text** field,
   separate from the caption. Alt text is required; captions are optional.
   See section 5.
+- **Call to action** — type `/cta` for a promo card with its own heading,
+  image and button, every part of it editable. See section 9.
 - **Table of contents** — type `/toc` for a live "Contents" box built from the
   article's Heading 2/3s; entries become clickable links on the published page.
   See section 7.
@@ -64,7 +66,7 @@ Recent additions to the editor:
 ## 2. Inserting blocks — the `/` menu
 
 Type **`/`** to open the insert menu, then keep typing to filter
-(e.g. `/head`, `/img`, `/faq`, `/toc`, `/media`). What's available:
+(e.g. `/head`, `/img`, `/faq`, `/cta`, `/toc`, `/media`). What's available:
 
 | Group  | Blocks                                                          |
 | ------ | --------------------------------------------------------------- |
@@ -72,9 +74,9 @@ Type **`/`** to open the insert menu, then keep typing to filter
 | Lists  | Bullet, Numbered, Checklist, Toggle list (collapsible)          |
 | Media  | Image, Video, Audio, File, **Media library**, **Custom HTML**   |
 | Layout | Table, Two/Three Columns, Divider                               |
-| Other  | Code block, Emoji, **FAQ question**, **Table of contents**      |
+| Other  | Code block, Emoji, **FAQ question**, **Call to action**, **Table of contents** |
 
-The **bold** ones are special to our site — see sections 5–8.
+The **bold** ones are special to our site — see sections 5–9.
 
 ## 3. Formatting text
 
@@ -196,7 +198,52 @@ The preview is exactly what readers will see. For safety, scripts are removed
 automatically, and iframe embeds only work from **YouTube, Vimeo, Spotify and
 Google Maps** — embeds from other sites are silently dropped.
 
-## 9. Side-by-side columns
+## 9. Call to action
+
+Type **`/cta`** to drop in a promo card — the same card design the marketing
+pages use, but with every part under your control.
+
+The card opens with its form showing. Fill in what you want and leave the rest
+blank; **anything you leave empty simply isn't shown**, so a card with no
+eyebrow, or no button, just doesn't have one.
+
+| Field                                | What it is                                                              |
+| ------------------------------------ | ----------------------------------------------------------------------- |
+| Eyebrow                              | Small upper-case line above the heading                                 |
+| Heading                              | The big line — the main message                                         |
+| Body                                 | A sentence or two underneath                                            |
+| Button text + Button link            | The button. **Both** are needed for it to appear                        |
+| Image                                | **Choose image** opens the media library; **Remove image** takes it out |
+| Image alt text                       | Describes the image (fills in from the library when it has one)         |
+| Image on the left / right / No image | Which side the picture sits on                                          |
+| In line / Pinned to top / bottom     | How the picture sits in its column — see below                          |
+
+Click **Done** when you're finished and the form folds away, leaving the card
+exactly as readers will see it. Click **Edit** to change it again.
+
+The **Button link** can be an internal path (`/download`, `/solar`) or a full
+external address. Internal links stay in the same tab; external ones open in a
+new tab automatically.
+
+> **A note on the heading:** it looks like a heading but deliberately isn't
+> one — it stays out of the table of contents and out of the article's heading
+> structure, so an advert never gets counted as part of the article's outline.
+
+**Pinning the image.** *In line with the text* is the normal setting — the
+picture is centred against the copy. *Pinned to the top / bottom edge* lifts it
+out and stands it against that edge of the card, so a tall image (a phone
+mockup, say) touches the border instead of floating in the middle. It's the
+look the app-download card on the homepage uses.
+
+The column stays the same width either way, so the text never runs underneath,
+and a pinned image is never allowed to grow taller than the card. Pinning is
+ignored when there's no image, or when the side is set to **No image**.
+
+On narrow screens the image moves above the text and the card centres itself,
+whichever side you picked — and pinning is ignored there too, since a stacked
+card has no side column to pin against.
+
+## 10. Side-by-side columns
 
 - Type **`/columns`** and pick **Two** or **Three Columns**, **or** drag a
   block to the **left/right edge** of another block until it snaps in beside it.
@@ -204,7 +251,7 @@ Google Maps** — embeds from other sites are silently dropped.
 - Drag a block out of a column to dissolve it.
 - On phones, columns stack on top of each other automatically.
 
-## 10. Moving & organising blocks
+## 11. Moving & organising blocks
 
 - Hover a block → **⠿ drag handle** appears on the left. Drag it to move the
   block; click it for actions (delete, duplicate, colours…).
@@ -212,7 +259,7 @@ Google Maps** — embeds from other sites are silently dropped.
 - **Tables:** type `/table`. Click into cells to type; hover the edges for
   **+** buttons and handles to add, move or delete rows and columns.
 
-## 11. The URL (slug)
+## 12. The URL (slug)
 
 The **Slug** field in _Post details_ is the article's address —
 `/hive/your-slug`. It is **required** and no longer follows the title, so it
@@ -228,7 +275,7 @@ is yours to choose:
 > its existing URL — old links and search results will 404. Only change it if
 > you mean to.
 
-## 12. Saving & publishing
+## 13. Saving & publishing
 
 The editor is part of the post form — one save covers everything (body, title,
 cover, tags, SEO…):

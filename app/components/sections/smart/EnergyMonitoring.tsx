@@ -54,14 +54,17 @@ export default function EnergyMonitoring() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="insights"
               title="Live Solar Tracking"
               description="Monitor solar production in real time."
             />
             <FeatureItem
+              glyph="weather"
               title="Weather-Based Forecasts"
               description="Plan ahead with forecasts based on local weather conditions."
             />
             <FeatureItem
+              glyph="energy"
               title="Daily Energy Overview"
               description="Understand production patterns and daily performance."
             />

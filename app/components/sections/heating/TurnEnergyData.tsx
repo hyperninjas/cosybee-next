@@ -27,14 +27,17 @@ export default function TurnEnergyData() {
           <SectionTitle>Turn Energy Data Into Real Savings</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="savings"
               title="Savings Intelligence"
               description="Identify opportunities to reduce heating costs through smarter decisions."
             />
             <FeatureItem
+              glyph="energy"
               title="Grid Independence Tracking"
               description="Measure how much energy your home is saving from external grid dependency."
             />
             <FeatureItem
+              glyph="carbon"
               title="Carbon & Efficiency Metrics"
               description="Understand your environmental impact through clear, actionable energy metrics."
             />

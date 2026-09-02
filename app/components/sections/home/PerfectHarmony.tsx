@@ -4,9 +4,9 @@ import { Section } from "@/app/components/ui/Section";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 // import { CtaButton } from "@/app/components/ui/Cta";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-import cottageImg from "@/public/ss-image/ss-small-9.png";
-import beeHydrangeaImg from "@/public/ss-image/ss-small-8.png";
-import deviceImg from "@/public/homepage-images/energiebee-device-energy.png";
+import womenOnCouch from "@/public/hex-images/women-on-couch.png";
+import hubDevice from "@/public/hex-images/hub-device.avif";
+import deviceImg from "@/public/hex-images/app-ss-connecting-devices.png";
 import Hexagon from "@/app/components/ui/Hexagon";
 
 /**
@@ -63,12 +63,21 @@ export default function PerfectHarmony() {
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
           gap={5}
           cornerInset={4}
-          left={{ src: cottageImg, color: "#B7C0A8" }}
+          left={{
+            src: womenOnCouch,
+            color: "#B7C0A8",
+            alt: "women using energiebee app - sitting on couch",
+          }}
           // Above-the-fold (section right below the hero) → eager-load so it
           // isn't flagged as an un-prioritised LCP image.
-          topRight={{ src: beeHydrangeaImg, color: "#D8A9B6", priority: true }}
+          topRight={{
+            src: hubDevice,
+            color: "#D8A9B6",
+            priority: true,
+            alt: "connection hub for devices - image",
+          }}
           bottomRight={{
-            color: "#E9E19E",
+            color: "#c9dfe9",
             children: (
               <Image
                 src={deviceImg}

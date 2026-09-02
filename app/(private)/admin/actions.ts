@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { revalidateContent } from "@/app/lib/revalidate";
-import { redirect } from "next/navigation";
 import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
-import { adminApi } from "./lib/api";
-import type { SaveState } from "./lib/form-state";
+import { adminApi, type AdminPost } from "./lib/api";
+import { api, type Blog } from "@/app/lib/api";
+import type { EntitySaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
 
 const BLOGS = new Set(["hive", "learn"]);
@@ -88,6 +88,9 @@ export type SlugCheck =
   | { state: "idle" }
   | { state: "invalid"; message: string }
   | { state: "available" }
+  // Free to use, but an old URL currently redirects here. Taking it silently
+  // breaks that redirect, so the author is told before they do.
+  | { state: "retired"; message: string }
   | { state: "taken"; message: string }
   | { state: "error"; message: string };
 
@@ -117,11 +120,22 @@ export async function checkSlug(
 
   try {
     const owner = await adminApi.findPostBySlug(blog, slug, excludeId);
-    if (!owner) return { state: "available" };
-    return {
-      state: "taken",
-      message: `Already used by “${owner.title}” (${statusLabel(owner.status)}).`,
-    };
+    if (owner) {
+      return {
+        state: "taken",
+        message: `Already used by “${owner.title}” (${statusLabel(owner.status)}).`,
+      };
+    }
+    // No live post holds it — but a retired address might, in which case
+    // taking it retires the redirect that address currently serves.
+    const retired = await api.resolvePostSlug(blog as Blog, slug);
+    if (retired && retired.id !== excludeId) {
+      return {
+        state: "retired",
+        message: `Free, but an old URL redirects here to “${retired.title}”. Using it drops that redirect.`,
+      };
+    }
+    return { state: "available" };
   } catch {
     // Never claim "available" on a failed lookup — that is how a duplicate
     // slips through to the database's unique index.
@@ -133,13 +147,15 @@ export async function checkSlug(
 }
 
 /**
- * Create or update a post. Returns a {@link SaveState} with inline
- * field errors on validation failure; on success it redirects to dashboard.
+ * Create or update a post. Returns an {@link EntitySaveState} with inline field
+ * errors on validation failure; on success it returns the saved post and
+ * stays put — the editor toasts and keeps the author where they were rather
+ * than bouncing to the dashboard.
  */
 export async function savePost(
-  _prev: SaveState,
+  _prev: EntitySaveState<AdminPost>,
   formData: FormData,
-): Promise<SaveState> {
+): Promise<EntitySaveState<AdminPost>> {
   await assertAdmin();
 
   const id = optStr(formData, "id");
@@ -333,12 +349,11 @@ export async function savePost(
     ...(contentHtml !== undefined ? { contentHtml } : {}),
   };
 
+  let saved: AdminPost;
   try {
-    if (id) {
-      await adminApi.updatePost(id, data);
-    } else {
-      await adminApi.createPost(data);
-    }
+    saved = id
+      ? await adminApi.updatePost(id, data)
+      : await adminApi.createPost(data);
   } catch (e) {
     return { ok: false, error: `Could not save: ${(e as Error).message}` };
   }
@@ -347,7 +362,21 @@ export async function savePost(
   revalidateContent();
   revalidatePath(`/${blog}`);
   revalidatePath(`/${blog}/${slug}`);
-  redirect(`/admin?saved=${blog}/${slug}&status=${status}`);
+  // A moved post leaves a prerendered page behind at its old address. Without
+  // this the stale page keeps being served from the cache and the new 308
+  // never runs — the redirect would look broken for as long as the cache
+  // lives. The previous address comes from the form, which holds the record
+  // as the server last returned it.
+  const previousBlog = str(formData, "previousBlog");
+  const previousSlug = str(formData, "previousSlug");
+  if (previousSlug && (previousBlog !== blog || previousSlug !== slug)) {
+    revalidatePath(`/${previousBlog || blog}/${previousSlug}`);
+  }
+  // The saved record rides back with the state so the form can adopt it. That
+  // matters most for a CREATE: the editor stays open, and without the new id
+  // its `id` field would still be empty and the next save would write a
+  // second post instead of updating this one.
+  return { ok: true, entity: saved };
 }
 
 /** Result of a dashboard quick-action — the caller toasts on this. */

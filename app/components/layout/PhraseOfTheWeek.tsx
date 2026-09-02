@@ -76,11 +76,11 @@ export default function PhraseOfTheWeek({
       {/* Curly quotes in the markup, not CSS `quotes` — they need to survive
           into the text a visitor copies, and into the RSS-style previews some
           browsers generate from selections. */}
-      <blockquote className="mt-3 text-balance font-medium! leading-[150%] text-[13px]! italic text-white/90 sm:text-base">
+      <blockquote className="mt-3 text-balance font-medium! text-center leading-[150%] text-[13px]! italic text-white/90 sm:text-base">
         &ldquo;{phrase.quote}&rdquo;
       </blockquote>
 
-      <figcaption className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
+      <figcaption className="mt-3 flex flex-wrap justify-center items-center gap-x-5 gap-y-1.5 text-sm">
         {/* Not <cite>: that element is for the title of a work, not a person. */}
         <span className="font-medium text-white/60">
           &mdash; {phrase.author}

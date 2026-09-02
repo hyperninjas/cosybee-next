@@ -2,7 +2,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
-import { HEX_PATH } from "@/app/lib/hex";
+import { HEX_PATH_BADGE } from "@/app/lib/hex";
 import type { StaticImageData } from "next/image";
 import downloadImg from "@/public/download-app/download_app-crop.png";
 import accountImg from "@/public/download-app/create_account-crop.png";
@@ -59,8 +59,19 @@ export default function GettingStarted() {
               key={title}
               className="flex flex-col overflow-hidden rounded-3xl bg-[#C7B7341A] px-6 pt-7"
             >
-              <svg viewBox="0 0 100 86.6" className="h-12 w-14" aria-hidden>
-                <path d={HEX_PATH} fill="#EFDF18" />
+              {/* viewBox padded by half the stroke width so the centred
+                  outline isn't clipped by the 100×86.6 box. */}
+              <svg
+                viewBox="-1.63 -1.63 103.26 89.86"
+                className="h-12 w-14"
+                aria-hidden
+              >
+                <path
+                  d={HEX_PATH_BADGE}
+                  fill="#FFF89D"
+                  stroke="#D4C60F"
+                  strokeWidth={3.25}
+                />
                 <text
                   x="50"
                   y="46"
@@ -68,7 +79,7 @@ export default function GettingStarted() {
                   dominantBaseline="middle"
                   fontSize="34"
                   fontWeight="800"
-                  fill="#26272B"
+                  fill="#544E08"
                 >
                   {String(i + 1).padStart(2, "0")}
                 </text>

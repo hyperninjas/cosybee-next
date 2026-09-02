@@ -1,5 +1,9 @@
 import Hexagon from "@/app/components/ui/Hexagon";
-import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
+import {
+  FeatureItem,
+  type GlyphName,
+  SectionTitle,
+} from "@/app/components/ui/SectionContent";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
 import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
@@ -9,6 +13,8 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export type FeatureItemContent = {
+  /** Hex badge glyph; falls back to the check mark when omitted. */
+  glyph?: GlyphName;
   title: string;
   description: string;
 };
@@ -22,16 +28,19 @@ export type EnergyMonitoringProps = {
 
 const DEFAULT_FEATURES: FeatureItemContent[] = [
   {
+    glyph: "solar",
     title: "Live Solar Production Tracking",
     description:
       "Monitor your solar panel energy production in real-time. See exactly how much energy you're generating with instant updates.",
   },
   {
+    glyph: "weather",
     title: "Weather-Based Forecasts",
     description:
       "Get accurate predictions for your solar energy output based on upcoming weather patterns, helping you plan energy usage effectively.",
   },
   {
+    glyph: "energy",
     title: "Daily Energy Overview",
     description:
       "View comprehensive daily energy production with visual graphs showing peak generation times and total output.",
@@ -45,7 +54,7 @@ export default function EnergyMonitoring({
 }: EnergyMonitoringProps = {}) {
   return (
     <Section surface="surface" spacing="md" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-34">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-32">
         {/* uniform 3-hex hive cluster */}
 
         <HiveHexCluster
@@ -85,6 +94,7 @@ export default function EnergyMonitoring({
             {features.map((f) => (
               <FeatureItem
                 key={f.title}
+                glyph={f.glyph}
                 title={f.title}
                 description={f.description}
                 descWidth="w-full"

@@ -3,9 +3,9 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { SectionHeader } from "@/app/components/ui/SectionContent";
 import type { StaticImageData } from "next/image";
-import hexaDevice from "@/public/simplified.svg";
-import hexaChart from "@/public/hexa-chart.svg";
-import hexaDollar from "@/public/hexa-dollar.svg";
+import hexaDevice from "@/public/energy.svg";
+import hexaChart from "@/public/insights.svg";
+import pound from "@/public/pound-sign.svg";
 
 const BENEFITS: ReadonlyArray<{
   icon: StaticImageData;
@@ -25,7 +25,7 @@ const BENEFITS: ReadonlyArray<{
       "See how weather, solar generation and your habits at home all affect your bills",
   },
   {
-    icon: hexaDollar,
+    icon: pound,
     title: "Reduce Your Bills",
     description: "Smart insights that show you where to cut costs",
   },

@@ -16,16 +16,19 @@ export type EnergyAnalyticsProps = {
 
 const DEFAULT_FEATURES: FeatureItemContent[] = [
   {
+    glyph: "savings",
     title: "Savings Calculator",
     description:
       "Track exactly how much money you're saving with solar. See monthly comparisons and cumulative savings over time.",
   },
   {
+    glyph: "energy",
     title: "Grid Independence Metrics",
     description:
       "Monitor your energy independence level. Understand how much of your power comes from solar vs. the grid.",
   },
   {
+    glyph: "carbon",
     title: "Carbon Footprint Impact",
     description:
       "Visualise your positive environmental impact with CO2 reduction metrics. See how much you're helping the planet.",
@@ -57,9 +60,10 @@ export default function EnergyAnalytics({
             {features.map((f) => (
               <FeatureItem
                 key={f.title}
+                glyph={f.glyph}
                 title={f.title}
                 description={f.description}
-                descWidth="w-[80%]"
+                descWidth="md:w-[80%]"
               />
             ))}
           </div>

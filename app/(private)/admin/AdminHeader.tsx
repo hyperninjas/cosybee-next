@@ -6,7 +6,7 @@ import { buttonVariants } from "@heroui/styles";
 import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { authClient } from "@/app/lib/auth-client";
-import { LogoutButton } from "./LogoutButton";
+import { LogoutButton } from "@/app/components/account/LogoutButton";
 import { useRouter, usePathname } from "next/navigation";
 import { Dropdown, Label, Separator } from "@heroui/react";
 
@@ -60,7 +60,6 @@ export function AdminHeader({ user }: { user: AdminUser }) {
   const onTags = pathname?.startsWith("/admin/tags") ?? false;
   const onPhrases = pathname?.startsWith("/admin/phrases") ?? false;
   const onMedia = pathname?.startsWith("/admin/media") ?? false;
-
   // Drives the mobile dropdown: internal nav, external (new-tab) links, sign out.
   async function onMenuAction(key: string) {
     if (key === "signout") {

@@ -27,15 +27,18 @@ export default function SmartEnergyManagement() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="device"
               title="Connected Devices"
               description="See how your smart home systems work together."
-              descWidth="w-[85%]"
+              descWidth="md:w-[85%]"
             />
             <FeatureItem
+              glyph="energy"
               title="Smart Energy Management"
               description="AI-powered recommendations help you use, store and save energy more effectively."
             />
             <FeatureItem
+              glyph="insights"
               title="Performance Tracking"
               description="Monitor long-term system performance and solar investment value."
             />

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 
@@ -44,22 +44,31 @@ async function proxyAuth(request: NextRequest) {
   // Get response body
   const responseBody = await res.text();
 
-  // Create response with same status and body
-  const response = new NextResponse(responseBody, {
-    status: res.status,
-    statusText: res.statusText,
-  });
-
-  // Forward important headers
-  response.headers.set("Content-Type", res.headers.get("Content-Type") || "application/json");
-
-  // Forward Set-Cookie headers - this is crucial for auth to work
-  const setCookieHeaders = res.headers.getSetCookie();
-  for (const cookie of setCookieHeaders) {
-    response.headers.append("Set-Cookie", cookie);
+  // Forward Set-Cookie headers - this is crucial for auth to work.
+  //
+  // Built on a plain `Headers` and returned as a plain `Response` rather than a
+  // NextResponse. Better Auth legitimately emits one cookie name several times
+  // in a single response — /change-password expires the session cache,
+  // re-writes it, and expires it again — and two of those are byte-identical
+  // strings. Measured through this route, only two of the three came out the
+  // far side, which reorders the survivors so a stale value lands last and
+  // wins, silently resurrecting the cached session the auth server had just
+  // invalidated. A plain `Headers` is known to keep all three in order, so the
+  // response is assembled on one here and handed over untouched.
+  const headers = new Headers();
+  headers.set(
+    "Content-Type",
+    res.headers.get("Content-Type") || "application/json",
+  );
+  for (const cookie of res.headers.getSetCookie()) {
+    headers.append("Set-Cookie", cookie);
   }
 
-  return response;
+  return new Response(responseBody, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  });
 }
 
 export const GET = proxyAuth;

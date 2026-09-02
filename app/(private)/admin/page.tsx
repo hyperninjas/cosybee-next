@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { connection } from "next/server";
 import { buttonVariants } from "@heroui/react";
 import { listPosts } from "./lib/queries";
 import PostsTable, { type Row } from "./PostsTable";
-import SavedToast from "./SavedToast";
 
 export default async function AdminDashboard() {
   // Render per-request: stop prerendering before the live, no-store fetch in
@@ -51,10 +49,6 @@ export default async function AdminDashboard() {
       </div>
 
       <PostsTable rows={rows} />
-
-      <Suspense fallback={null}>
-        <SavedToast />
-      </Suspense>
     </div>
   );
 }

@@ -17,6 +17,7 @@ export function CoverImageCard({
   setCoverImageCaption,
   coverImageCredit,
   setCoverImageCredit,
+  onImageMeta,
 }: {
   title: string;
   coverUrl: string;
@@ -29,6 +30,15 @@ export function CoverImageCard({
   setCoverImageCaption: (v: string) => void;
   coverImageCredit: string;
   setCoverImageCredit: (v: string) => void;
+  /** Reports the image's byte size + dimensions so the form can check it
+   *  against the recommended sizes. Advisory only. */
+  onImageMeta?: (meta: {
+    url: string;
+    name?: string;
+    bytes?: number;
+    width?: number;
+    height?: number;
+  }) => void;
 }) {
   return (
     <Card>
@@ -48,6 +58,7 @@ export function CoverImageCard({
             if (m.caption) setCoverImageCaption(m.caption);
             if (m.credit) setCoverImageCredit(m.credit);
           }}
+          onImageMeta={onImageMeta}
           alt={coverImageAlt || title}
         />
         <Labeled

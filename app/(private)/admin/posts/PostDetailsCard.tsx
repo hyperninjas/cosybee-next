@@ -96,7 +96,7 @@ export function PostDetailsCard({
       ? { tone: "error" as const, text: check.message }
       : check.state === "available"
         ? { tone: "ok" as const, text: "Available" }
-        : check.state === "error"
+        : check.state === "retired" || check.state === "error"
           ? { tone: "warn" as const, text: check.message }
           : null;
   return (

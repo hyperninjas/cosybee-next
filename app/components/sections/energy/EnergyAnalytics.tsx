@@ -18,22 +18,28 @@ export default function EnergyAnalytics() {
           className="pointer-events-none absolute -left-24 -top-10 w-[18rem] sm:-left-56 sm:w-88 lg:w-76.75 z-0"
         />
         {/* text — left */}
-        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-129.5">
+        <div className="z-9 flex flex-col justify-center max-[1200px]:mx-auto max-[1200px]:max-w-160 min-[1200px]:max-w-136.5">
           <SectionTitle align="left">
             Energy &amp; Savings Analytics
           </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="pound"
               title="Bill Forecasting"
               description="Project your monthly and annual electricity costs based on real consumption patterns — never get blindsided by a bill again."
+              descWidth="w-full"
             />
             <FeatureItem
+              glyph="energy"
               title="Self-Sufficiency Score"
               description="Measure what percentage of your power comes from your own solar and battery vs. the grid. Watch it climb."
+              descWidth="w-full"
             />
             <FeatureItem
+              glyph="carbon"
               title="Carbon Footprint Impact"
               description="Track lifetime CO2 savings from every smart automation and every renewable kilowatt-hour you produce."
+              descWidth="w-full"
             />
           </div>
         </div>

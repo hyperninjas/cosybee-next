@@ -8,7 +8,7 @@ import {
   ListBoxItem,
   Select,
 } from "@heroui/react";
-import { ArrowUpRightFromSquare } from "@gravity-ui/icons";
+import { ArrowUpRightFromSquare, TriangleExclamation } from "@gravity-ui/icons";
 import { useFormStatus } from "react-dom";
 import { AppLink } from "@/app/components/ui/AppLink";
 
@@ -25,6 +25,7 @@ export function ActionBar({
   onSetStatus,
   liveHref,
   disabled = false,
+  hasIssues = false,
 }: {
   editing: boolean;
   status: PostStatus;
@@ -34,6 +35,9 @@ export function ActionBar({
   liveHref?: string;
   /** Block both save buttons (e.g. content images missing alt text). */
   disabled?: boolean;
+  /** The post has advisory issues — mark the publish button and let the form
+   *  show them before it publishes. Advisory only; nothing is blocked. */
+  hasIssues?: boolean;
 }) {
   const { pending } = useFormStatus();
   const isPublished = status === "PUBLISHED";
@@ -122,6 +126,12 @@ export function ActionBar({
           isDisabled={pending || disabled}
           isPending={pending && status === "PUBLISHED"}
         >
+          {hasIssues && (
+            <TriangleExclamation
+              aria-hidden
+              className="size-3.5 shrink-0 opacity-90"
+            />
+          )}
           {editing && isPublished ? "Update" : "Publish"}
         </Button>
       </div>

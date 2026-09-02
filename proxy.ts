@@ -13,7 +13,7 @@ import { safeRedirect } from "@/app/lib/safe-redirect";
  */
 
 // Areas that require *some* authenticated session.
-const protectedPrefixes = ["/admin", "/account"];
+const protectedPrefixes = ["/admin", "/account", "/set-password"];
 
 // Public auth screens — a logged-in user shouldn't see these.
 const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
@@ -66,6 +66,7 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/account/:path*",
+    "/set-password",
     "/login",
     "/register",
     "/forgot-password",

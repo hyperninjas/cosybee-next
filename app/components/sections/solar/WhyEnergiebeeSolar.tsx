@@ -31,7 +31,7 @@ const DEFAULT_CARDS: FeatureCardContent[] = [
       "Track real-time solar generation and get insights to optimise energy production.",
   },
   {
-    glyph: "dollar",
+    glyph: "pound",
     title: "Track Savings",
     description:
       "See exactly how much money you're saving with detailed analytics and historical comparisons.",
@@ -67,7 +67,7 @@ const DEFAULT_BOTTOM_RIGHT: HexCell = {
 
 export default function WhyEnergieBeeSolar({
   title = "Why Choose EnergieBee Solar?",
-  lead = "Part of the EnergieBee app — everything you need to monitor and optimise your solar energy system.",
+  lead = "Part of the EnergieBee app, everything you need to monitor and optimise your solar energy system.",
   cards = DEFAULT_CARDS,
   left = DEFAULT_LEFT,
   topRight = DEFAULT_TOP_RIGHT,

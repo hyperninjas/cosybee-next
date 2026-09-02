@@ -74,14 +74,17 @@ export default function WhyChoose() {
           </p>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="insights"
               title="Smarter by Design"
               description="Built on predictive models that continuously learn from real household energy patterns."
             />
             <FeatureItem
+              glyph="savings"
               title="Built for Real Savings"
               description="Every optimisation is designed to reduce cost, not just display data."
             />
             <FeatureItem
+              glyph="green"
               title="Built for a Greener Future"
               description="Less wasted energy means lower emissions — without changing your comfort or lifestyle."
             />

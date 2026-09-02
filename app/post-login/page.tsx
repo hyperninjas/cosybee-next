@@ -29,6 +29,7 @@ export default async function PostLoginPage() {
 
   const { user } = session;
   if (user.banned) redirect("/banned");
+  if (user.mustChangePassword) redirect("/set-password");
   if (user.role === "admin") redirect("/admin");
 
   const properties = await listProperties();

@@ -250,6 +250,27 @@ export async function getArticleBySlug(
   return toArticle(post);
 }
 
+/**
+ * The address a retired URL should redirect to, or null to 404.
+ *
+ * Renaming a post's slug (or moving it between blogs) leaves the old URL with
+ * nothing behind it; the backend records the address the post vacated, and
+ * this asks where it went. Null covers both "never existed" and "the post has
+ * since been unpublished" — redirecting to a draft would only land the visitor
+ * on a second 404, so both cases stay a plain 404 here.
+ */
+export async function resolveRetiredSlug(
+  blog: Blog,
+  slug: string,
+): Promise<string | null> {
+  const target = await api.resolvePostSlug(blog, slug);
+  if (!target || !target.isLive) return null;
+  // Guard against a row that somehow points at itself: redirecting a URL to
+  // itself is an infinite loop in the browser, and a 404 is the safer failure.
+  if (target.blog === blog && target.slug === slug) return null;
+  return `/${target.blog}/${target.slug}`;
+}
+
 /** Related articles for the in-article footer (excludes current). */
 export async function getRelated(
   blog: Blog,
@@ -342,6 +363,30 @@ export async function getPublishedCount(blog: Blog): Promise<number> {
 export async function getAllArticles(blog: Blog): Promise<Article[]> {
   const posts = await getAllPublishedPosts(blog);
   return posts.map(toArticle);
+}
+
+/**
+ * Every published article across both blogs, newest first — the article list
+ * behind every RSS feed (`/rss.xml` and the syndication feeds — see `FEEDS`).
+ *
+ * Shared so the feeds cannot disagree about what has been published or in what
+ * order. A backend error yields an EMPTY list rather than throwing: a feed is
+ * refetched constantly, so serving an empty channel for one poll is recoverable
+ * in a way that a 500 in a partner's ingest log is not. That is the opposite
+ * trade-off to the sitemap reads, which throw so a blip can't cache "these
+ * pages are gone".
+ */
+export async function getFeedArticles(): Promise<Article[]> {
+  const [hive, learn] = await Promise.all([
+    getAllArticles("hive").catch(() => [] as Article[]),
+    getAllArticles("learn").catch(() => [] as Article[]),
+  ]);
+
+  return [...hive, ...learn].sort((a, b) => {
+    const ta = new Date(a.publishedAt ?? a.authorDate ?? 0).getTime();
+    const tb = new Date(b.publishedAt ?? b.authorDate ?? 0).getTime();
+    return tb - ta;
+  });
 }
 
 /** Does an author object carry any profile detail worth a page header? */

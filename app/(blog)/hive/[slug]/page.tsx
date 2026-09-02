@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   getArticleBySlug,
   getPublishedSlugs,
   getRelated,
+  resolveRetiredSlug,
 } from "@/app/lib/articles";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 import { RSS_ALTERNATE_TYPES, TWITTER_HANDLE } from "@/app/lib/site";
+import { articleSocialImage } from "@/app/lib/seo";
 import {
   openGraphVideos,
   resolveArticleVideos,
@@ -29,6 +31,9 @@ export async function generateMetadata({
   // articles — the overwhelming majority — which keeps their share cards as
   // the large-image cards they are today.
   const videos = openGraphVideos(resolveArticleVideos(article));
+  // One image object, reused by openGraph and twitter below, so the two can
+  // never disagree about which card an article shares as.
+  const socialImage = articleSocialImage(article, "hive");
   return {
     title: seoTitle,
     description: article.seoDescription ?? article.description,
@@ -50,20 +55,12 @@ export async function generateMetadata({
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
       type: "article",
-      // og:image is the article's specified OG image, else its cover —
-      // served through /api/og/article/* which crops to 1200×630 and
-      // compresses under WhatsApp's ~300 KB limit (raw covers are too big, so
-      // WhatsApp would show no preview). Width/height help crawlers pick the
-      // large-image card. Works as per-page metadata because there's no root
-      // opengraph-image file convention to outrank it.
-      images: [
-        {
-          url: `/api/og/article/hive/${article.slug}`,
-          width: 1200,
-          height: 630,
-          alt: article.ogImageAlt ?? article.coverImageAlt,
-        },
-      ],
+      // An article that sets its own OG image shares as that file, untouched;
+      // the rest get the generated card. See `articleSocialImage` (lib/seo.ts)
+      // for which, and why the dimensions come and go with it. Works as
+      // per-page metadata because there's no root opengraph-image file
+      // convention to outrank it.
+      images: [socialImage],
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
       authors: [article.author?.name ?? "energiebee"],
@@ -86,7 +83,7 @@ export async function generateMetadata({
       creator: TWITTER_HANDLE,
       title: `${seoTitle} — EnergieBee`,
       description: article.seoDescription ?? article.description,
-      images: [`/api/og/article/hive/${article.slug}`],
+      images: [socialImage.url],
     },
   };
 }
@@ -96,7 +93,16 @@ export default async function HiveArticlePage({
 }: PageProps<"/hive/[slug]">) {
   const { slug } = await params;
   const article = await getArticleBySlug("hive", slug);
-  if (!article) notFound();
+  if (!article) {
+    // Nothing lives here — but the post may have moved. Renaming a slug (or
+    // moving a post to the other blog) retires the old address rather than
+    // deleting it, so ask where it went before giving up. `permanentRedirect`
+    // sends a 308, which search engines treat as a 301 and which passes the
+    // old URL's ranking on to the new one.
+    const moved = await resolveRetiredSlug("hive", slug);
+    if (moved) permanentRedirect(moved);
+    notFound();
+  }
 
   const related = await getRelated("hive", slug);
 

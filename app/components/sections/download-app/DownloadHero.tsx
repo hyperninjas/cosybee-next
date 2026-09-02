@@ -3,22 +3,22 @@ import { Section } from "@/app/components/ui/Section";
 import { Heading, Text } from "@/app/components/ui/Typography";
 import HeroBackgroundVideo from "./HeroBackgroundVideo";
 import HeroDownloadCta from "./HeroDownloadCta";
-import heroBgImg from "@/public/energibee-hero-image.jpg";
+import heroBgImg from "@/public/homepage-images/hero-bg-fallback.png";
 import { HERO_VIDEO_LANDSCAPE } from "@/app/lib/hero-videos";
 
 /**
- * Download page hero — like HomeHero, but the background is the landscape
- * product video layered over the photo (which paints first and serves as the
- * reduced-motion fallback), with the same gradient overlay and copy on the
- * left. The store CTA is device-aware (badge on phones, QR on desktop — see
- * HeroDownloadCta).
+ * Download page hero — same layout as HomeHero: the copy sits at the bottom of
+ * the frame with the device-aware store CTA pushed to the opposite end of the
+ * row (badge on phones, QR on desktop — see HeroDownloadCta). The background is
+ * the landscape product video layered over the photo, which paints first and
+ * serves as the reduced-motion fallback.
  */
 export default function DownloadHero({ qrSvg }: { qrSvg: string }) {
   return (
     <Section
       spacing="none"
       surface="dark"
-      className="isolate flex flex-col justify-center min-h-[75vh] md:min-h-[93vh]"
+      className="isolate flex flex-col justify-end min-h-[75vh] md:min-h-[93vh]"
     >
       {/* background photo + gradient overlay */}
       <div aria-hidden className="absolute inset-0 -z-20">
@@ -48,19 +48,23 @@ export default function DownloadHero({ qrSvg }: { qrSvg: string }) {
           darkens video and photo alike, keeping the copy legible */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(360deg,rgba(0,0,0,0.9)_15.16%,rgba(0,0,0,0.6)_48.87%,rgba(0,0,0,0)_120.19%)]"
       />
 
-      <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:pt-15 lg:pb-11">
-        <div className="max-w-175">
-          <Heading as="h1" variant="display" className="whitespace-pre-line">
-            {"One app.\n Complete energy insight."}
-          </Heading>
-          <Text variant="heroLead" className="mt-5 max-w-129.5">
-            See how you use energy, when your solar panels work best, and what
-            to switch on and when.
-          </Text>
-          <div className="mt-14 flex flex-col flex-wrap w-fit gap-4">
+      <div className="relative mx-auto flex w-full max-w-360 items-center justify-between gap-10 pt-16 pb-24 px-6 sm:px-6 lg:px-30 lg:py-25 ">
+        <div className="w-full justify-between items-end flex flex-wrap">
+          <div>
+            <Heading as="h1" variant="display">
+              One app. Complete
+              <br />
+              home energy insight.
+            </Heading>
+            <Text variant="heroLead" className="mt-5 max-w-129.5">
+              See how you use energy, when your solar panels work best, and what
+              to switch on and when.
+            </Text>
+          </div>
+          <div className="mt-8 w-fit">
             <HeroDownloadCta qrSvg={qrSvg} />
           </div>
         </div>

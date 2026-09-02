@@ -150,40 +150,56 @@
   margin-top: 1rem;
 }
 .article-body p {
-  /* Match the editor's body text (.post-editor .bn-editor: 1.125rem / 1.7) so
-     the published article reads at the same size it was authored at. */
-  font-size: 1.125rem;
-  line-height: 1.7;
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
 }
+/* Headings are display type, not prose: leading close to their own size, and a
+   touch of negative tracking on the three large levels so the wide Manrope
+   caps don't drift apart. h1/h2 stay bold; h3 and below are semibold. */
 .article-body h1,
 .article-body h2,
-.article-body h3 {
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6 {
   color: var(--foreground);
-  font-weight: 700;
-  /* Matched to the editor, which is why these aren't width-constrained.
-     The 1.7 leading is inherited from `.bn-editor` and is body-copy
-     spacing — on a 2.25rem h2 it opens a 3.8rem line box, so a heading
-     that wraps reads as two loosely separated lines. Headings are set
-     tighter below; the editor gets the same value so what you write still
-     matches what publishes. */
-  line-height: 1.7;
   margin-top: 1.5rem;
 }
-/* Headings are display type, not prose: they want leading close to their own
-   size. Applied to h2 only for now — h1 and h3 keep the inherited 1.7. */
-.article-body h2 {
-  line-height: 1.25 !important;
-}
-/* Editor heading sizes are `--level`em × the 1.125rem editor base:
-   h1 3em, h2 2em, h3 1.3em — mirrored here in rem. */
 .article-body h1 {
-  font-size: 3.375rem;
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 .article-body h2 {
-  font-size: 2.25rem;
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 .article-body h3 {
-  font-size: 1.4625rem;
+  font-size: 1.75rem; /* 28px */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.article-body h4 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  line-height: 1.25;
+}
+.article-body h5 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  line-height: 1.25;
+}
+/* h6 has no line in the spec. BlockNote lets an author pick it, and an
+   unstyled h6 renders as plain body text — so it continues the ladder's 4px
+   step at the body size, semibold like the levels above it. */
+.article-body h6 {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.25;
 }
 .article-body ul,
 .article-body ol {
@@ -195,14 +211,25 @@
 .article-body ol {
   list-style: decimal;
 }
+/* List items sit one step below body copy. The lossy export writes them as
+   `<li><p>`, so the inner paragraph has to be named too — otherwise
+   `.article-body p` wins on the child and the item reads at body size. */
+.article-body li,
+.article-body li > p {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.3;
+}
 .article-body li {
-  font-size: 1.125rem;
-  line-height: 1.7;
   margin-top: 0.5rem;
 }
 .article-body li::marker {
   color: var(--muted);
 }
+/* A link takes the size and leading of whatever it sits in: that lands on
+   16px / 1.4 in body copy, and keeps a link inside a heading or a list item
+   the size of the text around it. Setting them on the anchor itself would
+   shrink links in headings and make the lines that contain one taller than
+   the lines that don't. */
 .article-body a {
   color: rgb(117, 117, 239);
   text-decoration: underline;
@@ -218,7 +245,7 @@
 }
 .article-body img {
   border-radius: 0.5rem;
-  margin-top: 0;
+  margin-top: 1rem;
   /* The lossy export sets an explicit `width` (the author's resized preview
      width); cap it to the column and keep the aspect ratio on small screens. */
   max-width: 100%;
@@ -231,7 +258,7 @@
    default 300x150 box. */
 .article-body video {
   border-radius: 0.5rem;
-  margin-top: 0;
+  margin-top: 1rem;
   /* Mirrors the img rule: the export sets the author's resized preview width. */
   max-width: 100%;
   height: auto;
@@ -244,14 +271,18 @@
 /* offset anchor jumps so headings clear the sticky navbar */
 .article-body h1,
 .article-body h2,
-.article-body h3 {
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6 {
   scroll-margin-top: 6rem;
 }
 .article-body blockquote {
   margin-top: 1.5rem;
   border-left: 3px solid var(--accent);
   padding: 0.25rem 0 0.25rem 1.25rem;
-  font-size: 1.25rem;
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
   font-style: italic;
   color: var(--muted);
 }
@@ -259,7 +290,7 @@
   background: var(--surface-secondary);
   border-radius: 0.3rem;
   padding: 0.12em 0.38em;
-  font-size: 0.9em;
+  font-size: 1em; /* 16px in body copy */
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 /* Code blocks stay intentionally dark in both themes (a deliberate "terminal"
@@ -271,8 +302,8 @@
   background: #1b1f24;
   color: #e6e6e6;
   padding: 1.1rem 1.25rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
 }
 .article-body pre code {
   background: transparent;
@@ -285,6 +316,7 @@
 .article-body figcaption {
   margin-top: 0.5rem;
   font-size: 0.85rem;
+  line-height: 1;
   color: var(--muted);
 }
 /* Honour BlockNote's per-block image alignment. The lossy export emits
@@ -348,8 +380,13 @@
   vertical-align: top;
   text-align: left;
 }
+.article-body th,
+.article-body th > p {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1;
+}
 .article-body th {
-  font-weight: 700;
   color: var(--foreground);
 }
 /* Empty cells still get a row height (editor parity). */
@@ -555,6 +592,327 @@
   padding-bottom: 20vh;
   min-height: 50vh;
 }
+/* ── Call-to-action card ──────────────────────────────────────────────────
+   Not scoped to `.article-body`: the same class set styles the editor preview,
+   so the card an author arranges looks like the one that publishes. Mirrors
+   the marketing ReadyToReduce card, rebuilt in plain CSS because the article
+   body is injected as an HTML string and can host no React. */
+.article-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  padding: 2.5rem 2rem !important;
+  border: 1px solid rgb(229, 227, 227) !important;
+  border-radius: 1.5rem;
+  /* The image column's width and the card's own padding, as tokens: a pinned
+     image is positioned against the CARD, so it has to line up with a column
+     it is no longer sitting in. One place to change both. */
+  --cta-media-w: 16rem;
+  --cta-pad: 1.75rem;
+  /* Warm wash over white. The design tool lists the opaque white FIRST, but
+     CSS paints the first background layer on top — taken literally it would
+     hide both gradients and render the card flat white. Only that layer is
+     moved (to the base); the two gradients keep the order they were given. */
+  background:
+    linear-gradient(
+      98.88deg,
+      rgba(239, 235, 191, 0.277) 0%,
+      rgba(248, 212, 168, 0.3) 34.13%,
+      rgba(239, 221, 191, 0.3) 67.07%,
+      rgba(239, 235, 191, 0.3) 100%
+    ),
+    linear-gradient(
+      98.88deg,
+      #fae4c6 0%,
+      rgba(252, 249, 240, 0) 50%,
+      #faf5c5 100%
+    ),
+    #ffffff;
+  /* The design's shadow ramp, combined into ONE declaration — as five separate
+     `box-shadow` lines each would simply override the last, leaving only the
+     bottom one. The first two carry zero alpha; they're kept so the ramp stays
+     intact if the opacities are ever tuned. */
+  box-shadow:
+    0px 0.34px 2.96px 0px rgba(0, 0, 0, 0),
+    0px 3.33px 7.32px 0px rgba(0, 0, 0, 0),
+    0px 11.26px 14.65px 0px rgba(0, 0, 0, 0.01),
+    0px 30.92px 29.68px 0px rgba(0, 0, 0, 0.01),
+    0px 100px 80px 0px rgba(0, 0, 0, 0.04);
+}
+@media (min-width: 900px) {
+  .article-cta {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0rem;
+    --cta-media-w: 14.75rem;
+    --cta-pad: 1rem 2rem;
+  }
+  /* The one job of `data-image`: which side the art sits on. `row-reverse`
+     rather than a second markup order, so the DOM keeps copy-before-image and
+     a screen reader hears the message first either way. */
+  .article-cta[data-image="right"] {
+    flex-direction: row-reverse;
+  }
+}
+.article-cta[data-image="none"] {
+  flex-direction: column;
+}
+
+.article-cta-media {
+  flex: none;
+  width: var(--cta-media-w);
+}
+.article-cta-media img {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 0 !important;
+}
+
+/* ── Pinned image ─────────────────────────────────────────────────────
+   The image leaves the flow and sits against an edge of the card, so a tall
+   mockup can stand ON the card's border instead of floating in the middle —
+   the same effect the marketing ReadyToReduce card gets from `absolute
+   bottom-0` plus a spacer div.
+
+   No spacer element is needed here: `.article-cta-media` keeps its width but
+   collapses to zero height once its only child is out of flow, which is
+   exactly what a spacer is. The copy therefore still starts after the column
+   and never runs underneath the picture.
+
+   Wide screens only. In the stacked mobile layout there is no side column to
+   pin to, and an out-of-flow image would simply land on top of the text — so
+   below 900px this is ignored and the image behaves normally. */
+@media (min-width: 900px) {
+  .article-cta[data-anchor="top"],
+  .article-cta[data-anchor="bottom"] {
+    position: relative;
+  }
+  .article-cta[data-anchor="top"] .article-cta-media img,
+  .article-cta[data-anchor="bottom"] .article-cta-media img {
+    position: absolute;
+    /* Bounded by BOTH axes and sized naturally, so the aspect ratio is never
+       distorted: at most as wide as the column it vacated, and at most as tall
+       as the card MINUS one card padding.
+
+       That subtraction is the whole point. A pinned image is flush against one
+       edge by design — that's what makes a phone mockup stand ON the card's
+       border — so the height cap is what keeps clear space at the OPPOSITE
+       edge. Without it a tall image fills the card corner to corner and the
+       artwork collides with the card's top edge.
+
+       `max-height` alone (rather than `object-fit`) because a fixed-width box
+       would letterbox a tall image: transparent bars either side, the picture
+       floating away from the edge it's meant to be flush with. */
+    width: auto;
+    height: auto;
+    /* max-width: var(--cta-media-w); */
+    max-height: calc(100% - 1rem);
+  }
+  .article-cta[data-anchor="top"] .article-cta-media img {
+    top: 0;
+  }
+  .article-cta[data-anchor="bottom"] .article-cta-media img {
+    bottom: 0;
+  }
+  /* Line the pinned image up with the column it vacated — one card padding
+     in from whichever edge its side is on. */
+  .article-cta[data-image="left"][data-anchor="top"] .article-cta-media img,
+  .article-cta[data-image="left"][data-anchor="bottom"] .article-cta-media img {
+    left: 2.5rem;
+  }
+  .article-cta[data-image="right"][data-anchor="top"] .article-cta-media img,
+  .article-cta[data-image="right"][data-anchor="bottom"]
+    .article-cta-media
+    img {
+    right: 2.5rem;
+  }
+}
+
+.article-cta-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+@media (min-width: 900px) {
+  .article-cta-copy {
+    text-align: left;
+  }
+  .article-cta[data-image="none"] .article-cta-copy {
+    text-align: center;
+  }
+}
+
+.article-cta-eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  color: #424242;
+}
+/* A <p>, not a heading — see buildCtaDom. Sized like one so it still reads as
+   the loudest thing in the card. */
+.article-cta-heading {
+  margin: 0;
+  font-size: 2rem !important;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1 !important;
+  color: var(--foreground);
+}
+@media (min-width: 900px) {
+  .article-cta-heading {
+    font-size: 2rem;
+  }
+}
+.article-cta-body {
+  margin: 0.75rem 0 0;
+  max-width: 40rem;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: var(--muted);
+}
+@media (min-width: 900px) {
+  .article-cta-body {
+    font-size: 1.125rem;
+  }
+}
+
+.article-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+@media (min-width: 900px) {
+  .article-cta[data-image="left"] .article-cta-actions,
+  .article-cta[data-image="right"] .article-cta-actions {
+    justify-content: flex-start;
+  }
+}
+/* Matches CtaButton's md size so the in-article card and the marketing pages
+   present the same button. */
+.article-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: 3rem;
+  padding: 0 1.5rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #0c0c0c !important;
+  text-decoration: none !important;
+  transition: filter 0.15s ease;
+}
+.article-cta-button:hover {
+  filter: brightness(1.1);
+  color: #fff;
+}
+/* The article prose rules underline every link; the button is not prose. */
+.article-body .article-cta-button {
+  text-decoration: none;
+}
+
+/* ── CTA block, editor chrome ─────────────────────────────────────────── */
+.bn-cta-block {
+  margin: 0.6rem 0;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  background: #fafaf9;
+  overflow: hidden;
+}
+.bn-cta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eeecea;
+}
+.bn-cta-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #ff8a7a;
+}
+.bn-cta-toggle {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bn-cta-preview {
+  padding: 0.75rem;
+}
+/* The preview shows the real card; drop its outer spacing so it sits neatly
+   inside the block chrome. */
+.bn-cta-preview .article-cta {
+  margin: 0;
+}
+.bn-cta-form {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border-top: 1px solid #eeecea;
+  background: #fff;
+}
+.bn-cta-field {
+  display: grid;
+  gap: 0.2rem;
+}
+.bn-cta-field > span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+.bn-cta-field input,
+.bn-cta-field textarea {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  font: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+}
+.bn-cta-field input:focus-visible,
+.bn-cta-field textarea:focus-visible {
+  outline: none;
+  border-color: #ff8a7a;
+}
+.bn-cta-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.bn-cta-action,
+.bn-cta-select {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.375rem;
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 /* ── FAQ block INSIDE THE EDITOR ──────────────────────────────────────────
    Rendered with BlockNote's toggle wrapper, which on its own is
    indistinguishable from a Toggle List — same chevron, same plain text — so
@@ -853,17 +1211,249 @@
   color: #71717a;
 }
 
+/* The editor mirrors the published type scale (`.article-body`, top of this
+   file). The two are deliberately matched: changing one alone would mean a
+   heading wraps differently while it is written than when it publishes. */
 .post-editor .bn-editor {
   padding-inline: 0;
-  font-size: 1.125rem;
-  line-height: 1.7;
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
   background-color: transparent;
 }
-/* Mirrors `.article-body h2`. The two were deliberately matched, so tightening
-   one alone would mean a heading wrapped differently while writing than when
-   published. */
-.post-editor .bn-editor h2 {
+/* @blocknote/core sets `line-height: 1.5` directly on every block wrapper, and
+   a rule on the element beats leading inherited from `.bn-editor` above — so
+   body leading has to be set here to actually take. */
+.post-editor .bn-block-outer {
+  line-height: 1.4;
+}
+/* Heading sizes in the editor come from BlockNote's `--level` em multiplier
+   (3em / 2em / 1.3em / 1em / .9em / .8em of the editor base). Re-point that
+   ladder at the published one — 36 / 32 / 28 / 24 / 20 / 16px against the 1rem
+   base above. `--prev-level` is the same ladder for BlockNote's transient
+   block-transition state, so a heading doesn't flash the old size mid-change. */
+.post-editor [data-content-type="heading"] {
+  --level: 2.25em;
+}
+.post-editor [data-content-type="heading"][data-level="2"] {
+  --level: 2em;
+}
+.post-editor [data-content-type="heading"][data-level="3"] {
+  --level: 1.75em;
+}
+.post-editor [data-content-type="heading"][data-level="4"] {
+  --level: 1.5em;
+}
+.post-editor [data-content-type="heading"][data-level="5"] {
+  --level: 1.25em;
+}
+.post-editor [data-content-type="heading"][data-level="6"] {
+  --level: 1em;
+}
+.post-editor [data-prev-level="1"] {
+  --prev-level: 2.25em;
+}
+.post-editor [data-prev-level="2"] {
+  --prev-level: 2em;
+}
+.post-editor [data-prev-level="3"] {
+  --prev-level: 1.75em;
+}
+.post-editor [data-prev-level="4"] {
+  --prev-level: 1.5em;
+}
+.post-editor [data-prev-level="5"] {
+  --prev-level: 1.25em;
+}
+.post-editor [data-prev-level="6"] {
+  --prev-level: 1em;
+}
+/* Leading and tracking to match the published headings. BlockNote hard-codes
+   `font-weight: 700` on a five-class selector, so the semibold levels are
+   written long enough to out-specify it rather than with `!important`. */
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"] {
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="3"] {
+  font-weight: 600;
   line-height: 1.25;
+}
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="4"],
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="5"],
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="6"] {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: normal;
+}
+/* Mirrors `.article-body li` — list items sit one step below body copy, with
+   their own tighter leading (the `.bn-block-outer` rule above would otherwise
+   hand them body leading). */
+.post-editor .bn-editor [data-content-type="bulletListItem"],
+.post-editor .bn-editor [data-content-type="numberedListItem"],
+.post-editor .bn-editor [data-content-type="checkListItem"],
+.post-editor .bn-editor [data-content-type="toggleListItem"] {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.3;
+}
+
+/* ── The rest of the published look, mirrored ─────────────────────────────
+   Everything below re-states an `.article-body` rule against the element
+   BlockNote actually renders. Each selector is written one class longer than
+   @blocknote/core's own so it wins on specificity without `!important`.
+   Block RHYTHM is deliberately left to BlockNote — the editor needs its own
+   spacing for drag handles and the "/" menu — so these are type and surface
+   treatments only. */
+
+/* Mirrors `.article-body blockquote`. BlockNote's own quote is a grey 2px
+   rule; the published one is an accent bar with italic muted text. */
+.post-editor [data-content-type="quote"] blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Mirrors `.article-body code` — BlockNote only sets the font family, so
+   inline code had none of the published chip treatment while writing. */
+.post-editor .bn-editor code {
+  background: var(--surface-secondary);
+  border-radius: 0.3rem;
+  padding: 0.12em 0.38em;
+  font-size: 1em; /* 16px in body copy */
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Mirrors `.article-body pre` — the same deliberately dark terminal block,
+   rather than BlockNote's near-black with 24px padding. The inner `pre` is
+   where the type lives; the block content carries the surface. */
+.post-editor .bn-block-content[data-content-type="codeBlock"] {
+  background-color: #1b1f24;
+  color: #e6e6e6;
+  border-radius: 0.9rem;
+}
+.post-editor .bn-block-content[data-content-type="codeBlock"] > pre {
+  padding: 1.1rem 1.25rem;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
+}
+/* The chip inside a code block sits on the dark surface, not the page. */
+.post-editor .bn-block-content[data-content-type="codeBlock"] code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Mirrors `.article-body img` / `video` — the published corner radius. The
+   1rem of air above media is NOT set here: the block rhythm below already
+   gives every block that gap, and adding it again on the wrapper would put
+   2rem above an image where the article has 1rem. */
+.post-editor [data-file-block] .bn-visual-media {
+  border-radius: 0.5rem;
+}
+
+/* Mirrors `.article-body figcaption`. */
+.post-editor [data-file-block] .bn-file-caption {
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+/* Mirrors `.article-body th` — semibold at body size, not BlockNote's bold.
+   The cell's `<p>` inherits it (`.bn-default-styles p` sets font-size:inherit),
+   so naming the cell is enough here. */
+.post-editor .bn-editor [data-content-type="table"] th {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Mirrors `.article-body hr` — the site separator rather than BlockNote's
+   grey, at the published thickness, and the published 2rem of air (1rem here
+   plus the 1rem block gap below). */
+.post-editor [data-content-type="divider"] hr {
+  border-top: 1px solid var(--separator);
+  margin: 1rem 0;
+}
+
+/* ── Block rhythm ─────────────────────────────────────────────────────────
+   The published article spaces blocks with margins — 1rem between blocks,
+   1.5rem above a heading, quote or code block, 0.5rem between list items.
+   BlockNote instead gives every block 3px of vertical padding (plus 18px
+   above a heading), which is why the editor always read tighter than the
+   page. Zero that padding so the margins below are the whole story.
+   The padding is spacing only: the drag handle and the "/" menu measure the
+   block box, which these margins leave intact. */
+.post-editor .bn-block-content {
+  padding-block: 0;
+}
+/* Mirrors `.article-body > * + *`. Sibling-scoped like the original, so the
+   first block in a group carries no space above it. */
+.post-editor .bn-block-outer + .bn-block-outer {
+  margin-top: 1rem;
+}
+/* Mirrors `.article-body h1…h6 { margin-top: 1.5rem }` — the 1rem above plus
+   BlockNote's own heading padding, retuned from 18px so the total lands on
+   the published 1.5rem instead of overshooting it. */
+.post-editor .bn-block-content[data-content-type="heading"] {
+  padding-top: 0.5rem;
+}
+/* Mirrors `.article-body blockquote` / `pre { margin-top: 1.5rem }`. Applied
+   to the block rather than as padding, so neither the quote's accent bar nor
+   the code block's dark surface grows to fill it. */
+.post-editor
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type="quote"]
+  ),
+.post-editor
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type="codeBlock"]
+  ) {
+  margin-top: 1.5rem;
+}
+/* Mirrors `.article-body li { margin-top: 0.5rem }` — the tighter step
+   between consecutive items. `$=` catches all four kinds (bullet, numbered,
+   check, toggle). A list's FIRST item keeps the 1rem block gap, which is
+   what separates the list from the paragraph introducing it. */
+.post-editor
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type$="ListItem"]
+  )
+  + .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type$="ListItem"]
+  ) {
+  margin-top: 0.5rem;
+}
+/* FAQ cards are the exception: they publish as one stacked panel with
+   collapsed shared edges, so they must not take the block gap. Their own
+   `margin: 0.6rem 0` (above) is the spacing they are meant to have. */
+.post-editor
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type="faqItem"]
+  ) {
+  margin-top: 0;
+}
+/* Mirrors `.article-body figcaption { margin-top: 0.5rem }` — BlockNote uses
+   4px of padding instead. */
+.post-editor [data-file-block] .bn-file-caption {
+  margin-top: 0.5rem;
+  padding-block: 0;
 }
 .post-editor .bn-container {
   background: transparent;
@@ -1131,4 +1721,15 @@
   &:focus-within::-webkit-scrollbar-thumb {
     background-color: oklch(50% 0 0 / 0.4);
   }
+}
+
+/* ── Toast alignment ──────────────────────────────────────────────────────
+   @heroui/styles lays the toast row out with `items-start`, but gives the
+   title/description block `self-center`. On a one-line toast the two agree;
+   add anything that makes the row taller — an action button, a second line —
+   and the indicator stays pinned to the top while the text it belongs to
+   drops to the middle. Centre the whole row so the icon, the message and the
+   action button share one centre line. */
+.toast {
+  align-items: center;
 }

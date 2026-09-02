@@ -133,6 +133,20 @@ async function fetchJson<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
+/**
+ * Where a post that has left an address lives now (`/api/posts/:blog/:slug/resolve`).
+ * `isLive` is false when the post has since become a draft or been archived —
+ * a redirect there would only reach another 404.
+ */
+export type SlugRedirect = {
+  /** The post now at this address — used to exclude self when checking a slug. */
+  id: string;
+  blog: Blog;
+  slug: string;
+  title: string;
+  isLive: boolean;
+};
+
 async function fetchJsonOrNull<T>(path: string): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE}${path}`, { next: contentCache() });
@@ -263,6 +277,17 @@ export const api = {
   /** Single article by slug (includes contentHtml). */
   async getPost(blog: Blog, slug: string): Promise<ApiPost | null> {
     return fetchJsonOrNull(`/api/posts/${blog}/${slug}`);
+  },
+
+  /**
+   * Where a retired address points now, or null if nothing was ever published
+   * there. Only asked on a miss, so an ordinary article read never pays for it.
+   */
+  async resolvePostSlug(
+    blog: Blog,
+    slug: string,
+  ): Promise<SlugRedirect | null> {
+    return fetchJsonOrNull(`/api/posts/${blog}/${slug}/resolve`);
   },
 
   /**

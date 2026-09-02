@@ -9,7 +9,7 @@ import { Section } from "@/app/components/ui/Section";
 export default function SmartEnergyManagement() {
   return (
     <Section spacing="md" surface="surface" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-38">
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-36">
         {/* uniform 3-hex hive cluster */}
         <SharedImageHexCluster
           src={sideImg.src}
@@ -27,16 +27,22 @@ export default function SmartEnergyManagement() {
           <SectionTitle>Smart Tariff Control</SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="pound"
               title="Dynamic Tariff Switching"
               description="Plug into time-of-use tariffs and let EnergieBee shift loads to the cheapest windows automatically."
+              descWidth="w-full"
             />
             <FeatureItem
+              glyph="savings"
               title="Battery Arbitrage"
               description="Charge from the grid at off-peak rates, discharge at peak. Earn the difference back to your wallet, hands-free."
+              descWidth="w-full"
             />
             <FeatureItem
+              glyph="energy"
               title="Peak Load Shaving"
               description="Smart limits trim your worst spikes so you never trigger demand surcharges or breaker trips."
+              descWidth="w-full"
             />
           </div>
         </div>

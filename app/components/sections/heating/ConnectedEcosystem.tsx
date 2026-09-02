@@ -66,14 +66,17 @@ export default function ConnectedEcosystem() {
           </SectionLead>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="home"
               title="Home Energy Hub Integration"
               description="A central intelligence layer for managing energy across your entire home."
             />
             <FeatureItem
+              glyph="connect"
               title="Smart Heating Connectivity"
               description="Real-time coordination between heating systems and energy intelligence."
             />
             <FeatureItem
+              glyph="phone"
               title="Advanced Control Layer"
               description="Automation across rooms, devices, and energy sources for full system control."
             />

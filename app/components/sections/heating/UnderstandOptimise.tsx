@@ -25,19 +25,22 @@ export default function UnderstandOptimise() {
           </SectionTitle>
           <div className="mt-6 md:mt-8 space-y-4">
             <FeatureItem
+              glyph="insights"
               title="Real-Time Energy Forecasting"
               description="Predict heating demand using live usage patterns and system behaviour."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
             <FeatureItem
+              glyph="weather"
               title="Weather-Adaptive Insights"
               description="Adjust energy expectations based on local climate conditions."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
             <FeatureItem
+              glyph="energy"
               title="Daily Energy Overview"
               description="A simple breakdown of energy usage, efficiency, and production every day."
-              descWidth="w-[60%]"
+              descWidth="md:w-[60%]"
             />
           </div>
         </div>

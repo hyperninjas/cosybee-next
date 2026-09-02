@@ -6,6 +6,7 @@ import { useUpload } from "@/app/hooks/useUpload";
 import {
   validate,
   validateLibraryFile,
+  readImageDimensions,
   LIMITS,
   type MediaItem,
 } from "@/app/lib/storage";
@@ -29,6 +30,7 @@ export function PublicImageUpload({
   libraryFolderSlug,
   acceptMime,
   onPickFromLibrary,
+  onImageMeta,
 }: {
   context:
     | "blog-cover"
@@ -55,6 +57,17 @@ export function PublicImageUpload({
    *  the library, so the caller can pull the asset's alt/title/caption/credit
    *  into its own fields. Only fires in `library` mode. */
   onPickFromLibrary?: (media: MediaItem) => void;
+  /** Reports the byte size and natural dimensions of whatever image ends up in
+   *  this slot, whether uploaded or picked from the library. Callers use it to
+   *  check the image against the recommended sizes; nothing is blocked here.
+   *  Only fires for images the browser handled this session. */
+  onImageMeta?: (meta: {
+    url: string;
+    name?: string;
+    bytes?: number;
+    width?: number;
+    height?: number;
+  }) => void;
   /** Tailwind height class for the (non-avatar) preview image. Defaults to
    *  `h-48`; pass e.g. `h-56`/`h-64` for a taller preview. Avatars ignore this
    *  (they render fixed square). */
@@ -96,10 +109,17 @@ export function PublicImageUpload({
       setClientError(null);
       setLocalPreview(null);
       onChange(media.url);
+      onImageMeta?.({
+        url: media.url,
+        name: media.name ?? undefined,
+        bytes: media.sizeBytes ?? undefined,
+        width: media.width ?? undefined,
+        height: media.height ?? undefined,
+      });
       // Let the caller copy the asset's editorial metadata into its fields.
       onPickFromLibrary?.(media);
     },
-    [onChange, onPickFromLibrary, acceptMime],
+    [onChange, onPickFromLibrary, onImageMeta, acceptMime],
   );
 
   // Revoke object URL on cleanup
@@ -140,6 +160,16 @@ export function PublicImageUpload({
             : {}),
         });
         onChange(fileUrl);
+        if (fileUrl && onImageMeta) {
+          const dims = await readImageDimensions(file).catch(() => null);
+          onImageMeta({
+            url: fileUrl,
+            name: file.name,
+            bytes: file.size,
+            width: dims?.width,
+            height: dims?.height,
+          });
+        }
       } catch {
         setLocalPreview(null);
       }
@@ -151,6 +181,7 @@ export function PublicImageUpload({
       acceptMime,
       upload,
       onChange,
+      onImageMeta,
       alt,
       title,
       caption,
@@ -264,7 +295,7 @@ export function PublicImageUpload({
             <button
               type="button"
               onClick={handleRemove}
-              className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium cursor-pointer text-accent shadow-sm hover:bg-[#FEF2F2]"
+              className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium cursor-pointer text-warning shadow-sm hover:bg-[#FEF2F2]"
             >
               Remove
             </button>

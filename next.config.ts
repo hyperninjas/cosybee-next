@@ -97,7 +97,10 @@ const nextConfig: NextConfig = {
     // an explicit quality prop. Next converts to AVIF/WebP and resizes per the
     // size ladders above.
     qualities: [75, 85, 90],
-    // Allow external images from the backend API and S3
+    // Allow external images from the backend API, S3, and Google account
+    // photos. Every pattern is as narrow as the source allows — an
+    // over-broad entry would let anyone route arbitrary images through our
+    // optimizer.
     remotePatterns: [
       {
         protocol: "https",
@@ -110,11 +113,10 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
-        // Google account profile photos (Better Auth stores the OAuth avatar
-        // URL on `user.image`, which the navbar renders via next/image).
         protocol: "https",
-        hostname: "lh3.googleusercontent.com",
+        hostname: "*.googleusercontent.com",
         pathname: "/**",
+        search: "",
       },
     ],
   },

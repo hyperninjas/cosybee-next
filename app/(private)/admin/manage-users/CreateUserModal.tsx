@@ -105,7 +105,7 @@ export function CreateUserModal({
 
               <PasswordField
                 name="password"
-                label="Password"
+                label="Temporary password"
                 placeholder="Min 8 characters"
                 autoComplete="new-password"
                 isRequired
@@ -140,6 +140,15 @@ export function CreateUserModal({
                   </ListBox>
                 </Select.Popover>
               </Select>
+
+              {/* Admin-created accounts skip the OTP flow entirely — the
+                  backend marks them verified, then emails a welcome carrying
+                  their role and this password so they can sign in. */}
+              <p className="text-sm text-muted">
+                The account is created already verified. We&rsquo;ll email them
+                a welcome with their role and this temporary password, and ask
+                them to change it on first sign-in.
+              </p>
 
               {error && (
                 <Alert status="danger">

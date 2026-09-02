@@ -2,8 +2,11 @@ import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-import deviceImg from "@/public/homepage-images/energiebee-solar-forecasting.png";
-import Hexagon from "../../ui/Hexagon";
+import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
+import deviceWeatherImg from "@/public/hex-images/weather-forecasting.png";
+import solarWorker from "@/public/hex-images/solar-worker-attaching-solar-panel.avif";
+import roofTopSolar from "@/public/hex-images/roof-top-solar-installation.avif";
+import Hexagon from "@/app/components/ui/Hexagon";
 
 /**
  * Home "Solar Forecasting" — title + 3 feature cards on the left, phone
@@ -45,11 +48,41 @@ export default function HomeSolarForecasting() {
             />
           </div>
         </div>
-
+        {/* cluster — right */}
+        <HiveHexCluster
+          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
+          gap={5}
+          cornerInset={4}
+          left={{
+            src: solarWorker,
+            color: "#B7C0A8",
+            alt: "a worker attaching a solar panel on roof top - image",
+          }}
+          // Above-the-fold (section right below the hero) → eager-load so it
+          // isn't flagged as an un-prioritised LCP image.
+          topRight={{
+            src: roofTopSolar,
+            color: "#D8A9B6",
+            priority: true,
+            alt: "roof top solar installation - image",
+          }}
+          bottomRight={{
+            color: "#c9dfe9",
+            children: (
+              <Image
+                src={deviceWeatherImg}
+                alt="EnergieBee app - solar forecasting preview"
+                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
+                quality={85}
+                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
+              />
+            ),
+          }}
+        />
         {/* phone — right. Wrapper owns the width; the image fills it via
             w-full h-auto so it scales proportionally instead of rendering
             at intrinsic size. */}
-        <div className="mx-auto w-full max-w-76.5">
+        {/* <div className="mx-auto w-full max-w-76.5">
           <Image
             src={deviceImg}
             alt="EnergieBee solar dashboard"
@@ -57,7 +90,7 @@ export default function HomeSolarForecasting() {
             quality={85}
             className="h-auto w-full"
           />
-        </div>
+        </div> */}
       </Container>
     </Section>
   );
