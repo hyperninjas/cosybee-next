@@ -11,6 +11,13 @@ import { authClient } from "@/app/lib/auth-client";
 import { safeRedirect } from "@/app/lib/safe-redirect";
 import { SocialButtons } from "@/app/(auth)/_components/SocialButtons";
 
+/**
+ * Better Auth's code for "that address already has an account". The backend
+ * raises it from a before-hook on `/sign-up/email`, using the same code the
+ * library itself uses for this case.
+ */
+const EMAIL_TAKEN_CODE = "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL";
+
 function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
@@ -24,16 +31,31 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  // The address the backend last rejected as already registered. Stored as the
+  // address rather than a boolean so editing the field clears the error on its
+  // own — no second piece of state to keep in step.
+  const [takenEmail, setTakenEmail] = useState<string | null>(null);
 
   // Live validation drives both the inline field errors and the submit gate.
   const pwTooShort = password.length > 0 && password.length < 8;
   const mismatch = confirm.length > 0 && confirm !== password;
   const emailValid = /.+@.+\..+/.test(email);
+  // Compared lowercased/trimmed, matching how the backend keys accounts.
+  // Inline rather than a shared helper: the React Compiler instruments
+  // module-level functions in client components with `useMemoCache`, which
+  // throws "Invalid hook call" the moment one is called from an event handler.
+  const emailTaken =
+    takenEmail !== null && email.trim().toLowerCase() === takenEmail;
   const canSubmit =
     name.trim().length > 0 &&
     emailValid &&
+    !emailTaken &&
     password.length >= 8 &&
     password === confirm;
+
+  // Where the "sign in instead" link goes, keeping whatever destination the
+  // visitor was originally heading for.
+  const loginHref = `/login?redirect=${encodeURIComponent(redirectTo)}`;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,14 +70,24 @@ function RegisterForm() {
     });
 
     if (error) {
-      toast.danger(error.message || "Could not create your account.");
+      // The backend refuses a sign-up for an address that already has an
+      // account (see the `/sign-up/email` before-hook in eb-auth's
+      // modules/auth/auth.ts) — nothing was created and no code was sent, so
+      // point at the email field and offer sign-in rather than flashing a
+      // toast that's gone before it's read.
+      if (error.code === EMAIL_TAKEN_CODE) {
+        setTakenEmail(email.trim().toLowerCase());
+      } else {
+        toast.danger(error.message || "Could not create your account.");
+      }
       setLoading(false);
       return;
     }
 
-    // Sign-up sends a 6-digit verification OTP, and writes require a verified
-    // email — so send new users to verify-email next (carrying the intended
-    // destination).
+    // Past this point the account really is new — a duplicate address is
+    // rejected above, not waved through. Writes require a verified email, so
+    // new users go to verify-email next (carrying the intended destination),
+    // which is what requests the 6-digit OTP.
     router.push(
       `/verify-email?email=${encodeURIComponent(email.trim())}&redirect=${encodeURIComponent(redirectTo)}`,
     );
@@ -94,6 +126,20 @@ function RegisterForm() {
             value={email}
             onChange={setEmail}
             icon={<Envelope className="size-4 text-muted" />}
+            isInvalid={emailTaken}
+            errorMessage={
+              <>
+                An account already exists with this email.{" "}
+                <Link href={loginHref} className="font-medium underline">
+                  Sign in
+                </Link>{" "}
+                instead, or{" "}
+                <Link href="/forgot-password" className="font-medium underline">
+                  reset your password
+                </Link>
+                .
+              </>
+            }
           />
           <PasswordField
             name="password"
