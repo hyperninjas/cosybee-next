@@ -179,10 +179,7 @@ export default async function ArticleDetail({
       <ReadingProgress targetSelector="#post" />
       {/* px-0 + xl:px-6 override the blog gutter: below xl the article body
           carries its own padding. */}
-      <Container
-        size="blog"
-        className="flex justify-center gap-10 px-0 xl:px-6"
-      >
+      <Container size="blog" className="flex justify-center gap-10 ">
         {/* `id="post"`, not `article-body`: this element spans the whole post
             — breadcrumb, header, hero, body, CTA — while `.article-body`
             below is the prose alone. Sharing one name made it easy to read
@@ -359,34 +356,35 @@ export default async function ArticleDetail({
           )}
         </article>
 
-        {(sidebarToc.length > 1 || related.length > 0) && (
+        {
+          (sidebarToc.length > 1 || related.length > 0) && ""
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
-          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
-            {/* sticky={false}: the aside already pins it. */}
-            {sidebarToc.length > 1 && (
-              <ArticleToc items={sidebarToc} sticky={false} />
-            )}
+          // <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
+          //   {/* sticky={false}: the aside already pins it. */}
+          //   {sidebarToc.length > 1 && (
+          //     <ArticleToc items={sidebarToc} sticky={false} />
+          //   )}
 
-            {related.length > 0 && (
-              <div>
-                <h3 className="text-lg font-extrabold text-foreground">
-                  More blogs
-                </h3>
-                <div className="mt-4 flex flex-col gap-1">
-                  {related.map((a) => (
-                    <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
-        )}
+          //   {related.length > 0 && (
+          //     <div>
+          //       <h3 className="text-lg font-extrabold text-foreground">
+          //         More blogs
+          //       </h3>
+          //       <div className="mt-4 flex flex-col gap-1">
+          //         {related.map((a) => (
+          //           <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
+          //         ))}
+          //       </div>
+          //     </div>
+          //   )}
+          // </aside>
+        }
       </Container>
       {/* more blogs */}
       {related.length > 0 && (
-        <Section spacing="none" overflow="visible" className="xl:hidden">
+        <Section spacing="none" overflow="visible" className="">
           <Container size="prose" className="pb-16 sm:px-5 lg:pb-24">
             <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
               More blogs
