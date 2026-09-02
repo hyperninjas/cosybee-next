@@ -162,7 +162,7 @@ export function ProviderStatusBar({
     <div className="grid gap-3 rounded-xl border border-border bg-surface p-4 md:grid-cols-2">
       <ProviderRow
         accent="solar"
-        title="SunSync"
+        title="Sunsynk"
         subtitle={sunsyncSubtitle}
         connected={sunsync.connected}
         ConnectModal={ConnectSunSyncModal}

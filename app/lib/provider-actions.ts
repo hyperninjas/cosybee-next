@@ -63,7 +63,7 @@ export async function disconnectSunSync(): Promise<ProviderActionResult> {
       headers: { Cookie: cookie },
       cache: "no-store",
     });
-    if (!res.ok) return readError(res, "Couldn't disconnect SunSync.");
+    if (!res.ok) return readError(res, "Couldn't disconnect Sunsynk.");
     revalidatePath("/energyflow-home");
     return { ok: true };
   } catch {
@@ -136,10 +136,10 @@ export async function listSunSyncPlants(): Promise<LinkedPlantsResult> {
       cache: "no-store",
     });
     if (!res.ok) {
-      const err = await readError(res, "Couldn't fetch your SunSync plants.");
+      const err = await readError(res, "Couldn't fetch your Sunsynk plants.");
       // `readError` returns the disconnect/switch shape; narrow to the
       // list-plants failure shape by re-throwing just the error string.
-      const message = err.ok ? "Couldn't fetch your SunSync plants." : err.error;
+      const message = err.ok ? "Couldn't fetch your Sunsynk plants." : err.error;
       return { ok: false, error: message };
     }
     // The backend envelope. Defensive parsing — every field defaulted so a
@@ -168,7 +168,7 @@ export async function listSunSyncPlants(): Promise<LinkedPlantsResult> {
     }));
     return { ok: true, plants };
   } catch {
-    return { ok: false, error: "Couldn't reach SunSync. Try again in a moment." };
+    return { ok: false, error: "Couldn't reach Sunsynk. Try again in a moment." };
   }
 }
 
@@ -212,6 +212,6 @@ export async function switchSunSyncSelection(input: {
     revalidatePath("/energyflow-home");
     return { ok: true };
   } catch {
-    return { ok: false, error: "Couldn't reach SunSync. Try again in a moment." };
+    return { ok: false, error: "Couldn't reach Sunsynk. Try again in a moment." };
   }
 }

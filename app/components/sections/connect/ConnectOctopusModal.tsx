@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
-import { Button, Chip, Modal } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { Button, Chip, Modal, useOverlayState } from "@heroui/react";
 import { ArrowUpRightFromSquare, ThunderboltFill } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
 import { PasswordField } from "@/app/components/ui/PasswordField";
@@ -24,6 +25,7 @@ const OCTOPUS_API_KEY_URL =
   "https://octopus.energy/dashboard/new/accounts/personal-details/api-access";
 
 const INITIAL: ConnectResult | null = null;
+const FORM_ID = "connect-octopus";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -32,21 +34,41 @@ function SubmitButton() {
       variant="primary"
       type="submit"
       isDisabled={pending}
-      form="connect-octopus"
+      form={FORM_ID}
     >
       {pending ? "Connecting…" : "Connect Octopus"}
     </Button>
   );
 }
 
-export function ConnectOctopusModal({ children }: { children: ReactNode }) {
+export function ConnectOctopusModal({
+  children,
+  successHref,
+}: {
+  children: ReactNode;
+  /** See ConnectSunSyncModal.successHref — same shape, same rationale. */
+  successHref?: string;
+}) {
   const [result, formAction] = useActionState(
     async (_prev: ConnectResult | null, form: FormData) => connectOctopus(form),
     INITIAL,
   );
+  const overlay = useOverlayState();
+  const router = useRouter();
+
+  const succeeded = result?.ok === true;
+
+  // See ConnectSunSyncModal — destructure `close` so the effect deps stay
+  // stable and don't re-fire router.push on every render.
+  const { close } = overlay;
+  useEffect(() => {
+    if (!succeeded) return;
+    close();
+    if (successHref) router.push(successHref);
+  }, [succeeded, successHref, close, router]);
 
   return (
-    <Modal>
+    <Modal state={overlay}>
       <Modal.Trigger>{children}</Modal.Trigger>
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
@@ -72,7 +94,7 @@ export function ConnectOctopusModal({ children }: { children: ReactNode }) {
             </Modal.Header>
 
             <Modal.Body>
-              <form id="connect-octopus" action={formAction} className="flex flex-col gap-5">
+              <form id={FORM_ID} action={formAction} className="flex flex-col gap-5">
                 {result && !result.ok && (
                   <div
                     role="alert"
@@ -81,46 +103,53 @@ export function ConnectOctopusModal({ children }: { children: ReactNode }) {
                     {result.error}
                   </div>
                 )}
-                <TextInputField
-                  name="accountNumber"
-                  label="Octopus account number"
-                  autoComplete="off"
-                  placeholder="A-1234ABCD"
-                  isRequired
-                  autoFocus
-                  description="Top of your Octopus dashboard, under your name. Starts with an A."
-                />
-                {/* PasswordField reused for the API key so we get the same
-                    masking + show/hide toggle — the key is a long-lived
-                    secret and deserves the same "never visible in the
-                    round-trip" affordance a password gets. */}
-                <PasswordField
-                  name="apiKey"
-                  label="Octopus API key"
-                  autoComplete="off"
-                  isRequired
-                  description="Starts with sk_live_. Generated in Octopus → Personal details → API access."
-                />
-                <a
-                  href={OCTOPUS_API_KEY_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-foreground underline underline-offset-4"
-                >
-                  Open Octopus API access page
-                  <ArrowUpRightFromSquare className="size-3" />
-                </a>
-                <p className="text-xs text-muted">
-                  We&rsquo;ll start a one-time back-fill of the last ~13
-                  months of consumption so charts and stats have history
-                  to show from day one.
-                </p>
+                <div hidden={succeeded} className="flex flex-col gap-5">
+                  <TextInputField
+                    name="accountNumber"
+                    label="Octopus account number"
+                    autoComplete="off"
+                    placeholder="A-1234ABCD"
+                    isRequired
+                    autoFocus
+                    description="Top of your Octopus dashboard, under your name. Starts with an A."
+                  />
+                  {/* PasswordField reused for the API key so we get the same
+                      masking + show/hide toggle — the key is a long-lived
+                      secret and deserves the same "never visible in the
+                      round-trip" affordance a password gets. */}
+                  <PasswordField
+                    name="apiKey"
+                    label="Octopus API key"
+                    autoComplete="off"
+                    isRequired
+                    description="Starts with sk_live_. Generated in Octopus → Personal details → API access."
+                  />
+                  <a
+                    href={OCTOPUS_API_KEY_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-foreground underline underline-offset-4"
+                  >
+                    Open Octopus API access page
+                    <ArrowUpRightFromSquare className="size-3" />
+                  </a>
+                  <p className="text-xs text-muted">
+                    We&rsquo;ll start a one-time back-fill of the last ~13
+                    months of consumption so charts and stats have history
+                    to show from day one.
+                  </p>
+                </div>
+                {succeeded && (
+                  <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm text-success">
+                    Octopus linked. {successHref ? "Taking you to the dashboard…" : "You can close this window."}
+                  </div>
+                )}
               </form>
             </Modal.Body>
 
             <Modal.Footer>
               <Modal.CloseTrigger />
-              <SubmitButton />
+              {!succeeded && <SubmitButton />}
             </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>

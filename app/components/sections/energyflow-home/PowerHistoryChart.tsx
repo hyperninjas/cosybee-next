@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
   CartesianGrid,
   Legend,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -125,6 +126,18 @@ export function PowerHistoryChart({ history }: { history: PowerHistory }) {
   // samples gives us the reference's 6-hour tick spacing (00, 06, 12, 18).
   const xTickInterval = Math.max(1, Math.floor(history.points.length / 4) - 1);
 
+  // Data-fit Y-axis. Recharts' auto-domain always snaps to round numbers
+  // computed from the FULL data range including toggled-off channels, so
+  // toggling one channel off didn't rescale to fit the remaining. Compute
+  // ourselves: scan only the visible channels, pick a "nice" step, and
+  // round the domain outward one step so the chart never clips a peak.
+  // Mirrors the mobile chart (see the reference screenshot: 0.6 / 0.3 / 0
+  // / −0.3 for a house drawing ~500 W and battery moving ~300 W).
+  const yAxis = useMemo(
+    () => niceYAxis(history.points, disabled),
+    [history.points, disabled],
+  );
+
   return (
     <Card variant="default">
       <Card.Header className="flex-row items-start justify-between gap-2">
@@ -173,7 +186,17 @@ export function PowerHistoryChart({ history }: { history: PowerHistory }) {
               <YAxis
                 {...axisProps}
                 width={44}
-                tickFormatter={(v: number) => `${v}kW`}
+                domain={[yAxis.min, yAxis.max]}
+                ticks={yAxis.ticks}
+                tickFormatter={yAxis.format}
+              />
+              {/* Emphasize the 0 kW baseline — a signed chart (grid /
+                  battery flip below zero) is unreadable without one.
+                  Matches the mobile reference. */}
+              <ReferenceLine
+                y={0}
+                stroke={chartColors.muted}
+                strokeOpacity={0.6}
               />
               <Tooltip
                 content={<PowerTooltip />}
@@ -184,11 +207,17 @@ export function PowerHistoryChart({ history }: { history: PowerHistory }) {
                 disabled.has(def.key) ? null : (
                   <Area
                     key={def.key}
-                    type="monotone"
+                    // `linear` = straight segments between raw samples.
+                    // The reference "Power History Chart" is a jagged
+                    // mountain silhouette showing every 5-min spike — a
+                    // curve smoother (monotone, natural, basis) rounds
+                    // those spikes off and hides real short-lived events
+                    // like cloud passes and stove pulses. Keep it raw.
+                    type="linear"
                     dataKey={def.key}
                     name={def.label}
                     stroke={def.color}
-                    strokeWidth={1.75}
+                    strokeWidth={1.5}
                     fill={grad.fill}
                     dot={false}
                     activeDot={{ r: 3, strokeWidth: 0, fill: def.color }}
@@ -234,4 +263,125 @@ export function PowerHistoryChart({ history }: { history: PowerHistory }) {
       </Card.Content>
     </Card>
   );
+}
+
+// ── Y-axis auto-fit ──────────────────────────────────────────────────────
+
+interface AxisSpec {
+  min: number;
+  max: number;
+  ticks: number[];
+  format: (v: number) => string;
+}
+
+/**
+ * Compute a nicely-rounded Y-axis for the visible channels.
+ *
+ * Behaviour:
+ *   1. Scan every visible sample for min/max across `home`, `solar`, `grid`,
+ *      `battery`. `grid` and `battery` are signed, so a big export or a
+ *      hard charge shows up on the negative side; `home` and `solar` clamp
+ *      to zero on the positive side.
+ *   2. Pick a "nice" step from a fixed ladder (0.1, 0.2, 0.5, 1, 2, 5, 10,
+ *      20 kW). Target ~4 ticks between the two extremes — same density as
+ *      the mobile reference (0.6 / 0.3 / 0 / −0.3).
+ *   3. Round the min DOWN and max UP to the next step so peaks never
+ *      touch the frame. If the range is entirely non-negative the min
+ *      snaps to 0 (a house that only draws never needs a −0.1 kW tick).
+ *   4. Auto-scale units — under 1 kW the axis reads in watts (`120 W`),
+ *      otherwise kW. Matches the mobile "W under 1 kW, kW above" rule
+ *      documented in `energy_flow_card.dart`.
+ *
+ * All-zero data (freshly linked inverter, or user toggled every channel
+ * off) collapses to a symmetric ±0.5 kW frame so the 0-line still renders
+ * and the chart doesn't shrink to a single row of pixels.
+ */
+function niceYAxis(
+  points: ReadonlyArray<{
+    home: number;
+    solar: number;
+    grid: number;
+    battery: number;
+  }>,
+  disabled: ReadonlySet<ChannelKey>,
+): AxisSpec {
+  let min = 0;
+  let max = 0;
+  for (const p of points) {
+    if (!disabled.has("home") && p.home > max) max = p.home;
+    if (!disabled.has("solar") && p.solar > max) max = p.solar;
+    if (!disabled.has("grid")) {
+      if (p.grid > max) max = p.grid;
+      if (p.grid < min) min = p.grid;
+    }
+    if (!disabled.has("battery")) {
+      if (p.battery > max) max = p.battery;
+      if (p.battery < min) min = p.battery;
+    }
+  }
+
+  // Empty / all-zero — give the 0-line something to sit against.
+  if (min === 0 && max === 0) {
+    return {
+      min: -0.5,
+      max: 0.5,
+      ticks: [-0.5, 0, 0.5],
+      format: (v) => `${v}kW`,
+    };
+  }
+
+  // Pick a step that lands roughly 5–6 ticks across the range. Target 5 —
+  // an earlier target of 4 rounded a 5.93 kW peak up to 10 kW with 4 kW of
+  // empty headroom, which is what the "why does it go to 10 when max is 5?"
+  // screenshot flagged.
+  const range = max - min;
+  const step = pickStep(range / 5);
+
+  // Snap outward so peaks are inside the frame, not on it.
+  const snappedMin = Math.floor(min / step) * step;
+  const snappedMax = Math.ceil(max / step) * step;
+
+  const ticks: number[] = [];
+  // Guard: FP arithmetic can drift and produce ticks like 0.6000000000001.
+  // `roundTo` collapses those back to the step precision.
+  const digits = decimalsForStep(step);
+  for (let t = snappedMin; t <= snappedMax + step / 2; t += step) {
+    ticks.push(roundTo(t, digits));
+  }
+
+  // Under 1 kW absolute range → label in watts. Same rule mobile uses.
+  const absMax = Math.max(Math.abs(snappedMin), Math.abs(snappedMax));
+  const inWatts = absMax < 1;
+  const format = inWatts
+    ? (v: number) => `${Math.round(v * 1000)}W`
+    : (v: number) => `${roundTo(v, digits)}kW`;
+
+  return { min: snappedMin, max: snappedMax, ticks, format };
+}
+
+/**
+ * "Nice" step ladder in kW. Returned step ≥ the requested minimum, so the
+ * chart never packs more than ~5 ticks into the visible range.
+ */
+function pickStep(minStep: number): number {
+  const ladder = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100];
+  for (const step of ladder) {
+    if (step >= minStep) return step;
+  }
+  // Beyond 100 kW — a genuinely huge system. Round the requested step up
+  // to a power of ten so labels stay clean.
+  const magnitude = 10 ** Math.ceil(Math.log10(minStep));
+  return magnitude;
+}
+
+/** How many decimals a step needs for a clean label (0.1 → 1, 1 → 0). */
+function decimalsForStep(step: number): number {
+  if (step >= 1) return 0;
+  if (step >= 0.1) return 1;
+  return 2;
+}
+
+function roundTo(value: number, digits: number): number {
+  const f = 10 ** digits;
+  return Math.round(value * f) / f;
 }

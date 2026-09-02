@@ -13,6 +13,7 @@ export { TariffCard } from "./TariffCard";
 export { DailyCostCard } from "./DailyCostCard";
 export { StatStrip } from "./StatStrip";
 export { PowerHistoryChart } from "./PowerHistoryChart";
+export { DashboardShell } from "./DashboardShell";
 export { getDashboardData } from "./data";
 export type {
   BatteryState,

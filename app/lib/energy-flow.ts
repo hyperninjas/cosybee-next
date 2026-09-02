@@ -37,9 +37,8 @@ const NOISE_FLOOR_W = 10;
 
 /**
  * The `realTime` block of `/api/energy-profile/energy-flow`. Only the fields
- * the dashboard cares about are typed. Everything below (`todayMix`,
- * `system`, `dataQuality`, `carbon`) is deliberately ignored here — those
- * belong to other cards.
+ * the dashboard cares about are typed. `system`, `dataQuality` and `carbon`
+ * are deliberately ignored — those belong to other cards.
  */
 interface RealTimeFlowResponse {
   solarKw?: number;
@@ -53,8 +52,26 @@ interface RealTimeFlowResponse {
   measuredAt?: string | null;
 }
 
+/**
+ * Cumulative totals from local-midnight to `timestamp`. Every field is
+ * nullable — a `null` here means "the backend refuses to answer", NOT zero.
+ * See `energy-profile.response-schemas.ts:582`: coalescing null → 0 is what
+ * historically rendered "100% off-grid" beside a chart showing 10 kW of
+ * import. Callers must treat null as "unavailable" and either skip the
+ * tile or show a placeholder — never fabricate a 0.
+ */
+export interface TodayEnergyMix {
+  solarGeneratedKwh: number | null;
+  houseConsumedKwh: number | null;
+  batteryStoredKwh: number | null;
+  batteryDischargedKwh: number | null;
+  exportedToGridKwh: number | null;
+  importedFromGridKwh: number | null;
+}
+
 interface EnergyFlowResponse {
   realTime?: RealTimeFlowResponse;
+  todayMix?: Partial<TodayEnergyMix>;
   /** Server clock — used only as a last-resort fallback if `measuredAt` is absent. */
   timestamp?: string;
 }
@@ -169,11 +186,32 @@ export function freshnessOf(updatedAt: string, now: Date): Freshness {
  * fallback was invisible).
  */
 export type EnergyFlowFetchResult =
-  | { status: "ok"; snapshot: EnergyFlowSnapshot }
+  | { status: "ok"; snapshot: EnergyFlowSnapshot; todayMix: TodayEnergyMix | null }
   | { status: "no-property" } // 404 from activePropertyResolver
   | { status: "no-data" } // 200 with missing `realTime`
   | { status: "http-error"; code: number }
   | { status: "network-error" };
+
+/**
+ * Read the six cumulative-total fields out of the response body, coercing
+ * anything non-numeric (missing, string, NaN) to `null`. Returns null if
+ * the block itself is absent — the caller then knows the endpoint answered
+ * but didn't include totals (a real state for a freshly linked inverter).
+ */
+export function todayMixOf(body: EnergyFlowResponse): TodayEnergyMix | null {
+  const raw = body.todayMix;
+  if (!raw) return null;
+  const num = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+  return {
+    solarGeneratedKwh: num(raw.solarGeneratedKwh),
+    houseConsumedKwh: num(raw.houseConsumedKwh),
+    batteryStoredKwh: num(raw.batteryStoredKwh),
+    batteryDischargedKwh: num(raw.batteryDischargedKwh),
+    exportedToGridKwh: num(raw.exportedToGridKwh),
+    importedFromGridKwh: num(raw.importedFromGridKwh),
+  };
+}
 
 /**
  * Fetch the aggregated energy-flow snapshot from the backend.
@@ -226,5 +264,5 @@ export async function fetchEnergyFlowSnapshot(
 
   const snapshot = realTimeToSnapshot(body);
   if (snapshot === null) return { status: "no-data" };
-  return { status: "ok", snapshot };
+  return { status: "ok", snapshot, todayMix: todayMixOf(body) };
 }

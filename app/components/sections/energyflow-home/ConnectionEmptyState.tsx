@@ -202,14 +202,14 @@ export function ConnectionEmptyState({
       >
         <ProviderCard
           accent="solar"
-          title="Connect SunSync"
+          title="Connect Sunsynk"
           subtitle="Your inverter and battery"
           bullets={[
             "Live solar generation, battery charge and discharge",
             "Home load and grid flow in real time",
             "Daily kWh totals and 24-hour power history",
           ]}
-          ctaLabel="Connect SunSync"
+          ctaLabel="Connect Sunsynk"
           Modal={ConnectSunSyncModal}
         />
         <ProviderCard

@@ -137,7 +137,7 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
               </Modal.Icon>
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Modal.Heading>Manage SunSync</Modal.Heading>
+                  <Modal.Heading>Manage Sunsynk</Modal.Heading>
                   {propertyLabel && (
                     <Chip color="default" variant="soft" size="sm">
                       {propertyLabel}
@@ -146,11 +146,11 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
                 </div>
                 <p className="mt-1 text-sm text-muted">
                   {view === "menu" &&
-                    "Disconnect this SunSync account or switch to a different inverter on the same account."}
+                    "Disconnect this Sunsynk account or switch to a different inverter on the same account."}
                   {view === "disconnect" &&
-                    "This unlinks the SunSync account from this home. Historical readings stay in your account — reconnecting later restores live sync."}
+                    "This unlinks the Sunsynk account from this home. Historical readings stay in your account — reconnecting later restores live sync."}
                   {view === "switch" &&
-                    "Repoint the dashboard at a different inverter on this SunSync account. No password re-entry needed."}
+                    "Repoint the dashboard at a different inverter on this Sunsynk account. No password re-entry needed."}
                 </p>
               </div>
             </Modal.Header>
@@ -169,11 +169,11 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
                 <div className="flex flex-col gap-3">
                   <ActionRow
                     label="Switch inverter"
-                    description="Pick a different plant or inverter on this SunSync account."
+                    description="Pick a different plant or inverter on this Sunsynk account."
                     onSelect={() => setView("switch")}
                   />
                   <ActionRow
-                    label="Disconnect SunSync"
+                    label="Disconnect Sunsynk"
                     description="Stop live sync. Historical readings kept."
                     danger
                     onSelect={() => setView("disconnect")}
@@ -183,7 +183,7 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
 
               {view === "disconnect" && (
                 <div className="rounded-lg border border-danger/30 bg-danger/5 p-4 text-sm text-danger">
-                  <p className="font-semibold">Disconnect this SunSync account?</p>
+                  <p className="font-semibold">Disconnect this Sunsynk account?</p>
                   <p className="mt-1 text-danger/80">
                     The dashboard will stop receiving live power flow. Historical
                     readings stay in your account and are restored if you reconnect
@@ -195,11 +195,11 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
               {view === "switch" && (
                 <div className="flex flex-col gap-4">
                   {plants === null && (
-                    <p className="text-sm text-muted">Loading your SunSync plants…</p>
+                    <p className="text-sm text-muted">Loading your Sunsynk plants…</p>
                   )}
                   {plants !== null && plants.length === 0 && (
                     <p className="text-sm text-muted">
-                      No plants found on this SunSync account.
+                      No plants found on this Sunsynk account.
                     </p>
                   )}
                   {plants !== null && plants.length > 0 && (

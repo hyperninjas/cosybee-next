@@ -190,9 +190,9 @@ export async function createProperty(form: FormData): Promise<ConnectResult> {
  * accounts get a message telling them what's next.
  */
 export async function connectSunSync(form: FormData): Promise<SunSyncConnectResult> {
-  const email = requiredString(form, "email", "SunSync email");
+  const email = requiredString(form, "email", "Sunsynk email");
   if ("error" in email) return { ok: false, error: email.error };
-  const password = requiredString(form, "password", "SunSync password");
+  const password = requiredString(form, "password", "Sunsynk password");
   if ("error" in password) return { ok: false, error: password.error };
 
   // Optional picker fields. Present on the SECOND submit — after the user
@@ -210,7 +210,7 @@ export async function connectSunSync(form: FormData): Promise<SunSyncConnectResu
 
   const cookie = await cookieHeader();
   if (cookie === null) {
-    return { ok: false, error: "You need to sign in before connecting SunSync." };
+    return { ok: false, error: "You need to sign in before connecting Sunsynk." };
   }
 
   try {
@@ -281,13 +281,13 @@ export async function connectSunSync(form: FormData): Promise<SunSyncConnectResu
 
     return {
       ok: false,
-      error: body?.message ?? "SunSync rejected those credentials.",
+      error: body?.message ?? "Sunsynk rejected those credentials.",
       ...(body?.code ? { code: body.code } : {}),
     };
   } catch {
     return {
       ok: false,
-      error: "Couldn't reach the SunSync service. Try again in a moment.",
+      error: "Couldn't reach the Sunsynk service. Try again in a moment.",
     };
   }
 }

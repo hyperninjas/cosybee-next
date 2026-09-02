@@ -15,8 +15,8 @@ import {
   ConnectionEmptyState,
   DailyCostCard,
   DashboardHeader,
+  DashboardShell,
   EnergyFlowDiagram,
-  EnergyFlowDiagramLive,
   PowerHistoryChart,
   ProviderStatusBar,
   StatStrip,
@@ -37,31 +37,20 @@ export const metadata: Metadata = pageMetadata({
  * data fetching, so future work (live data, per-day navigation, additional
  * panels) happens inside the module without touching this file.
  *
- * The wrapper carries `efh-scope` (activates the dashboard's channel
- * palette) but no forced theme class — every color routes through semantic
- * theme tokens (--foreground, --surface, --success, efh channel vars), so
- * the dashboard follows whichever theme the visitor picked. Light mode is
- * tuned in globals.css with darker channel values so tinted labels stay
- * readable on white.
- */
-/**
- * Four render paths this page picks between, evaluated in order:
+ * ### Render paths
  *
  *   1. Not logged in            → `requireUser()` redirects to `/login`.
- *   2. `?demo=1`                → hardcoded demo dashboard (design / marketing
- *                                 preview; kept for when a real user has no
- *                                 data yet but a stakeholder wants to see
- *                                 what the connected experience will look
- *                                 like).
+ *   2. `?demo=1`                → hardcoded demo dashboard, static, for
+ *                                 marketing / design preview.
  *   3. No SunSync, no Octopus   → Tier-0 empty state with modal CTAs.
- *   4. At least one connected   → real dashboard (still using hardcoded
- *                                 data at this stage; the next commit
- *                                 replaces `getDashboardData()` with a live
- *                                 backend fetch).
+ *   4. At least one connected   → {@link DashboardShell}, the interactive
+ *                                 client component that owns day state
+ *                                 and drives the header, stats and chart
+ *                                 together.
  *
  * Partial connections (SunSync-only or Octopus-only) still land on the
- * real dashboard for now — the section components will surface "Add your
- * Octopus tariff to unlock cost" affordances once real data is wired.
+ * real dashboard — the section components will surface "Add your Octopus
+ * tariff to unlock cost" affordances once the remaining data lands.
  */
 export default async function EnergyFlowHomePage({
   searchParams,
@@ -90,16 +79,7 @@ export default async function EnergyFlowHomePage({
     </div>
   );
 
-  if (showDemo)
-    return wrapper(
-      <DemoDashboard
-        data={getDashboardData()}
-        flowLive={false}
-        flowResult={null}
-        properties={[]}
-        activePropertyId={null}
-      />,
-    );
+  if (showDemo) return wrapper(<DemoDashboard data={getDashboardData()} />);
 
   // Real connection state — one round-trip to each provider status endpoint,
   // memoised so re-reads within this render don't hit the backend twice.
@@ -117,15 +97,16 @@ export default async function EnergyFlowHomePage({
       <ConnectionEmptyState demoHref="?demo=1" hasProperty={property !== null} />,
     );
 
-  // Live data — SunSync's power flow overwrites the demo snapshot when
-  // available; the rest of the cards keep their placeholder values with a
-  // "still connecting" note until their endpoint mappings land.
-  const { data, liveFields, activePropertyId } = await getLiveDashboardData();
+  // Live data — server pre-fetches today's flow, history and stats so the
+  // client shell paints in one shot. The shell then handles date navigation
+  // on the client without a page reload.
+  const { data, liveFields, activePropertyId, todayIso } =
+    await getLiveDashboardData();
   const stillSyncing =
     !liveFields.tariff ||
     !liveFields.cost ||
     !liveFields.stats ||
-    !liveFields.history;
+    !liveFields.history.live;
 
   return wrapper(
     <div className="flex flex-col gap-4">
@@ -140,80 +121,57 @@ export default async function EnergyFlowHomePage({
         <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
           <span className="mt-0.5 inline-block size-2 shrink-0 rounded-full bg-warning" />
           <span>
-            {liveFields.flow.live ? "Showing live power flow. " : ""}Tariff,
-            cost, stats and history are still on demo values while we finish
-            wiring those to your account.
+            {liveFields.flow.live ? "Showing live power flow. " : ""}
+            {(() => {
+              const pending = [
+                liveFields.tariff ? null : "tariff",
+                liveFields.cost ? null : "cost",
+                liveFields.stats ? null : "stats",
+                liveFields.history.live ? null : "history",
+              ].filter((s): s is string => s !== null);
+              const verb = pending.length === 1 ? "is" : "are";
+              return `${joinWithAnd(pending)} ${verb}`;
+            })()}{" "}
+            still on demo values while we finish wiring those to your
+            account.
           </span>
         </div>
       )}
-      <DemoDashboard
+
+      <DashboardShell
         data={data}
         flowLive={liveFields.flow.live}
         flowResult={liveFields.flow.result}
         properties={properties}
         activePropertyId={activePropertyId}
+        historyLive={liveFields.history.live}
+        todayIso={todayIso}
       />
     </div>,
   );
 }
 
 /**
- * The connected-state dashboard. Renamed argument-wise so the same layout
- * serves both the hardcoded demo (?demo=1) and the live data path — the
- * only difference between them is where `data` came from.
- *
- * `flowLive` picks the live client wrapper (which polls the aggregated
- * `/api/energy-profile/energy-flow` and updates in place) vs the pure server
- * render (used by the demo, where polling would just re-fetch the same fake
- * numbers).
+ * The `?demo=1` preview — static, no polling, no date navigation. Kept
+ * separate from the live shell because the demo has no `todayIso` (it's
+ * frozen fixture data) and wiring a date navigator across a frozen fixture
+ * would just render broken empty states on prev/next.
  */
-function DemoDashboard({
-  data,
-  flowLive,
-  flowResult,
-  properties,
-  activePropertyId,
-}: {
-  data: DashboardData;
-  flowLive: boolean;
-  flowResult: EnergyFlowFetchResult | null;
-  properties: ActiveProperty[];
-  activePropertyId: string | null;
-}) {
-  // `now` is captured once here so every child receives the same clock —
-  // avoids per-component `new Date()` calls that would fight hydration and
-  // makes relative timestamps (e.g. "3 min ago") deterministic per render.
+function DemoDashboard({ data }: { data: DashboardData }) {
   const now = new Date();
-
+  const properties: ActiveProperty[] = [];
+  const flowResult: EnergyFlowFetchResult | null = null;
   return (
     <div className="flex flex-col gap-4">
       <DashboardHeader
         achievement={data.achievement}
         dayLabel={data.dayLabel}
         properties={properties}
-        activePropertyId={activePropertyId}
+        activePropertyId={null}
       />
-      {/* Two-column layout. `lg:items-stretch` forces both columns to
-          share the tallest row's height so the right column can no
-          longer end short of the flow diagram. Inside the right column
-          we use `grid-rows-[auto_1fr]` so the tariff card sizes to its
-          content and the daily-cost card absorbs whatever height is
-          left over — matches the reference layout. */}
       <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
         <div className="lg:col-span-2 flex">
-          {flowLive ? (
-            <EnergyFlowDiagramLive initial={data.flow} initialResult={flowResult} />
-          ) : flowResult !== null ? (
-            // We tried to fetch and got a specific failure — show the client
-            // wrapper anyway so it renders the accurate unavailable reason
-            // AND keeps polling in case the failure is transient (e.g. the
-            // inverter is minutes away from its first reading). Passing
-            // `initial={null}` triggers the UnavailableCard branch.
-            <EnergyFlowDiagramLive initial={null} initialResult={flowResult} />
-          ) : (
-            // No fetch was attempted (demo path). Static render, no polling.
-            <EnergyFlowDiagram flow={data.flow} now={now} />
-          )}
+          <EnergyFlowDiagram flow={data.flow} now={now} />
         </div>
         <div className="grid gap-4 lg:grid-rows-[auto_1fr]">
           <TariffCard tariff={data.tariff} />
@@ -222,6 +180,27 @@ function DemoDashboard({
       </div>
       <StatStrip stats={data.stats} />
       <PowerHistoryChart history={data.history} />
+      {/* Silence "flowResult unused" — kept for shape parity with the
+          live path in case future demo tweaks want to render a specific
+          failure branch. */}
+      {flowResult}
     </div>
   );
+}
+
+/**
+ * "Tariff, cost and history" — sentence-cased on the first field, so it
+ * reads correctly at the start of the banner ("Tariff still on demo…").
+ * Empty input returns the empty string; the caller only mounts the banner
+ * when at least one item is pending, so this shouldn't be reached with an
+ * empty list.
+ */
+function joinWithAnd(items: string[]): string {
+  if (items.length === 0) return "";
+  const capitalised = items.map((s, i) =>
+    i === 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s,
+  );
+  if (capitalised.length === 1) return capitalised[0]!;
+  if (capitalised.length === 2) return `${capitalised[0]} and ${capitalised[1]}`;
+  return `${capitalised.slice(0, -1).join(", ")} and ${capitalised.at(-1)}`;
 }

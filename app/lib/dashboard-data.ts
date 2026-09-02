@@ -2,11 +2,15 @@ import "server-only";
 
 import { cache } from "react";
 import { cookies } from "next/headers";
-import type { DashboardData } from "@/app/components/sections/energyflow-home";
+import type { DashboardData, PowerHistory } from "@/app/components/sections/energyflow-home";
 import { getDashboardData as getDemoDashboardData } from "@/app/components/sections/energyflow-home";
 import { fetchLiveTariff, fetchLiveDailyCost } from "./octopus-live";
 import { fetchEnergyFlowSnapshot, type EnergyFlowFetchResult } from "./energy-flow";
+import { fetchPowerHistory, type PowerHistoryFetchResult } from "./sunsync-history";
+import { buildLiveStats, findPeakSolar } from "./live-stats";
+import { integratePoints, mergeMix } from "./history-integration";
 import { getActiveProperty } from "./property-state";
+import { ukDateParam, ukDayStartUtc } from "./uk-time";
 
 /**
  * Server-side dashboard data assembly.
@@ -21,10 +25,16 @@ import { getActiveProperty } from "./property-state";
  *   ✓ flow         — live from `/api/energy-profile/energy-flow` (aggregated;
  *                    the same endpoint the mobile card reads, so the two
  *                    surfaces render matching numbers — see energy-flow.ts).
+ *   ✓ history      — live from `/api/sunsynk/telemetry`, bucketed to 5-min
+ *                    UK-wall-clock slots (same rule as mobile — see
+ *                    sunsync-history.ts). Client-side date navigation goes
+ *                    through app/api/dashboard/history for other days.
+ *   ✓ stats        — live from `todayMix` on the same energy-flow response
+ *                    the diagram reads; peak solar computed from the history
+ *                    points above. Nullable totals surface as em-dashes —
+ *                    NEVER coalesced to 0 (see live-stats.ts doc block).
  *   … tariff       — placeholder; wire from `/api/octopus/connection` + tariff catalog
  *   … cost         — placeholder; compute from Octopus consumption × tariff
- *   … stats        — placeholder; from SunSync `sunsynk_daily_energy` + Octopus
- *   … history      — placeholder; aggregate SunSync 5-min readings to 10-min buckets
  */
 
 // ── Cookie helper ────────────────────────────────────────────────────────
@@ -63,7 +73,12 @@ export interface DashboardDataResult {
     tariff: boolean;
     cost: boolean;
     stats: boolean;
-    history: boolean;
+    /**
+     * True when the initial (today) history came from the backend. Same
+     * shape as `flow` — the raw result carries the specific reason so the
+     * chart can render an accurate empty state on failure.
+     */
+    history: { live: boolean; result: PowerHistoryFetchResult | null };
   };
   /**
    * Active property id the flow fetch was pinned to (via `X-Property-Id`).
@@ -72,6 +87,8 @@ export interface DashboardDataResult {
    * to the active property.
    */
   activePropertyId: string | null;
+  /** Today's UK date (`YYYY-MM-DD`) — the initial day the chart is showing. */
+  todayIso: string;
 }
 
 /**
@@ -83,6 +100,8 @@ export interface DashboardDataResult {
 export const getLiveDashboardData = cache(
   async (): Promise<DashboardDataResult> => {
     const demo = getDemoDashboardData();
+    const now = new Date();
+    const todayIso = ukDateParam(now);
     const cookie = await cookieHeader();
     if (cookie === null) {
       return {
@@ -92,9 +111,10 @@ export const getLiveDashboardData = cache(
           tariff: false,
           cost: false,
           stats: false,
-          history: false,
+          history: { live: false, result: null },
         },
         activePropertyId: null,
+        todayIso,
       };
     }
 
@@ -105,21 +125,39 @@ export const getLiveDashboardData = cache(
     const activeProperty = await getActiveProperty();
     const propertyId = activeProperty?.id;
 
-    // All three live fetches run in parallel — none depends on the others,
-    // so the wall clock for a fully-live dashboard is `max(flow, tariff+
+    // Live fetches run in parallel — none depends on the others, so the
+    // wall clock for a fully-live dashboard is `max(flow, history, tariff+
     // cost)` rather than the sum. `fetchLiveTariff` returns the tariff
-    // result up-front so we can chain it into the cost computation
-    // without a second round-trip.
-    const [flowResult, tariffResult] = await Promise.all([
+    // result up-front so we can chain it into the cost computation without
+    // a second round-trip.
+    const [flowResult, historyResult, tariffResult] = await Promise.all([
       fetchEnergyFlowSnapshot(cookie, { propertyId }),
+      fetchPowerHistory(cookie, { propertyId, dayStartUtc: ukDayStartUtc(now) }),
       fetchLiveTariff(),
     ]);
     const cost = await fetchLiveDailyCost(tariffResult.tariff);
     const flowSnapshot = flowResult.status === "ok" ? flowResult.snapshot : null;
+    const todayMix = flowResult.status === "ok" ? flowResult.todayMix : null;
+    const liveHistory = historyResult.status === "ok"
+      ? historyPointsToDashboard(historyResult.points, todayIso, now)
+      : null;
+    // Fill any null fields in the backend's `todayMix` by integrating the
+    // history we already fetched — reconciliation sometimes returns nulls
+    // even though the raw readings are all there, and em-dashes across the
+    // strip beside a full flow diagram just reads as "broken". A merged
+    // mix keeps whatever backend numbers ARE present (more precise: the
+    // backend applies data-quality guards) and only falls back per-null.
+    const integratedMix = liveHistory ? integratePoints(liveHistory.points) : null;
+    const effectiveMix = mergeMix(todayMix, integratedMix);
+    const liveStats = effectiveMix
+      ? buildLiveStats(effectiveMix, findPeakSolar(liveHistory?.points ?? []))
+      : null;
 
     const merged: DashboardData = {
       ...demo,
       ...(flowSnapshot ? { flow: flowSnapshot } : {}),
+      ...(liveHistory ? { history: liveHistory, dayIso: todayIso, dayLabel: liveHistory.dayLabel ?? demo.dayLabel } : {}),
+      ...(liveStats ? { stats: liveStats } : {}),
       ...(tariffResult.tariff ? { tariff: tariffResult.tariff } : {}),
       ...(cost ? { cost } : {}),
     };
@@ -130,13 +168,30 @@ export const getLiveDashboardData = cache(
         flow: { live: flowSnapshot !== null, result: flowResult },
         tariff: tariffResult.tariff !== null,
         cost: cost !== null,
-        // Still on demo until their endpoint mappings land. When we wire
-        // stats + history, flip these booleans and the banner on the page
-        // will shrink to only mention the ones still pending.
-        stats: false,
-        history: false,
+        stats: liveStats !== null,
+        history: { live: liveHistory !== null, result: historyResult },
       },
       activePropertyId: propertyId ?? null,
+      todayIso,
     };
   },
 );
+
+/**
+ * Wrap a bucketed telemetry series in the {@link PowerHistory} shape the
+ * chart consumes. `dayLabel` becomes the header chip; kept as an optional
+ * field on the return so the caller only replaces it when we successfully
+ * built a live series (a failed fetch leaves the demo label alone).
+ */
+function historyPointsToDashboard(
+  points: PowerHistory["points"],
+  isoDay: string,
+  now: Date,
+): PowerHistory & { dayLabel?: string } {
+  const isToday = isoDay === ukDateParam(now);
+  return {
+    points,
+    windowLabel: isToday ? "Today" : "24h View",
+    dayLabel: isToday ? "Today" : isoDay,
+  };
+}

@@ -165,7 +165,7 @@ function messageFor(result: EnergyFlowFetchResult | null): string {
     case "no-property":
       return "Add a home to your account to see live energy flow.";
     case "no-data":
-      return "No inverter reading yet. This can take a few minutes after connecting SunSync.";
+      return "No inverter reading yet. This can take a few minutes after connecting Sunsynk.";
     case "http-error":
       return `Backend returned an error (HTTP ${result.code}). Try again shortly.`;
     case "network-error":

@@ -25,12 +25,12 @@ export default function ConnectSunSyncStep() {
         step={3}
         total={4}
         title="Connect your solar inverter"
-        description="Link your SunSync account to see live power flow on the dashboard. Skip for now if you don't have your credentials to hand — you can always come back."
+        description="Link your Sunsynk account to see live power flow on the dashboard. Skip for now if you don't have your credentials to hand — you can always come back."
       />
       <ConnectStep skipHref="/onboarding/connect-octopus">
-        <ConnectSunSyncModal>
+        <ConnectSunSyncModal successHref="/onboarding/connect-octopus">
           <Button variant="primary" size="lg" fullWidth>
-            Connect SunSync
+            Connect Sunsynk
           </Button>
         </ConnectSunSyncModal>
       </ConnectStep>

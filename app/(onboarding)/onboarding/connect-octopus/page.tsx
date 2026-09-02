@@ -19,7 +19,7 @@ export default function ConnectOctopusStep() {
         description="Link your Octopus account so the dashboard can show your live tariff and daily cost. Skip for now if you'd rather do this later."
       />
       <ConnectStep skipHref="/energyflow-home">
-        <ConnectOctopusModal>
+        <ConnectOctopusModal successHref="/energyflow-home">
           <Button variant="primary" size="lg" fullWidth>
             Connect Octopus
           </Button>
