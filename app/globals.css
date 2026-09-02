@@ -106,6 +106,50 @@
    the published spec; `.post-editor .bn-editor` mirrors it so a post reads the
    same while it is written as it does once it publishes. Sizes are in rem with
    the px they resolve to in a comment, because the spec is written in px. */
+
+/* Energy Flow dashboard channel palette. The site-wide semantic tokens
+   above cover success / warning / danger / accent — but the energy-flow
+   diagram has FOUR distinct channels (solar, battery, grid, home) and the
+   grid channel has no natural semantic mapping (there is no "info" blue in
+   the base theme). Kept here rather than inlined on each component so a
+   future re-theme is one file, and so future dashboard modules can share
+   the same tokens. Scoped to `.efh-scope` to keep the global namespace
+   clean. Values are identical across light/dark for now — the dashboard
+   renders inside a forced-dark wrapper. Split later if a light variant is
+   ever needed. */
+/*
+ * Solar / battery / grid-export / grid-import all read as "energy flowing
+ * the way we want" — they sit on the success axis (green). Solar keeps a
+ * slight amber tilt so the sun ring in the flow diagram stays
+ * distinguishable from the battery ring; grid keeps a slight sky tilt for
+ * the same reason. Home is the sole consumption channel and reads in a
+ * warm rose — a distinct "money going out" signal that pops against the
+ * surrounding green.
+ *
+ * Two value sets: darker + more saturated for LIGHT mode (so tinted labels
+ * stay legible on white), lighter + more vivid for DARK mode (so they cut
+ * through the near-black surface without going neon). The dashboard
+ * follows whichever theme the site is in — no `.dark` wrapper on the page.
+ */
+.efh-scope {
+  --efh-solar: oklch(58% 0.16 85);
+  --efh-battery: var(--success);
+  --efh-grid: oklch(52% 0.17 240);
+  --efh-home: oklch(55% 0.22 355);
+  --efh-net-positive: var(--success);
+  --efh-net-negative: var(--danger);
+}
+
+.dark .efh-scope,
+[data-theme="dark"] .efh-scope {
+  --efh-solar: oklch(82% 0.16 100);
+  --efh-battery: var(--success);
+  --efh-grid: oklch(72% 0.13 240);
+  --efh-home: oklch(72% 0.22 355);
+}
+
+/* Server-rendered article body (BlockNote -> HTML). Mirrors the prior
+   hand-built renderer's typography. */
 .article-body > * + * {
   margin-top: 1rem;
 }

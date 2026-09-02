@@ -39,7 +39,7 @@ const CSP_REPORT_ONLY = [
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' https://app.consently.net https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://www.clarity.ms",
-  "img-src 'self' data: blob: https://eb-api.technext.it https://energiebee.s3.eu-west-2.amazonaws.com https://www.google.com https://www.googletagmanager.com https://*.google-analytics.com https://c.bing.com",
+  "img-src 'self' data: blob: https://eb-api.technext.it https://energiebee.s3.eu-west-2.amazonaws.com https://lh3.googleusercontent.com https://www.google.com https://www.googletagmanager.com https://*.google-analytics.com https://c.bing.com",
   // Clarity uploads replay data to a regional *.clarity.ms host and syncs its
   // MUID cookie against c.bing.com.
   "connect-src 'self' https://app.consently.net https://www.google.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://eb-api.technext.it https://*.clarity.ms https://c.bing.com",
@@ -287,9 +287,7 @@ const nextConfig: NextConfig = {
         ? [
             {
               source: "/(.*)",
-              headers: [
-                { key: "X-Robots-Tag", value: "noindex, nofollow" },
-              ],
+              headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
             },
           ]
         : []),

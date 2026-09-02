@@ -7,11 +7,19 @@ import { useEffect, useRef, useState } from "react";
 import EnergieBeeLogo from "@/public/energiebee-brand-horizontal.svg";
 
 import { CTA_BASE_CLASSES, CTA_SIZE_CLASSES } from "@/app/components/ui/Cta";
-// Hidden for now — restore alongside the nav cluster below.
-// import { ThemeToggle } from "@/app/components/ui/ThemeToggle";
-// import { UserMenu } from "./UserMenu";
+import { authClient } from "@/app/lib/auth-client";
+import { UserMenu } from "./UserMenu";
 
-const NAV_LINKS = [
+/**
+ * Two link sets — the navbar picks one at runtime based on session state.
+ *
+ * Marketing links are the current outward-facing site nav. App links are
+ * for signed-in users on the product surface (dashboard + account). We
+ * deliberately do NOT surface every marketing tab to a signed-in user —
+ * they're on the app now, and the app is a distinct product with a
+ * different mental model.
+ */
+const MARKETING_LINKS = [
   { label: "smart", href: "/smart" },
   { label: "heating", href: "/heating" },
   { label: "solar", href: "/solar" },
@@ -19,6 +27,11 @@ const NAV_LINKS = [
   { label: "hive", href: "/hive" },
   { label: "learn", href: "/learn" },
   // { label: "shop", href: "/shop" },
+];
+
+const APP_LINKS = [
+  { label: "Dashboard", href: "/energyflow-home" },
+  { label: "Account", href: "/account" },
 ];
 
 const MENU_ID = "site-mobile-menu";
@@ -122,6 +135,23 @@ export default function Navbar({
   const pathname = usePathname();
   const currentPath = activeHref ?? pathname;
 
+  // Live session — flips the link set + reveals the user menu without a
+  // full page reload. `isPending` is the initial suspense window before
+  // better-auth's cookie check resolves; we render the marketing links
+  // during that window so the first paint doesn't flash the wrong nav for
+  // a signed-out visitor (the majority of first paints).
+  const { data, isPending } = authClient.useSession();
+  const signedIn = !isPending && !!data?.user;
+  // 🔴 Admins keep the marketing nav — they've historically browsed the
+  // site with the same top bar as visitors, and switching them to the app
+  // nav would hide the marketing pages they still need to reach (product,
+  // learn, etc.). The `/admin` shell is separate and already renders its
+  // own header via `HideOnAdmin`, so this only affects admin browsing
+  // OUTSIDE the admin console — where they act like a visitor.
+  const isAdmin = !!data?.user?.role && data.user.role === "admin";
+  const useAppNav = signedIn && !isAdmin;
+  const NAV_LINKS = useAppNav ? APP_LINKS : MARKETING_LINKS;
+
   // A link is active when its href exactly matches the current path or
   // is a prefix of it (so `/solar/details` still highlights "solar").
   const isLinkActive = (href: string) => {
@@ -204,20 +234,27 @@ export default function Navbar({
           >
             <UserIcon />
           </button> */}
-          {/* Primary CTA. Hidden below `sm`, where the logo and the hamburger
-              already fill a 64px-tall bar — the mobile menu carries it instead,
-              so exactly one instance is reachable at every width.
-              `max-sm:hidden`, not `hidden sm:inline-flex`: the shared CTA
-              classes already set `inline-flex`, and between two unprefixed
-              display utilities Tailwind resolves the conflict by stylesheet
-              order, not class order — so the plain `hidden` lost and the button
-              overflowed the bar on a 375px screen. A media variant outranks it. */}
-          <Link
-            href={DOWNLOAD_CTA.href}
-            className={`max-sm:hidden ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
-          >
-            {DOWNLOAD_CTA.label}
-          </Link>
+          {/* Right side: signed-in users get the avatar UserMenu (Profile,
+              Security, Admin, Sign out). Anonymous visitors get the
+              "Download free app" CTA — the primary conversion goal for the
+              marketing surface, and hidden below `sm` because at that
+              width the logo + hamburger already fill the bar (the mobile
+              menu carries the CTA instead). */}
+          {/* Signed-in users get the avatar menu (Profile, Security, Admin,
+              Sign out). Admins ALSO get the avatar menu even though they
+              keep the marketing links — the menu is how they reach the
+              admin console + sign-out. Only fully anonymous visitors see
+              the download CTA. */}
+          {signedIn ? (
+            <UserMenu />
+          ) : (
+            <Link
+              href={DOWNLOAD_CTA.href}
+              className={`max-sm:hidden ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
+            >
+              {DOWNLOAD_CTA.label}
+            </Link>
+          )}
 
           <button
             type="button"
@@ -267,17 +304,21 @@ export default function Navbar({
               );
             })}
             {/* The CTA the header hides below `sm`. Full width here, matching
-                how the links above fill the panel. */}
-            <li className="mt-2 border-t border-neutral-800 px-2 pt-4 sm:hidden">
-              <Link
-                href={DOWNLOAD_CTA.href}
-                onClick={() => setOpen(false)}
-                tabIndex={open ? 0 : -1}
-                className={`w-full ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
-              >
-                {DOWNLOAD_CTA.label}
-              </Link>
-            </li>
+                how the links above fill the panel. Suppressed for signed-in
+                users — the UserMenu already covers the right side of the bar
+                at every width. */}
+            {!signedIn && (
+              <li className="mt-2 border-t border-neutral-800 px-2 pt-4 sm:hidden">
+                <Link
+                  href={DOWNLOAD_CTA.href}
+                  onClick={() => setOpen(false)}
+                  tabIndex={open ? 0 : -1}
+                  className={`w-full ${CTA_BASE_CLASSES} ${CTA_SIZE_CLASSES.sm}`}
+                >
+                  {DOWNLOAD_CTA.label}
+                </Link>
+              </li>
+            )}
             {/* <li className="mt-2 flex items-center gap-6 border-t border-neutral-800 px-2 pt-4 sm:hidden">
               <button
                 type="button"
