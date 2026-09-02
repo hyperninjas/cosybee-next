@@ -152,6 +152,87 @@ function stripCtaStampedProps(html: string): string {
 }
 
 /**
+ * The nine colour names in BlockNote's palette (@blocknote/core). `default`
+ * never reaches the export — it is skipped before an inline colour is written.
+ */
+const BLOCKNOTE_COLOR_NAMES = new Set([
+  "gray",
+  "brown",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+]);
+
+/**
+ * Drop colours that came in on pasted text, so article prose is painted by
+ * `--article-foreground` (globals.css) instead of by whatever site it was
+ * copied from.
+ *
+ * BlockNote's `textColor`/`backgroundColor` style specs parse ANY
+ * `<span style="color: …">` in pasted HTML and keep the raw CSS string as the
+ * style value. On export that value is written straight back out as an inline
+ * style, so a paragraph pasted from Word or Google Docs publishes as
+ *
+ *   <span style="color: rgb(0, 0, 0);" data-style-type="textColor"
+ *         data-value="rgb(0, 0, 0)">…</span>
+ *
+ * An inline style outranks the stylesheet, and the editor's own `render()`
+ * makes a bare span — so the author writes in the theme colour and publishes
+ * in a hardcoded one, which also goes unreadable in the dark theme.
+ *
+ * The tell is the accompanying data attribute: a colour the author actually
+ * picked from the toolbar is one of the palette NAMES above, while paste
+ * residue is a raw CSS colour. So a named colour keeps its inline style and
+ * anything else loses just that one declaration. Author-written markup in an
+ * htmlBlock carries no `data-style-type`/`data-text-color` at all and is
+ * untouched — an author writing raw HTML keeps full control of it.
+ */
+export function stripPastedColors(html: string): string {
+  return html.replace(/<[a-z][a-z0-9]*\b[^>]*>/gi, (tag) => {
+    const style = /\sstyle="([^"]*)"/.exec(tag);
+    if (!style) return tag;
+
+    const attr = (name: string) =>
+      new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
+    // Inline marks name the colour in `data-value` (qualified by the style
+    // type, as linkRel marks use `data-value` too); block-level colours use
+    // `data-text-color`/`data-background-color`.
+    const styleType = attr("data-style-type");
+    const value = attr("data-value");
+    const pasted = (v: string | undefined) =>
+      v !== undefined && !BLOCKNOTE_COLOR_NAMES.has(v);
+
+    let next = style[1];
+    if (pasted(styleType === "textColor" ? value : attr("data-text-color"))) {
+      next = dropDeclaration(next, "color");
+    }
+    if (
+      pasted(
+        styleType === "backgroundColor" ? value : attr("data-background-color"),
+      )
+    ) {
+      next = dropDeclaration(next, "background-color");
+    }
+    if (next === style[1]) return tag;
+    // An emptied `style=""` is dropped rather than left behind.
+    return tag.replace(style[0], next ? ` style="${next}"` : "");
+  });
+}
+
+/** Remove one declaration from an inline `style` value, keeping the rest. */
+function dropDeclaration(style: string, property: string): string {
+  return style
+    .split(";")
+    .map((d) => d.trim())
+    .filter((d) => d !== "" && d.split(":")[0].trim().toLowerCase() !== property)
+    .join("; ");
+}
+
+/**
  * Convert BlockNote JSON blocks to HTML string.
  * Uses server-side rendering for generating the HTML.
  *
@@ -172,14 +253,18 @@ export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
   const html = await editor.blocksToHTMLLossy(blocks);
   // Apply the site link policy (hoist author rel tokens, un-nofollow internal
-  // links, external → noopener/new-tab) and give media blocks their player
-  // controls before the HTML goes anywhere.
+  // links, external → noopener/new-tab), give media blocks their player
+  // controls, and drop pasted-in text colours before the HTML goes anywhere.
   // Also drop the `data-html` attribute BlockNote's block wrapper stamps on
   // exported htmlBlocks — it duplicates the RAW (unsanitized) source next to
   // the sanitized markup; the raw source belongs only in contentJson.
-  return stripCtaStampedProps(
-    decorateMediaPlayers(decorateArticleLinks(html)),
-  ).replace(/\s*data-html="[^"]*"/g, "");
+  // The colour pass runs LAST, on purpose: it walks tags as `<[^>]*>`, and the
+  // CTA's stamped props can legally contain a `>` — so it must not see them.
+  return stripPastedColors(
+    stripCtaStampedProps(
+      decorateMediaPlayers(decorateArticleLinks(html)),
+    ).replace(/\s*data-html="[^"]*"/g, ""),
+  );
 }
 
 /**

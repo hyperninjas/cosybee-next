@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/article-types";
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
-import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { contentJsonToHtml, stripPastedColors } from "@/app/lib/blocknote";
 import { collectFaqItems } from "@/app/lib/blocknoteSchema";
 import { ArticleCard } from "./ArticleCard";
 import { MoreArticlesCard } from "./MoreArticlesCard";
@@ -105,8 +105,12 @@ export default async function ArticleDetail({
     rawHtml = blockNoteHtml || article.contentHtml || "";
   }
   // Post-process the rendered body regardless of which source produced it:
-  // heading ids for the TOC, and a scroll wrapper around each table.
-  const { html, items: toc } = buildToc(wrapArticleTables(rawHtml));
+  // heading ids for the TOC, a scroll wrapper around each table, and — for the
+  // stored-`contentHtml` fallback, which may predate the export-side pass —
+  // the pasted-in colours that would otherwise outrank `--article-foreground`.
+  const { html, items: toc } = buildToc(
+    wrapArticleTables(stripPastedColors(rawHtml)),
+  );
   // The sidebar "On this page" outline lists top-level sections (h2) only.
   // Anchors and the in-article /toc block still cover h3 subsections.
   const sidebarToc = toc.filter((item) => item.level === 2);
@@ -334,7 +338,7 @@ export default async function ArticleDetail({
               breadcrumb, byline and share control, none of which are the
               article. */}
           <div
-            className="article-body mt-10 text-foreground wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 max-w-170 mx-auto wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{
               __html: `${ARTICLE_START}${html}${ARTICLE_END}`,
             }}
