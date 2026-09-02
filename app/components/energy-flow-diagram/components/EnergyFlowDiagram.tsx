@@ -354,14 +354,14 @@ export function EnergyFlowDiagram({
         ariaLabel={battery.label ?? "Battery"}
         lines={[
           {
-            icon: <ArrowDownwardIcon size={arrowSize} color={style.palette.batteryIn} />,
-            text: directed(format(solution.batteryCharge), battery.inLabel),
-            color: style.palette.batteryIn,
-          },
-          {
             icon: <ArrowUpwardIcon size={arrowSize} color={style.palette.batteryOut} />,
             text: directed(format(solution.batteryDischarge), battery.outLabel),
             color: style.palette.batteryOut,
+          },
+          {
+            icon: <ArrowDownwardIcon size={arrowSize} color={style.palette.batteryIn} />,
+            text: directed(format(solution.batteryCharge), battery.inLabel),
+            color: style.palette.batteryIn,
           },
         ]}
       />,

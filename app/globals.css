@@ -128,7 +128,11 @@
  * follows whichever theme the site is in — no `.dark` wrapper on the page.
  */
 .efh-scope {
-  --efh-solar: oklch(58% 0.16 85);
+  /* Material amber 500 (#ff9800) — client-specified brand amber for the
+     solar channel. Applied as the semantic token so every surface that
+     names the solar channel (node border, flow dots, ring segment, stat
+     tile accent, icon) picks it up in one change. */
+  --efh-solar: #ff9800;
   --efh-battery: var(--success);
   --efh-grid: oklch(52% 0.17 240);
   --efh-home: oklch(55% 0.22 355);
@@ -138,7 +142,7 @@
 
 .dark .efh-scope,
 [data-theme="dark"] .efh-scope {
-  --efh-solar: oklch(82% 0.16 100);
+  --efh-solar: #ff9800;
   --efh-battery: var(--success);
   --efh-grid: oklch(72% 0.13 240);
   --efh-home: oklch(72% 0.22 355);

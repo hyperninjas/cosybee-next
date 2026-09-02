@@ -52,10 +52,40 @@ export const ArrowOutwardIcon = svg(
   <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6H6z" />,
 );
 
-/** `Icons.solar_power`. */
-export const SolarIcon = svg(
-  <path d="M11 5V1h2v4h-2zM4.6 7.4 1.8 4.6 3.2 3.2 6 6 4.6 7.4zM19.4 7.4 18 6l2.8-2.8 1.4 1.4-2.8 2.8zM3 11H1V9h2v2zM23 11h-2V9h2v2zM12 8c-3.9 0-7 3.1-7 7h14c0-3.9-3.1-7-7-7zm-4.7 5c.6-1.8 2.5-3 4.7-3s4.1 1.2 4.7 3H7.3zM2 17h20v2H2v-2zM6 21h12v2H6v-2z" />,
-);
+/**
+ * Lucide `sun`. Stroke-based (a circle with eight rays) — deliberately not
+ * the filled Material `solar_power` panel because "sun" reads faster at
+ * icon size than a stylised panel array. The base `svg()` helper here is
+ * fill-based, so this one hand-rolls the SVG to use `stroke` on the passed
+ * colour.
+ */
+export function SolarIcon({ size = 24, color = "currentColor", style }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      style={{ display: "block", flexShrink: 0, ...style }}
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  );
+}
 
 /** `Icons.home_outlined`. */
 export const HomeIcon = svg(

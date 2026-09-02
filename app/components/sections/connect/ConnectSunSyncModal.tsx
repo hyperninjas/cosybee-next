@@ -1,8 +1,8 @@
 "use client";
+"use no memo";
 
 import type { ReactNode } from "react";
-import { useActionState, useEffect } from "react";
-import { useFormStatus } from "react-dom";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -10,6 +10,7 @@ import {
   Modal,
   Radio,
   RadioGroup,
+  Spinner,
   useOverlayState,
 } from "@heroui/react";
 import { Sun } from "@gravity-ui/icons";
@@ -74,15 +75,62 @@ function autoSubmit() {
   if (form instanceof HTMLFormElement) form.requestSubmit();
 }
 
-function SubmitButton({ label }: { label: string }) {
-  const { pending } = useFormStatus();
+/**
+ * Card shown while the connect action is in flight. Sunsynk's cloud API is
+ * genuinely slow (3–8 s on a good day, sometimes more), and the earlier
+ * version left the picker on screen with no visible activity — customers
+ * read that as "nothing happened".
+ *
+ * Cycles a small ladder of status messages every 2 s so the customer sees
+ * motion. We don't get real progress from the backend (`client.discover`
+ * is one blocking call end-to-end), so the messages are HONEST placeholders
+ * describing what the backend is doing at that stage rather than fake
+ * numeric progress. Cycling stops on the last message so a genuinely long
+ * wait doesn't spin the labels forever.
+ */
+const SYNC_MESSAGES = [
+  "Signing in to Sunsynk…",
+  "Fetching your site…",
+  "Linking your inverter…",
+  "Still working — Sunsynk can be slow at times…",
+];
+
+function SyncingCard() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (step >= SYNC_MESSAGES.length - 1) return;
+    const t = setTimeout(() => setStep((s) => s + 1), 2000);
+    return () => clearTimeout(t);
+  }, [step]);
   return (
-    <Button
-      variant="primary"
-      type="submit"
-      isDisabled={pending}
-      form={FORM_ID}
-    >
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-4">
+      <Spinner size="sm" />
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-foreground">
+          Talking to Sunsynk
+        </p>
+        <p className="text-xs text-muted">{SYNC_MESSAGES[step]}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Submit button that lives INSIDE the form (form wraps Header/Body/Footer,
+ * so the button is a descendant). Native `type="submit"` fires the form's
+ * action; HeroUI's Button passes `type` through to its underlying <button>
+ * so no onPress workaround is needed.
+ *
+ * An earlier iteration put the button in Modal.Footer OUTSIDE the form and
+ * relied on `form={FORM_ID}` — react-aria-components' Button doesn't
+ * reliably translate its synthetic PressEvent into a native submit dispatch
+ * for a form-external button, so every click was silently swallowed.
+ * Wrapping the form around Modal.Footer is the fix; it also lets
+ * useFormStatus report pending correctly for descendants.
+ */
+function SubmitButton({ label, pending }: { label: string; pending: boolean }) {
+  return (
+    <Button variant="primary" type="submit" isDisabled={pending}>
       {pending ? "Working…" : label}
     </Button>
   );
@@ -102,7 +150,10 @@ export function ConnectSunSyncModal({
    */
   successHref?: string;
 }) {
-  const [result, formAction] = useActionState(
+  // `isPending` is the third slot of useActionState — true while the
+  // server action is in flight. Preferred over useFormStatus here because
+  // the submit button lives outside the form (see SubmitButton doc).
+  const [result, formAction, isPending] = useActionState(
     async (_prev: SunSyncConnectResult | null, form: FormData) =>
       connectSunSync(form),
     INITIAL,
@@ -135,8 +186,12 @@ export function ConnectSunSyncModal({
 
   // Credentials + picker are all hidden on success — the effect above will
   // dismiss the modal on the next paint, so we just show a confirmation
-  // rather than the input UI the user has already finished with.
-  const hideCredentials = pickingPlant || pickingInverter || succeeded;
+  // rather than the input UI the user has already finished with. Also
+  // hidden while the connect action is in flight so the SyncingCard is
+  // the only focal point on screen (Sunsynk's 3–8 s wait feels
+  // interminable if the picker just sits there unresponsive).
+  const hideCredentials = pickingPlant || pickingInverter || succeeded || isPending;
+  const hidePicker = isPending;
 
   return (
     <Modal state={overlay}>
@@ -144,6 +199,26 @@ export function ConnectSunSyncModal({
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
+            {/* form wraps every Modal slot below so `type="submit"` on the
+                footer button is a natural form descendant.
+
+                🔴 We DELIBERATELY use `onSubmit` + `formAction(fd)` instead
+                of `<form action={formAction}>`. React 19 auto-resets any
+                form bound via the `action` prop as soon as the action
+                returns — regardless of whether the action succeeded or
+                returned a validation error. Our multi-step flow returns
+                `{pickPlant:[…]}` on the first pass; the auto-reset would
+                then clear the (hidden) email + password inputs before the
+                second pass, and the "Link this site" click would POST
+                with empty credentials. The manual dispatch below is the
+                supported opt-out. */}
+            <form
+              id={FORM_ID}
+              onSubmit={(e) => {
+                e.preventDefault();
+                formAction(new FormData(e.currentTarget));
+              }}
+            >
             <Modal.Header className="flex-row items-start gap-3">
               <Modal.Icon className="bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
                 <Sun className="size-5" />
@@ -178,12 +253,9 @@ export function ConnectSunSyncModal({
             </Modal.Header>
 
             <Modal.Body>
-              <form
-                id={FORM_ID}
-                action={formAction}
-                className="flex flex-col gap-5"
-              >
-                {genericError && (
+              <div className="flex flex-col gap-5">
+                {isPending && <SyncingCard />}
+                {!isPending && genericError && (
                   <div
                     role="alert"
                     className="rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger"
@@ -195,11 +267,19 @@ export function ConnectSunSyncModal({
                 {/* Credential fields — mounted for every step. On picker
                     re-submits the user's original values are still in the
                     inputs so we don't have to ferry them through hidden
-                    fields or React state. The wrapper is `hidden` during
-                    the picker so the user isn't asked to re-enter what
-                    they already typed — the inputs still submit because
-                    `hidden` (and `display:none`) doesn't disable form
-                    controls, only the `disabled` attribute does. */}
+                    fields or React state.
+
+                    🔴 `isRequired` only on the credentials step, NEVER on
+                    the picker step. When a required input sits inside a
+                    `hidden` wrapper, the browser silently blocks form
+                    submit because it can't scroll to / focus a hidden
+                    input to show the "please fill out this field" bubble
+                    — Chrome logs `An invalid form control with
+                    name='email' is not focusable` and drops the submit
+                    with no visible error. That was the entire "Link this
+                    site does nothing" bug. Missing values on re-submit
+                    are caught by `requiredString` inside the server
+                    action instead. */}
                 <div hidden={hideCredentials} className="flex flex-col gap-5">
                   <TextInputField
                     name="email"
@@ -208,7 +288,7 @@ export function ConnectSunSyncModal({
                     autoComplete="email"
                     inputMode="email"
                     placeholder="you@example.com"
-                    isRequired
+                    isRequired={!hideCredentials}
                     autoFocus
                     description="The email you use to sign in to the Sunsynk app."
                   />
@@ -216,12 +296,12 @@ export function ConnectSunSyncModal({
                     name="password"
                     label="Sunsynk password"
                     autoComplete="current-password"
-                    isRequired
+                    isRequired={!hideCredentials}
                     description="Stored encrypted (AES-256-GCM); used only to talk to the Sunsynk API on your behalf."
                   />
                 </div>
 
-                {pickingPlant && "pickPlant" in result! && (
+                {pickingPlant && "pickPlant" in result! && !hidePicker && (
                   <fieldset className="rounded-lg border border-border bg-surface-secondary p-4">
                     <legend className="px-2 text-sm font-semibold text-foreground">
                       Which site?
@@ -248,7 +328,7 @@ export function ConnectSunSyncModal({
                   </fieldset>
                 )}
 
-                {pickingInverter && "pickInverter" in result! && (
+                {pickingInverter && "pickInverter" in result! && !hidePicker && (
                   <fieldset className="rounded-lg border border-border bg-surface-secondary p-4">
                     <legend className="px-2 text-sm font-semibold text-foreground">
                       Which inverter?
@@ -270,7 +350,7 @@ export function ConnectSunSyncModal({
                   </fieldset>
                 )}
 
-                {!pickingPlant && !pickingInverter && !succeeded && (
+                {!pickingPlant && !pickingInverter && !succeeded && !isPending && (
                   <p className="text-xs text-muted">
                     If your account has more than one plant or inverter, the
                     next step lets you pick which one to link.
@@ -282,7 +362,7 @@ export function ConnectSunSyncModal({
                     Your inverter is linked. Taking you to the next step…
                   </div>
                 )}
-              </form>
+              </div>
             </Modal.Body>
 
             <Modal.Footer>
@@ -290,8 +370,9 @@ export function ConnectSunSyncModal({
               {/* Hide the submit on success — the effect above closes the
                   modal and (if provided) navigates on, so rendering an
                   active button would let the user re-fire the action. */}
-              {!succeeded && <SubmitButton label={submitLabel} />}
+              {!succeeded && <SubmitButton label={submitLabel} pending={isPending} />}
             </Modal.Footer>
+            </form>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

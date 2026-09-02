@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 
 import { Card, Chip } from "@heroui/react";
 import {
@@ -101,7 +102,15 @@ function toEnergyFlowInput(flow: EnergyFlowSnapshot): EnergyFlowInput {
           })),
         }
       : {}),
-    showExportNode: true,
+    // Grid is a single BI-DIRECTIONAL connection at the meter — the same
+    // wire carries import and export, never at the same instant. The
+    // library draws export as a reverse arrow on the grid link when this
+    // is false, which is what the client asked for (splitting import and
+    // export into two hexagons reads as two physical connections and
+    // misrepresents the meter). Daily import/export totals still live
+    // separately on the stat strip, where cumulative kWh in each
+    // direction is a genuinely useful two-number breakdown.
+    showExportNode: false,
   });
 }
 
@@ -111,6 +120,14 @@ function toEnergyFlowInput(flow: EnergyFlowSnapshot): EnergyFlowInput {
  * "grid" token), and the battery in/out share the battery hue for the
  * same reason. When a future palette adds distinct export / discharge
  * tokens, wire them here — nothing else needs to change.
+ *
+ * 🔴 Solar stays on the theme token — an earlier pass pinned it to
+ * `#ff9800` for the solar node, but the same entry drives the SOLAR
+ * SEGMENT on the home node's consumption ring (see `EnergyNodeView.tsx`
+ * → `push(ringShares.solar, style.palette.solar)`), so a saturated
+ * amber wrapped the entire home node whenever solar was supplying the
+ * house. Palette must stay a single per-source colour until the library
+ * grows a separate "solar-ring" key.
  */
 const PALETTE: EnergyFlowPalette = {
   gridImport: "var(--efh-grid)",
@@ -202,6 +219,16 @@ export function EnergyFlowDiagram({ flow, now, freshness = "fresh" }: EnergyFlow
                   // pinned every dot to the slowest speed once we started
                   // feeding it watts. Mirrors mobile's `FlowRate(50, 5000)`.
                   flowRate: { ...DEFAULT_FLOW_RATE, minExpected: 50, maxExpected: 5000 },
+                  // Node border thickness — client-specified 1.5.
+                  //
+                  // 🔴 The Home node draws a SEGMENTED consumption ring
+                  // instead of a plain border (`!hasRing && borderWidth > 0`
+                  // in EnergyNodeView.tsx), so `borderWidth` alone would
+                  // leave Home on the library-default `ringWidth: 4`.
+                  // Match the two so every node — Home included — reads
+                  // at the same 1.5 stroke.
+                  borderWidth: 1.5,
+                  ringWidth: 1.5,
                 }}
               />
               {overhead >= OVERHEAD_MIN_W && (

@@ -1,10 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useActionState, useEffect } from "react";
-import { useFormStatus } from "react-dom";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Chip, Modal, useOverlayState } from "@heroui/react";
+import { Button, Chip, Modal, Spinner, useOverlayState } from "@heroui/react";
 import { ArrowUpRightFromSquare, ThunderboltFill } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
 import { PasswordField } from "@/app/components/ui/PasswordField";
@@ -27,15 +26,46 @@ const OCTOPUS_API_KEY_URL =
 const INITIAL: ConnectResult | null = null;
 const FORM_ID = "connect-octopus";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
+/**
+ * Same syncing card as ConnectSunSyncModal — Octopus's connect endpoint
+ * kicks off a ~13-month consumption back-fill after auth, which the API
+ * doesn't await, but the connect POST itself still takes a few seconds
+ * (auth + tariff / MPAN resolution). Cycling status keeps the customer
+ * oriented while that runs.
+ */
+const SYNC_MESSAGES = [
+  "Signing in to Octopus…",
+  "Reading your account…",
+  "Setting up the connection…",
+  "Still working — this can take a moment…",
+];
+
+function SyncingCard() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (step >= SYNC_MESSAGES.length - 1) return;
+    const t = setTimeout(() => setStep((s) => s + 1), 2000);
+    return () => clearTimeout(t);
+  }, [step]);
   return (
-    <Button
-      variant="primary"
-      type="submit"
-      isDisabled={pending}
-      form={FORM_ID}
-    >
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-4">
+      <Spinner size="sm" />
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-foreground">Talking to Octopus</p>
+        <p className="text-xs text-muted">{SYNC_MESSAGES[step]}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Submit-inside-form. See the matching doc in ConnectSunSyncModal —
+ * form wraps Header/Body/Footer so the button is a natural descendant
+ * and `type="submit"` fires the form's action without hacks.
+ */
+function SubmitButton({ pending }: { pending: boolean }) {
+  return (
+    <Button variant="primary" type="submit" isDisabled={pending}>
       {pending ? "Connecting…" : "Connect Octopus"}
     </Button>
   );
@@ -49,7 +79,7 @@ export function ConnectOctopusModal({
   /** See ConnectSunSyncModal.successHref — same shape, same rationale. */
   successHref?: string;
 }) {
-  const [result, formAction] = useActionState(
+  const [result, formAction, isPending] = useActionState(
     async (_prev: ConnectResult | null, form: FormData) => connectOctopus(form),
     INITIAL,
   );
@@ -73,6 +103,18 @@ export function ConnectOctopusModal({
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
+            {/* onSubmit + manual dispatch instead of `action={formAction}`
+                for consistency with ConnectSunSyncModal (see the block
+                there for the React-19 auto-reset explanation). Octopus
+                is single-step so it's not currently affected, but a
+                future multi-step flow here would hit the same bug. */}
+            <form
+              id={FORM_ID}
+              onSubmit={(e) => {
+                e.preventDefault();
+                formAction(new FormData(e.currentTarget));
+              }}
+            >
             <Modal.Header className="flex-row items-start gap-3">
               <Modal.Icon className="bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
                 <ThunderboltFill className="size-5" />
@@ -94,8 +136,9 @@ export function ConnectOctopusModal({
             </Modal.Header>
 
             <Modal.Body>
-              <form id={FORM_ID} action={formAction} className="flex flex-col gap-5">
-                {result && !result.ok && (
+              <div className="flex flex-col gap-5">
+                {isPending && <SyncingCard />}
+                {!isPending && result && !result.ok && (
                   <div
                     role="alert"
                     className="rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger"
@@ -103,13 +146,16 @@ export function ConnectOctopusModal({
                     {result.error}
                   </div>
                 )}
-                <div hidden={succeeded} className="flex flex-col gap-5">
+                {/* Hide credentials on success (post-connect confirmation
+                    replaces them) AND while pending (SyncingCard is the
+                    focal point). Same reasoning as ConnectSunSyncModal. */}
+                <div hidden={succeeded || isPending} className="flex flex-col gap-5">
                   <TextInputField
                     name="accountNumber"
                     label="Octopus account number"
                     autoComplete="off"
                     placeholder="A-1234ABCD"
-                    isRequired
+                    isRequired={!(succeeded || isPending)}
                     autoFocus
                     description="Top of your Octopus dashboard, under your name. Starts with an A."
                   />
@@ -121,7 +167,7 @@ export function ConnectOctopusModal({
                     name="apiKey"
                     label="Octopus API key"
                     autoComplete="off"
-                    isRequired
+                    isRequired={!(succeeded || isPending)}
                     description="Starts with sk_live_. Generated in Octopus → Personal details → API access."
                   />
                   <a
@@ -144,13 +190,14 @@ export function ConnectOctopusModal({
                     Octopus linked. {successHref ? "Taking you to the dashboard…" : "You can close this window."}
                   </div>
                 )}
-              </form>
+              </div>
             </Modal.Body>
 
             <Modal.Footer>
               <Modal.CloseTrigger />
-              {!succeeded && <SubmitButton />}
+              {!succeeded && <SubmitButton pending={isPending} />}
             </Modal.Footer>
+            </form>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

@@ -20,6 +20,7 @@ import {
   PowerHistoryChart,
   ProviderStatusBar,
   StatStrip,
+  SyncingDataBanner,
   TariffCard,
   getDashboardData,
 } from "@/app/components/sections/energyflow-home";
@@ -108,6 +109,18 @@ export default async function EnergyFlowHomePage({
     !liveFields.stats ||
     !liveFields.history.live;
 
+  // Freshly-linked Sunsynk backfill signal. The backend fires up to 90 days
+  // of 5-minute intraday sync as fire-and-forget on connect (see
+  // sunsynk.connection.ts); until it finishes, the dashboard shows
+  // Connected but every kWh tile reads 0.0 and the chart has one dot.
+  // Trigger the banner when: Sunsynk connected, and either we haven't
+  // synced telemetry yet OR the returned history has almost no points.
+  // Conservative bounds so a genuine low-activity day doesn't show it.
+  const historyPointCount = data.history.points.length;
+  const showBackfillBanner =
+    sunsync.connected &&
+    (sunsync.lastSyncedAt === null || historyPointCount < 3);
+
   return wrapper(
     <div className="flex flex-col gap-4">
       {/* Persistent connections strip — makes the second provider reachable
@@ -116,6 +129,8 @@ export default async function EnergyFlowHomePage({
           could connect Octopus first and then have no way to add SunSync
           from the page. */}
       <ProviderStatusBar sunsync={sunsync} octopus={octopus} />
+
+      {showBackfillBanner && <SyncingDataBanner />}
 
       {stillSyncing && (
         <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
