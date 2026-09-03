@@ -473,26 +473,82 @@ export async function createDraft(
  *   - No status. The backend rejects one on this route rather than ignoring
  *     it; typing must never publish anything.
  */
+export type AutosavePatch = {
+  title?: string;
+  contentJson?: unknown[];
+  description?: string;
+  lede?: string;
+  // Cover
+  coverImage?: string;
+  coverImageAlt?: string;
+  coverImageTitle?: string;
+  coverImageCaption?: string;
+  coverImageCredit?: string;
+  // SEO / social
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  // Byline + placement
+  authorDate?: string;
+  featured?: boolean;
+  homeFeatured?: boolean;
+  carouselIntro?: string;
+  carouselBody?: string;
+  // CTA
+  ctaLabel?: string;
+  ctaHref?: string;
+  ctaExternal?: boolean;
+};
+
+/** Fields whose empty string means "cleared", so it is sent as null. */
+const NULLABLE_WHEN_BLANK = new Set([
+  "lede",
+  "coverImageTitle",
+  "coverImageCaption",
+  "coverImageCredit",
+  "seoTitle",
+  "seoDescription",
+  "ogImage",
+  "ogImageAlt",
+  "canonicalUrl",
+  "carouselIntro",
+  "carouselBody",
+  "ctaLabel",
+  "ctaHref",
+]);
+
 export async function autosavePost(
   id: string,
-  patch: {
-    title?: string;
-    contentJson?: unknown[];
-    description?: string;
-    lede?: string | null;
-    seoTitle?: string | null;
-    seoDescription?: string | null;
-  },
+  patch: AutosavePatch,
 ): Promise<AutosaveResult> {
   await assertAdmin();
   if (!id) return { ok: false, error: "The post hasn't been created yet." };
 
   const body: Record<string, unknown> = {};
-  if (patch.title !== undefined) body.title = patch.title;
-  if (patch.description !== undefined) body.description = patch.description;
-  if (patch.lede !== undefined) body.lede = patch.lede;
-  if (patch.seoTitle !== undefined) body.seoTitle = patch.seoTitle;
-  if (patch.seoDescription !== undefined) body.seoDescription = patch.seoDescription;
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined || key === "contentJson") continue;
+    // An emptied optional field means "remove it", and the column is nullable
+    // — sending "" would store a blank string where null is meant.
+    body[key] =
+      typeof value === "string" && value === "" && NULLABLE_WHEN_BLANK.has(key)
+        ? null
+        : value;
+  }
+
+  // Same normalisation the explicit save applies, so a link autosaved
+  // half-typed still arrives in the shape the rest of the site expects.
+  if (typeof body.ctaHref === "string" && body.ctaHref) {
+    body.ctaHref = patch.ctaExternal
+      ? /^(https?:\/\/|mailto:|tel:)/i.test(body.ctaHref)
+        ? body.ctaHref
+        : `https://${body.ctaHref}`
+      : body.ctaHref.startsWith("/")
+        ? body.ctaHref
+        : `/${body.ctaHref}`;
+  }
 
   if (patch.contentJson !== undefined) {
     const blocks = Array.isArray(patch.contentJson) ? patch.contentJson : [];

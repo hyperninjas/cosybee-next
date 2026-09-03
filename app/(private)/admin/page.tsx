@@ -18,6 +18,7 @@ export default async function AdminDashboard() {
     category: p.category,
     tags: p.tags ?? [],
     status: p.status,
+    hasUnpublishedChanges: p.hasUnpublishedChanges ?? false,
     featured: p.featured,
     homeFeatured: p.homeFeatured,
     coverImage: p.coverImage,

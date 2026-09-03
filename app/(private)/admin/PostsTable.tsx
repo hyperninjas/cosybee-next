@@ -34,6 +34,8 @@ export type Row = {
   category: Category | null;
   tags: Tag[];
   status: string;
+  /** Live, but holding autosaved edits readers haven't been shown. */
+  hasUnpublishedChanges?: boolean;
   featured: boolean;
   homeFeatured: boolean;
   coverImage: string | null;
@@ -296,7 +298,9 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
       applyOptimistic({ type: "status", id: row.id, status: next });
       const res = await setStatus(fd);
       if (res.ok) {
-        toast.success(next === "PUBLISHED" ? "Post published" : "Moved to drafts");
+        toast.success(
+          next === "PUBLISHED" ? "Post published" : "Moved to drafts",
+        );
       } else {
         toast.danger(res.error || "Couldn't update status");
       }
@@ -332,9 +336,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
       applyOptimistic({ type: "homeFeatured", id: row.id, homeFeatured: next });
       const res = await setHomeFeatured(fd);
       if (res.ok) {
-        toast.success(
-          next ? "Added to home page" : "Removed from home page",
-        );
+        toast.success(next ? "Added to home page" : "Removed from home page");
       } else {
         toast.danger(res.error || "Couldn't update home feature");
       }
@@ -563,7 +565,7 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                         <div className="min-w-0">
                           <Link
                             href={`/admin/posts/${row.id}/edit`}
-                            className="block truncate font-semibold transition-colors hover:text-accent"
+                            className="block truncate font-semibold transition-colors hover:underline"
                           >
                             {row.title}
                             {row.featured && (
@@ -607,6 +609,18 @@ export default function PostsTable({ rows }: { rows: Row[] }) {
                         }
                       >
                         {row.status === "PUBLISHED" ? "Published" : "Draft"}
+                        {/* A live post whose author has saved work readers
+                            cannot see yet — worth surfacing here, since the
+                            dashboard is where someone notices a post they
+                            left half-edited. */}
+                        {row.hasUnpublishedChanges && (
+                          <span
+                            className="ml-1.5 font-semibold text-warning"
+                            title="Edited since it was last made live"
+                          >
+                            •
+                          </span>
+                        )}
                       </Chip>
                     </Table.Cell>
 

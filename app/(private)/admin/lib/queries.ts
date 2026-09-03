@@ -19,9 +19,34 @@ export async function listPosts(): Promise<AdminPostRow[]> {
   return adminApi.listPosts();
 }
 
-/** A single post for the edit form (full row). */
+/**
+ * Lay a post's unpublished edits over its live values.
+ *
+ * A live post's columns hold what readers already have; the staged patch holds
+ * what the author has been writing. Everywhere inside the admin — the editor
+ * and the preview both — the second is the one to show. Without it, reopening
+ * a post would present the old version and the next autosave would overwrite
+ * the staged work with it.
+ *
+ * `key in merged` rather than a `??` chain, so a field the author CLEARED
+ * (staged as null) still wins over the live value instead of falling back to
+ * it. Keys with no counterpart on the row — `authorId`, `categoryId` — are
+ * skipped: those are references autosave doesn't stage.
+ */
+function applyStagedEdits(row: AdminPost): AdminPost {
+  const staged = (row.draft ?? {}) as Record<string, unknown>;
+  if (Object.keys(staged).length === 0) return row;
+  const merged: Record<string, unknown> = { ...row };
+  for (const key of Object.keys(staged)) {
+    if (key in merged) merged[key] = staged[key];
+  }
+  return merged as unknown as AdminPost;
+}
+
+/** A single post for the edit form (full row), showing unpublished edits. */
 export async function getPost(id: string): Promise<AdminPost | null> {
-  return adminApi.getPost(id);
+  const row = await adminApi.getPost(id);
+  return row ? applyStagedEdits(row) : null;
 }
 
 /**
@@ -62,8 +87,12 @@ function unfiledCategory(blog: "hive" | "learn"): Category {
 }
 
 export async function getPostArticle(id: string): Promise<Article | null> {
-  const row = await adminApi.getPost(id);
-  if (!row) return null;
+  const live = await adminApi.getPost(id);
+  if (!live) return null;
+  // A preview exists to answer "how will what I am writing look", so it shows
+  // the staged version — previewing the article readers already have is the
+  // one thing an author never needs.
+  const row = applyStagedEdits(live);
 
   return {
     id: row.id,

@@ -30,34 +30,18 @@ export default async function EditPostPage({
   // Extract tag names for autocomplete suggestions
   const tagSuggestions = tags.map((t) => t.name);
 
-  // Unpublished edits, laid over the live values.
-  //
-  // Without this the editor would open on the LIVE article and the next
-  // autosave would overwrite the staged patch with it — quietly throwing away
-  // work that had been saved successfully. Autosave only makes sense if
-  // reopening the post resumes where the author left off.
-  //
-  // Only the fields autosave actually writes are merged; everything else
-  // (cover, taxonomy, flags) is never staged and comes from the live row.
-  const staged = (post.draft ?? {}) as Partial<{
-    title: string;
-    description: string;
-    lede: string | null;
-    seoTitle: string | null;
-    seoDescription: string | null;
-    contentJson: Record<string, unknown>;
-  }>;
-
+  // `getPost` has already laid any unpublished edits over the live values, so
+  // this maps one coherent record — the version the author was last writing.
   // Map backend post to form shape
   const formPost: FormPost = {
     id: post.id,
     blog: post.blog,
     slug: post.slug,
-    title: staged.title ?? post.title,
-    seoTitle: staged.seoTitle ?? post.seoTitle,
-    seoDescription: staged.seoDescription ?? post.seoDescription,
-    description: staged.description ?? post.description,
-    lede: staged.lede ?? post.lede,
+    title: post.title,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    description: post.description,
+    lede: post.lede,
 
     // Taxonomy (full objects)
     author: post.author,
@@ -99,8 +83,7 @@ export default async function EditPostPage({
     publishedAt: post.publishedAt ?? null,
 
     // Content
-    // The body is the field autosave writes most — staged wins.
-    contentJson: staged.contentJson ?? post.contentJson,
+    contentJson: post.contentJson,
   };
 
   return (

@@ -91,7 +91,10 @@ export type AdminPostRow = Pick<
   | "coverImage"
   | "ogImage"
   | "updatedAt"
->;
+> & {
+  /** The post is live and holding edits nobody has made live yet. */
+  hasUnpublishedChanges?: boolean;
+};
 
 /** Input for creating/updating a post. */
 export interface PostInput {

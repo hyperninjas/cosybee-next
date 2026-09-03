@@ -78,18 +78,24 @@ export function ActionBar({
     : isArchived
       ? "Archived"
       : "Draft";
-  // Deliberately understated: autosave is background work, and a loud status
-  // beside the buttons would read as something needing attention. Only a
-  // failure raises its voice, because that one does.
-  const autosaveNote =
+  // Colour carries the meaning, so the states aren't all one grey word:
+  //
+  //   in progress   muted    — typing and saving are the normal case, and
+  //                            colouring them would make writing look alarming
+  //   saved         success  — steady while idle, not a flash: it stays until
+  //                            the next keystroke
+  //   not live yet  warning  — the one state with something still to do
+  //   failed        danger   — handled separately below, since it also has to
+  //                            survive on mobile and announce itself
+  const autosaveNote: { text: string; tone: string } | null =
     autosave?.status === "saving"
-      ? "Saving…"
+      ? { text: "Saving…", tone: "text-success" }
       : autosave?.status === "dirty"
-        ? "Unsaved changes"
+        ? { text: "Unsaved changes", tone: "text-danger" }
         : autosave?.status === "saved"
           ? autosave.staged
-            ? "Saved — not live yet"
-            : "Saved"
+            ? { text: "Saved - not live yet", tone: "text-warning font-medium" }
+            : { text: "Saved", tone: "text-success font-medium" }
           : null;
 
   return (
@@ -125,11 +131,11 @@ export function ActionBar({
         </Chip>
         {autosaveNote && (
           <span
-            className="hidden text-xs text-muted sm:inline"
+            className={`hidden text-sm sm:inline ${autosaveNote.tone}`}
             // Spoken only when it settles, not on every keystroke.
             aria-live="polite"
           >
-            {autosaveNote}
+            {autosaveNote.text}
           </span>
         )}
         {autosave?.status === "error" && (
@@ -139,25 +145,7 @@ export function ActionBar({
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* A live post holding edits nobody has seen.
-            There is no "make these live" button here on purpose: Update
-            already does that, and does it properly. This acts only on the
-            staged patch — it would have published the subset autosave
-            tracks, so an author who had also changed the cover or the tags
-            would have shipped the body and silently left those behind. */}
-        {staged && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onPress={staged.onDiscard}
-            isDisabled={staged.busy || pending}
-            isPending={staged.busy}
-          >
-            Discard changes
-          </Button>
-        )}
+      <div className="flex items-center gap-2.5">
         {liveHref && (
           <AppLink
             href={liveHref}
@@ -168,6 +156,25 @@ export function ActionBar({
             <ArrowUpRightFromSquare className="size-3.5" />
           </AppLink>
         )}
+        {/* A live post holding edits nobody has seen.
+            There is no "make these live" button here on purpose: Update
+            already does that, and does it properly. This acts only on the
+            staged patch — it would have published the subset autosave
+            tracks, so an author who had also changed the cover or the tags
+            would have shipped the body and silently left those behind. */}
+        {staged && (
+          <Button
+            type="button"
+            variant="danger-soft"
+            size="sm"
+            onPress={staged.onDiscard}
+            isDisabled={staged.busy || pending}
+            isPending={staged.busy}
+          >
+            Discard changes
+          </Button>
+        )}
+
         {/* A live post's secondary action is to TAKE IT DOWN, said plainly —
             not a "Save draft" that quietly did the same thing. A draft has
             nothing to take down, so it gets an ordinary save instead. */}
@@ -213,11 +220,18 @@ export function ActionBar({
           type="submit"
           variant="primary"
           size="sm"
-          onPress={press("primary", isPublished || isArchived ? "" : "PUBLISHED")}
+          onPress={press(
+            "primary",
+            isPublished || isArchived ? "" : "PUBLISHED",
+          )}
           isDisabled={pending || disabled}
           isPending={pending && pressed === "primary"}
         >
-          {hasIssues && !isPublished && (
+          {/* Shown when THIS button leaves the post live, which has to match the
+              gate on the issues dialog in PostForm or the dialog arrives
+              unannounced. That means Publish on a draft and Update on a live
+              post — but not Save on an archived one, which publishes nothing. */}
+          {hasIssues && !isArchived && (
             <TriangleExclamation
               aria-hidden
               className="size-3.5 shrink-0 opacity-90"

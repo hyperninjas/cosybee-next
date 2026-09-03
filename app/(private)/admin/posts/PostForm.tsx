@@ -16,6 +16,7 @@ import {
   createDraft,
   autosavePost,
   discardStagedChanges,
+  type AutosavePatch,
 } from "@/app/(private)/admin/actions";
 import { useAutosave } from "./useAutosave";
 import {
@@ -488,15 +489,35 @@ export default function PostForm({
       (url) => url && !measuredImages.current.has(url),
     );
     if (pending.length === 0) return;
-    for (const url of pending) measuredImages.current.add(url);
+    // Captured once: the Set is created by `useRef(new Set())` and never
+    // reassigned, so this is the same object the cleanup needs — and reading
+    // it here rather than through `.current` later is what the lint asks for.
+    const measured = measuredImages.current;
+    for (const url of pending) measured.add(url);
 
     let cancelled = false;
+    // URLs whose lookup actually finished, so the cleanup can tell them apart
+    // from ones abandoned mid-flight.
+    const settled = new Set<string>();
     void Promise.all(
       pending.map(async (url) => {
-        // A miss is normal (external URL, or a file uploaded outside the
-        // library) and simply leaves that image unchecked.
-        const item = await findMediaByUrl(url).catch(() => null);
-        if (cancelled || !item || item.kind !== "image") return;
+        // Three outcomes, and they are not the same thing:
+        //
+        //  - a row comes back → record what it knows;
+        //  - the library genuinely has no such object (an external URL, or a
+        //    file uploaded outside the gallery) → leave it marked, so the
+        //    lookup isn't repeated on every keystroke;
+        //  - the REQUEST failed → unmark it, so a blip doesn't silently
+        //    exclude that image from the pre-publish checks for the rest of
+        //    the session. It is retried on the next edit.
+        const item = await findMediaByUrl(url).catch(() => undefined);
+        if (cancelled) return;
+        settled.add(url);
+        if (item === undefined) {
+          measured.delete(url);
+          return;
+        }
+        if (!item || item.kind !== "image") return;
         recordImageMeta({
           url,
           name: item.name ?? undefined,
@@ -508,6 +529,20 @@ export default function PostForm({
     );
     return () => {
       cancelled = true;
+      // Release the marks on anything abandoned mid-flight, so a later run
+      // asks again.
+      //
+      // Without this the effect could not survive its own remount. Strict Mode
+      // runs it, cleans up, then runs it again: the first pass marked every
+      // URL and had its results discarded by `cancelled`, and the second found
+      // nothing left to do because they were all marked. Net result, on every
+      // post opened for editing: no image facts at all, so `issues` silently
+      // skipped every image and the size/dimension warnings never appeared.
+      // Only images uploaded during the session — which report themselves
+      // through `onImageMeta` — were ever checked.
+      for (const url of pending) {
+        if (!settled.has(url)) measured.delete(url);
+      }
     };
   }, [coverUrl, ogImage, documentImageUrls, recordImageMeta]);
 
@@ -706,9 +741,70 @@ export default function PostForm({
     [blog, saved],
   );
 
+  /**
+   * Everything autosave keeps, as one flat object.
+   *
+   * Three groups are deliberately absent:
+   *
+   *  - `slug` and `blog` — the post's ADDRESS. Moving it retires the old URL
+   *    into the redirect table, which is a decision, not a keystroke.
+   *  - `status` and `publishedAt` — publication. The backend refuses them on
+   *    the autosave route rather than ignoring them.
+   *  - author, category and tags — stored as references, so reloading a
+   *    staged patch would mean resolving ids back into records. They are
+   *    single-click picks that an explicit save already covers.
+   */
   const autosaveValue = useMemo(
-    () => ({ title, blocks, description, lede, seoTitle, seoDescription }),
-    [title, blocks, description, lede, seoTitle, seoDescription],
+    () => ({
+      title,
+      blocks,
+      description,
+      lede,
+      coverImage: coverUrl,
+      coverImageAlt,
+      coverImageTitle,
+      coverImageCaption,
+      coverImageCredit,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      ogImageAlt,
+      canonicalUrl,
+      noindex,
+      authorDate,
+      featured,
+      homeFeatured,
+      carouselIntro,
+      carouselBody,
+      ctaLabel,
+      ctaHref,
+      ctaExternal,
+    }),
+    [
+      title,
+      blocks,
+      description,
+      lede,
+      coverUrl,
+      coverImageAlt,
+      coverImageTitle,
+      coverImageCaption,
+      coverImageCredit,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      ogImageAlt,
+      canonicalUrl,
+      noindex,
+      authorDate,
+      featured,
+      homeFeatured,
+      carouselIntro,
+      carouselBody,
+      ctaLabel,
+      ctaHref,
+      ctaExternal,
+    ],
   );
 
   const autosaveState = useAutosave({
@@ -716,15 +812,25 @@ export default function PostForm({
     // Nothing to save into until the post exists.
     enabled: Boolean(saved?.id),
     save: async (v, previous) => {
-      // Only what actually changed. The body is the expensive field by a wide
-      // margin — the server re-renders it to HTML through jsdom on every save
-      // — so a request that only moves the title should not carry it. On the
-      // first save `previous` is undefined and everything goes.
-      const patch: Parameters<typeof autosavePost>[1] = {};
-      if (!previous || v.title !== previous.title) patch.title = v.title;
-      // Compared by content, not identity: BlockNote hands back a fresh array
-      // for changes that leave the document alone (a cursor move), and the
-      // body is the one field worth a stringify to be sure about.
+      // Only what actually changed. Every field is compared rather than
+      // listed, so adding one to `autosaveValue` is enough — a per-field
+      // `if` ladder is exactly the kind of thing that silently stops covering
+      // a field somebody added later.
+      //
+      // It matters most for the body: the server re-renders it to HTML
+      // through jsdom on every save, so a request that only moves the title
+      // must not carry it. On the first save `previous` is undefined and
+      // everything goes.
+      const patch: AutosavePatch = {};
+      for (const key of Object.keys(v) as (keyof typeof v)[]) {
+        if (key === "blocks") continue;
+        if (!previous || v[key] !== previous[key]) {
+          (patch as Record<string, unknown>)[key] = v[key];
+        }
+      }
+      // The body is compared by content, not identity: BlockNote hands back a
+      // fresh array for changes that leave the document alone (a cursor move),
+      // and it is the one field worth a stringify to be sure about.
       if (
         !previous ||
         (v.blocks !== previous.blocks &&
@@ -732,15 +838,8 @@ export default function PostForm({
       ) {
         patch.contentJson = v.blocks as unknown[];
       }
-      if (!previous || v.description !== previous.description) {
-        patch.description = v.description;
-      }
-      if (!previous || v.lede !== previous.lede) patch.lede = v.lede || null;
-      if (!previous || v.seoTitle !== previous.seoTitle) {
-        patch.seoTitle = v.seoTitle || null;
-      }
-      if (!previous || v.seoDescription !== previous.seoDescription) {
-        patch.seoDescription = v.seoDescription || null;
+      if (Object.keys(patch).length === 0) {
+        return { ok: true as const, staged: hasStaged };
       }
       const result = await autosavePost(saved!.id, patch);
       // Set here rather than in an effect on the autosave state: this is an
