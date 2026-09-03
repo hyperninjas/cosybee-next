@@ -1,18 +1,14 @@
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import deviceImg from "@/public/solar/energiebee-app-solar-system-overview.png";
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
 import type { FeatureItemContent } from "./EnergyMonitoring";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import Hexagon from "../../ui/Hexagon";
-import featureImage from "@/public/solar/Energy-&-Savings-Analytics.png";
+import featureImage from "@/public/solar/energy-and-savings-analytics.png";
 
 export type EnergyAnalyticsProps = {
   title?: string;
   features?: FeatureItemContent[];
-  /** Phone-mockup image on the right. */
-  deviceSrc?: StaticImageData | string;
-  deviceAlt?: string;
 };
 
 const DEFAULT_FEATURES: FeatureItemContent[] = [
@@ -39,10 +35,8 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
 export default function EnergyAnalytics({
   title = "Energy & Savings Analytics",
   features = DEFAULT_FEATURES,
-  deviceSrc = deviceImg,
-  deviceAlt = "energy analytics dashboard",
 }: EnergyAnalyticsProps = {}) {
-  // Two-column band: title + features on the left, phone mockup on the right.
+  // Two-column band: title + features on the left, artwork on the right.
   return (
     <Section surface="base" spacing="lg">
       <Container
@@ -70,14 +64,13 @@ export default function EnergyAnalytics({
           </div>
         </div>
 
-        {/* phone — right */}
-        <div className="mx-auto w-full ">
+        {/* artwork — right */}
+        <div className="mx-auto w-full">
           <Image
             src={featureImage}
             alt="energie bee app screen"
             sizes="(min-width: 1440px) 1440px, 100vw"
             quality={100}
-            className=""
           />
         </div>
       </Container>

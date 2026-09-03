@@ -4,24 +4,16 @@ import {
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import HiveHexCluster, { HexCell } from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/solar/energiebee-app-solar-cycle.png";
-import windowLightImg from "@/public/ss-image/ss-small-7.png";
-import beeCloseupImg from "@/public/ss-image/ss-small-12.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import type { FeatureCardContent } from "./WhyEnergieBee";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
-import featureImage from "@/public/solar/Why-Choose-EnergieBee-Solar.png";
+import featureImage from "@/public/solar/why-choose-energiebee-solar.png";
 
 export type WhyEnergieBeeSolarProps = {
   title?: string;
   lead?: string;
   cards?: FeatureCardContent[];
-  /** Hive cluster cells — override individual hexes to swap imagery. */
-  left?: HexCell;
-  topRight?: HexCell;
-  bottomRight?: HexCell;
 };
 
 const DEFAULT_CARDS: FeatureCardContent[] = [
@@ -45,34 +37,10 @@ const DEFAULT_CARDS: FeatureCardContent[] = [
   },
 ];
 
-const DEFAULT_LEFT: HexCell = {
-  src: windowLightImg,
-  color: "#C2C8BE",
-};
-
-const DEFAULT_TOP_RIGHT: HexCell = {
-  src: beeCloseupImg,
-  color: "#D8A9B6",
-};
-
-const DEFAULT_BOTTOM_RIGHT: HexCell = {
-  color: "#E9E19E",
-  children: (
-    <Image
-      src={deviceImg}
-      alt="cosy bee app"
-      className="absolute left-1/2 top-[16.8%] w-[65%] -translate-x-1/2"
-    />
-  ),
-};
-
 export default function WhyEnergieBeeSolar({
   title = "Why Choose EnergieBee Solar?",
   lead = "Part of the EnergieBee app, everything you need to monitor and optimise your solar energy system.",
   cards = DEFAULT_CARDS,
-  left = DEFAULT_LEFT,
-  topRight = DEFAULT_TOP_RIGHT,
-  bottomRight = DEFAULT_BOTTOM_RIGHT,
 }: WhyEnergieBeeSolarProps = {}) {
   return (
     <Section
@@ -104,20 +72,13 @@ export default function WhyEnergieBeeSolar({
           </div>
         </div>
 
-        {/* hexagon cluster — same canonical hive shape as the rest of the page */}
+        {/* artwork — right */}
         <Image
           src={featureImage}
           alt="energie bee app screen"
           sizes="(min-width: 1440px) 1440px, 100vw"
           quality={100}
-          className=""
         />
-        {/* <HiveHexCluster
-          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
-          left={left}
-          topRight={topRight}
-          bottomRight={bottomRight}
-        /> */}
       </Container>
     </Section>
   );

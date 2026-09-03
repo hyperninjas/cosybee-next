@@ -4,12 +4,8 @@ import {
   type GlyphName,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
-import featureImage from "@/public/solar/Real-Time-Energy-Monitoring.png";
-import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
-import smartSwitchImg from "@/public/ss-image/ss-small-1.png";
-import Image, { StaticImageData } from "next/image";
+import featureImage from "@/public/solar/real-time-energy-monitoring.png";
+import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
@@ -23,8 +19,6 @@ export type FeatureItemContent = {
 export type EnergyMonitoringProps = {
   title?: string;
   features?: FeatureItemContent[];
-  /** Side photo masked through the hex cluster. */
-  imageSrc?: StaticImageData;
 };
 
 const DEFAULT_FEATURES: FeatureItemContent[] = [
@@ -51,38 +45,11 @@ const DEFAULT_FEATURES: FeatureItemContent[] = [
 export default function EnergyMonitoring({
   title = "Real-Time Energy Monitoring",
   features = DEFAULT_FEATURES,
-  imageSrc = deviceImg,
 }: EnergyMonitoringProps = {}) {
   return (
     <Section surface="surface" spacing="md" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-32">
-        {/* uniform 3-hex hive cluster */}
-
-        {/* <HiveHexCluster
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
-          gap={5}
-          cornerInset={4}
-          left={{
-            src: energyDisplayImg,
-            alt: "EnergieBee desktop display showing live energy stats",
-            color: "#AEB2B4",
-          }}
-          topRight={{
-            src: smartSwitchImg,
-            alt: "Smart switch on a wall",
-            color: "#E9EAEC",
-          }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={imageSrc}
-                alt="energie bee app screen"
-                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
-              />
-            ),
-          }}
-        /> */}
+        {/* artwork */}
         <Image
           src={featureImage}
           alt="energie bee app screen"
