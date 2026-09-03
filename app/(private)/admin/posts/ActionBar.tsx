@@ -10,15 +10,13 @@ import {
 } from "@heroui/react";
 import { ArrowUpRightFromSquare, TriangleExclamation } from "@gravity-ui/icons";
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { AppLink } from "@/app/components/ui/AppLink";
 import type { AutosaveState } from "./useAutosave";
 
 export type PostStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
 /** Sticky top action bar — blog picker on the left, status chip + action
- *  buttons on the right. Drives its busy state from the surrounding
- *  <form>'s useFormStatus. */
+ *  buttons on the right. Busy state is passed in — see `pending`. */
 export function ActionBar({
   editing,
   status,
@@ -28,6 +26,7 @@ export function ActionBar({
   liveHref,
   disabled = false,
   hasIssues = false,
+  pending,
   autosave,
   staged = null,
 }: {
@@ -50,12 +49,19 @@ export function ActionBar({
   /** The post has advisory issues — mark the publish button and let the form
    *  show them before it publishes. Advisory only; nothing is blocked. */
   hasIssues?: boolean;
+  /**
+   * Whether a save is in flight.
+   *
+   * Passed in rather than read from `useFormStatus`: the form dispatches its
+   * action by hand (so the status can be written onto the FormData), and
+   * without an `action` prop React has no form state to report.
+   */
+  pending: boolean;
   /** Autosave's current state, rendered as the quiet line beside the chip. */
   autosave?: AutosaveState;
   /** Set when a live post is holding edits nobody has made live yet. */
   staged?: { onDiscard: () => void; busy: boolean } | null;
 }) {
-  const { pending } = useFormStatus();
   // Which button was pressed, so only that one spins. It used to be inferred
   // from the status being submitted, which no longer distinguishes them — a
   // plain save submits no status at all.
@@ -63,7 +69,14 @@ export function ActionBar({
   const isPublished = status === "PUBLISHED";
   const isArchived = status === "ARCHIVED";
 
-  /** Arm a submit: record the button for the spinner, set the status it asks for. */
+  /**
+   * Record which button was pressed, then hand over the status it asks for —
+   * which is what actually submits the form (see `setStatusForSubmit`).
+   *
+   * These are `type="button"`, deliberately. As real submit buttons the
+   * browser could serialise the form before this handler had written the
+   * status field, and Publish would save a draft.
+   */
   const press = (key: string, nextStatus: string) => () => {
     setPressed(key);
     onSetStatus(nextStatus);
@@ -180,7 +193,7 @@ export function ActionBar({
             nothing to take down, so it gets an ordinary save instead. */}
         {isPublished ? (
           <Button
-            type="submit"
+            type="button"
             variant="outline"
             size="sm"
             onPress={press("unpublish", "DRAFT")}
@@ -191,7 +204,7 @@ export function ActionBar({
           </Button>
         ) : (
           <Button
-            type="submit"
+            type="button"
             variant="outline"
             size="sm"
             onPress={press("save", "")}
@@ -203,7 +216,7 @@ export function ActionBar({
         )}
         {editing && (isPublished || isArchived) && (
           <Button
-            type="submit"
+            type="button"
             variant="outline"
             size="sm"
             onPress={press("archive", isArchived ? "DRAFT" : "ARCHIVED")}
@@ -217,7 +230,7 @@ export function ActionBar({
             it must not re-assert PUBLISHED, or a scheduled post would be
             dragged forward to now every time someone fixed a typo. */}
         <Button
-          type="submit"
+          type="button"
           variant="primary"
           size="sm"
           onPress={press(

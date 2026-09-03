@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useActionState,
   useCallback,
   useEffect,
@@ -300,7 +301,17 @@ export default function PostForm({
     },
   );
 
-  const statusRef = useRef<HTMLInputElement>(null);
+  /**
+   * Publication change the next submit should carry — `""` for none.
+   *
+   * A plain ref, NOT a hidden form field. It was one, written imperatively by
+   * the action bar on press, and it kept arriving empty: whether that value
+   * reaches the serialised form depends on the button's type, on React Aria's
+   * press timing against the browser's native submit, and on React's own form
+   * reset. Publish silently saved a draft. The submit handler now sets this on
+   * the FormData itself, where none of that can interfere.
+   */
+  const requestedStatusRef = useRef("");
 
   // ── Content ─────────────────────────────────────────────────────────
   const [blocks, setBlocks] = useState<PartialBlock[]>(initialBlocks);
@@ -335,7 +346,20 @@ export default function PostForm({
   const [slug, setSlug] = useState(post?.slug ?? "");
 
   // ── Status ──────────────────────────────────────────────────────────
-  const [status, setStatus] = useState<PostStatus>(post?.status ?? "DRAFT");
+  /**
+   * What the post ACTUALLY is, straight from the last saved record.
+   *
+   * Derived, never set optimistically. It used to be state that the action bar
+   * wrote on press — so pressing Publish flipped it to PUBLISHED before
+   * anything was saved, and if the submit was then blocked or failed, the
+   * primary button re-labelled itself to "Update". Pressing that sent NO
+   * status at all (Update means "leave publication alone"), so the post saved
+   * as a draft and the toast said so, with the button still claiming
+   * otherwise. The intent for the next submit lives in `requestedStatusRef`;
+   * this is
+   * only ever the truth.
+   */
+  const status: PostStatus = (saved?.status as PostStatus | undefined) ?? "DRAFT";
 
   // Edits a live post is holding back. Seeded from the record and kept in step
   // with what autosave reports, so the bar appears the moment work is staged.
@@ -445,6 +469,32 @@ export default function PostForm({
 
   // Every content image must carry alt text or the backend rejects the save.
   // This is the one HARD blocker — it disables the save buttons outright.
+  /**
+   * What this post still needs before it can go live.
+   *
+   * These used to be filled in behind the author's back — an unattributed post
+   * was quietly assigned an author called "energiebee" and a category called
+   * "Uncategorised". Nothing invents them now, which is right, but it means
+   * the backend refuses to publish without them. Saying so here turns an
+   * opaque save failure into something actionable before the request is made.
+   *
+   * Advisory issues (no cover, thin description) stay in the dialog — these
+   * are the ones that actually stop the post going live.
+   */
+  const missingToPublish = useMemo(() => {
+    const missing: string[] = [];
+    if (!title.trim()) missing.push("a title");
+    if (!authorId) missing.push("an author");
+    if (!categoryId) missing.push("a category");
+    return missing;
+  }, [title, authorId, categoryId]);
+
+  /** "a title, an author and a category" — read out, not comma-spliced. */
+  const missingToPublishText =
+    missingToPublish.length > 1
+      ? `${missingToPublish.slice(0, -1).join(", ")} and ${missingToPublish.at(-1)}`
+      : missingToPublish[0];
+
   const missingAlts = useMemo(
     () => findContentImagesMissingAlt(blocks as unknown[]),
     [blocks],
@@ -996,14 +1046,22 @@ export default function PostForm({
   /**
    * Arm the next submit with a publication change — or with none.
    *
-   * `""` means "save, don't touch publication", and the local `status` state
-   * is deliberately left alone for it: the chip should keep showing what the
-   * post actually is, and the form must post an empty `status` so the action
-   * omits the field entirely.
+   * `""` posts an empty status, which the action reads as "leave publication
+   * alone" and omits from the payload. Nothing else happens here: the chip and
+   * the button labels follow the SAVED record (see `status`), so a submit that
+   * never lands cannot leave them describing a post that doesn't exist.
    */
   function setStatusForSubmit(s: string) {
-    if (s) setStatus(s as PostStatus);
-    if (statusRef.current) statusRef.current.value = s;
+    requestedStatusRef.current = s;
+    // Submit HERE rather than letting the button's own `type="submit"` do it.
+    //
+    // The buttons come from a React Aria press handler, and there is no
+    // guarantee `onPress` runs before the browser's native submit — if it
+    // loses that race the form is serialised with the PREVIOUS value of this
+    // field, which is empty, and the action reads that as "leave publication
+    // alone". Pressing Publish then saved a draft. Writing the field and
+    // submitting in the same call removes the race instead of betting on it.
+    formRef.current?.requestSubmit();
   }
 
   // Publishing with open issues goes through the dialog once. `bypassIssues`
@@ -1021,8 +1079,13 @@ export default function PostForm({
   return (
     <form
       ref={formRef}
-      action={formAction}
+      // No `action` prop: the action is dispatched by hand below, so the
+      // status can be written onto the FormData rather than smuggled through
+      // a hidden field. See `requestedStatusRef`.
       onSubmit={(e) => {
+        // Nothing here submits natively — every path ends in `formAction`.
+        e.preventDefault();
+
         // The BlockNote toolbar renders <button>s that portal INSIDE this form
         // (into `.bn-container`). A <button> with no explicit type defaults to
         // type="submit", so clicking e.g. Bold would submit the post instead of
@@ -1030,24 +1093,35 @@ export default function PostForm({
         // real saves come from the ActionBar, which is outside `.bn-container`.
         const submitter = (e.nativeEvent as SubmitEvent).submitter;
         if (submitter instanceof Element && submitter.closest(".bn-container")) {
-          e.preventDefault();
           return;
         }
-        // Only a save that leaves the post LIVE is worth interrupting.
-        // `statusRef` already holds what the pressed button wrote in its
-        // onPress, which runs before this — and an empty value now means "no
-        // status change", so an update to an already-published post has to
-        // count too. Archiving and draft saves go straight through.
-        const requested = statusRef.current?.value ?? "";
+        // Only a save that leaves the post LIVE is worth interrupting. An
+        // empty request means "no status change", so an update to an
+        // already-published post counts too. Archiving and draft saves go
+        // straight through.
+        const requested = requestedStatusRef.current;
         const willBeLive =
           requested === "PUBLISHED" || (requested === "" && status === "PUBLISHED");
+        // Stop here rather than letting the backend refuse: it would come back
+        // as a save error after a round trip, with the post's own fields the
+        // only clue as to what was wrong.
+        if (willBeLive && missingToPublish.length > 0) {
+          toast.danger(`Add ${missingToPublishText} before publishing.`);
+          return;
+        }
         if (willBeLive && issues.length > 0 && !bypassIssues.current) {
-          e.preventDefault();
           setIssuesOpen(true);
           return;
         }
         bypassIssues.current = false;
         submittedSnapshot.current = snapshot;
+
+        // Dispatch with FormData we control. `status` is set HERE, on the
+        // object that actually reaches the action — the previous hidden field
+        // kept arriving empty, so Publish saved a draft.
+        const data = new FormData(e.currentTarget);
+        data.set("status", requested);
+        startTransition(() => formAction(data));
       }}
     >
       {/* Hidden inputs — every editable field needs one so a stable
@@ -1068,9 +1142,6 @@ export default function PostForm({
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
-      {/* Empty by default — a status only rides along when a button that
-          changes publication armed it. See `setStatusForSubmit`. */}
-      <input ref={statusRef} type="hidden" name="status" defaultValue="" />
       {/* Author + category.
           These fields are sent ONLY when they carry a real instruction. The
           backend treats "field present" as "field changed" and resolves a bare
@@ -1155,6 +1226,7 @@ export default function PostForm({
         liveHref={liveHref}
         disabled={missingAlts.length > 0}
         hasIssues={issues.length > 0}
+        pending={isPending}
         autosave={autosaveState}
         staged={
           hasStaged && status === "PUBLISHED"
@@ -1247,6 +1319,19 @@ export default function PostForm({
 
             {/* Block the save until every content image carries alt text —
                 the backend rejects un-alt'd images with a 400. */}
+            {missingToPublish.length > 0 && (
+              <Alert status="warning">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>
+                    Not ready to publish — add {missingToPublishText}
+                  </Alert.Title>
+                  <Alert.Description>
+                    Saving works as normal; only going live needs these.
+                  </Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
             {missingAlts.length > 0 && (
               <div className="mb-4">
                 <Alert status="warning">
