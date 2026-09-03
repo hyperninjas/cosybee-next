@@ -424,7 +424,7 @@ function DetailContent({
                     onClick={() =>
                       setNewTags((prev) => prev.filter((x) => x !== n))
                     }
-                    className="text-accent/70 hover:text-accent"
+                    className="text-accent/70 hover:underline"
                   >
                     ✕
                   </button>
@@ -478,7 +478,7 @@ function DetailContent({
                     title="Edit post in a new tab"
                     className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
                   >
-                    <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                    <span className="min-w-0 flex-1 truncate text-foreground group-hover:underline">
                       {u.title}
                     </span>
                     <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
@@ -487,7 +487,7 @@ function DetailContent({
                     <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted">
                       {u.status}
                     </span>
-                    <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
+                    <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:underline" />
                   </a>
                 </li>
               ))}
@@ -509,13 +509,13 @@ function DetailContent({
                       title="Edit author in a new tab"
                       className="group flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-background"
                     >
-                      <span className="min-w-0 flex-1 truncate text-foreground group-hover:text-accent">
+                      <span className="min-w-0 flex-1 truncate text-foreground group-hover:underline">
                         {a.name}
                       </span>
                       <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
                         avatar
                       </span>
-                      <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:text-accent" />
+                      <ArrowUpRightFromSquare className="size-3.5 shrink-0 text-muted group-hover:underline" />
                     </a>
                   </li>
                 ))}
