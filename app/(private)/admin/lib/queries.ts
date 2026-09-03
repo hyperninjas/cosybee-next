@@ -28,6 +28,39 @@ export async function getPost(id: string): Promise<AdminPost | null> {
  * Map any post (draft or published) to the public Article shape.
  * Used by the admin draft-preview page.
  */
+/**
+ * Stand-ins for a draft that hasn't been attributed or filed yet.
+ *
+ * A post now exists from the moment its slug is chosen, so the preview has to
+ * render one that may have no author and no category. These placeholders live
+ * HERE, at the preview boundary, and are never written anywhere — which is the
+ * whole difference between them and the "energiebee" / "Uncategorised" records
+ * the editor used to save into the database to satisfy a NOT NULL column.
+ *
+ * The alternative — making `Article.author` nullable — would push a null check
+ * into every public component that renders a byline, none of which can ever
+ * receive one: the public site is served PUBLISHED posts only, and a post
+ * cannot be published without both.
+ */
+const UNATTRIBUTED_AUTHOR: Author = {
+  id: "",
+  name: "No author yet",
+  slug: "",
+  avatarUrl: null,
+  bio: null,
+  role: null,
+};
+
+function unfiledCategory(blog: "hive" | "learn"): Category {
+  return {
+    id: "",
+    blog,
+    name: "No category yet",
+    slug: "",
+    description: null,
+  };
+}
+
 export async function getPostArticle(id: string): Promise<Article | null> {
   const row = await adminApi.getPost(id);
   if (!row) return null;
@@ -44,9 +77,10 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     seoTitle: row.seoTitle,
     seoDescription: row.seoDescription,
 
-    // Taxonomy (full objects)
-    author: row.author,
-    category: row.category,
+    // Taxonomy (full objects). Placeholders only for an unfinished draft being
+    // previewed — see above.
+    author: row.author ?? UNATTRIBUTED_AUTHOR,
+    category: row.category ?? unfiledCategory(row.blog),
     tags: row.tags ?? [],
 
     // Media
@@ -68,7 +102,9 @@ export async function getPostArticle(id: string): Promise<Article | null> {
 
     // Display
     readTime: row.readTime,
-    authorDate: row.authorDate,
+    // No byline date chosen yet — show when the draft was created rather than
+    // an empty date the formatter would render as "Invalid Date".
+    authorDate: row.authorDate ?? row.createdAt,
 
     // Featured/Carousel
     featured: row.featured,

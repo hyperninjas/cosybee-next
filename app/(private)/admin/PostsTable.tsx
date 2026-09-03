@@ -30,7 +30,8 @@ export type Row = {
   blog: string;
   slug: string;
   title: string;
-  category: Category;
+  // Null for a draft not yet filed — the table renders "Uncategorised".
+  category: Category | null;
   tags: Tag[];
   status: string;
   featured: boolean;

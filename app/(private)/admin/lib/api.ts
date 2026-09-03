@@ -16,9 +16,11 @@ export interface AdminPost {
   seoTitle: string | null;
   seoDescription: string | null;
 
-  // Taxonomy (full objects)
-  author: Author;
-  category: Category;
+  // Taxonomy (full objects). Null while a post is a draft nobody has
+  // attributed or filed yet — a post now exists from the moment its slug is
+  // chosen. Publishing requires both, so anything a reader can reach has them.
+  author: Author | null;
+  category: Category | null;
   tags: Tag[];
 
   // Media — optional (a post can be saved without a cover).
@@ -37,7 +39,8 @@ export interface AdminPost {
 
   // Display
   readTime: number;
-  authorDate: string;
+  /** Null until the byline date is set — see `author`. */
+  authorDate: string | null;
 
   // Featured/Carousel
   featured: boolean;
