@@ -12,7 +12,7 @@ export default function SmartEnergyManagement() {
         {/* artwork */}
         <Image
           src={featureImage}
-          alt="energie bee app screen"
+          alt="An EnergieBee hub beside the app reading a 6.5 kWp array with a 10.6 kWh battery, rating solar potential D up to A"
           sizes="(min-width: 1440px) 1440px, 100vw"
           quality={100}
         />

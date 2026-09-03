@@ -52,7 +52,7 @@ export default function EnergyMonitoring({
         {/* artwork */}
         <Image
           src={featureImage}
-          alt="energie bee app screen"
+          alt="Rooftop solar panels beside the EnergieBee app, showing today's solar cycle and a live 170 W flow into the house"
           sizes="(min-width: 1440px) 1440px, 100vw"
           quality={100}
           className="object-cover object-right"

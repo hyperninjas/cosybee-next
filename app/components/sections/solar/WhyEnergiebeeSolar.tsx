@@ -75,7 +75,7 @@ export default function WhyEnergieBeeSolar({
         {/* artwork — right */}
         <Image
           src={featureImage}
-          alt="energie bee app screen"
+          alt="The EnergieBee app over a panelled roof: where the home's power is going, a £1.46 bill, 2.63p per kWh blended"
           sizes="(min-width: 1440px) 1440px, 100vw"
           quality={100}
         />

@@ -68,7 +68,7 @@ export default function EnergyAnalytics({
         <div className="mx-auto w-full">
           <Image
             src={featureImage}
-            alt="energie bee app screen"
+            alt="EnergieBee's solar analytics: 41.8 g CO2 per kWh, 43% cleaner than the grid, and where the day's energy was routed"
             sizes="(min-width: 1440px) 1440px, 100vw"
             quality={100}
           />
