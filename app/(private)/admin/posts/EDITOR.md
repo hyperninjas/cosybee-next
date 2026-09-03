@@ -26,6 +26,9 @@ Recent additions to the editor:
 - **Alt text for images** — images now have their own **Alt text** field,
   separate from the caption. Alt text is required; captions are optional.
   See section 5.
+- **Your writing saves itself** — press **Start draft** once you have a slug,
+  and from then on your work is saved a few seconds after you stop typing. On
+  a live post those edits stay private until you press Update. See section 13.
 - **Call to action** — type `/cta` for a promo card with its own heading,
   image and button, every part of it editable. See section 9.
 - **Table of contents** — type `/toc` for a live "Contents" box built from the
@@ -266,6 +269,8 @@ The **Slug** field in _Post details_ is the article's address —
 is yours to choose:
 
 - **Generate** fills it in from the title in one click; edit it freely after.
+- On a new post, **Start draft** appears once the slug is free — that is what
+  brings the post into existence, and nothing is saved before you press it.
 - It's checked as you type: **Available**, or which post already uses it —
   including **drafts**, which the check used to miss.
 - Saving is blocked on a clash rather than quietly renaming it, so you get the
@@ -277,13 +282,68 @@ is yours to choose:
 
 ## 13. Saving & publishing
 
-The editor is part of the post form — one save covers everything (body, title,
-cover, tags, SEO…):
+### The post saves itself
 
-- **Save draft** — saves without publishing.
-- **Publish / Update** — makes it live (or updates the live version).
-- Leaving the page with unsaved changes triggers a browser warning.
-- What you see in the editor is what readers see on the live article.
+Set the slug, then press **Start draft** (beside the Generate button). That
+creates the post — keeping everything you have written so far — and from then
+on your work is saved for you a few seconds after you stop typing. The line
+beside the status chip tells you where you are: *Unsaved changes* → *Saving…*
+→ *Saved*.
+
+The button appears only until the post exists; after that there is nothing for
+it to do. Until you press it, nothing has been saved anywhere.
+
+Autosave covers everything on the page bar the two exceptions below: the
+**title and body**, the **post details** (description, lede, byline date), the
+**author, category and tags**, the **cover image** and its alt/title/caption/
+credit, the **SEO and social** fields, the **CTA**, and the carousel and
+featured settings.
+
+The author, category and tags are kept too.
+
+Two things are **not** autosaved, on purpose:
+
+| Not autosaved | Why |
+| --- | --- |
+| The **slug** and which blog it's in | Moving a published post leaves a redirect behind at its old URL — a decision, not a keystroke |
+| **Publish / Unpublish / Archive** | Autosave can't change whether a post is live, by design |
+
+> **It never publishes anything.** Autosave cannot change whether a post is
+> live, so you can leave a half-written sentence on screen safely.
+
+### Editing a post that is already live
+
+Your edits are kept **privately** until you say otherwise: readers keep seeing
+the published version, and the status line reads *Saved — not live yet*. The
+dashboard marks those posts with a **•** beside "Published".
+
+- **Update** — makes everything on the page live, in one go.
+- **Discard changes** — throws the unpublished edits away and reloads the live
+  version. There is no undo.
+
+Close the tab mid-edit and your work is waiting when you come back: reopening
+the post shows what you were writing, not what readers have.
+
+### The buttons
+
+Which ones appear depends on the post:
+
+| Post | Buttons |
+| --- | --- |
+| New or draft | **Save draft** · **Publish** |
+| Published | **Discard changes** (only with pending edits) · **Unpublish** · **Archive** · **Update** |
+| Archived | **Save** · **Unarchive** |
+
+> **Saving never changes publication.** *Save draft* on a live post used to
+> take it offline; taking a post down is now **Unpublish**, and nothing else
+> does it by accident.
+
+**Preview** (in the post list, or the link above the editor) shows what you are
+working on — including edits you haven't made live — exactly as a reader would
+see it.
+
+Leaving the page with unsaved changes still triggers a browser warning, since
+the fields autosave doesn't cover may not have been saved yet.
 
 ---
 

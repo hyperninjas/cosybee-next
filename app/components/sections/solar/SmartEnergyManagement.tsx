@@ -1,21 +1,20 @@
 import Hexagon from "@/app/components/ui/Hexagon";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImg from "@/public/energy-management.png";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
+import featureImage from "@/public/solar/smart-energy-management.png";
+import Image from "next/image";
 
 export default function SmartEnergyManagement() {
   return (
     <Section surface="surface" spacing="md" className="text-foreground">
-      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-16">
-        {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImg.src}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
+      <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-20">
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="An EnergieBee hub beside the app reading a 6.5 kWp array with a 10.6 kWh battery, rating solar potential D up to A"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

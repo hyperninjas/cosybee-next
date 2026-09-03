@@ -48,8 +48,8 @@ export default function ArticleToc({
               href={`#${i.id}`}
               className={`-ml-px block border-l-2 pl-3 leading-snug transition-colors ${
                 active === i.id
-                  ? "border-accent font-semibold text-foreground"
-                  : "border-transparent text-muted hover:text-foreground"
+                  ? "border-warning font-medium text-foreground"
+                  : "border-transparent text-muted hover:text-foreground hover:underline"
               }`}
             >
               {i.text}

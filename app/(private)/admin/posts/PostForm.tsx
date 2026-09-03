@@ -11,7 +11,14 @@ import {
 import dynamic from "next/dynamic";
 import { Alert, Spinner, toast } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
-import { savePost } from "@/app/(private)/admin/actions";
+import {
+  savePost,
+  createDraft,
+  autosavePost,
+  discardStagedChanges,
+  type AutosavePatch,
+} from "@/app/(private)/admin/actions";
+import { useAutosave } from "./useAutosave";
 import {
   initialSaveState,
   type EntitySaveState,
@@ -22,7 +29,6 @@ import {
   PLACEHOLDER_COVER,
   type Author,
   type Category,
-  type Tag,
 } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import {
@@ -32,6 +38,7 @@ import {
 import { collectPostIssues, type ImageFacts } from "@/app/lib/post-issues";
 import { findMediaByUrl } from "@/app/lib/storage";
 import type { LinkTarget } from "@/app/lib/link-targets";
+import { inter } from "@/app/lib/fonts";
 import TagInput from "./TagInput";
 import { ActionBar, type PostStatus } from "./ActionBar";
 import { PublishIssuesDialog } from "./PublishIssuesDialog";
@@ -66,9 +73,17 @@ export type FormPost = {
   lede: string | null;
 
   // Taxonomy (full objects from backend)
-  author: Author;
-  category: Category;
-  tags: Tag[];
+  // Null on a draft that hasn't been attributed or filed yet. The pickers
+  // start empty and the post cannot be published until both are chosen.
+  author: Author | null;
+  category: Category | null;
+  /**
+   * The post's tag NAMES — which is all the form works in. It used to take
+   * `Tag[]` and immediately throw away everything but the name, which meant a
+   * caller with only names (a staged autosave patch stores them that way) had
+   * to fabricate ids to satisfy the type.
+   */
+  tagNames: string[];
 
   // Media — optional (a post can be coverless; the form normalises null → "").
   coverImage: string | null;
@@ -85,7 +100,9 @@ export type FormPost = {
 
   // Display
   readTime: number;
-  authorDate: string;
+  authorDate: string | null;
+  /** Set when the post is already live and holding edits nobody has seen. */
+  draftUpdatedAt?: string | null;
 
   // Featured/Carousel
   featured: boolean;
@@ -320,6 +337,12 @@ export default function PostForm({
   // ── Status ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PostStatus>(post?.status ?? "DRAFT");
 
+  // Edits a live post is holding back. Seeded from the record and kept in step
+  // with what autosave reports, so the bar appears the moment work is staged.
+  const [hasStaged, setHasStaged] = useState(Boolean(post?.draftUpdatedAt));
+  const [stagedBusy, setStagedBusy] = useState(false);
+
+
   // ── Taxonomy ────────────────────────────────────────────────────────
   const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
   const [authorName, setAuthorName] = useState(post?.author?.name ?? "");
@@ -331,10 +354,31 @@ export default function PostForm({
   const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
   const blogCategories = categories.filter((c) => c.blog === blog);
 
+  /**
+   * Move the post to the other blog, dropping the category with it.
+   *
+   * Categories are scoped per blog (`Category.@@unique([blog, slug])`), so a
+   * category chosen under Hive does not exist under Learn. Carrying the id
+   * across made the save fail outright — the backend's `resolveCategoryId`
+   * rejects an id whose blog doesn't match — while the picker, which only
+   * lists this blog's categories, showed an empty box and gave no clue why.
+   * Clearing it states the truth: moving blogs means choosing a category
+   * again.
+   *
+   * A wrapper rather than an effect on `blog`, which would also fire on mount
+   * and wipe the category the post was loaded with.
+   */
+  const changeBlog = (next: string) => {
+    if (next === blog) return;
+    setBlog(next);
+    setCategoryId("");
+    setCategoryName("");
+  };
+
   // TagInput owns the canonical tag state (+ hidden input); this mirror exists
   // only so tag edits register in the unsaved-changes snapshot below.
   const [tagNames, setTagNames] = useState<string[]>(
-    post?.tags?.map((t) => t.name) ?? [],
+    post?.tagNames ?? [],
   );
 
   // ── Cover image ─────────────────────────────────────────────────────
@@ -451,15 +495,35 @@ export default function PostForm({
       (url) => url && !measuredImages.current.has(url),
     );
     if (pending.length === 0) return;
-    for (const url of pending) measuredImages.current.add(url);
+    // Captured once: the Set is created by `useRef(new Set())` and never
+    // reassigned, so this is the same object the cleanup needs — and reading
+    // it here rather than through `.current` later is what the lint asks for.
+    const measured = measuredImages.current;
+    for (const url of pending) measured.add(url);
 
     let cancelled = false;
+    // URLs whose lookup actually finished, so the cleanup can tell them apart
+    // from ones abandoned mid-flight.
+    const settled = new Set<string>();
     void Promise.all(
       pending.map(async (url) => {
-        // A miss is normal (external URL, or a file uploaded outside the
-        // library) and simply leaves that image unchecked.
-        const item = await findMediaByUrl(url).catch(() => null);
-        if (cancelled || !item || item.kind !== "image") return;
+        // Three outcomes, and they are not the same thing:
+        //
+        //  - a row comes back → record what it knows;
+        //  - the library genuinely has no such object (an external URL, or a
+        //    file uploaded outside the gallery) → leave it marked, so the
+        //    lookup isn't repeated on every keystroke;
+        //  - the REQUEST failed → unmark it, so a blip doesn't silently
+        //    exclude that image from the pre-publish checks for the rest of
+        //    the session. It is retried on the next edit.
+        const item = await findMediaByUrl(url).catch(() => undefined);
+        if (cancelled) return;
+        settled.add(url);
+        if (item === undefined) {
+          measured.delete(url);
+          return;
+        }
+        if (!item || item.kind !== "image") return;
         recordImageMeta({
           url,
           name: item.name ?? undefined,
@@ -471,6 +535,20 @@ export default function PostForm({
     );
     return () => {
       cancelled = true;
+      // Release the marks on anything abandoned mid-flight, so a later run
+      // asks again.
+      //
+      // Without this the effect could not survive its own remount. Strict Mode
+      // runs it, cleans up, then runs it again: the first pass marked every
+      // URL and had its results discarded by `cancelled`, and the second found
+      // nothing left to do because they were all marked. Net result, on every
+      // post opened for editing: no image facts at all, so `issues` silently
+      // skipped every image and the size/dimension warnings never appeared.
+      // Only images uploaded during the session — which report themselves
+      // through `onImageMeta` — were ever checked.
+      for (const url of pending) {
+        if (!settled.has(url)) measured.delete(url);
+      }
     };
   }, [coverUrl, ogImage, documentImageUrls, recordImageMeta]);
 
@@ -570,11 +648,30 @@ export default function PostForm({
     tags: tagNames,
     blocks,
   });
+  /**
+   * The same idea, narrowed to what autosave does NOT keep.
+   *
+   * Once a post exists, its title, body, cover, SEO, CTA and the rest are
+   * saved a few seconds after you stop typing — so warning about them on the
+   * way out would cry wolf every single time. These are the fields that really
+   * would be lost: the address, publication, and the CTA's on/off toggle.
+   *
+   * Kept in step with `snapshot` by hand; both baselines move together on a
+   * successful save.
+   */
+  const unautosavedSnapshot = JSON.stringify({
+    blog,
+    slug,
+    status,
+    publishedAt,
+    ctaEnabled,
+  });
+
   // Capture the first render's snapshot as the baseline (lazy state init runs
   // once); reading state during render is allowed, reading a ref isn't. A
   // successful save moves the baseline forward — see below.
   const [initialSnapshot, setInitialSnapshot] = useState(snapshot);
-  useUnsavedChangesWarning(snapshot !== initialSnapshot && !isPending);
+  const [initialUnautosaved, setInitialUnautosaved] = useState(unautosavedSnapshot);
 
   // What was in the form when the save was submitted. The success effect
   // rebases on this rather than on the live snapshot, so anything typed while
@@ -603,6 +700,15 @@ export default function PostForm({
       status: entity.status,
     });
     setInitialSnapshot(submittedSnapshot.current);
+    setInitialUnautosaved(unautosavedSnapshot);
+    // An explicit save writes the WHOLE form live, which makes any staged
+    // patch stale — it is a subset of what was just published. Leaving it
+    // would keep offering "Make changes live" for edits already live, and
+    // promoting it later would republish an older body.
+    if (hasStaged) {
+      setHasStaged(false);
+      void discardStagedChanges(entity.id);
+    }
     const href = `/${entity.blog}/${entity.slug}`;
     toast.success(
       entity.status === "PUBLISHED"
@@ -621,13 +727,282 @@ export default function PostForm({
           }
         : undefined,
     );
-  }, [state, saved]);
+  }, [state, saved, hasStaged, unautosavedSnapshot]);
 
   const liveHref =
     saved?.status === "PUBLISHED" ? `/${saved.blog}/${saved.slug}` : undefined;
 
+  // ── Create-on-slug + autosave ───────────────────────────────────────
+  //
+  // A post used to come into existence only when someone pressed Save, so
+  // until then there was nothing to autosave into and an hour of writing lived
+  // in one browser tab. It is now created as soon as its address is settled
+  // and free, and everything typed after that is kept on its own.
+
+  /** Guards against a second create while the first is still in the air. */
+  const creatingRef = useRef(false);
+
+  const [startingDraft, setStartingDraft] = useState(false);
+
+  const startDraft = useCallback(async () => {
+    if (saved || creatingRef.current) return;
+    creatingRef.current = true;
+    setStartingDraft(true);
+    try {
+      // Seeded with everything on screen. Creating an empty row and letting
+      // autosave fill it in meant the author's work only reached the server on
+      // the next idle tick — close the tab first and they had a post with
+      // nothing in it.
+      const result = await createDraft(blog, slug, {
+        title,
+        contentJson: blocks as unknown[],
+        description,
+        lede,
+        coverImage: coverUrl,
+        coverImageAlt,
+        coverImageTitle,
+        coverImageCaption,
+        coverImageCredit,
+        seoTitle,
+        seoDescription,
+        ogImage,
+        ogImageAlt,
+        canonicalUrl,
+        noindex,
+        authorDate,
+        featured,
+        homeFeatured,
+        carouselIntro,
+        carouselBody,
+        ctaLabel,
+        ctaHref,
+        ctaExternal,
+        authorId,
+        categoryId,
+        tags: tagNames,
+      });
+      if (!result.ok) {
+        // Not fatal — Save draft still creates the post the ordinary way. Say
+        // so once rather than blocking the author.
+        toast.danger(result.error);
+        return;
+      }
+      setSaved({
+        id: result.post.id,
+        blog: result.post.blog,
+        slug: result.post.slug,
+        status: result.post.status,
+      });
+      // Move the address bar onto the real edit URL without a navigation, so a
+      // reload lands on the draft instead of a blank "new post" form.
+      window.history.replaceState(null, "", `/admin/posts/${result.post.id}/edit`);
+      toast.success("Draft started — it saves itself from here");
+    } finally {
+      creatingRef.current = false;
+      setStartingDraft(false);
+    }
+  }, [
+    blog,
+    saved,
+    slug,
+    title,
+    blocks,
+    description,
+    lede,
+    coverUrl,
+    coverImageAlt,
+    coverImageTitle,
+    coverImageCaption,
+    coverImageCredit,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    ogImageAlt,
+    canonicalUrl,
+    noindex,
+    authorDate,
+    featured,
+    homeFeatured,
+    carouselIntro,
+    carouselBody,
+    ctaLabel,
+    ctaHref,
+    ctaExternal,
+    authorId,
+    categoryId,
+    tagNames,
+  ]);
+
+  /**
+   * Everything autosave keeps, as one flat object.
+   *
+   * Three groups are deliberately absent:
+   *
+   *  - `slug` and `blog` — the post's ADDRESS. Moving it retires the old URL
+   *    into the redirect table, which is a decision, not a keystroke.
+   *  - `status` and `publishedAt` — publication. The backend refuses them on
+   *    the autosave route rather than ignoring them.
+   * Author, category and tags ARE included, as ids and names respectively. On
+   * a draft they land straight in the columns and the backend resolves them
+   * like any other save; on a published post they sit in the staged patch, and
+   * the edit page resolves them back into records when it reloads.
+   */
+  const autosaveValue = useMemo(
+    () => ({
+      title,
+      blocks,
+      description,
+      lede,
+      coverImage: coverUrl,
+      coverImageAlt,
+      coverImageTitle,
+      coverImageCaption,
+      coverImageCredit,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      ogImageAlt,
+      canonicalUrl,
+      noindex,
+      authorDate,
+      featured,
+      homeFeatured,
+      carouselIntro,
+      carouselBody,
+      ctaLabel,
+      ctaHref,
+      ctaExternal,
+      authorId,
+      categoryId,
+      tags: tagNames,
+    }),
+    [
+      title,
+      blocks,
+      description,
+      lede,
+      coverUrl,
+      coverImageAlt,
+      coverImageTitle,
+      coverImageCaption,
+      coverImageCredit,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      ogImageAlt,
+      canonicalUrl,
+      noindex,
+      authorDate,
+      featured,
+      homeFeatured,
+      carouselIntro,
+      carouselBody,
+      ctaLabel,
+      ctaHref,
+      ctaExternal,
+      authorId,
+      categoryId,
+      tagNames,
+    ],
+  );
+
+  const autosaveState = useAutosave({
+    value: autosaveValue,
+    // Nothing to save into until the post exists.
+    enabled: Boolean(saved?.id),
+    save: async (v, previous) => {
+      // Only what actually changed. Every field is compared rather than
+      // listed, so adding one to `autosaveValue` is enough — a per-field
+      // `if` ladder is exactly the kind of thing that silently stops covering
+      // a field somebody added later.
+      //
+      // It matters most for the body: the server re-renders it to HTML
+      // through jsdom on every save, so a request that only moves the title
+      // must not carry it. On the first save `previous` is undefined and
+      // everything goes.
+      const patch: AutosavePatch = {};
+      for (const key of Object.keys(v) as (keyof typeof v)[]) {
+        // Both handled below: arrays get a content comparison, because a new
+        // array with the same items is not a change worth sending.
+        if (key === "blocks" || key === "tags") continue;
+        if (!previous || v[key] !== previous[key]) {
+          (patch as Record<string, unknown>)[key] = v[key];
+        }
+      }
+      if (
+        !previous ||
+        JSON.stringify(v.tags) !== JSON.stringify(previous.tags)
+      ) {
+        patch.tags = v.tags;
+      }
+      // The body is compared by content, not identity: BlockNote hands back a
+      // fresh array for changes that leave the document alone (a cursor move),
+      // and it is the one field worth a stringify to be sure about.
+      if (
+        !previous ||
+        (v.blocks !== previous.blocks &&
+          JSON.stringify(v.blocks) !== JSON.stringify(previous.blocks))
+      ) {
+        patch.contentJson = v.blocks as unknown[];
+      }
+      if (Object.keys(patch).length === 0) {
+        return { ok: true as const, staged: hasStaged };
+      }
+      const result = await autosavePost(saved!.id, patch);
+      // Set here rather than in an effect on the autosave state: this is an
+      // event callback, so it cannot cascade renders the way a synchronous
+      // setState inside an effect does.
+      if (result.ok && result.staged) setHasStaged(true);
+      return result.ok
+        ? { ok: true as const, staged: result.staged }
+        : { ok: false as const, error: result.error };
+    },
+  });
+
+  const dropStagedChanges = useCallback(async () => {
+    if (!saved) return;
+    setStagedBusy(true);
+    const result = await discardStagedChanges(saved.id);
+    setStagedBusy(false);
+    if (!result.ok) {
+      toast.danger(result.error ?? "Could not discard the changes.");
+      return;
+    }
+    setHasStaged(false);
+    // The editor was seeded with the staged text, so clearing the patch alone
+    // would leave the discarded version on screen — and the next keystroke
+    // would stage it straight back. Reloading is what actually returns the
+    // author to the live article.
+    window.location.reload();
+  }, [saved]);
+
+  // Warn on the way out only about work that would actually be lost.
+  //
+  // Before the post exists nothing is saved, so the whole form counts. After
+  // that, autosave has the body and most of the metadata — what remains is the
+  // narrow snapshot above, plus autosave itself still having work in hand or
+  // having failed.
+  const autosaveHasWork =
+    autosaveState.status === "dirty" ||
+    autosaveState.status === "saving" ||
+    autosaveState.status === "error";
+  useUnsavedChangesWarning(
+    !isPending &&
+      (saved
+        ? unautosavedSnapshot !== initialUnautosaved || autosaveHasWork
+        : snapshot !== initialSnapshot),
+  );
+
+  /**
+   * Arm the next submit with a publication change — or with none.
+   *
+   * `""` means "save, don't touch publication", and the local `status` state
+   * is deliberately left alone for it: the chip should keep showing what the
+   * post actually is, and the form must post an empty `status` so the action
+   * omits the field entirely.
+   */
   function setStatusForSubmit(s: string) {
-    setStatus(s as PostStatus);
+    if (s) setStatus(s as PostStatus);
     if (statusRef.current) statusRef.current.value = s;
   }
 
@@ -658,14 +1033,15 @@ export default function PostForm({
           e.preventDefault();
           return;
         }
-        // Only going live is worth interrupting: drafts and archiving save
-        // straight through. `statusRef` already holds the status the pressed
-        // button wrote in its onPress, which runs before this.
-        if (
-          statusRef.current?.value === "PUBLISHED" &&
-          issues.length > 0 &&
-          !bypassIssues.current
-        ) {
+        // Only a save that leaves the post LIVE is worth interrupting.
+        // `statusRef` already holds what the pressed button wrote in its
+        // onPress, which runs before this — and an empty value now means "no
+        // status change", so an update to an already-published post has to
+        // count too. Archiving and draft saves go straight through.
+        const requested = statusRef.current?.value ?? "";
+        const willBeLive =
+          requested === "PUBLISHED" || (requested === "" && status === "PUBLISHED");
+        if (willBeLive && issues.length > 0 && !bypassIssues.current) {
           e.preventDefault();
           setIssuesOpen(true);
           return;
@@ -692,29 +1068,48 @@ export default function PostForm({
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
-      <input
-        ref={statusRef}
-        type="hidden"
-        name="status"
-        defaultValue={status}
-      />
-      {/* Author — send ID if available, otherwise name + avatar */}
+      {/* Empty by default — a status only rides along when a button that
+          changes publication armed it. See `setStatusForSubmit`. */}
+      <input ref={statusRef} type="hidden" name="status" defaultValue="" />
+      {/* Author + category.
+          These fields are sent ONLY when they carry a real instruction. The
+          backend treats "field present" as "field changed" and resolves a bare
+          NAME by upserting a record with it, so a form that always posted
+          `authorName`/`category` was re-resolving the taxonomy on every single
+          update. With the pickers empty that meant the fallback literals below
+          were written as data: the post was silently reassigned to an author
+          called "energiebee" and a category called "Uncategorised".
+
+          An id is safe to send at any time — it names an existing record. A
+          NAME is only ever an instruction to create one, so it is limited to
+          the create path, where a post genuinely has no taxonomy yet and the
+          backend requires one of the two. On update, omitting both is what
+          says "leave the author/category exactly as they are". */}
       {authorId && <input type="hidden" name="authorId" value={authorId} />}
-      <input
-        type="hidden"
-        name="authorName"
-        value={authorName || "energiebee"}
-      />
-      <input type="hidden" name="authorAvatarUrl" value={authorAvatarUrl} />
-      {/* Category — send ID if available, otherwise name */}
+      {!saved && !authorId && (
+        <>
+          <input
+            type="hidden"
+            name="authorName"
+            value={authorName || "energiebee"}
+          />
+          <input
+            type="hidden"
+            name="authorAvatarUrl"
+            value={authorAvatarUrl}
+          />
+        </>
+      )}
       {categoryId && (
         <input type="hidden" name="categoryId" value={categoryId} />
       )}
-      <input
-        type="hidden"
-        name="category"
-        value={categoryName || "Uncategorised"}
-      />
+      {!saved && !categoryId && (
+        <input
+          type="hidden"
+          name="category"
+          value={categoryName || "Uncategorised"}
+        />
+      )}
       <input type="hidden" name="authorDate" value={authorDate} />
       <input type="hidden" name="description" value={description} />
       <input type="hidden" name="coverImageAlt" value={coverImageAlt} />
@@ -755,11 +1150,17 @@ export default function PostForm({
         editing={Boolean(saved)}
         status={status}
         blog={blog}
-        setBlog={setBlog}
+        setBlog={changeBlog}
         onSetStatus={setStatusForSubmit}
         liveHref={liveHref}
         disabled={missingAlts.length > 0}
         hasIssues={issues.length > 0}
+        autosave={autosaveState}
+        staged={
+          hasStaged && status === "PUBLISHED"
+            ? { onDiscard: dropStagedChanges, busy: stagedBusy }
+            : null
+        }
       />
 
       <PublishIssuesDialog
@@ -872,7 +1273,10 @@ export default function PostForm({
               </div>
             )}
 
-            <div className="post-editor">
+            {/* `inter.variable` again (see ArticleDetail): the editor is set
+                in the article's reading face so a post looks the same while
+                it is written as it does once it publishes. */}
+            <div className={`${inter.variable} post-editor`}>
               <Editor
                 initialContent={initialBlocks}
                 onChange={setBlocks}
@@ -927,12 +1331,15 @@ export default function PostForm({
             <PostDetailsCard
               blog={blog}
               slug={slug}
-              postId={post?.id}
+              postId={saved?.id}
               title={title}
               slugError={errors.slug}
               description={description}
               setDescription={setDescription}
               setSlug={setSlug}
+              startDraft={
+                saved ? null : { onStart: startDraft, busy: startingDraft }
+              }
               authorDate={authorDate}
               setAuthorDate={setAuthorDate}
               lede={lede}

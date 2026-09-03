@@ -81,13 +81,11 @@ export function CategoryPickerCard({
                 selectedKey={categoryId || null}
                 onSelectionChange={(key) => {
                   const c = blogCategories.find((x) => x.id === String(key));
-                  if (c) {
-                    setCategoryId(c.id);
-                    setCategoryName(c.name);
-                  } else {
-                    setCategoryId("");
-                    setCategoryName("");
-                  }
+                  // Unmatched key = "still typing", not "category removed".
+                  // See the same guard in AuthorPickerCard for why.
+                  if (!c) return;
+                  setCategoryId(c.id);
+                  setCategoryName(c.name);
                 }}
               >
                 <ComboBox.InputGroup>

@@ -6,7 +6,7 @@ import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
-import { adminApi, type AdminPost } from "./lib/api";
+import { adminApi, type AdminPost, type PostInput } from "./lib/api";
 import { api, type Blog } from "@/app/lib/api";
 import type { EntitySaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
@@ -161,10 +161,17 @@ export async function savePost(
   const id = optStr(formData, "id");
   const rawBlog = str(formData, "blog");
   const blog = BLOGS.has(rawBlog) ? (rawBlog as "hive" | "learn") : "hive";
+  // Publication is only changed when a button that changes it was pressed.
+  //
+  // This used to default to DRAFT, so EVERY save carried a status — and since
+  // the backend writes any field it is given, saving a live article
+  // unpublished it. An absent status now means "leave it as it is", which is
+  // what an ordinary save should do. A create with no status gets DRAFT from
+  // the backend's own default.
   const rawStatus = str(formData, "status");
   const status = STATUSES.has(rawStatus)
     ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
-    : "DRAFT";
+    : undefined;
   const title = str(formData, "title");
   const contentJsonStr = str(formData, "contentJson") || "[]";
 
@@ -265,14 +272,23 @@ export async function savePost(
   const carouselIntro = optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
   const carouselBody = optStr(formData, "carouselBody") ?? (featured ? description : null);
 
-  // Author handling - use authorId if provided, otherwise authorName for auto-create
+  // Author + category.
+  //
+  // No defaults here, deliberately. These used to fall back to the literals
+  // "energiebee" and "Uncategorised" whenever the form posted a blank, and the
+  // payload below always included them — so the backend, which reads a bare
+  // NAME as "upsert a record with this name and attach it", reassigned the
+  // post's author and category on any save where the pickers weren't
+  // populated. An id names an existing record and is always safe to send; a
+  // name creates one, so it is passed through only when the form really sent
+  // it (the create path, where the backend requires one of the two). Sending
+  // neither is what leaves an existing post's taxonomy alone.
   const authorId = optStr(formData, "authorId");
-  const authorName = str(formData, "authorName") || "energiebee";
+  const authorName = optStr(formData, "authorName");
   const authorAvatarUrl = optStr(formData, "authorAvatarUrl");
 
-  // Category handling - use categoryId if provided, otherwise category name for auto-create
   const categoryId = optStr(formData, "categoryId");
-  const category = str(formData, "category") || "Uncategorised";
+  const category = optStr(formData, "category");
 
   // Scheduling. The form now sends an ABSOLUTE instant (ISO, with a `Z`),
   // converted in the browser where the author's timezone is actually known —
@@ -298,9 +314,13 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    // Taxonomy - send ID if available, otherwise name + avatar for auto-create
-    ...(authorId ? { authorId } : { authorName, authorAvatarUrl }),
-    ...(categoryId ? { categoryId } : { category }),
+    // Taxonomy — id, else a name to create from, else nothing at all.
+    ...(authorId
+      ? { authorId }
+      : authorName
+        ? { authorName, authorAvatarUrl }
+        : {}),
+    ...(categoryId ? { categoryId } : category ? { category } : {}),
     tags, // string[] of tag names (backend auto-creates)
     readTime: readTimeMinutes,
     coverImage,
@@ -343,7 +363,7 @@ export async function savePost(
     carouselBody,
     featured,
     homeFeatured,
-    status,
+    ...(status ? { status } : {}),
     // Only include content if editor has blocks - preserves legacy content on metadata-only edits
     ...(contentJson !== undefined ? { contentJson } : {}),
     ...(contentHtml !== undefined ? { contentHtml } : {}),
@@ -377,6 +397,239 @@ export async function savePost(
   // its `id` field would still be empty and the next save would write a
   // second post instead of updating this one.
   return { ok: true, entity: saved };
+}
+
+// ── Autosave ────────────────────────────────────────────────────────────────
+
+/** What an autosave tells the editor about where its work went. */
+export type AutosaveResult =
+  | {
+      ok: true;
+      /** Whether the patch was staged aside rather than applied to the post. */
+      staged: boolean;
+      /** When the staged patch was last touched; null once nothing is pending. */
+      draftUpdatedAt: string | null;
+      savedAt: string;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Bring the post into existence at the address the author chose, keeping
+ * whatever they have already written.
+ *
+ * `initial` matters. This used to create a bare row and let autosave fill it
+ * in, which meant the work on screen only reached the server on the next idle
+ * tick — and if the author closed the tab first, they had a post with nothing
+ * in it. Everything they have goes in the create itself.
+ *
+ * A post used to require a title, description, cover alt text, byline date,
+ * body and a full taxonomy before it could exist at all, which is why the
+ * editor had nothing to save against until the author had finished. The
+ * backend now accepts a draft with nothing but a blog and a slug, and refuses
+ * to PUBLISH one that is still missing the rest.
+ */
+export async function createDraft(
+  blog: string,
+  rawSlug: string,
+  initial: AutosavePatch = {},
+): Promise<{ ok: true; post: AdminPost } | { ok: false; error: string }> {
+  await assertAdmin();
+
+  const targetBlog = BLOGS.has(blog) ? (blog as "hive" | "learn") : "hive";
+  const slug = slugify(rawSlug);
+  if (!slug) return { ok: false, error: "Add a slug first." };
+
+  // The same check the inline hint runs. Worth repeating: a draft created on a
+  // taken address would collide with the unique index as an opaque 500.
+  const check = await checkSlug(targetBlog, slug);
+  if (check.state !== "available") {
+    return {
+      ok: false,
+      error: "message" in check ? check.message : "That slug isn't available.",
+    };
+  }
+
+  const seeded = await buildPostPatch(initial);
+  if ("error" in seeded) return { ok: false, error: seeded.error };
+
+  try {
+    const post = await adminApi.createPost({
+      ...seeded.body,
+      blog: targetBlog,
+      slug,
+    } as Parameters<typeof adminApi.createPost>[0]);
+    // Only the dashboard's list changes — a draft is invisible to readers, so
+    // there is no public page to rebuild.
+    revalidatePath("/admin");
+    return { ok: true, post };
+  } catch (e) {
+    return { ok: false, error: `Could not start the draft: ${(e as Error).message}` };
+  }
+}
+
+/**
+ * Save the author's work without deciding anything about publication.
+ *
+ * A deliberately cheap sibling of `savePost`, because this runs while someone
+ * is typing rather than when they press a button:
+ *
+ *   - No slug availability check. `savePost` walks up to twenty pages of the
+ *     admin listing to run it, which is fine once per save and absurd every
+ *     few seconds — and the slug isn't changing here anyway.
+ *   - No revalidation. Either the post is a draft, which no reader can see, or
+ *     the patch is staged and the live page has not moved.
+ *   - No status. The backend rejects one on this route rather than ignoring
+ *     it; typing must never publish anything.
+ */
+export type AutosavePatch = {
+  title?: string;
+  contentJson?: unknown[];
+  description?: string;
+  lede?: string;
+  // Cover
+  coverImage?: string;
+  coverImageAlt?: string;
+  coverImageTitle?: string;
+  coverImageCaption?: string;
+  coverImageCredit?: string;
+  // SEO / social
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  canonicalUrl?: string;
+  noindex?: boolean;
+  // Byline + placement
+  authorDate?: string;
+  featured?: boolean;
+  homeFeatured?: boolean;
+  carouselIntro?: string;
+  carouselBody?: string;
+  // CTA
+  ctaLabel?: string;
+  ctaHref?: string;
+  ctaExternal?: boolean;
+  // Taxonomy. IDs only — a NAME tells the backend to create a record with it,
+  // which is how every save used to reassign the post to an author called
+  // "energiebee". An empty id is omitted rather than sent, both because it
+  // would fail uuid validation and because "not chosen" must never overwrite
+  // a choice already stored.
+  authorId?: string;
+  categoryId?: string;
+  tags?: string[];
+};
+
+/** Ids that are omitted entirely when blank — see AutosavePatch. */
+const OMIT_WHEN_BLANK = new Set(["authorId", "categoryId"]);
+
+/** Fields whose empty string means "cleared", so it is sent as null. */
+const NULLABLE_WHEN_BLANK = new Set([
+  "lede",
+  "coverImageTitle",
+  "coverImageCaption",
+  "coverImageCredit",
+  "seoTitle",
+  "seoDescription",
+  "ogImage",
+  "ogImageAlt",
+  "canonicalUrl",
+  "carouselIntro",
+  "carouselBody",
+  "ctaLabel",
+  "ctaHref",
+]);
+
+/**
+ * Turn a patch of form fields into the body the API expects.
+ *
+ * Shared by `createDraft` and `autosavePost` so the two cannot disagree about
+ * how a field is written — the create seeds the same shape autosave will keep
+ * updating.
+ */
+async function buildPostPatch(
+  patch: AutosavePatch,
+): Promise<{ body: Record<string, unknown> } | { error: string }> {
+  const body: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined || key === "contentJson") continue;
+    if (value === "" && OMIT_WHEN_BLANK.has(key)) continue;
+    // An emptied optional field means "remove it", and the column is nullable
+    // — sending "" would store a blank string where null is meant.
+    body[key] =
+      typeof value === "string" && value === "" && NULLABLE_WHEN_BLANK.has(key)
+        ? null
+        : value;
+  }
+
+  // Same normalisation the explicit save applies, so a link autosaved
+  // half-typed still arrives in the shape the rest of the site expects.
+  if (typeof body.ctaHref === "string" && body.ctaHref) {
+    body.ctaHref = patch.ctaExternal
+      ? /^(https?:\/\/|mailto:|tel:)/i.test(body.ctaHref)
+        ? body.ctaHref
+        : `https://${body.ctaHref}`
+      : body.ctaHref.startsWith("/")
+        ? body.ctaHref
+        : `/${body.ctaHref}`;
+  }
+
+  if (patch.contentJson !== undefined) {
+    const blocks = Array.isArray(patch.contentJson) ? patch.contentJson : [];
+    // An image with no alt text is refused upstream, and a save that 400s on
+    // every keystroke would be worse than useless — so say what is wrong once,
+    // clearly, and let the author fix it.
+    const missing = findContentImagesMissingAlt(blocks);
+    if (missing.length > 0) {
+      const list = missing.map((m) => `#${m.index}`).join(", ");
+      return {
+        error: `Not saved — add alt text to content image${missing.length === 1 ? "" : "s"} ${list}.`,
+      };
+    }
+    body.contentJson = { blocks };
+    body.contentHtml = await contentJsonToHtml(blocks);
+  }
+
+  return { body };
+}
+
+export async function autosavePost(
+  id: string,
+  patch: AutosavePatch,
+): Promise<AutosaveResult> {
+  await assertAdmin();
+  if (!id) return { ok: false, error: "The post hasn't been created yet." };
+
+  const built = await buildPostPatch(patch);
+  if ("error" in built) return { ok: false, error: built.error };
+  const body = built.body;
+
+  if (Object.keys(body).length === 0) {
+    return { ok: true, staged: false, draftUpdatedAt: null, savedAt: new Date().toISOString() };
+  }
+
+  try {
+    const saved = await adminApi.stageDraft(id, body as Partial<PostInput>);
+    return {
+      ok: true,
+      staged: saved.draftUpdatedAt != null,
+      draftUpdatedAt: saved.draftUpdatedAt ?? null,
+      savedAt: new Date().toISOString(),
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+/** Throw a published post's staged edits away. */
+export async function discardStagedChanges(id: string): Promise<ActionResult> {
+  await assertAdmin();
+  try {
+    await adminApi.discardDraft(id);
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
 }
 
 /** Result of a dashboard quick-action — the caller toasts on this. */

@@ -459,6 +459,8 @@ export interface ListMediaParams {
   folderId?: string;
   unfiled?: boolean;
   q?: string;
+  /** Exact storage key — identifies one row, unlike the fuzzy `q`. */
+  key?: string;
   tagId?: string;
   /** Filter to media carrying ANY of these tag ids (OR). */
   tagIds?: string[];
@@ -470,6 +472,7 @@ export function listMedia(params: ListMediaParams = {}): Promise<MediaListResult
   if (params.page) qs.set("page", String(params.page));
   if (params.pageSize) qs.set("pageSize", String(params.pageSize));
   if (params.kind) qs.set("kind", params.kind);
+  if (params.key) qs.set("key", params.key);
   if (params.folderId) qs.set("folderId", params.folderId);
   if (params.unfiled) qs.set("unfiled", "true");
   if (params.q) qs.set("q", params.q);
@@ -494,10 +497,22 @@ export function listMedia(params: ListMediaParams = {}): Promise<MediaListResult
  * Returns null for anything the library doesn't know about — an external URL,
  * or a file uploaded outside the media library.
  */
+/**
+ * Find the library row for a public URL, by its exact storage key.
+ *
+ * This used to search (`q: key`) and take the first five results. `q` is a
+ * CONTAINS match over name/alt/title/key ordered newest-first, so the row it
+ * was actually looking for got pushed past the fifth position as the library
+ * grew — and the lookup started missing. The caller reads that miss as
+ * "nothing known about this image", which is why pre-publish warnings about
+ * oversized images quietly stopped appearing rather than being wrong.
+ *
+ * `key` is unique, so an exact filter answers with that row or nothing.
+ */
 export async function findMediaByUrl(url: string): Promise<MediaItem | null> {
   const key = keyFromUrl(url);
   if (!key) return null;
-  const { items } = await listMedia({ q: key, pageSize: 5 });
+  const { items } = await listMedia({ key, pageSize: 1 });
   return items.find((m) => m.key === key) ?? null;
 }
 

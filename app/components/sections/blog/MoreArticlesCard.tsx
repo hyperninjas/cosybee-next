@@ -27,7 +27,7 @@ export function MoreArticlesCard({
       href={`${basePath}/${a.slug}`}
       className="group flex gap-3 rounded-xl p-2 transition-colors hover:bg-surface-secondary"
     >
-      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg">
+      <div className="relative h-20 w-33 shrink-0 overflow-hidden rounded-lg">
         <Image
           src={a.coverImage}
           alt={a.coverImageAlt}
@@ -38,9 +38,9 @@ export function MoreArticlesCard({
         />
       </div>
       <div className="flex min-w-0 flex-col">
-        <h3 className="line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors group-hover:text-accent">
+        <h4 className="line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors group-hover:underline">
           {a.title}
-        </h3>
+        </h4>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
           <span>{formatReadTime(a.readTime)}</span>
           <Dot />

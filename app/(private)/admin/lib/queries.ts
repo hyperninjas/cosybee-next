@@ -19,18 +19,80 @@ export async function listPosts(): Promise<AdminPostRow[]> {
   return adminApi.listPosts();
 }
 
-/** A single post for the edit form (full row). */
+/**
+ * Lay a post's unpublished edits over its live values.
+ *
+ * A live post's columns hold what readers already have; the staged patch holds
+ * what the author has been writing. Everywhere inside the admin — the editor
+ * and the preview both — the second is the one to show. Without it, reopening
+ * a post would present the old version and the next autosave would overwrite
+ * the staged work with it.
+ *
+ * `key in merged` rather than a `??` chain, so a field the author CLEARED
+ * (staged as null) still wins over the live value instead of falling back to
+ * it. Keys with no counterpart on the row — `authorId`, `categoryId` — are
+ * skipped: those are references autosave doesn't stage.
+ */
+function applyStagedEdits(row: AdminPost): AdminPost {
+  const staged = (row.draft ?? {}) as Record<string, unknown>;
+  if (Object.keys(staged).length === 0) return row;
+  const merged: Record<string, unknown> = { ...row };
+  for (const key of Object.keys(staged)) {
+    if (key in merged) merged[key] = staged[key];
+  }
+  return merged as unknown as AdminPost;
+}
+
+/** A single post for the edit form (full row), showing unpublished edits. */
 export async function getPost(id: string): Promise<AdminPost | null> {
-  return adminApi.getPost(id);
+  const row = await adminApi.getPost(id);
+  return row ? applyStagedEdits(row) : null;
 }
 
 /**
  * Map any post (draft or published) to the public Article shape.
  * Used by the admin draft-preview page.
  */
+/**
+ * Stand-ins for a draft that hasn't been attributed or filed yet.
+ *
+ * A post now exists from the moment its slug is chosen, so the preview has to
+ * render one that may have no author and no category. These placeholders live
+ * HERE, at the preview boundary, and are never written anywhere — which is the
+ * whole difference between them and the "energiebee" / "Uncategorised" records
+ * the editor used to save into the database to satisfy a NOT NULL column.
+ *
+ * The alternative — making `Article.author` nullable — would push a null check
+ * into every public component that renders a byline, none of which can ever
+ * receive one: the public site is served PUBLISHED posts only, and a post
+ * cannot be published without both.
+ */
+const UNATTRIBUTED_AUTHOR: Author = {
+  id: "",
+  name: "No author yet",
+  slug: "",
+  avatarUrl: null,
+  bio: null,
+  role: null,
+};
+
+function unfiledCategory(blog: "hive" | "learn"): Category {
+  return {
+    id: "",
+    blog,
+    name: "No category yet",
+    slug: "",
+    description: null,
+  };
+}
+
 export async function getPostArticle(id: string): Promise<Article | null> {
-  const row = await adminApi.getPost(id);
-  if (!row) return null;
+  const live = await adminApi.getPost(id);
+  if (!live) return null;
+  // A preview exists to answer "how will what I am writing look", so it shows
+  // the staged version — previewing the article readers already have is the
+  // one thing an author never needs.
+  const row = applyStagedEdits(live);
 
   return {
     id: row.id,
@@ -44,9 +106,10 @@ export async function getPostArticle(id: string): Promise<Article | null> {
     seoTitle: row.seoTitle,
     seoDescription: row.seoDescription,
 
-    // Taxonomy (full objects)
-    author: row.author,
-    category: row.category,
+    // Taxonomy (full objects). Placeholders only for an unfinished draft being
+    // previewed — see above.
+    author: row.author ?? UNATTRIBUTED_AUTHOR,
+    category: row.category ?? unfiledCategory(row.blog),
     tags: row.tags ?? [],
 
     // Media
@@ -68,7 +131,9 @@ export async function getPostArticle(id: string): Promise<Article | null> {
 
     // Display
     readTime: row.readTime,
-    authorDate: row.authorDate,
+    // No byline date chosen yet — show when the draft was created rather than
+    // an empty date the formatter would render as "Invalid Date".
+    authorDate: row.authorDate ?? row.createdAt,
 
     // Featured/Carousel
     featured: row.featured,

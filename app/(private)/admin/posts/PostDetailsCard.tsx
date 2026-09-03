@@ -38,6 +38,7 @@ export function PostDetailsCard({
   description,
   setDescription,
   setSlug,
+  startDraft = null,
   authorDate,
   setAuthorDate,
   lede,
@@ -53,6 +54,16 @@ export function PostDetailsCard({
   description: string;
   setDescription: (v: string) => void;
   setSlug: (v: string) => void;
+  /**
+   * Offered until the post exists: create it at this address, keeping what has
+   * been written so far.
+   *
+   * A deliberate button rather than something that happens as soon as a free
+   * slug is typed. Creating on availability alone meant clicking Generate
+   * silently produced a post — so a moment's browsing left real rows behind,
+   * and the author was never asked.
+   */
+  startDraft?: { onStart: () => void; busy: boolean } | null;
   authorDate: string;
   setAuthorDate: (v: string) => void;
   lede: string;
@@ -147,10 +158,33 @@ export function PostDetailsCard({
             >
               Generate
             </Button>
+            {/* Only until the post exists. From then on the post saves itself,
+                so there is nothing for this to do. */}
+            {startDraft && (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="shrink-0"
+                // Only once the address is known to be free — starting a draft
+                // on a taken slug would fail at the unique index.
+                isDisabled={startDraft.busy || check.state !== "available"}
+                isPending={startDraft.busy}
+                onPress={startDraft.onStart}
+              >
+                Start draft
+              </Button>
+            )}
           </div>
           <span className="mt-1 block font-mono text-xs text-muted">
             /{blog}/{slug || "…"}
           </span>
+          {startDraft && check.state === "available" && (
+            <span className="mt-1 block text-xs text-muted">
+              Start the draft to save what you have written — after that the
+              post keeps itself saved as you work.
+            </span>
+          )}
           {message && (
             <span
               className={`mt-1 block text-xs font-medium ${

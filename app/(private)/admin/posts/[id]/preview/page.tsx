@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import ArticleDetail from "@/app/components/sections/blog/ArticleDetail";
 import { getPostArticle } from "@/app/(private)/admin/lib/queries";
 
-// Admin-only draft preview — renders any post (incl. drafts) exactly as
-// it will appear once published.
+// Admin-only preview — renders any post, published or not, exactly as it will
+// appear to a reader. On a live post it shows the STAGED version rather than
+// the one readers currently have: previewing the already-published article is
+// the one thing an author never needs.
 export default async function PreviewPage({
   params,
 }: {
@@ -19,7 +21,13 @@ export default async function PreviewPage({
       <div className="sticky top-0 z-30 flex items-center justify-between bg-foreground px-6 py-2.5 text-sm text-white">
         <span className="font-semibold">
           Preview · {article.blog} ·{" "}
-          <span className="text-danger">draft view</span>
+          <span className="text-danger">
+            {article.status === "PUBLISHED"
+              ? "unpublished changes"
+              : article.status === "ARCHIVED"
+                ? "archived"
+                : "draft view"}
+          </span>
         </span>
         <Link
           href={`/admin/posts/${id}/edit`}

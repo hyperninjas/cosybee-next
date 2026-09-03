@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/article-types";
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
-import { contentJsonToHtml } from "@/app/lib/blocknote";
+import { contentJsonToHtml, stripPastedColors } from "@/app/lib/blocknote";
 import { collectFaqItems } from "@/app/lib/blocknoteSchema";
 import { ArticleCard } from "./ArticleCard";
 import { MoreArticlesCard } from "./MoreArticlesCard";
@@ -30,6 +30,7 @@ import {
   videoObjectSchema,
 } from "@/app/lib/structured-data";
 import { resolveArticleVideos } from "@/app/lib/article-videos";
+import { inter } from "@/app/lib/fonts";
 
 type Props = {
   /** Published article with rendered body HTML (caller handles notFound). */
@@ -105,8 +106,12 @@ export default async function ArticleDetail({
     rawHtml = blockNoteHtml || article.contentHtml || "";
   }
   // Post-process the rendered body regardless of which source produced it:
-  // heading ids for the TOC, and a scroll wrapper around each table.
-  const { html, items: toc } = buildToc(wrapArticleTables(rawHtml));
+  // heading ids for the TOC, a scroll wrapper around each table, and — for the
+  // stored-`contentHtml` fallback, which may predate the export-side pass —
+  // the pasted-in colours that would otherwise outrank `--article-foreground`.
+  const { html, items: toc } = buildToc(
+    wrapArticleTables(stripPastedColors(rawHtml)),
+  );
   // The sidebar "On this page" outline lists top-level sections (h2) only.
   // Anchors and the in-article /toc block still cover h3 subsections.
   const sidebarToc = toc.filter((item) => item.level === 2);
@@ -153,7 +158,11 @@ export default async function ArticleDetail({
   ];
 
   return (
-    <main className="flex-1">
+    /* `inter.variable` defines --font-inter on this element; `.article-page`
+       is what consumes it (globals.css). Declaring the font in this component
+       rather than the root layout is what keeps it scoped: Next preloads Inter
+       only on the routes that render an article. */
+    <main className={`${inter.variable} article-page flex-1`}>
       {/* Warm up the connection to the media host — article images load from
           it cross-origin (React 19 hoists this to <head> and dedups it). */}
       <link rel="preconnect" href="https://eb-api.technext.it" />
@@ -175,10 +184,7 @@ export default async function ArticleDetail({
       <ReadingProgress targetSelector="#post" />
       {/* px-0 + xl:px-6 override the blog gutter: below xl the article body
           carries its own padding. */}
-      <Container
-        size="blog"
-        className="flex justify-center gap-10 px-0 xl:px-6"
-      >
+      <Container size="blog" className="flex justify-center gap-10 ">
         {/* `id="post"`, not `article-body`: this element spans the whole post
             — breadcrumb, header, hero, body, CTA — while `.article-body`
             below is the prose alone. Sharing one name made it easy to read
@@ -334,7 +340,7 @@ export default async function ArticleDetail({
               breadcrumb, byline and share control, none of which are the
               article. */}
           <div
-            className="article-body mt-10 text-foreground wrap-break-word [&_a]:break-all"
+            className="article-body mt-10 max-w-170 mx-auto wrap-break-word [&_a]:break-all"
             dangerouslySetInnerHTML={{
               __html: `${ARTICLE_START}${html}${ARTICLE_END}`,
             }}
@@ -367,9 +373,9 @@ export default async function ArticleDetail({
 
             {related.length > 0 && (
               <div>
-                <h2 className="text-lg font-extrabold text-foreground">
+                <h3 className="text-lg font-extrabold text-foreground">
                   More blogs
-                </h2>
+                </h3>
                 <div className="mt-4 flex flex-col gap-1">
                   {related.map((a) => (
                     <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
@@ -382,7 +388,11 @@ export default async function ArticleDetail({
       </Container>
       {/* more blogs */}
       {related.length > 0 && (
-        <Section spacing="none" overflow="visible" className="xl:hidden">
+        <Section
+          spacing="none"
+          overflow="visible"
+          className="xl:has-last:hidden"
+        >
           <Container size="prose" className="pb-16 sm:px-5 lg:pb-24">
             <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
               More blogs

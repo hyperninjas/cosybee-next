@@ -224,16 +224,16 @@ export function MediaCard({
           {description}
         </p>
         {bullets && bullets.length > 0 && (
-          <ul className="mt-5 space-y-3">
+          <ul className="mt-5 space-y-2">
             {bullets.map((b) => (
               <li key={b} className="flex items-center gap-3">
                 <Image
                   src={hexaCheck}
                   alt=""
                   aria-hidden
-                  className="h-5 w-6 lg:h-6.5 lg:w-7.5"
+                  className="h-4.5 w-5.5 "
                 />
-                <span className="text-sm text-muted sm:text-base leading-[100%] font-medium">
+                <span className="text-sm text-muted sm:text-sm leading-[100%] font-medium">
                   {b}
                 </span>
               </li>

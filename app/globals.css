@@ -33,7 +33,7 @@
   --field-foreground: oklch(21.03% 0.0015 49.85);
   --field-placeholder: oklch(55.17% 0.003 49.85);
   --focus: oklch(64.11% 0.1638 49.85);
-  --foreground: oklab(15.434000000000001% 0 -0.00002);
+  --foreground: oklch(15.434% 0.00002 271.152);
   --muted: oklab(39.042% 0 -0.00004);
   --overlay: oklch(100% 0.0004 49.85);
   --overlay-foreground: oklch(21.03% 0.0015 49.85);
@@ -83,7 +83,7 @@
   --field-foreground: oklch(99.11% 0.0015 49.85);
   --field-placeholder: oklch(70.5% 0.003 49.85);
   --focus: oklch(64.11% 0.1638 49.85);
-  --foreground: oklch(99.11% 0.0015 49.85);
+  --foreground: oklch(99.155% 0.0016 66.21);
   --muted: oklch(70.5% 0.003 49.85);
   --overlay: oklch(21.03% 0.003 49.85);
   --overlay-foreground: oklch(99.11% 0.0015 49.85);
@@ -150,12 +150,62 @@
 
 /* Server-rendered article body (BlockNote -> HTML). Mirrors the prior
    hand-built renderer's typography. */
+/* Prose colour. Articles paint from the theme's `--foreground`, so body copy is
+   the same black as the rest of the site rather than a second, darker one.
+   It was a literal PURE black for as long as text pasted from Word/Docs
+   published the `rgb(0, 0, 0)` BlockNote inlines on it, and the prose had to
+   agree with that black or the page read as two of them; `stripPastedColors`
+   (app/lib/blocknote.ts) now drops those inline colours on export, so there is
+   no second black left to match. One declaration serves both themes because
+   `--foreground` already flips — near-black on the light surface, near-white
+   on the dark one, where a literal black would be invisible. It stays a token
+   rather than a direct `var(--foreground)` because the palette colours further
+   down rebind it per element, which is how an author's chosen colour survives
+   the !important prose rules. Set on the container so every element inherits
+   it, and mirrored onto the editor so a post is written in the colour it
+   publishes in. */
+/* Reading face. Articles are set in Inter rather than the site's Manrope: it
+   is a text face drawn for long-form screen reading, where Manrope is the
+   brand's display voice. `.article-page` covers the whole article route —
+   title, byline, prose, sidebar, related cards — so nothing on the page reads
+   as two different families, and the editor is mirrored so a post is written
+   in the face it publishes in.
+
+   The stack is written out here rather than hoisted to a --font-article token
+   beside --font-sans, and that is deliberate: a var() inside a custom property
+   is substituted where the property is DECLARED, not where it is used. Inter's
+   variable is defined by next/font's class on the two elements that carry it,
+   `.article-page` and `.post-editor` (see ArticleDetail.tsx and PostForm.tsx),
+   NOT on :root the way Manrope's is — so a :root token would resolve
+   var(--font-inter) against <html>, find nothing, collapse to invalid, and
+   leave the article silently reading in Manrope.
+   Reference the variable rather than a bare "Inter": it also carries the
+   metric-matched "Inter Fallback" face, which is what keeps the swap from
+   reflowing the article. `.bn-default-styles` is listed because @blocknote/core
+   puts its own font-family on that class, which sits on the block content
+   INSIDE .bn-editor — an ancestor rule loses to it no matter how specific, so
+   the editor would otherwise keep BlockNote's stack. (That stack happens to
+   start with a bare "Inter" and would coincidentally land on this same face,
+   but only for as long as next/font emits an unhashed family name.) */
+.article-page,
+.post-editor .bn-editor,
+.post-editor .bn-default-styles {
+  font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+.article-body,
+.post-editor .bn-editor {
+  --article-foreground: var(--foreground);
+  color: var(--article-foreground);
+}
 .article-body > * + * {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
 }
 .article-body p {
-  font-size: 1rem; /* 16px */
-  line-height: 1.4;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.5;
+  margin-top: 2.25rem;
+
+  color: var(--article-foreground);
 }
 /* Headings are display type, not prose: leading close to their own size, and a
    touch of negative tracking on the three large levels so the wide Manrope
@@ -166,8 +216,9 @@
 .article-body h4,
 .article-body h5,
 .article-body h6 {
-  color: var(--foreground);
-  margin-top: 1.5rem;
+  color: var(--article-foreground) !important;
+  margin-top: 2.25rem;
+  margin-bottom: -1rem;
 }
 .article-body h1 {
   font-size: 2.25rem; /* 36px */
@@ -176,24 +227,24 @@
   letter-spacing: -0.01em;
 }
 .article-body h2 {
-  font-size: 2rem; /* 32px */
+  font-size: 1.5rem; /* 24px */
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
 .article-body h3 {
-  font-size: 1.75rem; /* 28px */
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
 }
 .article-body h4 {
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
   line-height: 1.25;
 }
 .article-body h5 {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1rem; /* 16px */
   font-weight: 600;
   line-height: 1.25;
 }
@@ -201,7 +252,7 @@
    unstyled h6 renders as plain body text — so it continues the ladder's 4px
    step at the body size, semibold like the levels above it. */
 .article-body h6 {
-  font-size: 1rem; /* 16px */
+  font-size: 0.875rem; /* 14px */
   font-weight: 600;
   line-height: 1.25;
 }
@@ -220,17 +271,17 @@
    `.article-body p` wins on the child and the item reads at body size. */
 .article-body li,
 .article-body li > p {
-  font-size: 0.875rem; /* 14px */
+  font-size: 1.125rem; /* 18px */
   line-height: 1.3;
 }
-.article-body li {
-  margin-top: 0.5rem;
+.article-body li > p {
+  margin-top: 0.5rem !important;
 }
 .article-body li::marker {
   color: var(--muted);
 }
 /* A link takes the size and leading of whatever it sits in: that lands on
-   16px / 1.4 in body copy, and keeps a link inside a heading or a list item
+   16px / 1.5 in body copy, and keeps a link inside a heading or a list item
    the size of the text around it. Setting them on the anchor itself would
    shrink links in headings and make the lines that contain one taller than
    the lines that don't. */
@@ -245,11 +296,11 @@
 }
 .article-body strong {
   font-weight: 700;
-  color: var(--foreground);
+  color: var(--article-foreground) !important;
 }
 .article-body img {
   border-radius: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   /* The lossy export sets an explicit `width` (the author's resized preview
      width); cap it to the column and keep the aspect ratio on small screens. */
   max-width: 100%;
@@ -307,7 +358,7 @@
   color: #e6e6e6;
   padding: 1.1rem 1.25rem;
   font-size: 0.875rem; /* 14px */
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .article-body pre code {
   background: transparent;
@@ -383,6 +434,9 @@
   padding: 5px 10px;
   vertical-align: top;
   text-align: left;
+  p {
+    margin-top: 0 !important;
+  }
 }
 .article-body th,
 .article-body th > p {
@@ -391,7 +445,7 @@
   line-height: 1;
 }
 .article-body th {
-  color: var(--foreground);
+  color: var(--article-foreground) !important;
 }
 /* Empty cells still get a row height (editor parity). */
 .article-body th > p,
@@ -403,7 +457,21 @@
    inline `text-align`, cells get `data-text-alignment`; cell colors come as
    `data-text-color`/`data-background-color`). The editor renders these via
    BlockNote's own CSS; without this mirror the styling silently vanished
-   from the published article. Palette values match @blocknote/core. */
+   from the published article. Palette values match @blocknote/core.
+
+   Each colour also REDEFINES --article-foreground rather than only painting
+   `color`, because the prose-colour rules above carry !important (they exist
+   to flatten colours pasted in from Word/Docs, which outrank a stylesheet as
+   inline styles). Without the token an author's deliberate palette colour lost
+   to them on exactly the elements that force it — headings, <strong>, <th> —
+   so a coloured heading published black, and a bold word inside a coloured
+   paragraph snapped back to black. Redefining the token instead means those
+   rules resolve to the author's colour and every descendant inherits it, while
+   pasted colours — which carry no palette name, so they match none of these
+   selectors — stay flattened. The second selector is the same choice made as
+   an inline mark rather than a block property: BlockNote writes the palette
+   NAME to `data-value` beside the inline style (see stripPastedColors in
+   app/lib/blocknote.ts), which is what tells the two apart. */
 .article-body [data-text-alignment="left"] {
   text-align: left;
 }
@@ -416,31 +484,49 @@
 .article-body [data-text-alignment="justify"] {
   text-align: justify;
 }
-.article-body [data-text-color="gray"] {
+.article-body [data-text-color="gray"],
+.article-body [data-style-type="textColor"][data-value="gray"] {
+  --article-foreground: #9b9a97;
   color: #9b9a97;
 }
-.article-body [data-text-color="brown"] {
+.article-body [data-text-color="brown"],
+.article-body [data-style-type="textColor"][data-value="brown"] {
+  --article-foreground: #64473a;
   color: #64473a;
 }
-.article-body [data-text-color="red"] {
+.article-body [data-text-color="red"],
+.article-body [data-style-type="textColor"][data-value="red"] {
+  --article-foreground: #e03e3e;
   color: #e03e3e;
 }
-.article-body [data-text-color="orange"] {
+.article-body [data-text-color="orange"],
+.article-body [data-style-type="textColor"][data-value="orange"] {
+  --article-foreground: #d9730d;
   color: #d9730d;
 }
-.article-body [data-text-color="yellow"] {
+.article-body [data-text-color="yellow"],
+.article-body [data-style-type="textColor"][data-value="yellow"] {
+  --article-foreground: #dfab01;
   color: #dfab01;
 }
-.article-body [data-text-color="green"] {
+.article-body [data-text-color="green"],
+.article-body [data-style-type="textColor"][data-value="green"] {
+  --article-foreground: #4d6461;
   color: #4d6461;
 }
-.article-body [data-text-color="blue"] {
+.article-body [data-text-color="blue"],
+.article-body [data-style-type="textColor"][data-value="blue"] {
+  --article-foreground: #0b6e99;
   color: #0b6e99;
 }
-.article-body [data-text-color="purple"] {
+.article-body [data-text-color="purple"],
+.article-body [data-style-type="textColor"][data-value="purple"] {
+  --article-foreground: #6940a5;
   color: #6940a5;
 }
-.article-body [data-text-color="pink"] {
+.article-body [data-text-color="pink"],
+.article-body [data-style-type="textColor"][data-value="pink"] {
+  --article-foreground: #ad1a72;
   color: #ad1a72;
 }
 .article-body [data-background-color="gray"] {
@@ -768,7 +854,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.1 !important;
-  color: var(--foreground);
+  color: var(--foreground) !important;
 }
 @media (min-width: 900px) {
   .article-cta-heading {
@@ -1019,7 +1105,7 @@
   padding: 1rem 1.25rem;
   cursor: pointer;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.5;
   list-style: none; /* Firefox */
   transition: background-color 0.12s ease;
 }
@@ -1202,7 +1288,7 @@
 .bn-link-page-path {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.7rem;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #8a8a93;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1221,14 +1307,14 @@
 .post-editor .bn-editor {
   padding-inline: 0;
   font-size: 1rem; /* 16px */
-  line-height: 1.4;
+  line-height: 1.5;
   background-color: transparent;
 }
 /* @blocknote/core sets `line-height: 1.5` directly on every block wrapper, and
    a rule on the element beats leading inherited from `.bn-editor` above — so
    body leading has to be set here to actually take. */
 .post-editor .bn-block-outer {
-  line-height: 1.4;
+  line-height: 1.5;
 }
 /* Heading sizes in the editor come from BlockNote's `--level` em multiplier
    (3em / 2em / 1.3em / 1em / .9em / .8em of the editor base). Re-point that
@@ -1355,7 +1441,7 @@
 .post-editor .bn-block-content[data-content-type="codeBlock"] > pre {
   padding: 1.1rem 1.25rem;
   font-size: 0.875rem; /* 14px */
-  line-height: 1.4;
+  line-height: 1.5;
 }
 /* The chip inside a code block sits on the dark surface, not the page. */
 .post-editor .bn-block-content[data-content-type="codeBlock"] code {

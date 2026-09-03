@@ -309,7 +309,7 @@ export default function GetInTouch() {
             const detail = item.href ? (
               <Link
                 href={item.href}
-                className="text-sm text-muted transition-colors hover:text-accent"
+                className="text-sm text-muted transition-colors hover:underline"
               >
                 {item.detail}
               </Link>

@@ -16,9 +16,11 @@ export interface AdminPost {
   seoTitle: string | null;
   seoDescription: string | null;
 
-  // Taxonomy (full objects)
-  author: Author;
-  category: Category;
+  // Taxonomy (full objects). Null while a post is a draft nobody has
+  // attributed or filed yet — a post now exists from the moment its slug is
+  // chosen. Publishing requires both, so anything a reader can reach has them.
+  author: Author | null;
+  category: Category | null;
   tags: Tag[];
 
   // Media — optional (a post can be saved without a cover).
@@ -37,7 +39,8 @@ export interface AdminPost {
 
   // Display
   readTime: number;
-  authorDate: string;
+  /** Null until the byline date is set — see `author`. */
+  authorDate: string | null;
 
   // Featured/Carousel
   featured: boolean;
@@ -57,6 +60,16 @@ export interface AdminPost {
   // Content
   contentJson: Record<string, unknown> | null;
   contentHtml: string | null;
+
+  /**
+   * Edits saved but not yet made live, and when they were last touched.
+   *
+   * Only ever set on a PUBLISHED post: its columns ARE the live article, so
+   * autosave stages here instead of overwriting them. A draft has nothing to
+   * protect and autosaves straight into its own fields, leaving this null.
+   */
+  draft?: Partial<PostInput> | null;
+  draftUpdatedAt?: string | null;
 
   // Timestamps
   createdAt: string;
@@ -78,7 +91,10 @@ export type AdminPostRow = Pick<
   | "coverImage"
   | "ogImage"
   | "updatedAt"
->;
+> & {
+  /** The post is live and holding edits nobody has made live yet. */
+  hasUnpublishedChanges?: boolean;
+};
 
 /** Input for creating/updating a post. */
 export interface PostInput {
@@ -273,6 +289,24 @@ export const adminApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     });
+  },
+
+  /**
+   * Autosave. The backend decides where it lands — straight into a draft's
+   * own columns, or staged aside on a published post — so callers don't have
+   * to know. Never changes publication: `status` is rejected here, not
+   * ignored.
+   */
+  async stageDraft(id: string, data: Partial<PostInput>): Promise<AdminPost> {
+    return fetchApi<AdminPost>(`/api/posts/${id}/draft`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /** Throw the staged edits away; the live article is untouched. */
+  async discardDraft(id: string): Promise<AdminPost> {
+    return fetchApi<AdminPost>(`/api/posts/${id}/draft`, { method: "DELETE" });
   },
 
   /** Delete a post. */
