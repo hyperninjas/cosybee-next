@@ -11,7 +11,7 @@ import {
 import { parseDate, type CalendarDate } from "@internationalized/date";
 import { ChevronLeft, ChevronRight, Sun } from "@gravity-ui/icons";
 import type { DashboardData } from "./types";
-import { PropertySwitcher } from "./PropertySwitcher";
+// import { PropertySwitcher } from "./PropertySwitcher"; // hidden per design pass 2026-09-03
 import type { ActiveProperty } from "@/app/lib/property-state";
 
 /**
@@ -82,7 +82,13 @@ export function DashboardHeader({
             <span className="ml-2 text-muted">{achievement.message}</span>
           </Chip>
         )}
-        <PropertySwitcher properties={properties} activeId={activePropertyId} />
+        {/* PropertySwitcher hidden from the dashboard header per the design
+            pass on 2026-09-03. The dashboard is still scoped to the active
+            property under the hood (see `getActiveProperty` in
+            `property-state.ts`); only the visible chip is dropped. Restore
+            by uncommenting when a home-switcher affordance is needed
+            somewhere in the header again. */}
+        {/* <PropertySwitcher properties={properties} activeId={activePropertyId} /> */}
       </div>
 
       {interactive ? (

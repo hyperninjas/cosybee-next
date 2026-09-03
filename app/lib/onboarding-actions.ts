@@ -122,6 +122,42 @@ export async function searchEpcByPostcode(postcode: string): Promise<EpcCertific
   }
 }
 
+/**
+ * List EPC certificates for a specific UPRN. Mirrors mobile's
+ * `EpcApiService.searchByUprn` (see energiebeemobile
+ * `features/epc/data/services/epc_api_service.dart`).
+ *
+ * Preferred over the postcode search whenever a UPRN is available: a UPRN
+ * identifies exactly one property, so matching on it removes the risk of
+ * showing a neighbour's certificate and lets the funnel skip the "pick
+ * yours from 9" step entirely.
+ *
+ * An empty result is a definitive "this property has no EPC" (not "we
+ * couldn't match the address"), so the caller can confidently jump to
+ * the no-EPC branch. When the exact-match returns nothing, the caller
+ * still has the postcode search as a fallback.
+ */
+export async function searchEpcByUprn(uprn: string): Promise<EpcCertificateRow[]> {
+  if (uprn.trim().length === 0) return [];
+  const cookie = await cookieHeader();
+  if (cookie === null) return [];
+
+  const upstream = new URL(`${API_URL}/api/epc/search`);
+  upstream.searchParams.set("uprn", uprn.trim());
+
+  try {
+    const res = await fetch(upstream.toString(), {
+      headers: { Cookie: cookie },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { rows?: EpcCertificateRow[] };
+    return body.rows ?? [];
+  } catch {
+    return [];
+  }
+}
+
 // ── Property create ──────────────────────────────────────────────────────
 
 /**

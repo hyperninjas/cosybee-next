@@ -38,13 +38,17 @@ export const chartColors = {
   warning: "var(--warning)",
   danger: "var(--danger)",
 
-  // Energy channels (defined by `.efh-scope` in globals.css). Charts placed
-  // outside that scope fall back to the semantic tokens above rather than
-  // rendering with a broken `var()` reference, because these lookups happen
-  // in components that decide their own palette.
-  solar: "var(--efh-solar, var(--warning))",
-  battery: "var(--efh-battery, var(--success))",
-  grid: "var(--efh-grid, var(--accent))",
+  // Energy channels — hex-pinned to the mobile EnergieBee energy-flow
+  // palette (see `sections/energyflow-home/EnergyFlowDiagram.tsx` →
+  // PALETTE, which mirrors `energiebeemobile/.../energy_flow_card.dart`).
+  // Pinning the channel hues means the Power History Chart's Solar /
+  // Grid / Battery lines read the same colour as their counterparts in
+  // the flow diagram directly above them. Home stays on the rose CSS
+  // token — it's the "consumption" cue and intentionally distinct from
+  // the source colours.
+  solar: "#F59E0B",
+  battery: "#6366F1",
+  grid: "#EF4444",
   home: "var(--efh-home, var(--danger))",
 } as const;
 

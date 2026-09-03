@@ -87,6 +87,24 @@ export function DashboardShell({
 
   const isToday = dayIso === todayIso;
 
+  // Sync per-day state from the parent's `data` prop whenever we're viewing
+  // today. Without this, `router.refresh()` (fired by e.g.
+  // OctopusBackfillWatcher when Octopus finishes back-filling) re-runs the
+  // server component and hands down fresh `data.stats` / `data.history` —
+  // but `useState` initialisers only run once, so the shell kept rendering
+  // the stale initial em-dashes until the user did a full page reload.
+  // Guarded on `isToday` so a user browsing a past day (fetched via the
+  // `/api/dashboard/history` effect below) isn't clobbered when the
+  // server's today re-fetches.
+  useEffect(() => {
+    if (!isToday) return;
+    setStats(data.stats);
+    if (historyLive) {
+      setHistory(data.history);
+      setHistoryStatus("ok");
+    }
+  }, [isToday, historyLive, data.stats, data.history]);
+
   // `now` is captured once here so every child receives the same clock —
   // avoids per-component `new Date()` calls that would fight hydration.
   const now = new Date();
@@ -157,8 +175,15 @@ export function DashboardShell({
         isBusy={pending}
       />
 
-      <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-        <div className="lg:col-span-2 flex">
+      {/* Column ratio was `lg:grid-cols-3 + col-span-2` (67 / 33). The right
+          stack's "Import − Export + Standing Charge" caption truncates at 33%
+          and the tariff product code wraps onto two lines, while the diagram
+          column has empty gutters. `[3fr_2fr]` (~60 / 40) gives the tariff
+          and cost cards room without noticeably shrinking the diagram.
+          `minmax(0,…)` prevents a wide tariff name from blowing the track
+          out — long text just truncates instead. */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch">
+        <div className="flex">
           {isToday ? (
             flowLive ? (
               <EnergyFlowDiagramLive

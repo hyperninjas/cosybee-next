@@ -117,3 +117,58 @@ export async function requireAdmin(): Promise<ServerSession> {
   if (session.user.role !== "admin") redirect("/");
   return session;
 }
+
+/**
+ * Guard for the "create your property" onboarding steps (address search,
+ * building-profile). A user who already has a home should not be re-
+ * running property creation — the backend rejects a duplicate with
+ * `PropertyConflictError` and the UI dead-ends. This gate short-circuits
+ * that: non-admins with ≥1 property are sent to the dashboard, admins
+ * are allowed through so operators can reproduce the funnel.
+ *
+ * NOT applied at the layout level because onboarding steps 3 (sunsync)
+ * and 4 (octopus) run AFTER the property is created — a blanket gate
+ * would boot the user out mid-flow the moment they finish step 2.
+ */
+export async function requireNoPropertyYet(): Promise<ServerSession> {
+  const session = await requireUser("/onboarding/address");
+  if (session.user.role === "admin") return session;
+
+  const { listProperties } = await import("./property-state");
+  const properties = await listProperties();
+  if (properties.length > 0) redirect("/energyflow-home");
+  return session;
+}
+
+/**
+ * Require an authenticated user who has finished onboarding — the app's
+ * standard gate for member-only pages (dashboard, account).
+ *
+ * "Onboarded" = has at least one non-archived property. Matches the
+ * `/post-login` funnel: a signed-in user with zero properties is routed to
+ * `/onboarding/address` and cannot reach any tenanted page until they've
+ * created a home. The same property-count check is the app's de-facto
+ * completion signal — there is no `onboardingCompletedAt` flag on the
+ * user record — so archiving every home self-corrects a user back into
+ * the funnel on the next request.
+ *
+ * Admins are EXEMPT: an operator visiting `/energyflow-home` to reproduce
+ * a support ticket must not be trapped in the customer funnel, and the
+ * admin surface has its own gate (`requireAdmin`). Any other role is
+ * treated as a regular user.
+ *
+ * Called from user layouts / pages — NOT from `/onboarding/*` itself
+ * (that would redirect the very page meant to clear the gate, in a loop).
+ */
+export async function requireOnboarded(redirectTo?: string): Promise<ServerSession> {
+  const session = await requireUser(redirectTo);
+  if (session.user.role === "admin") return session;
+
+  // Local import — property-state.ts imports server-only bits, so keeping
+  // this inside the function avoids pulling the property fetcher into any
+  // page that only needs `requireUser`.
+  const { listProperties } = await import("./property-state");
+  const properties = await listProperties();
+  if (properties.length === 0) redirect("/onboarding/address");
+  return session;
+}

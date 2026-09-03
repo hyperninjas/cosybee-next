@@ -1,12 +1,17 @@
+import { ProgressBar } from "@heroui/react";
+
 /**
  * Shared step header for the onboarding funnel.
  *
- * Renders "Step N of TOTAL" text above a filled progress bar. Both values
- * are explicit so a step can be rearranged / inserted / removed without
- * changing this component — the source of truth for step numbering is the
- * page that instantiates it. That's deliberately different from mobile's
- * "detect current route → look up step index" pattern, which turned into
- * an if-ladder every time a step moved.
+ * Renders "Step N of TOTAL" text above a HeroUI `ProgressBar`. Both step
+ * values are explicit (not derived from the URL) so a step can be
+ * rearranged / inserted / removed by editing just the page that
+ * instantiates this — no cross-file if-ladder.
+ *
+ * Uses `ProgressBar.Root` + `Track` + `Fill` composition rather than a
+ * bespoke `<div>` bar so the funnel picks up HeroUI's theme tokens
+ * (accent colour, motion, sizing) and stays visually consistent with the
+ * rest of the app's progress affordances.
  */
 
 interface Props {
@@ -19,24 +24,30 @@ interface Props {
 export function OnboardingProgress({ step, total, title, description }: Props) {
   const pct = Math.max(0, Math.min(100, (step / total) * 100));
   return (
-    <div className="mb-8 flex flex-col gap-3">
-      <div className="flex items-center justify-between text-xs text-muted">
-        <span>
-          Step {step} of {total}
-        </span>
-        <span>{Math.round(pct)}%</span>
-      </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-        <div
-          className="h-full rounded-full bg-accent transition-[width] duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+    <div className="mb-8 flex flex-col gap-5">
+      <ProgressBar
+        value={pct}
+        color="accent"
+        size="sm"
+        aria-label="Onboarding progress"
+      >
+        <div className="mb-2 flex items-center justify-between text-xs font-medium text-muted">
+          <span>
+            Step {step} of {total}
+          </span>
+          <ProgressBar.Output>{Math.round(pct)}%</ProgressBar.Output>
+        </div>
+        <ProgressBar.Track>
+          <ProgressBar.Fill />
+        </ProgressBar.Track>
+      </ProgressBar>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {title}
         </h1>
-        {description && <p className="text-sm text-muted">{description}</p>}
+        {description && (
+          <p className="text-sm leading-relaxed text-muted">{description}</p>
+        )}
       </div>
     </div>
   );

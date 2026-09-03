@@ -2,20 +2,27 @@
 "use no memo";
 
 import type { ReactNode } from "react";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
-  Chip,
+  Description,
+  FieldError,
+  Fieldset,
+  Form,
+  InputGroup,
+  Label,
+  ListBox,
   Modal,
-  Radio,
-  RadioGroup,
   Spinner,
+  TextField,
   useOverlayState,
 } from "@heroui/react";
-import { Sun } from "@gravity-ui/icons";
-import { TextInputField } from "@/app/components/ui/TextInputField";
-import { PasswordField } from "@/app/components/ui/PasswordField";
+import {
+  CircleCheckFill,
+  CircleExclamationFill,
+  Sun,
+} from "@gravity-ui/icons";
 import { connectSunSync } from "@/app/lib/connect-actions";
 import type { SunSyncConnectResult } from "@/app/lib/connect-actions";
 
@@ -33,60 +40,105 @@ import type { SunSyncConnectResult } from "@/app/lib/connect-actions";
  * The credential fields (email + password) stay mounted across every
  * step, so re-submitting after a picker re-uses whatever the user typed
  * originally — no need to hold credentials in React state or ferry them
- * through a hidden input.
+ * through hidden inputs.
  *
- * `useActionState` gives us the last Server Action result, which is a
- * discriminated union: `{ok:true}` closes the dialog, `{pickPlant}` /
- * `{pickInverter}` show a radio group, `{error}` shows the banner.
+ * ### Redesign notes
+ *
+ *   • Header collapsed to a single tinted icon + title row — the step
+ *     name lives in the 3-dot stepper below, not in a floating chip that
+ *     duplicated the info.
+ *   • Body has ONE focal card per step: credentials, plant picker, or
+ *     inverter picker. Non-current-step markup is `hidden`, still in the
+ *     DOM so its FormData values survive re-submits.
+ *   • Loading uses a centred `Spinner` + rotating ladder of honest
+ *     messages instead of a small inline card that was easy to miss on
+ *     Sunsynk's 3–8 s round-trip.
+ *   • Success uses an inline `CircleCheckFill` + heading, so the modal
+ *     feels like it acknowledged the click before dismissing.
+ *   • Errors show as a compact banner at the top of the body with a
+ *     matching `CircleExclamationFill` — same visual grammar as success.
  */
 
 const INITIAL: SunSyncConnectResult | null = null;
 const FORM_ID = "connect-sunsync";
 
 /**
- * Single row in the plant / inverter picker. HeroUI's Radio is a compound
- * component — rendering just `<Radio>label</Radio>` shows only the label
- * (no dot), which is why the earlier version looked like a bare text list.
- * Compose Control/Indicator/Content and give the row a card-style hit area
- * so the whole line is clickable.
+ * Extract the single selected key from react-aria's `Selection` shape
+ * (`"all" | Set<Key>`). Our ListBox uses `selectionMode="single"` so
+ * `"all"` never fires and the Set holds 0 or 1 entries. Returns `null`
+ * when nothing is selected, so callers can gate on truthiness.
  */
-function PickerRow({ value, label }: { value: string; label: string }) {
+function firstKey(selection: "all" | Set<React.Key>): string | null {
+  if (selection === "all") return null;
+  const first = selection.values().next().value;
+  return typeof first === "string" ? first : null;
+}
+
+/** One of the three logical steps in the flow. */
+type Step = "credentials" | "plant" | "inverter";
+
+/**
+ * 3-dot stepper at the top of the modal body. Highlights the current
+ * step; upcoming steps sit muted. The plant / inverter dots only light
+ * up when the account actually surfaces those pickers — for a single-
+ * site / single-inverter Sunsynk account the visual stays honest
+ * (`current` collapses back to "credentials" once resolved and the
+ * modal closes on its own).
+ */
+function Stepper({ step }: { step: Step }) {
+  const steps: { key: Step; label: string }[] = [
+    { key: "credentials", label: "Sign in" },
+    { key: "plant", label: "Site" },
+    { key: "inverter", label: "Inverter" },
+  ];
+  const activeIdx = steps.findIndex((s) => s.key === step);
   return (
-    <Radio
-      value={value}
-      className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-sm transition-colors hover:border-foreground/30 hover:bg-surface-tertiary data-[selected=true]:border-[color:var(--efh-solar)] data-[selected=true]:bg-[color:var(--efh-solar)]/5"
-    >
-      <Radio.Control>
-        <Radio.Indicator />
-      </Radio.Control>
-      <Radio.Content className="flex-1 text-foreground">{label}</Radio.Content>
-    </Radio>
+    <ol className="flex items-center gap-2 text-xs">
+      {steps.map((s, i) => {
+        const isActive = i === activeIdx;
+        const isDone = i < activeIdx;
+        return (
+          <li key={s.key} className="flex items-center gap-2">
+            <span
+              className={`flex size-6 items-center justify-center rounded-full text-[11px] font-semibold transition-colors ${
+                isActive
+                  ? "bg-[color:var(--efh-solar)] text-white"
+                  : isDone
+                    ? "bg-[color:var(--efh-solar)]/20 text-[color:var(--efh-solar)]"
+                    : "bg-surface-secondary text-muted"
+              }`}
+            >
+              {isDone ? "✓" : i + 1}
+            </span>
+            <span
+              className={`font-medium ${
+                isActive ? "text-foreground" : "text-muted"
+              }`}
+            >
+              {s.label}
+            </span>
+            {i < steps.length - 1 && (
+              <span
+                aria-hidden
+                className={`ml-1 h-px w-6 ${
+                  isDone
+                    ? "bg-[color:var(--efh-solar)]/40"
+                    : "bg-separator"
+                }`}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
 /**
- * Fire the form's submit as soon as the user picks a radio — one gesture
- * advances to the next step instead of "pick, then hunt for the button".
- * The credential inputs are still mounted, so plantId / inverterSerial ride
- * along with the same email + password the user already typed.
- */
-function autoSubmit() {
-  const form = document.getElementById(FORM_ID);
-  if (form instanceof HTMLFormElement) form.requestSubmit();
-}
-
-/**
- * Card shown while the connect action is in flight. Sunsynk's cloud API is
- * genuinely slow (3–8 s on a good day, sometimes more), and the earlier
- * version left the picker on screen with no visible activity — customers
- * read that as "nothing happened".
- *
- * Cycles a small ladder of status messages every 2 s so the customer sees
- * motion. We don't get real progress from the backend (`client.discover`
- * is one blocking call end-to-end), so the messages are HONEST placeholders
- * describing what the backend is doing at that stage rather than fake
- * numeric progress. Cycling stops on the last message so a genuinely long
- * wait doesn't spin the labels forever.
+ * Centred loading state. Sunsynk's API is genuinely slow (3–8 s on a
+ * good day). A cycling ladder of honest labels tells the customer WHAT
+ * we're doing so a long wait doesn't read as "nothing happened". The
+ * last message stays put so we never spin the label forever.
  */
 const SYNC_MESSAGES = [
   "Signing in to Sunsynk…",
@@ -95,7 +147,7 @@ const SYNC_MESSAGES = [
   "Still working — Sunsynk can be slow at times…",
 ];
 
-function SyncingCard() {
+function LoadingCard() {
   const [step, setStep] = useState(0);
   useEffect(() => {
     if (step >= SYNC_MESSAGES.length - 1) return;
@@ -103,36 +155,41 @@ function SyncingCard() {
     return () => clearTimeout(t);
   }, [step]);
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary p-4">
-      <Spinner size="sm" />
-      <div className="flex-1">
-        <p className="text-sm font-semibold text-foreground">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-surface-secondary px-6 py-10 text-center">
+      <Spinner size="lg" />
+      <div className="flex flex-col gap-1">
+        <p className="text-base font-semibold text-foreground">
           Talking to Sunsynk
         </p>
-        <p className="text-xs text-muted">{SYNC_MESSAGES[step]}</p>
+        <p className="text-sm text-muted">{SYNC_MESSAGES[step]}</p>
       </div>
     </div>
   );
 }
 
-/**
- * Submit button that lives INSIDE the form (form wraps Header/Body/Footer,
- * so the button is a descendant). Native `type="submit"` fires the form's
- * action; HeroUI's Button passes `type` through to its underlying <button>
- * so no onPress workaround is needed.
- *
- * An earlier iteration put the button in Modal.Footer OUTSIDE the form and
- * relied on `form={FORM_ID}` — react-aria-components' Button doesn't
- * reliably translate its synthetic PressEvent into a native submit dispatch
- * for a form-external button, so every click was silently swallowed.
- * Wrapping the form around Modal.Footer is the fix; it also lets
- * useFormStatus report pending correctly for descendants.
- */
-function SubmitButton({ label, pending }: { label: string; pending: boolean }) {
+function ErrorBanner({ children }: { children: ReactNode }) {
   return (
-    <Button variant="primary" type="submit" isDisabled={pending}>
-      {pending ? "Working…" : label}
-    </Button>
+    <div
+      role="alert"
+      className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger"
+    >
+      <CircleExclamationFill className="mt-0.5 size-4 shrink-0" />
+      <span className="flex-1">{children}</span>
+    </div>
+  );
+}
+
+function SuccessCard() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-success/30 bg-success/5 px-6 py-8 text-center">
+      <CircleCheckFill className="size-8 text-success" />
+      <div className="flex flex-col gap-1">
+        <p className="text-base font-semibold text-foreground">
+          Sunsynk linked
+        </p>
+        <p className="text-sm text-muted">Taking you to the next step…</p>
+      </div>
+    </div>
   );
 }
 
@@ -150,9 +207,6 @@ export function ConnectSunSyncModal({
    */
   successHref?: string;
 }) {
-  // `isPending` is the third slot of useActionState — true while the
-  // server action is in flight. Preferred over useFormStatus here because
-  // the submit button lives outside the form (see SubmitButton doc).
   const [result, formAction, isPending] = useActionState(
     async (_prev: SunSyncConnectResult | null, form: FormData) =>
       connectSunSync(form),
@@ -167,31 +221,55 @@ export function ConnectSunSyncModal({
   const genericError =
     result !== null && !result.ok && "error" in result ? result.error : null;
 
+  const currentStep: Step = pickingInverter
+    ? "inverter"
+    : pickingPlant
+      ? "plant"
+      : "credentials";
+
+  // Track picker selection locally so the submit button can be disabled
+  // until the user actually chooses. Reset whenever the step changes so
+  // the button re-locks on entry.
+  const [selectedPlant, setSelectedPlant] = useState<string | null>(null);
+  const [selectedInverter, setSelectedInverter] = useState<string | null>(null);
+  useEffect(() => {
+    if (pickingPlant) setSelectedPlant(null);
+  }, [pickingPlant]);
+  useEffect(() => {
+    if (pickingInverter) setSelectedInverter(null);
+  }, [pickingInverter]);
+
   // On success: close the modal and (in onboarding) navigate forward.
-  // `close` is a useCallback-stable ref from useOverlayState; `router` is
-  // stable across renders. So the effect only re-runs when `succeeded` /
-  // `successHref` change — no repeated router.push per re-render.
   const { close } = overlay;
   useEffect(() => {
     if (!succeeded) return;
-    close();
-    if (successHref) router.push(successHref);
+    const t = setTimeout(() => {
+      close();
+      if (successHref) router.push(successHref);
+    }, 700);
+    return () => clearTimeout(t);
   }, [succeeded, successHref, close, router]);
 
-  const submitLabel = pickingPlant
-    ? "Link this site"
-    : pickingInverter
-      ? "Link this inverter"
-      : "Continue";
+  const submitLabel =
+    currentStep === "plant"
+      ? "Link this site"
+      : currentStep === "inverter"
+        ? "Link this inverter"
+        : "Continue";
 
-  // Credentials + picker are all hidden on success — the effect above will
-  // dismiss the modal on the next paint, so we just show a confirmation
-  // rather than the input UI the user has already finished with. Also
-  // hidden while the connect action is in flight so the SyncingCard is
-  // the only focal point on screen (Sunsynk's 3–8 s wait feels
-  // interminable if the picker just sits there unresponsive).
-  const hideCredentials = pickingPlant || pickingInverter || succeeded || isPending;
-  const hidePicker = isPending;
+  // Credentials mounted for every step so re-submits carry them. Hidden
+  // while the pickers or a syncing / success state own the body.
+  const showCredentialsInBody = currentStep === "credentials" && !isPending && !succeeded;
+  const showPlantInBody = currentStep === "plant" && !isPending && !succeeded;
+  const showInverterInBody = currentStep === "inverter" && !isPending && !succeeded;
+
+  // Submit button disabled when: action in flight, or the active picker
+  // step has no selection. Credentials step relies on browser required-
+  // field validation instead.
+  const submitDisabled =
+    isPending ||
+    (currentStep === "plant" && !selectedPlant) ||
+    (currentStep === "inverter" && !selectedInverter);
 
   return (
     <Modal state={overlay}>
@@ -199,180 +277,195 @@ export function ConnectSunSyncModal({
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
-            {/* form wraps every Modal slot below so `type="submit"` on the
+            {/* Form wraps every Modal slot so `type="submit"` on the
                 footer button is a natural form descendant.
 
-                🔴 We DELIBERATELY use `onSubmit` + `formAction(fd)` instead
-                of `<form action={formAction}>`. React 19 auto-resets any
-                form bound via the `action` prop as soon as the action
-                returns — regardless of whether the action succeeded or
-                returned a validation error. Our multi-step flow returns
-                `{pickPlant:[…]}` on the first pass; the auto-reset would
-                then clear the (hidden) email + password inputs before the
-                second pass, and the "Link this site" click would POST
-                with empty credentials. The manual dispatch below is the
-                supported opt-out. */}
-            <form
+                🔴 `onSubmit` + `startTransition(() => formAction(fd))`
+                instead of `<Form action={formAction}>`. React 19 auto-
+                resets any form bound via the `action` prop as soon as
+                the action returns; our multi-step flow returns
+                `{pickPlant:[…]}` on pass 1, and the auto-reset would
+                wipe the (hidden) credentials before pass 2. `formAction`
+                from `useActionState` must be called inside a transition
+                when dispatched manually — otherwise `isPending` never
+                flips and React logs a warning. */}
+            <Form
               id={FORM_ID}
               onSubmit={(e) => {
                 e.preventDefault();
-                formAction(new FormData(e.currentTarget));
+                const fd = new FormData(e.currentTarget);
+                startTransition(() => {
+                  formAction(fd);
+                });
               }}
             >
-            <Modal.Header className="flex-row items-start gap-3">
-              <Modal.Icon className="bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
-                <Sun className="size-5" />
-              </Modal.Icon>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2">
+              <Modal.Header className="flex-row items-center gap-3">
+                <Modal.Icon className="bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
+                  <Sun className="size-5" />
+                </Modal.Icon>
+                <div className="flex-1">
                   <Modal.Heading>Connect Sunsynk</Modal.Heading>
-                  {succeeded && (
-                    <Chip color="success" variant="soft" size="sm">
-                      Connected
-                    </Chip>
-                  )}
-                  {pickingPlant && (
-                    <Chip color="warning" variant="soft" size="sm">
-                      Pick a site
-                    </Chip>
-                  )}
-                  {pickingInverter && (
-                    <Chip color="warning" variant="soft" size="sm">
-                      Pick an inverter
-                    </Chip>
-                  )}
+                  <p className="mt-0.5 text-sm text-muted">
+                    {currentStep === "credentials"
+                      ? "Sign in with the same account you use for the Sunsynk app."
+                      : currentStep === "plant"
+                        ? "Pick the home this dashboard should read."
+                        : "Pick the inverter whose telemetry drives this dashboard."}
+                  </p>
                 </div>
-                <p className="mt-1 text-sm text-muted">
-                  {pickingPlant
-                    ? "Your Sunsynk account has more than one site. Pick the home this dashboard should read."
-                    : pickingInverter
-                      ? "This site has more than one inverter. Pick the one whose telemetry drives this dashboard."
-                      : "Sign in with the same account you use for the Sunsynk app. We read your inverter's cloud API — nothing is installed on your hardware."}
-                </p>
-              </div>
-            </Modal.Header>
+              </Modal.Header>
 
-            <Modal.Body>
-              <div className="flex flex-col gap-5">
-                {isPending && <SyncingCard />}
-                {!isPending && genericError && (
-                  <div
-                    role="alert"
-                    className="rounded-md border border-danger/30 bg-danger/10 p-3 text-sm text-danger"
-                  >
-                    {genericError}
-                  </div>
+              <Modal.Body className="flex flex-col gap-5">
+                {/* Stepper hidden on success / loading — no need to
+                    distract from the focal card that owns the moment. */}
+                {!isPending && !succeeded && <Stepper step={currentStep} />}
+
+                {isPending && <LoadingCard />}
+                {succeeded && <SuccessCard />}
+                {!isPending && !succeeded && genericError && (
+                  <ErrorBanner>{genericError}</ErrorBanner>
                 )}
 
-                {/* Credential fields — mounted for every step. On picker
-                    re-submits the user's original values are still in the
-                    inputs so we don't have to ferry them through hidden
-                    fields or React state.
-
-                    🔴 `isRequired` only on the credentials step, NEVER on
-                    the picker step. When a required input sits inside a
-                    `hidden` wrapper, the browser silently blocks form
-                    submit because it can't scroll to / focus a hidden
-                    input to show the "please fill out this field" bubble
-                    — Chrome logs `An invalid form control with
-                    name='email' is not focusable` and drops the submit
-                    with no visible error. That was the entire "Link this
-                    site does nothing" bug. Missing values on re-submit
-                    are caught by `requiredString` inside the server
-                    action instead. */}
-                <div hidden={hideCredentials} className="flex flex-col gap-5">
-                  <TextInputField
+                {/* Credentials — mounted for every step. `isRequired` only
+                    on the credentials step because a required input inside
+                    a `hidden` wrapper blocks form submit in Chrome ("not
+                    focusable"). Missing values on picker re-submit are
+                    caught server-side by `requiredString`. */}
+                <Fieldset
+                  hidden={!showCredentialsInBody}
+                  className="flex flex-col gap-4"
+                >
+                  <TextField
                     name="email"
-                    label="Sunsynk email"
                     type="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    placeholder="you@example.com"
-                    isRequired={!hideCredentials}
-                    autoFocus
-                    description="The email you use to sign in to the Sunsynk app."
-                  />
-                  <PasswordField
-                    name="password"
-                    label="Sunsynk password"
-                    autoComplete="current-password"
-                    isRequired={!hideCredentials}
-                    description="Stored encrypted (AES-256-GCM); used only to talk to the Sunsynk API on your behalf."
-                  />
-                </div>
+                    isRequired={showCredentialsInBody}
+                    autoFocus={showCredentialsInBody}
+                  >
+                    <Label>Sunsynk email</Label>
+                    <InputGroup variant="secondary">
+                      <InputGroup.Input
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        inputMode="email"
+                      />
+                    </InputGroup>
+                    <Description>
+                      The email you use to sign in to the Sunsynk app.
+                    </Description>
+                    <FieldError />
+                  </TextField>
 
-                {pickingPlant && "pickPlant" in result! && !hidePicker && (
-                  <fieldset className="rounded-lg border border-border bg-surface-secondary p-4">
-                    <legend className="px-2 text-sm font-semibold text-foreground">
-                      Which site?
-                    </legend>
-                    {/* `name="plantId"` is what eb-auth reads on the
-                        second-pass POST; each Radio value carries the id
-                        from the details[] array eb-auth returned.
-                        onChange auto-submits so the user advances to the
-                        next step with a single click. */}
-                    <RadioGroup
-                      name="plantId"
-                      isRequired
-                      className="mt-2 max-h-72 gap-2 overflow-y-auto pr-1"
-                      onChange={autoSubmit}
+                  <TextField
+                    name="password"
+                    type="password"
+                    isRequired={showCredentialsInBody}
+                  >
+                    <Label>Sunsynk password</Label>
+                    <InputGroup variant="secondary">
+                      <InputGroup.Input autoComplete="current-password" />
+                    </InputGroup>
+                    <Description>
+                      Stored encrypted (AES-256-GCM); used only to talk to
+                      the Sunsynk API on your behalf.
+                    </Description>
+                    <FieldError />
+                  </TextField>
+                </Fieldset>
+
+                {showPlantInBody && "pickPlant" in result! && (
+                  <Fieldset className="flex flex-col gap-2">
+                    <Fieldset.Legend>Sites on this account</Fieldset.Legend>
+                    <ListBox
+                      aria-label="Sunsynk site"
+                      selectionMode="single"
+                      selectedKeys={
+                        selectedPlant ? new Set([selectedPlant]) : new Set()
+                      }
+                      onSelectionChange={(keys) =>
+                        setSelectedPlant(firstKey(keys))
+                      }
+                      className="max-h-64 overflow-y-auto rounded-xl border border-border bg-surface"
                     >
                       {result.pickPlant.map((plant) => (
-                        <PickerRow
+                        <ListBox.Item
                           key={plant.id}
-                          value={plant.id}
-                          label={plant.label}
-                        />
+                          id={plant.id}
+                          textValue={plant.label}
+                        >
+                          {plant.label}
+                        </ListBox.Item>
                       ))}
-                    </RadioGroup>
-                  </fieldset>
+                    </ListBox>
+                    <input
+                      type="hidden"
+                      name="plantId"
+                      value={selectedPlant ?? ""}
+                    />
+                  </Fieldset>
                 )}
 
-                {pickingInverter && "pickInverter" in result! && !hidePicker && (
-                  <fieldset className="rounded-lg border border-border bg-surface-secondary p-4">
-                    <legend className="px-2 text-sm font-semibold text-foreground">
-                      Which inverter?
-                    </legend>
-                    <RadioGroup
-                      name="inverterSerial"
-                      isRequired
-                      className="mt-2 max-h-72 gap-2 overflow-y-auto pr-1"
-                      onChange={autoSubmit}
+                {showInverterInBody && "pickInverter" in result! && (
+                  <Fieldset className="flex flex-col gap-2">
+                    <Fieldset.Legend>Inverters at this site</Fieldset.Legend>
+                    <ListBox
+                      aria-label="Sunsynk inverter"
+                      selectionMode="single"
+                      selectedKeys={
+                        selectedInverter
+                          ? new Set([selectedInverter])
+                          : new Set()
+                      }
+                      onSelectionChange={(keys) =>
+                        setSelectedInverter(firstKey(keys))
+                      }
+                      className="max-h-64 overflow-y-auto rounded-xl border border-border bg-surface"
                     >
                       {result.pickInverter.map((inv) => (
-                        <PickerRow
+                        <ListBox.Item
                           key={inv.serial}
-                          value={inv.serial}
-                          label={inv.label}
-                        />
+                          id={inv.serial}
+                          textValue={inv.label}
+                        >
+                          {inv.label}
+                        </ListBox.Item>
                       ))}
-                    </RadioGroup>
-                  </fieldset>
+                    </ListBox>
+                    <input
+                      type="hidden"
+                      name="inverterSerial"
+                      value={selectedInverter ?? ""}
+                    />
+                  </Fieldset>
                 )}
 
-                {!pickingPlant && !pickingInverter && !succeeded && !isPending && (
+                {showCredentialsInBody && (
                   <p className="text-xs text-muted">
-                    If your account has more than one plant or inverter, the
-                    next step lets you pick which one to link.
+                    If your account has more than one site or inverter,
+                    the next step lets you pick which one to link.
                   </p>
                 )}
+              </Modal.Body>
 
-                {succeeded && (
-                  <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm text-success">
-                    Your inverter is linked. Taking you to the next step…
-                  </div>
+              <Modal.Footer className="items-center gap-2">
+                <Modal.CloseTrigger />
+                {!succeeded && (
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    isDisabled={submitDisabled}
+                  >
+                    {isPending ? (
+                      <>
+                        <Spinner size="sm" className="mr-2" />
+                        Working…
+                      </>
+                    ) : (
+                      submitLabel
+                    )}
+                  </Button>
                 )}
-              </div>
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Modal.CloseTrigger />
-              {/* Hide the submit on success — the effect above closes the
-                  modal and (if provided) navigates on, so rendering an
-                  active button would let the user re-fire the action. */}
-              {!succeeded && <SubmitButton label={submitLabel} pending={isPending} />}
-            </Modal.Footer>
-            </form>
+              </Modal.Footer>
+            </Form>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

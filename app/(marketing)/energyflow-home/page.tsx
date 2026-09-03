@@ -4,7 +4,7 @@ import JsonLd from "@/app/components/JsonLd";
 import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
-import { requireUser } from "@/app/lib/server-session";
+import { requireOnboarded } from "@/app/lib/server-session";
 import { getConnectionState } from "@/app/lib/connection-state";
 import { getActiveProperty, listProperties } from "@/app/lib/property-state";
 import type { ActiveProperty } from "@/app/lib/property-state";
@@ -17,6 +17,7 @@ import {
   DashboardHeader,
   DashboardShell,
   EnergyFlowDiagram,
+  OctopusBackfillWatcher,
   PowerHistoryChart,
   ProviderStatusBar,
   StatStrip,
@@ -61,10 +62,11 @@ export default async function EnergyFlowHomePage({
   const { demo } = await searchParams;
   const showDemo = demo === "1";
 
-  // Redirects to /login when there's no session. We pass the current path
-  // through the `redirect` query so the user lands back here after signing
-  // in rather than on the site's home page.
-  await requireUser("/energyflow-home");
+  // Redirects to /login when there's no session, or to /onboarding/address
+  // when the signed-in user hasn't created a home yet. Admins are exempt
+  // from the onboarding gate so support access still works. The redirect
+  // path returns the user here after login.
+  await requireOnboarded("/energyflow-home");
 
   const wrapper = (children: React.ReactNode) => (
     <div className="efh-scope bg-background text-foreground">
@@ -74,7 +76,11 @@ export default async function EnergyFlowHomePage({
           { name: "Energy Flow Dashboard", path: "/energyflow-home" },
         ])}
       />
-      <Section spacing="md" surface="base">
+      {/* `spacing="sm"` (py-12 lg:py-16) instead of the marketing-band
+          default `md` (py-16 lg:py-20). Dashboards read better with less
+          empty air above the first card — the marketing sizing pushed the
+          Sunsynk/Octopus row a screenful below the header. */}
+      <Section spacing="sm" surface="base">
         <Container size="wide">{children}</Container>
       </Section>
     </div>
@@ -121,6 +127,13 @@ export default async function EnergyFlowHomePage({
     sunsync.connected &&
     (sunsync.lastSyncedAt === null || historyPointCount < 3);
 
+  // Freshly-linked Octopus back-fill signal — the provider tile shows
+  // "Back-filling your history…" until this flips to true. Handing it to
+  // the silent watcher below triggers `router.refresh()` on an interval
+  // while incomplete, so the tile / cost card / stats auto-fill on
+  // completion without a manual reload.
+  const octopusBackfilling = octopus.connected && !octopus.backfillComplete;
+
   return wrapper(
     <div className="flex flex-col gap-4">
       {/* Persistent connections strip — makes the second provider reachable
@@ -129,6 +142,13 @@ export default async function EnergyFlowHomePage({
           could connect Octopus first and then have no way to add SunSync
           from the page. */}
       <ProviderStatusBar sunsync={sunsync} octopus={octopus} />
+
+      {/* Behaviour-only: refreshes the page while Octopus is still back-
+          filling so the Octopus tile subtitle flips from
+          "Back-filling your history…" to "Account A-XXXXXXXX" and the
+          cost card / stat strip pick up the newly-synced numbers without
+          the user reloading. Renders nothing when idle or complete. */}
+      <OctopusBackfillWatcher isBackfilling={octopusBackfilling} />
 
       {showBackfillBanner && <SyncingDataBanner />}
 

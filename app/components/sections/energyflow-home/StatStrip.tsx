@@ -34,12 +34,18 @@ const TONE_ICON: Record<Tone, React.ReactElement> = {
   "grid-export": <ArrowUp className="size-4" />,
 };
 
+// Tinted to match the flow diagram's palette (see `EnergyFlowDiagram.tsx`
+// → PALETTE, which mirrors the mobile card). Each tile now reads the same
+// hue as its corresponding node / edge in the diagram, so a glance from
+// the diagram to the strip and back doesn't require re-mapping colours.
+// Home stays on the rose channel — it's the sole "consumption" cue and
+// intentionally distinct from the source colours above.
 const TONE_COLOR: Record<Tone, string> = {
-  solar: "var(--efh-solar)",
-  "grid-import": "var(--efh-battery)",
-  battery: "var(--efh-battery)",
-  home: "var(--efh-home)",
-  "grid-export": "var(--efh-battery)",
+  solar: "#F59E0B", // amber — matches PALETTE.solar
+  "grid-import": "#EF4444", // red — matches PALETTE.gridImport
+  battery: "#6366F1", // indigo — matches PALETTE.batteryIn
+  home: "var(--efh-home)", // rose — consumption channel
+  "grid-export": "#00695C", // teal — matches PALETTE.gridExport
 };
 
 export function StatStrip({ stats }: { stats: StatTile[] }) {

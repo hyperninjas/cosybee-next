@@ -11,19 +11,21 @@ import {
 } from "@/app/lib/onboarding-actions";
 
 /**
- * Client half of the building-profile step. The server component upstream
- * has already resolved the address (via `retrieveAddress`) and looked up
- * the EPC records for the postcode (via `searchEpcByPostcode`). This
- * component handles the interactive parts:
+ * Client half of the building-profile step, rendered ONLY on the two
+ * branches that need user input — the unambiguous "auto-continue" case
+ * is handled upstream by {@link AutoCreateProperty} (see
+ * `building-profile/page.tsx` and `resolveEpc` in
+ * `app/lib/onboarding-epc.ts`), so this component never sees a one-EPC
+ * or clear-best-match input.
  *
- *   • Pick an EPC (pre-selected: the first row — usually the exact match).
- *   • Or fall into the "no EPC" fallback (button reveals plain form; the
- *     address / postcode are pre-filled from what AFD returned).
- *   • Submit → server action → next step.
+ *   • `epcs.length > 1` — postcode fallback returned several rows with
+ *     no leading-house-number match. User picks from the list.
+ *   • `epcs.length === 0` — no EPC on the register. User confirms to
+ *     continue with just the address.
  *
- * Everything downstream matches the mobile app's flow: property is
- * auto-created AND auto-activated by the backend, so no separate activate
- * step is needed here.
+ * Either branch can also flip into the no-EPC fallback via a link, so a
+ * multi-row postcode result isn't a dead end for someone whose home
+ * genuinely isn't in the list.
  */
 
 interface Props {
@@ -37,11 +39,14 @@ export function BuildingProfileClient({ address, epcs }: Props) {
     epcs[0]?.certificateNumber ?? "",
   );
   const [useNoEpc, setUseNoEpc] = useState(epcs.length === 0);
-  // A one-word "Home" reads better than a truncated street when the user
-  // only has one property; multi-property users can rename later.
-  const [label, setLabel] = useState("Home");
+  // Default label — the customer-facing rename lives in the account area,
+  // not the onboarding funnel, so the step doesn't ask for it here.
+  const label = "Home";
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Separate transition for the "Change" back-navigation so the primary
+  // "Continue" spinner isn't confused with a plain route change.
+  const [navigating, startNavigation] = useTransition();
 
   function handleCreate() {
     setError(null);
@@ -77,9 +82,12 @@ export function BuildingProfileClient({ address, epcs }: Props) {
           <Button
             variant="tertiary"
             size="sm"
-            onPress={() => router.push("/onboarding/address")}
+            isDisabled={navigating || pending}
+            onPress={() =>
+              startNavigation(() => router.push("/onboarding/address"))
+            }
           >
-            Change
+            {navigating ? "Loading…" : "Change"}
           </Button>
         </div>
       </div>
@@ -93,27 +101,10 @@ export function BuildingProfileClient({ address, epcs }: Props) {
         </div>
       )}
 
-      {/* Label — small optional friendly name; defaults to town so the user
-          isn't forced to think of one but can rename if they have two homes. */}
-      <div className="flex flex-col gap-2">
-        <label htmlFor="home-label" className="text-sm font-medium text-foreground">
-          Give this home a name (optional)
-        </label>
-        <input
-          id="home-label"
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="e.g. Home"
-          className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-base text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
-
-      {epcs.length > 0 && !useNoEpc && (
+      {epcs.length > 1 && !useNoEpc && (
         <div className="flex flex-col gap-3">
           <p className="text-sm font-medium text-foreground">
-            We found {epcs.length} EPC{epcs.length === 1 ? "" : "s"} for this postcode.
-            Pick yours:
+            We found {epcs.length} EPCs for this postcode. Pick yours:
           </p>
           <RadioGroup
             aria-label="EPC certificate"
