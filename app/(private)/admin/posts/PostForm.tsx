@@ -649,8 +649,16 @@ export default function PostForm({
   const liveHref =
     saved?.status === "PUBLISHED" ? `/${saved.blog}/${saved.slug}` : undefined;
 
+  /**
+   * Arm the next submit with a publication change — or with none.
+   *
+   * `""` means "save, don't touch publication", and the local `status` state
+   * is deliberately left alone for it: the chip should keep showing what the
+   * post actually is, and the form must post an empty `status` so the action
+   * omits the field entirely.
+   */
   function setStatusForSubmit(s: string) {
-    setStatus(s as PostStatus);
+    if (s) setStatus(s as PostStatus);
     if (statusRef.current) statusRef.current.value = s;
   }
 
@@ -681,14 +689,15 @@ export default function PostForm({
           e.preventDefault();
           return;
         }
-        // Only going live is worth interrupting: drafts and archiving save
-        // straight through. `statusRef` already holds the status the pressed
-        // button wrote in its onPress, which runs before this.
-        if (
-          statusRef.current?.value === "PUBLISHED" &&
-          issues.length > 0 &&
-          !bypassIssues.current
-        ) {
+        // Only a save that leaves the post LIVE is worth interrupting.
+        // `statusRef` already holds what the pressed button wrote in its
+        // onPress, which runs before this — and an empty value now means "no
+        // status change", so an update to an already-published post has to
+        // count too. Archiving and draft saves go straight through.
+        const requested = statusRef.current?.value ?? "";
+        const willBeLive =
+          requested === "PUBLISHED" || (requested === "" && status === "PUBLISHED");
+        if (willBeLive && issues.length > 0 && !bypassIssues.current) {
           e.preventDefault();
           setIssuesOpen(true);
           return;
@@ -715,12 +724,9 @@ export default function PostForm({
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="blog" value={blog} />
       <input type="hidden" name="readTime" value="" />
-      <input
-        ref={statusRef}
-        type="hidden"
-        name="status"
-        defaultValue={status}
-      />
+      {/* Empty by default — a status only rides along when a button that
+          changes publication armed it. See `setStatusForSubmit`. */}
+      <input ref={statusRef} type="hidden" name="status" defaultValue="" />
       {/* Author + category.
           These fields are sent ONLY when they carry a real instruction. The
           backend treats "field present" as "field changed" and resolves a bare

@@ -9,6 +9,7 @@ import {
   Select,
 } from "@heroui/react";
 import { ArrowUpRightFromSquare, TriangleExclamation } from "@gravity-ui/icons";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { AppLink } from "@/app/components/ui/AppLink";
 
@@ -31,6 +32,14 @@ export function ActionBar({
   status: PostStatus;
   blog: string;
   setBlog: (b: string) => void;
+  /**
+   * Status this submit should put the post in — `""` for "leave it alone".
+   *
+   * Saving used to BE a status change: the secondary button set DRAFT, so
+   * pressing "Save draft" on a live article unpublished it, and that was the
+   * only way to edit one privately. Publication is now its own decision, made
+   * by the buttons that say so.
+   */
   onSetStatus: (s: string) => void;
   liveHref?: string;
   /** Block both save buttons (e.g. content images missing alt text). */
@@ -40,8 +49,18 @@ export function ActionBar({
   hasIssues?: boolean;
 }) {
   const { pending } = useFormStatus();
+  // Which button was pressed, so only that one spins. It used to be inferred
+  // from the status being submitted, which no longer distinguishes them — a
+  // plain save submits no status at all.
+  const [pressed, setPressed] = useState<string | null>(null);
   const isPublished = status === "PUBLISHED";
   const isArchived = status === "ARCHIVED";
+
+  /** Arm a submit: record the button for the spinner, set the status it asks for. */
+  const press = (key: string, nextStatus: string) => () => {
+    setPressed(key);
+    onSetStatus(nextStatus);
+  };
   const chipColor = isPublished
     ? ("success" as const)
     : isArchived
@@ -96,43 +115,62 @@ export function ActionBar({
             <ArrowUpRightFromSquare className="size-3.5" />
           </AppLink>
         )}
-        <Button
-          type="submit"
-          variant="outline"
-          size="sm"
-          onPress={() => onSetStatus("DRAFT")}
-          isDisabled={pending || disabled}
-          isPending={pending && status === "DRAFT"}
-        >
-          Save draft
-        </Button>
+        {/* A live post's secondary action is to TAKE IT DOWN, said plainly —
+            not a "Save draft" that quietly did the same thing. A draft has
+            nothing to take down, so it gets an ordinary save instead. */}
+        {isPublished ? (
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            onPress={press("unpublish", "DRAFT")}
+            isDisabled={pending || disabled}
+            isPending={pending && pressed === "unpublish"}
+          >
+            Unpublish
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            onPress={press("save", "")}
+            isDisabled={pending || disabled}
+            isPending={pending && pressed === "save"}
+          >
+            {isArchived ? "Save" : "Save draft"}
+          </Button>
+        )}
         {editing && (isPublished || isArchived) && (
           <Button
             type="submit"
             variant="outline"
             size="sm"
-            onPress={() => onSetStatus(isArchived ? "DRAFT" : "ARCHIVED")}
+            onPress={press("archive", isArchived ? "DRAFT" : "ARCHIVED")}
             isDisabled={pending || disabled}
-            isPending={pending && status === "ARCHIVED"}
+            isPending={pending && pressed === "archive"}
           >
             {isArchived ? "Unarchive" : "Archive"}
           </Button>
         )}
+        {/* Primary. On a post that is already live this is a plain save —
+            it must not re-assert PUBLISHED, or a scheduled post would be
+            dragged forward to now every time someone fixed a typo. */}
         <Button
           type="submit"
           variant="primary"
           size="sm"
-          onPress={() => onSetStatus("PUBLISHED")}
+          onPress={press("primary", isPublished || isArchived ? "" : "PUBLISHED")}
           isDisabled={pending || disabled}
-          isPending={pending && status === "PUBLISHED"}
+          isPending={pending && pressed === "primary"}
         >
-          {hasIssues && (
+          {hasIssues && !isPublished && (
             <TriangleExclamation
               aria-hidden
               className="size-3.5 shrink-0 opacity-90"
             />
           )}
-          {editing && isPublished ? "Update" : "Publish"}
+          {isPublished ? "Update" : isArchived ? "Save" : "Publish"}
         </Button>
       </div>
     </Card>

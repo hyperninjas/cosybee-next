@@ -161,10 +161,17 @@ export async function savePost(
   const id = optStr(formData, "id");
   const rawBlog = str(formData, "blog");
   const blog = BLOGS.has(rawBlog) ? (rawBlog as "hive" | "learn") : "hive";
+  // Publication is only changed when a button that changes it was pressed.
+  //
+  // This used to default to DRAFT, so EVERY save carried a status — and since
+  // the backend writes any field it is given, saving a live article
+  // unpublished it. An absent status now means "leave it as it is", which is
+  // what an ordinary save should do. A create with no status gets DRAFT from
+  // the backend's own default.
   const rawStatus = str(formData, "status");
   const status = STATUSES.has(rawStatus)
     ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
-    : "DRAFT";
+    : undefined;
   const title = str(formData, "title");
   const contentJsonStr = str(formData, "contentJson") || "[]";
 
@@ -356,7 +363,7 @@ export async function savePost(
     carouselBody,
     featured,
     homeFeatured,
-    status,
+    ...(status ? { status } : {}),
     // Only include content if editor has blocks - preserves legacy content on metadata-only edits
     ...(contentJson !== undefined ? { contentJson } : {}),
     ...(contentHtml !== undefined ? { contentHtml } : {}),
