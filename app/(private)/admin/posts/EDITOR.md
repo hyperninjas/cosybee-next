@@ -26,9 +26,9 @@ Recent additions to the editor:
 - **Alt text for images** — images now have their own **Alt text** field,
   separate from the caption. Alt text is required; captions are optional.
   See section 5.
-- **Your writing saves itself** — the post is created as soon as you set the
-  slug, and your work is saved a few seconds after you stop typing. On a live
-  post those edits stay private until you press Update. See section 13.
+- **Your writing saves itself** — press **Start draft** once you have a slug,
+  and from then on your work is saved a few seconds after you stop typing. On
+  a live post those edits stay private until you press Update. See section 13.
 - **Call to action** — type `/cta` for a promo card with its own heading,
   image and button, every part of it editable. See section 9.
 - **Table of contents** — type `/toc` for a live "Contents" box built from the
@@ -269,6 +269,8 @@ The **Slug** field in _Post details_ is the article's address —
 is yours to choose:
 
 - **Generate** fills it in from the title in one click; edit it freely after.
+- On a new post, **Start draft** appears once the slug is free — that is what
+  brings the post into existence, and nothing is saved before you press it.
 - It's checked as you type: **Available**, or which post already uses it —
   including **drafts**, which the check used to miss.
 - Saving is blocked on a clash rather than quietly renaming it, so you get the
@@ -282,24 +284,29 @@ is yours to choose:
 
 ### The post saves itself
 
-**As soon as you set the slug, the post exists** — it appears in the dashboard
-as a draft — and from then on your writing is saved for you a few seconds
-after you stop typing. The line beside the status chip tells you where you
-are: *Unsaved changes* → *Saving…* → *Saved*.
+Set the slug, then press **Start draft** (beside the Generate button). That
+creates the post — keeping everything you have written so far — and from then
+on your work is saved for you a few seconds after you stop typing. The line
+beside the status chip tells you where you are: *Unsaved changes* → *Saving…*
+→ *Saved*.
 
-Autosave covers nearly everything on the page: the **title and body**, the
-**post details** (description, lede, byline date), the **cover image** and its
-alt/title/caption/credit, the **SEO and social** fields, the **CTA**, and the
-carousel and featured settings.
+The button appears only until the post exists; after that there is nothing for
+it to do. Until you press it, nothing has been saved anywhere.
 
-Four things are **not** autosaved, on purpose:
+Autosave covers everything on the page bar the two exceptions below: the
+**title and body**, the **post details** (description, lede, byline date), the
+**author, category and tags**, the **cover image** and its alt/title/caption/
+credit, the **SEO and social** fields, the **CTA**, and the carousel and
+featured settings.
+
+The author, category and tags are kept too.
+
+Two things are **not** autosaved, on purpose:
 
 | Not autosaved | Why |
 | --- | --- |
 | The **slug** and which blog it's in | Moving a published post leaves a redirect behind at its old URL — a decision, not a keystroke |
 | **Publish / Unpublish / Archive** | Autosave can't change whether a post is live, by design |
-| **Author** and **category** | One-click picks; press a save button to keep them |
-| **Tags** | As above |
 
 > **It never publishes anything.** Autosave cannot change whether a post is
 > live, so you can leave a half-written sentence on screen safely.

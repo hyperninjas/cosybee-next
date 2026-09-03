@@ -414,20 +414,24 @@ export type AutosaveResult =
   | { ok: false; error: string };
 
 /**
- * Create the post the moment its address is settled, so there is something to
- * autosave INTO.
+ * Bring the post into existence at the address the author chose, keeping
+ * whatever they have already written.
  *
- * Everything else about the article is left blank on purpose. A post used to
- * require a title, description, cover alt text, byline date, body and a full
- * taxonomy before it could exist at all, which is why the editor had nothing
- * to save against until the author had finished — and why it invented
- * placeholder values to get a row written. The backend now accepts a draft
- * with nothing but a blog and a slug, and refuses to PUBLISH one that is
- * still missing the rest.
+ * `initial` matters. This used to create a bare row and let autosave fill it
+ * in, which meant the work on screen only reached the server on the next idle
+ * tick — and if the author closed the tab first, they had a post with nothing
+ * in it. Everything they have goes in the create itself.
+ *
+ * A post used to require a title, description, cover alt text, byline date,
+ * body and a full taxonomy before it could exist at all, which is why the
+ * editor had nothing to save against until the author had finished. The
+ * backend now accepts a draft with nothing but a blog and a slug, and refuses
+ * to PUBLISH one that is still missing the rest.
  */
 export async function createDraft(
   blog: string,
   rawSlug: string,
+  initial: AutosavePatch = {},
 ): Promise<{ ok: true; post: AdminPost } | { ok: false; error: string }> {
   await assertAdmin();
 
@@ -445,8 +449,12 @@ export async function createDraft(
     };
   }
 
+  const seeded = await buildPostPatch(initial);
+  if ("error" in seeded) return { ok: false, error: seeded.error };
+
   try {
     const post = await adminApi.createPost({
+      ...seeded.body,
       blog: targetBlog,
       slug,
     } as Parameters<typeof adminApi.createPost>[0]);
@@ -501,7 +509,18 @@ export type AutosavePatch = {
   ctaLabel?: string;
   ctaHref?: string;
   ctaExternal?: boolean;
+  // Taxonomy. IDs only — a NAME tells the backend to create a record with it,
+  // which is how every save used to reassign the post to an author called
+  // "energiebee". An empty id is omitted rather than sent, both because it
+  // would fail uuid validation and because "not chosen" must never overwrite
+  // a choice already stored.
+  authorId?: string;
+  categoryId?: string;
+  tags?: string[];
 };
+
+/** Ids that are omitted entirely when blank — see AutosavePatch. */
+const OMIT_WHEN_BLANK = new Set(["authorId", "categoryId"]);
 
 /** Fields whose empty string means "cleared", so it is sent as null. */
 const NULLABLE_WHEN_BLANK = new Set([
@@ -520,16 +539,20 @@ const NULLABLE_WHEN_BLANK = new Set([
   "ctaHref",
 ]);
 
-export async function autosavePost(
-  id: string,
+/**
+ * Turn a patch of form fields into the body the API expects.
+ *
+ * Shared by `createDraft` and `autosavePost` so the two cannot disagree about
+ * how a field is written — the create seeds the same shape autosave will keep
+ * updating.
+ */
+async function buildPostPatch(
   patch: AutosavePatch,
-): Promise<AutosaveResult> {
-  await assertAdmin();
-  if (!id) return { ok: false, error: "The post hasn't been created yet." };
-
+): Promise<{ body: Record<string, unknown> } | { error: string }> {
   const body: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(patch)) {
     if (value === undefined || key === "contentJson") continue;
+    if (value === "" && OMIT_WHEN_BLANK.has(key)) continue;
     // An emptied optional field means "remove it", and the column is nullable
     // — sending "" would store a blank string where null is meant.
     body[key] =
@@ -552,20 +575,33 @@ export async function autosavePost(
 
   if (patch.contentJson !== undefined) {
     const blocks = Array.isArray(patch.contentJson) ? patch.contentJson : [];
-    // An image with no alt text is refused upstream, and an autosave that
-    // 400s on every keystroke would be worse than useless — so say what is
-    // wrong once, clearly, and let the author fix it.
+    // An image with no alt text is refused upstream, and a save that 400s on
+    // every keystroke would be worse than useless — so say what is wrong once,
+    // clearly, and let the author fix it.
     const missing = findContentImagesMissingAlt(blocks);
     if (missing.length > 0) {
       const list = missing.map((m) => `#${m.index}`).join(", ");
       return {
-        ok: false,
         error: `Not saved — add alt text to content image${missing.length === 1 ? "" : "s"} ${list}.`,
       };
     }
     body.contentJson = { blocks };
     body.contentHtml = await contentJsonToHtml(blocks);
   }
+
+  return { body };
+}
+
+export async function autosavePost(
+  id: string,
+  patch: AutosavePatch,
+): Promise<AutosaveResult> {
+  await assertAdmin();
+  if (!id) return { ok: false, error: "The post hasn't been created yet." };
+
+  const built = await buildPostPatch(patch);
+  if ("error" in built) return { ok: false, error: built.error };
+  const body = built.body;
 
   if (Object.keys(body).length === 0) {
     return { ok: true, staged: false, draftUpdatedAt: null, savedAt: new Date().toISOString() };

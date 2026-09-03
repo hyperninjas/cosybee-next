@@ -29,7 +29,6 @@ import {
   PLACEHOLDER_COVER,
   type Author,
   type Category,
-  type Tag,
 } from "@/app/lib/article-types";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import {
@@ -77,7 +76,13 @@ export type FormPost = {
   // start empty and the post cannot be published until both are chosen.
   author: Author | null;
   category: Category | null;
-  tags: Tag[];
+  /**
+   * The post's tag NAMES — which is all the form works in. It used to take
+   * `Tag[]` and immediately throw away everything but the name, which meant a
+   * caller with only names (a staged autosave patch stores them that way) had
+   * to fabricate ids to satisfy the type.
+   */
+  tagNames: string[];
 
   // Media — optional (a post can be coverless; the form normalises null → "").
   coverImage: string | null;
@@ -372,7 +377,7 @@ export default function PostForm({
   // TagInput owns the canonical tag state (+ hidden input); this mirror exists
   // only so tag edits register in the unsaved-changes snapshot below.
   const [tagNames, setTagNames] = useState<string[]>(
-    post?.tags?.map((t) => t.name) ?? [],
+    post?.tagNames ?? [],
   );
 
   // ── Cover image ─────────────────────────────────────────────────────
@@ -648,7 +653,7 @@ export default function PostForm({
    * Once a post exists, its title, body, cover, SEO, CTA and the rest are
    * saved a few seconds after you stop typing — so warning about them on the
    * way out would cry wolf every single time. These are the fields that really
-   * would be lost: the address, publication, the taxonomy references and tags.
+   * would be lost: the address, publication, and the CTA's on/off toggle.
    *
    * Kept in step with `snapshot` by hand; both baselines move together on a
    * successful save.
@@ -658,12 +663,6 @@ export default function PostForm({
     slug,
     status,
     publishedAt,
-    authorId,
-    authorName,
-    authorAvatarUrl,
-    categoryId,
-    categoryName,
-    tags: tagNames,
     ctaEnabled,
   });
 
@@ -742,15 +741,48 @@ export default function PostForm({
   /** Guards against a second create while the first is still in the air. */
   const creatingRef = useRef(false);
 
-  const startDraft = useCallback(
-    async (nextSlug: string) => {
-      if (saved || creatingRef.current) return;
-      creatingRef.current = true;
-      const result = await createDraft(blog, nextSlug);
-      creatingRef.current = false;
+  const [startingDraft, setStartingDraft] = useState(false);
+
+  const startDraft = useCallback(async () => {
+    if (saved || creatingRef.current) return;
+    creatingRef.current = true;
+    setStartingDraft(true);
+    try {
+      // Seeded with everything on screen. Creating an empty row and letting
+      // autosave fill it in meant the author's work only reached the server on
+      // the next idle tick — close the tab first and they had a post with
+      // nothing in it.
+      const result = await createDraft(blog, slug, {
+        title,
+        contentJson: blocks as unknown[],
+        description,
+        lede,
+        coverImage: coverUrl,
+        coverImageAlt,
+        coverImageTitle,
+        coverImageCaption,
+        coverImageCredit,
+        seoTitle,
+        seoDescription,
+        ogImage,
+        ogImageAlt,
+        canonicalUrl,
+        noindex,
+        authorDate,
+        featured,
+        homeFeatured,
+        carouselIntro,
+        carouselBody,
+        ctaLabel,
+        ctaHref,
+        ctaExternal,
+        authorId,
+        categoryId,
+        tags: tagNames,
+      });
       if (!result.ok) {
-        // Not fatal — pressing Save still creates the post the old way. Say so
-        // once rather than blocking the author.
+        // Not fatal — Save draft still creates the post the ordinary way. Say
+        // so once rather than blocking the author.
         toast.danger(result.error);
         return;
       }
@@ -763,9 +795,42 @@ export default function PostForm({
       // Move the address bar onto the real edit URL without a navigation, so a
       // reload lands on the draft instead of a blank "new post" form.
       window.history.replaceState(null, "", `/admin/posts/${result.post.id}/edit`);
-    },
-    [blog, saved],
-  );
+      toast.success("Draft started — it saves itself from here");
+    } finally {
+      creatingRef.current = false;
+      setStartingDraft(false);
+    }
+  }, [
+    blog,
+    saved,
+    slug,
+    title,
+    blocks,
+    description,
+    lede,
+    coverUrl,
+    coverImageAlt,
+    coverImageTitle,
+    coverImageCaption,
+    coverImageCredit,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    ogImageAlt,
+    canonicalUrl,
+    noindex,
+    authorDate,
+    featured,
+    homeFeatured,
+    carouselIntro,
+    carouselBody,
+    ctaLabel,
+    ctaHref,
+    ctaExternal,
+    authorId,
+    categoryId,
+    tagNames,
+  ]);
 
   /**
    * Everything autosave keeps, as one flat object.
@@ -776,9 +841,10 @@ export default function PostForm({
    *    into the redirect table, which is a decision, not a keystroke.
    *  - `status` and `publishedAt` — publication. The backend refuses them on
    *    the autosave route rather than ignoring them.
-   *  - author, category and tags — stored as references, so reloading a
-   *    staged patch would mean resolving ids back into records. They are
-   *    single-click picks that an explicit save already covers.
+   * Author, category and tags ARE included, as ids and names respectively. On
+   * a draft they land straight in the columns and the backend resolves them
+   * like any other save; on a published post they sit in the staged patch, and
+   * the edit page resolves them back into records when it reloads.
    */
   const autosaveValue = useMemo(
     () => ({
@@ -805,6 +871,9 @@ export default function PostForm({
       ctaLabel,
       ctaHref,
       ctaExternal,
+      authorId,
+      categoryId,
+      tags: tagNames,
     }),
     [
       title,
@@ -830,6 +899,9 @@ export default function PostForm({
       ctaLabel,
       ctaHref,
       ctaExternal,
+      authorId,
+      categoryId,
+      tagNames,
     ],
   );
 
@@ -849,10 +921,18 @@ export default function PostForm({
       // everything goes.
       const patch: AutosavePatch = {};
       for (const key of Object.keys(v) as (keyof typeof v)[]) {
-        if (key === "blocks") continue;
+        // Both handled below: arrays get a content comparison, because a new
+        // array with the same items is not a change worth sending.
+        if (key === "blocks" || key === "tags") continue;
         if (!previous || v[key] !== previous[key]) {
           (patch as Record<string, unknown>)[key] = v[key];
         }
+      }
+      if (
+        !previous ||
+        JSON.stringify(v.tags) !== JSON.stringify(previous.tags)
+      ) {
+        patch.tags = v.tags;
       }
       // The body is compared by content, not identity: BlockNote hands back a
       // fresh array for changes that leave the document alone (a cursor move),
@@ -1253,7 +1333,9 @@ export default function PostForm({
               description={description}
               setDescription={setDescription}
               setSlug={setSlug}
-              onSlugAvailable={startDraft}
+              startDraft={
+                saved ? null : { onStart: startDraft, busy: startingDraft }
+              }
               authorDate={authorDate}
               setAuthorDate={setAuthorDate}
               lede={lede}

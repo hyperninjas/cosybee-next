@@ -32,6 +32,24 @@ export default async function EditPostPage({
 
   // `getPost` has already laid any unpublished edits over the live values, so
   // this maps one coherent record — the version the author was last writing.
+  //
+  // Except the taxonomy: a staged patch stores an author/category as an ID,
+  // while the post carries the whole record, so the merge in `getPost` cannot
+  // apply them. Resolved here instead, against the lists this page already
+  // fetches. An id that no longer matches anything (the author was deleted
+  // meanwhile) falls back to what is live rather than blanking the field.
+  const staged = (post.draft ?? {}) as {
+    authorId?: string;
+    categoryId?: string;
+    tags?: string[];
+  };
+  const stagedAuthor = staged.authorId
+    ? authors.find((a) => a.id === staged.authorId)
+    : undefined;
+  const stagedCategory = staged.categoryId
+    ? categories.find((c) => c.id === staged.categoryId)
+    : undefined;
+
   // Map backend post to form shape
   const formPost: FormPost = {
     id: post.id,
@@ -44,11 +62,14 @@ export default async function EditPostPage({
     lede: post.lede,
 
     // Taxonomy (full objects)
-    author: post.author,
-    category: post.category,
+    author: stagedAuthor ?? post.author,
+    category: stagedCategory ?? post.category,
     // Non-null when the live post is holding edits nobody has made live yet.
     draftUpdatedAt: post.draftUpdatedAt ?? null,
-    tags: post.tags ?? [],
+    // Staged picks resolve back into records here, where the author and
+    // category lists are already loaded. `applyStagedEdits` cannot do it: the
+    // patch holds ids, and the post carries whole objects.
+    tagNames: staged.tags ?? (post.tags ?? []).map((t) => t.name),
 
     // Media
     coverImage: post.coverImage,

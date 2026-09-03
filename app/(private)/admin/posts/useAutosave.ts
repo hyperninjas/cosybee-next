@@ -169,7 +169,15 @@ export function useAutosave<T>({
     if (!enabled) return;
     if (serialized === savedRef.current) return;
 
-    setState((prev) => (prev.status === "saving" ? prev : { status: "dirty" }));
+    // Returning `prev` unchanged is load-bearing, not a micro-optimisation:
+    // handing back a fresh `{status:"dirty"}` object re-rendered the component
+    // on every pass, and this effect re-ran with it — clearing the pending
+    // timer and setting a new one each time, so the save never fired.
+    setState((prev) =>
+      prev.status === "saving" || prev.status === "dirty"
+        ? prev
+        : { status: "dirty" },
+    );
 
     const now = Date.now();
     firstDirtyAtRef.current ??= now;
@@ -179,18 +187,24 @@ export function useAutosave<T>({
     const delay = Math.max(0, Math.min(IDLE_MS, remaining));
 
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => void run(), delay);
+    timerRef.current = setTimeout(() => runRef.current(), delay);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [serialized, enabled, run]);
+    // Deliberately NOT keyed on `run`. What this effect schedules is "a save,
+    // eventually" — a change in that function's identity is not a new reason
+    // to restart the countdown, and keying on it meant any re-render could
+    // reset the timer indefinitely. The ref always points at the current one.
+  }, [serialized, enabled]);
 
   // Leaving the page kills the timer, so save now instead. `visibilitychange`
   // rather than `beforeunload`: it is the one that fires reliably when a tab
   // is backgrounded or closed on mobile.
   useEffect(() => {
     if (!enabled) return;
-    const flushNow = () => void run();
+    // Through the ref for the same reason as above — re-subscribing these on
+    // every render is pure churn.
+    const flushNow = () => runRef.current();
     const onHidden = () => {
       if (document.visibilityState === "hidden") flushNow();
     };
@@ -200,7 +214,7 @@ export function useAutosave<T>({
       document.removeEventListener("visibilitychange", onHidden);
       window.removeEventListener("pagehide", flushNow);
     };
-  }, [enabled, run]);
+  }, [enabled]);
 
   return state;
 }

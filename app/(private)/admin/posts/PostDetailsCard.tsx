@@ -38,7 +38,7 @@ export function PostDetailsCard({
   description,
   setDescription,
   setSlug,
-  onSlugAvailable,
+  startDraft = null,
   authorDate,
   setAuthorDate,
   lede,
@@ -55,10 +55,15 @@ export function PostDetailsCard({
   setDescription: (v: string) => void;
   setSlug: (v: string) => void;
   /**
-   * Fired when a settled slug comes back free, so a post with no id yet can be
-   * brought into existence and autosave has somewhere to write.
+   * Offered until the post exists: create it at this address, keeping what has
+   * been written so far.
+   *
+   * A deliberate button rather than something that happens as soon as a free
+   * slug is typed. Creating on availability alone meant clicking Generate
+   * silently produced a post — so a moment's browsing left real rows behind,
+   * and the author was never asked.
    */
-  onSlugAvailable?: (slug: string) => void;
+  startDraft?: { onStart: () => void; busy: boolean } | null;
   authorDate: string;
   setAuthorDate: (v: string) => void;
   lede: string;
@@ -76,18 +81,13 @@ export function PostDetailsCard({
     let cancelled = false;
     const timer = setTimeout(async () => {
       const result = await checkSlug(blog, slug, postId);
-      if (cancelled) return;
-      setChecked({ slug, result });
-      // The address is settled and free — the moment a draft can safely be
-      // created for it. Announced rather than acted on here: this card knows
-      // about slugs, not about whether the post exists.
-      if (result.state === "available") onSlugAvailable?.(slug);
+      if (!cancelled) setChecked({ slug, result });
     }, CHECK_DEBOUNCE_MS);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [blog, slug, postId, onSlugAvailable]);
+  }, [blog, slug, postId]);
 
   // Only trust an answer that is about the slug currently in the box. Storing
   // the slug alongside the result — rather than clearing state on every
@@ -158,10 +158,33 @@ export function PostDetailsCard({
             >
               Generate
             </Button>
+            {/* Only until the post exists. From then on the post saves itself,
+                so there is nothing for this to do. */}
+            {startDraft && (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="shrink-0"
+                // Only once the address is known to be free — starting a draft
+                // on a taken slug would fail at the unique index.
+                isDisabled={startDraft.busy || check.state !== "available"}
+                isPending={startDraft.busy}
+                onPress={startDraft.onStart}
+              >
+                Start draft
+              </Button>
+            )}
           </div>
           <span className="mt-1 block font-mono text-xs text-muted">
             /{blog}/{slug || "…"}
           </span>
+          {startDraft && check.state === "available" && (
+            <span className="mt-1 block text-xs text-muted">
+              Start the draft to save what you have written — after that the
+              post keeps itself saved as you work.
+            </span>
+          )}
           {message && (
             <span
               className={`mt-1 block text-xs font-medium ${
