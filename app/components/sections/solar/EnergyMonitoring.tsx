@@ -6,6 +6,7 @@ import {
 } from "@/app/components/ui/SectionContent";
 import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import deviceImg from "@/public/solar/energiebee-app-solar-energy-flow.png";
+import featureImage from "@/public/solar/Real-Time-Energy-Monitoring.png";
 import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
 import smartSwitchImg from "@/public/ss-image/ss-small-1.png";
 import Image, { StaticImageData } from "next/image";
@@ -57,7 +58,7 @@ export default function EnergyMonitoring({
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-[1fr_1.25fr] min-[1200px]:gap-32">
         {/* uniform 3-hex hive cluster */}
 
-        <HiveHexCluster
+        {/* <HiveHexCluster
           className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
           gap={5}
           cornerInset={4}
@@ -81,6 +82,13 @@ export default function EnergyMonitoring({
               />
             ),
           }}
+        /> */}
+        <Image
+          src={featureImage}
+          alt="energie bee app screen"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          className="object-cover object-right"
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

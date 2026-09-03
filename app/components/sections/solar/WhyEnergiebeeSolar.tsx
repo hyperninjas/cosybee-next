@@ -12,6 +12,7 @@ import { AppImage as Image } from "@/app/components/ui/AppImage";
 import type { FeatureCardContent } from "./WhyEnergieBee";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
+import featureImage from "@/public/solar/Why-Choose-EnergieBee-Solar.png";
 
 export type WhyEnergieBeeSolarProps = {
   title?: string;
@@ -104,12 +105,19 @@ export default function WhyEnergieBeeSolar({
         </div>
 
         {/* hexagon cluster — same canonical hive shape as the rest of the page */}
-        <HiveHexCluster
+        <Image
+          src={featureImage}
+          alt="energie bee app screen"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          className=""
+        />
+        {/* <HiveHexCluster
           className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
           left={left}
           topRight={topRight}
           bottomRight={bottomRight}
-        />
+        /> */}
       </Container>
     </Section>
   );

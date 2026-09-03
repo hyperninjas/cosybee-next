@@ -5,6 +5,7 @@ import type { FeatureItemContent } from "./EnergyMonitoring";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import Hexagon from "../../ui/Hexagon";
+import featureImage from "@/public/solar/Energy-&-Savings-Analytics.png";
 
 export type EnergyAnalyticsProps = {
   title?: string;
@@ -70,13 +71,13 @@ export default function EnergyAnalytics({
         </div>
 
         {/* phone — right */}
-        <div className="mx-auto w-full max-w-75">
+        <div className="mx-auto w-full ">
           <Image
-            src={deviceSrc}
-            alt={deviceAlt}
-            sizes="(min-width: 1200px) 300px, 280px"
-            quality={85}
-            className="h-auto w-full"
+            src={featureImage}
+            alt="energie bee app screen"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+            quality={100}
+            className=""
           />
         </div>
       </Container>
