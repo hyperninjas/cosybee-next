@@ -66,8 +66,10 @@ export type FormPost = {
   lede: string | null;
 
   // Taxonomy (full objects from backend)
-  author: Author;
-  category: Category;
+  // Null on a draft that hasn't been attributed or filed yet. The pickers
+  // start empty and the post cannot be published until both are chosen.
+  author: Author | null;
+  category: Category | null;
   tags: Tag[];
 
   // Media — optional (a post can be coverless; the form normalises null → "").
@@ -85,7 +87,7 @@ export type FormPost = {
 
   // Display
   readTime: number;
-  authorDate: string;
+  authorDate: string | null;
 
   // Featured/Carousel
   featured: boolean;
@@ -330,6 +332,27 @@ export default function PostForm({
   const [categoryId, setCategoryId] = useState(post?.category?.id ?? "");
   const [categoryName, setCategoryName] = useState(post?.category?.name ?? "");
   const blogCategories = categories.filter((c) => c.blog === blog);
+
+  /**
+   * Move the post to the other blog, dropping the category with it.
+   *
+   * Categories are scoped per blog (`Category.@@unique([blog, slug])`), so a
+   * category chosen under Hive does not exist under Learn. Carrying the id
+   * across made the save fail outright — the backend's `resolveCategoryId`
+   * rejects an id whose blog doesn't match — while the picker, which only
+   * lists this blog's categories, showed an empty box and gave no clue why.
+   * Clearing it states the truth: moving blogs means choosing a category
+   * again.
+   *
+   * A wrapper rather than an effect on `blog`, which would also fire on mount
+   * and wipe the category the post was loaded with.
+   */
+  const changeBlog = (next: string) => {
+    if (next === blog) return;
+    setBlog(next);
+    setCategoryId("");
+    setCategoryName("");
+  };
 
   // TagInput owns the canonical tag state (+ hidden input); this mirror exists
   // only so tag edits register in the unsaved-changes snapshot below.
@@ -698,23 +721,45 @@ export default function PostForm({
         name="status"
         defaultValue={status}
       />
-      {/* Author — send ID if available, otherwise name + avatar */}
+      {/* Author + category.
+          These fields are sent ONLY when they carry a real instruction. The
+          backend treats "field present" as "field changed" and resolves a bare
+          NAME by upserting a record with it, so a form that always posted
+          `authorName`/`category` was re-resolving the taxonomy on every single
+          update. With the pickers empty that meant the fallback literals below
+          were written as data: the post was silently reassigned to an author
+          called "energiebee" and a category called "Uncategorised".
+
+          An id is safe to send at any time — it names an existing record. A
+          NAME is only ever an instruction to create one, so it is limited to
+          the create path, where a post genuinely has no taxonomy yet and the
+          backend requires one of the two. On update, omitting both is what
+          says "leave the author/category exactly as they are". */}
       {authorId && <input type="hidden" name="authorId" value={authorId} />}
-      <input
-        type="hidden"
-        name="authorName"
-        value={authorName || "energiebee"}
-      />
-      <input type="hidden" name="authorAvatarUrl" value={authorAvatarUrl} />
-      {/* Category — send ID if available, otherwise name */}
+      {!saved && !authorId && (
+        <>
+          <input
+            type="hidden"
+            name="authorName"
+            value={authorName || "energiebee"}
+          />
+          <input
+            type="hidden"
+            name="authorAvatarUrl"
+            value={authorAvatarUrl}
+          />
+        </>
+      )}
       {categoryId && (
         <input type="hidden" name="categoryId" value={categoryId} />
       )}
-      <input
-        type="hidden"
-        name="category"
-        value={categoryName || "Uncategorised"}
-      />
+      {!saved && !categoryId && (
+        <input
+          type="hidden"
+          name="category"
+          value={categoryName || "Uncategorised"}
+        />
+      )}
       <input type="hidden" name="authorDate" value={authorDate} />
       <input type="hidden" name="description" value={description} />
       <input type="hidden" name="coverImageAlt" value={coverImageAlt} />
@@ -755,7 +800,7 @@ export default function PostForm({
         editing={Boolean(saved)}
         status={status}
         blog={blog}
-        setBlog={setBlog}
+        setBlog={changeBlog}
         onSetStatus={setStatusForSubmit}
         liveHref={liveHref}
         disabled={missingAlts.length > 0}

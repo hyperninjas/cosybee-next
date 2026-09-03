@@ -265,14 +265,23 @@ export async function savePost(
   const carouselIntro = optStr(formData, "carouselIntro") ?? (featured ? lede ?? description : null);
   const carouselBody = optStr(formData, "carouselBody") ?? (featured ? description : null);
 
-  // Author handling - use authorId if provided, otherwise authorName for auto-create
+  // Author + category.
+  //
+  // No defaults here, deliberately. These used to fall back to the literals
+  // "energiebee" and "Uncategorised" whenever the form posted a blank, and the
+  // payload below always included them — so the backend, which reads a bare
+  // NAME as "upsert a record with this name and attach it", reassigned the
+  // post's author and category on any save where the pickers weren't
+  // populated. An id names an existing record and is always safe to send; a
+  // name creates one, so it is passed through only when the form really sent
+  // it (the create path, where the backend requires one of the two). Sending
+  // neither is what leaves an existing post's taxonomy alone.
   const authorId = optStr(formData, "authorId");
-  const authorName = str(formData, "authorName") || "energiebee";
+  const authorName = optStr(formData, "authorName");
   const authorAvatarUrl = optStr(formData, "authorAvatarUrl");
 
-  // Category handling - use categoryId if provided, otherwise category name for auto-create
   const categoryId = optStr(formData, "categoryId");
-  const category = str(formData, "category") || "Uncategorised";
+  const category = optStr(formData, "category");
 
   // Scheduling. The form now sends an ABSOLUTE instant (ISO, with a `Z`),
   // converted in the browser where the author's timezone is actually known —
@@ -298,9 +307,13 @@ export async function savePost(
     seoTitle: optStr(formData, "seoTitle"),
     seoDescription: optStr(formData, "seoDescription"),
     description,
-    // Taxonomy - send ID if available, otherwise name + avatar for auto-create
-    ...(authorId ? { authorId } : { authorName, authorAvatarUrl }),
-    ...(categoryId ? { categoryId } : { category }),
+    // Taxonomy — id, else a name to create from, else nothing at all.
+    ...(authorId
+      ? { authorId }
+      : authorName
+        ? { authorName, authorAvatarUrl }
+        : {}),
+    ...(categoryId ? { categoryId } : category ? { category } : {}),
     tags, // string[] of tag names (backend auto-creates)
     readTime: readTimeMinutes,
     coverImage,

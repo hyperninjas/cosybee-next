@@ -99,15 +99,19 @@ export function AuthorPickerCard({
                   selectedKey={authorId || null}
                   onSelectionChange={(key) => {
                     const a = authors.find((x) => x.id === String(key));
-                    if (a) {
-                      setAuthorId(a.id);
-                      setAuthorName(a.name);
-                      setAuthorAvatarUrl(a.avatarUrl ?? "");
-                    } else {
-                      setAuthorId("");
-                      setAuthorName("");
-                      setAuthorAvatarUrl("");
-                    }
+                    // A null key is NOT "the author was removed" — React Aria
+                    // clears the selection the moment the typed text stops
+                    // matching the selected item, so simply clicking in and
+                    // typing one letter fired this branch. It used to wipe the
+                    // selection, leaving the card showing no author for a post
+                    // that has one. There is no "no author" state to reach
+                    // (the field is required and has no clear button), so an
+                    // unmatched key means "still searching" and the current
+                    // choice stands; blurring restores its name in the input.
+                    if (!a) return;
+                    setAuthorId(a.id);
+                    setAuthorName(a.name);
+                    setAuthorAvatarUrl(a.avatarUrl ?? "");
                   }}
                 >
                   <ComboBox.InputGroup>
