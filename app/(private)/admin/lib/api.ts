@@ -304,13 +304,6 @@ export const adminApi = {
     });
   },
 
-  /** Make the staged edits the live article. */
-  async publishDraft(id: string): Promise<AdminPost> {
-    return fetchApi<AdminPost>(`/api/posts/${id}/draft/publish`, {
-      method: "POST",
-    });
-  },
-
   /** Throw the staged edits away; the live article is untouched. */
   async discardDraft(id: string): Promise<AdminPost> {
     return fetchApi<AdminPost>(`/api/posts/${id}/draft`, { method: "DELETE" });

@@ -642,11 +642,36 @@ export default function PostForm({
     tags: tagNames,
     blocks,
   });
+  /**
+   * The same idea, narrowed to what autosave does NOT keep.
+   *
+   * Once a post exists, its title, body, cover, SEO, CTA and the rest are
+   * saved a few seconds after you stop typing — so warning about them on the
+   * way out would cry wolf every single time. These are the fields that really
+   * would be lost: the address, publication, the taxonomy references and tags.
+   *
+   * Kept in step with `snapshot` by hand; both baselines move together on a
+   * successful save.
+   */
+  const unautosavedSnapshot = JSON.stringify({
+    blog,
+    slug,
+    status,
+    publishedAt,
+    authorId,
+    authorName,
+    authorAvatarUrl,
+    categoryId,
+    categoryName,
+    tags: tagNames,
+    ctaEnabled,
+  });
+
   // Capture the first render's snapshot as the baseline (lazy state init runs
   // once); reading state during render is allowed, reading a ref isn't. A
   // successful save moves the baseline forward — see below.
   const [initialSnapshot, setInitialSnapshot] = useState(snapshot);
-  useUnsavedChangesWarning(snapshot !== initialSnapshot && !isPending);
+  const [initialUnautosaved, setInitialUnautosaved] = useState(unautosavedSnapshot);
 
   // What was in the form when the save was submitted. The success effect
   // rebases on this rather than on the live snapshot, so anything typed while
@@ -675,6 +700,7 @@ export default function PostForm({
       status: entity.status,
     });
     setInitialSnapshot(submittedSnapshot.current);
+    setInitialUnautosaved(unautosavedSnapshot);
     // An explicit save writes the WHOLE form live, which makes any staged
     // patch stale — it is a subset of what was just published. Leaving it
     // would keep offering "Make changes live" for edits already live, and
@@ -701,7 +727,7 @@ export default function PostForm({
           }
         : undefined,
     );
-  }, [state, saved, hasStaged]);
+  }, [state, saved, hasStaged, unautosavedSnapshot]);
 
   const liveHref =
     saved?.status === "PUBLISHED" ? `/${saved.blog}/${saved.slug}` : undefined;
@@ -868,6 +894,23 @@ export default function PostForm({
     // author to the live article.
     window.location.reload();
   }, [saved]);
+
+  // Warn on the way out only about work that would actually be lost.
+  //
+  // Before the post exists nothing is saved, so the whole form counts. After
+  // that, autosave has the body and most of the metadata — what remains is the
+  // narrow snapshot above, plus autosave itself still having work in hand or
+  // having failed.
+  const autosaveHasWork =
+    autosaveState.status === "dirty" ||
+    autosaveState.status === "saving" ||
+    autosaveState.status === "error";
+  useUnsavedChangesWarning(
+    !isPending &&
+      (saved
+        ? unautosavedSnapshot !== initialUnautosaved || autosaveHasWork
+        : snapshot !== initialSnapshot),
+  );
 
   /**
    * Arm the next submit with a publication change — or with none.
