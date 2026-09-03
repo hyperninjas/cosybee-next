@@ -730,6 +730,9 @@
     0px 11.26px 14.65px 0px rgba(0, 0, 0, 0.01),
     0px 30.92px 29.68px 0px rgba(0, 0, 0, 0.01),
     0px 100px 80px 0px rgba(0, 0, 0, 0.04);
+  p {
+    margin-top: 0;
+  }
 }
 @media (min-width: 900px) {
   .article-cta {
@@ -802,6 +805,7 @@
     height: auto;
     /* max-width: var(--cta-media-w); */
     max-height: calc(100% - 1rem);
+    max-width: 220px;
   }
   .article-cta[data-anchor="top"] .article-cta-media img {
     top: 0;
@@ -865,6 +869,8 @@
   margin: 0.75rem 0 0;
   max-width: 40rem;
   font-size: 1rem !important;
+  margin-top: 1rem !important;
+
   font-weight: 500 !important;
   line-height: 1.5 !important;
   color: var(--muted);

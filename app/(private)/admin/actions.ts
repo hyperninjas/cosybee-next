@@ -169,6 +169,9 @@ export async function savePost(
   // what an ordinary save should do. A create with no status gets DRAFT from
   // the backend's own default.
   const rawStatus = str(formData, "status");
+  console.log(
+    `[savePost] id=${id ?? "(new)"} requested status=${JSON.stringify(rawStatus)}`,
+  );
   const status = STATUSES.has(rawStatus)
     ? (rawStatus as "DRAFT" | "PUBLISHED" | "ARCHIVED")
     : undefined;
@@ -375,7 +378,16 @@ export async function savePost(
       ? await adminApi.updatePost(id, data)
       : await adminApi.createPost(data);
   } catch (e) {
-    return { ok: false, error: `Could not save: ${(e as Error).message}` };
+    const message = (e as Error).message;
+    // The publish gate already explains itself ("Cannot publish: an author
+    // must be chosen"). Wrapping that in "Could not save:" buries the reason
+    // behind a second, vaguer one.
+    return {
+      ok: false,
+      error: message.startsWith("Cannot publish")
+        ? message
+        : `Could not save: ${message}`,
+    };
   }
 
   revalidatePath("/admin");
