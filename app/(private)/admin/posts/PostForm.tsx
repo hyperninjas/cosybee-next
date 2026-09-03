@@ -38,6 +38,7 @@ import {
 import { collectPostIssues, type ImageFacts } from "@/app/lib/post-issues";
 import { findMediaByUrl } from "@/app/lib/storage";
 import type { LinkTarget } from "@/app/lib/link-targets";
+import { inter } from "@/app/lib/fonts";
 import TagInput from "./TagInput";
 import { ActionBar, type PostStatus } from "./ActionBar";
 import { PublishIssuesDialog } from "./PublishIssuesDialog";
@@ -1272,7 +1273,10 @@ export default function PostForm({
               </div>
             )}
 
-            <div className="post-editor">
+            {/* `inter.variable` again (see ArticleDetail): the editor is set
+                in the article's reading face so a post looks the same while
+                it is written as it does once it publishes. */}
+            <div className={`${inter.variable} post-editor`}>
               <Editor
                 initialContent={initialBlocks}
                 onChange={setBlocks}

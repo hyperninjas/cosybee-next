@@ -30,6 +30,7 @@ import {
   videoObjectSchema,
 } from "@/app/lib/structured-data";
 import { resolveArticleVideos } from "@/app/lib/article-videos";
+import { inter } from "@/app/lib/fonts";
 
 type Props = {
   /** Published article with rendered body HTML (caller handles notFound). */
@@ -157,7 +158,11 @@ export default async function ArticleDetail({
   ];
 
   return (
-    <main className="flex-1">
+    /* `inter.variable` defines --font-inter on this element; `.article-page`
+       is what consumes it (globals.css). Declaring the font in this component
+       rather than the root layout is what keeps it scoped: Next preloads Inter
+       only on the routes that render an article. */
+    <main className={`${inter.variable} article-page flex-1`}>
       {/* Warm up the connection to the media host — article images load from
           it cross-origin (React 19 hoists this to <head> and dedups it). */}
       <link rel="preconnect" href="https://eb-api.technext.it" />
@@ -356,35 +361,38 @@ export default async function ArticleDetail({
           )}
         </article>
 
-        {
-          (sidebarToc.length > 1 || related.length > 0) && ""
+        {(sidebarToc.length > 1 || related.length > 0) && (
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
-          // <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
-          //   {/* sticky={false}: the aside already pins it. */}
-          //   {sidebarToc.length > 1 && (
-          //     <ArticleToc items={sidebarToc} sticky={false} />
-          //   )}
+          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
+            {/* sticky={false}: the aside already pins it. */}
+            {sidebarToc.length > 1 && (
+              <ArticleToc items={sidebarToc} sticky={false} />
+            )}
 
-          //   {related.length > 0 && (
-          //     <div>
-          //       <h3 className="text-lg font-extrabold text-foreground">
-          //         More blogs
-          //       </h3>
-          //       <div className="mt-4 flex flex-col gap-1">
-          //         {related.map((a) => (
-          //           <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
-          //         ))}
-          //       </div>
-          //     </div>
-          //   )}
-          // </aside>
-        }
+            {related.length > 0 && (
+              <div>
+                <h3 className="text-lg font-extrabold text-foreground">
+                  More blogs
+                </h3>
+                <div className="mt-4 flex flex-col gap-1">
+                  {related.map((a) => (
+                    <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
       </Container>
       {/* more blogs */}
       {related.length > 0 && (
-        <Section spacing="none" overflow="visible" className="">
+        <Section
+          spacing="none"
+          overflow="visible"
+          className="xl:has-last:hidden"
+        >
           <Container size="prose" className="pb-16 sm:px-5 lg:pb-24">
             <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
               More blogs

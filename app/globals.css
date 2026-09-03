@@ -106,34 +106,60 @@
    the published spec; `.post-editor .bn-editor` mirrors it so a post reads the
    same while it is written as it does once it publishes. Sizes are in rem with
    the px they resolve to in a comment, because the spec is written in px. */
-/* Prose colour. Articles read as PURE black in the light theme — a deliberate
-   step darker than the site's near-black `--foreground` — so body copy matches
-   the `rgb(0, 0, 0)` that BlockNote inlines on text pasted from Word/Docs and
-   nothing reads as two different blacks. The dark theme falls back to
-   `--foreground`, which is why this is a token and not a literal: black on the
-   dark surface would be invisible. Set on the container so every element
-   inherits it, and mirrored onto the editor so a post is written in the colour
-   it publishes in. (The pasted inline colours themselves are stripped on
-   export — see `stripPastedColors` in app/lib/blocknote.ts — so this token is
-   what actually paints.) */
+/* Prose colour. Articles paint from the theme's `--foreground`, so body copy is
+   the same black as the rest of the site rather than a second, darker one.
+   It was a literal PURE black for as long as text pasted from Word/Docs
+   published the `rgb(0, 0, 0)` BlockNote inlines on it, and the prose had to
+   agree with that black or the page read as two of them; `stripPastedColors`
+   (app/lib/blocknote.ts) now drops those inline colours on export, so there is
+   no second black left to match. One declaration serves both themes because
+   `--foreground` already flips — near-black on the light surface, near-white
+   on the dark one, where a literal black would be invisible. It stays a token
+   rather than a direct `var(--foreground)` because the palette colours further
+   down rebind it per element, which is how an author's chosen colour survives
+   the !important prose rules. Set on the container so every element inherits
+   it, and mirrored onto the editor so a post is written in the colour it
+   publishes in. */
+/* Reading face. Articles are set in Inter rather than the site's Manrope: it
+   is a text face drawn for long-form screen reading, where Manrope is the
+   brand's display voice. `.article-page` covers the whole article route —
+   title, byline, prose, sidebar, related cards — so nothing on the page reads
+   as two different families, and the editor is mirrored so a post is written
+   in the face it publishes in.
+
+   The stack is written out here rather than hoisted to a --font-article token
+   beside --font-sans, and that is deliberate: a var() inside a custom property
+   is substituted where the property is DECLARED, not where it is used. Inter's
+   variable is defined by next/font's class on the two elements that carry it,
+   `.article-page` and `.post-editor` (see ArticleDetail.tsx and PostForm.tsx),
+   NOT on :root the way Manrope's is — so a :root token would resolve
+   var(--font-inter) against <html>, find nothing, collapse to invalid, and
+   leave the article silently reading in Manrope.
+   Reference the variable rather than a bare "Inter": it also carries the
+   metric-matched "Inter Fallback" face, which is what keeps the swap from
+   reflowing the article. `.bn-default-styles` is listed because @blocknote/core
+   puts its own font-family on that class, which sits on the block content
+   INSIDE .bn-editor — an ancestor rule loses to it no matter how specific, so
+   the editor would otherwise keep BlockNote's stack. (That stack happens to
+   start with a bare "Inter" and would coincidentally land on this same face,
+   but only for as long as next/font emits an unhashed family name.) */
+.article-page,
+.post-editor .bn-editor,
+.post-editor .bn-default-styles {
+  font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+}
 .article-body,
 .post-editor .bn-editor {
-  --article-foreground: #000;
-  color: var(--article-foreground);
-}
-.dark .article-body,
-.dark .post-editor .bn-editor,
-[data-theme="dark"] .article-body,
-[data-theme="dark"] .post-editor .bn-editor {
   --article-foreground: var(--foreground);
+  color: var(--article-foreground);
 }
 .article-body > * + * {
   margin-top: 1.25rem;
 }
 .article-body p {
-  font-size: 1.25rem; /* 16px */
+  font-size: 1.25rem; /* 20px */
   line-height: 1.5;
-  margin-top: 1rem !important;
+  margin-top: 2.25rem;
 
   color: var(--article-foreground);
 }
@@ -147,7 +173,8 @@
 .article-body h5,
 .article-body h6 {
   color: var(--article-foreground) !important;
-  margin-top: 1.5rem;
+  margin-top: 2.25rem;
+  margin-bottom: -1rem;
 }
 .article-body h1 {
   font-size: 2.25rem; /* 36px */
@@ -203,8 +230,8 @@
   font-size: 1.125rem; /* 18px */
   line-height: 1.3;
 }
-.article-body li {
-  margin-top: 0.5rem;
+.article-body li > p {
+  margin-top: 0.5rem !important;
 }
 .article-body li::marker {
   color: var(--muted);
@@ -363,6 +390,9 @@
   padding: 5px 10px;
   vertical-align: top;
   text-align: left;
+  p {
+    margin-top: 0 !important;
+  }
 }
 .article-body th,
 .article-body th > p {
@@ -383,7 +413,21 @@
    inline `text-align`, cells get `data-text-alignment`; cell colors come as
    `data-text-color`/`data-background-color`). The editor renders these via
    BlockNote's own CSS; without this mirror the styling silently vanished
-   from the published article. Palette values match @blocknote/core. */
+   from the published article. Palette values match @blocknote/core.
+
+   Each colour also REDEFINES --article-foreground rather than only painting
+   `color`, because the prose-colour rules above carry !important (they exist
+   to flatten colours pasted in from Word/Docs, which outrank a stylesheet as
+   inline styles). Without the token an author's deliberate palette colour lost
+   to them on exactly the elements that force it — headings, <strong>, <th> —
+   so a coloured heading published black, and a bold word inside a coloured
+   paragraph snapped back to black. Redefining the token instead means those
+   rules resolve to the author's colour and every descendant inherits it, while
+   pasted colours — which carry no palette name, so they match none of these
+   selectors — stay flattened. The second selector is the same choice made as
+   an inline mark rather than a block property: BlockNote writes the palette
+   NAME to `data-value` beside the inline style (see stripPastedColors in
+   app/lib/blocknote.ts), which is what tells the two apart. */
 .article-body [data-text-alignment="left"] {
   text-align: left;
 }
@@ -396,31 +440,49 @@
 .article-body [data-text-alignment="justify"] {
   text-align: justify;
 }
-.article-body [data-text-color="gray"] {
+.article-body [data-text-color="gray"],
+.article-body [data-style-type="textColor"][data-value="gray"] {
+  --article-foreground: #9b9a97;
   color: #9b9a97;
 }
-.article-body [data-text-color="brown"] {
+.article-body [data-text-color="brown"],
+.article-body [data-style-type="textColor"][data-value="brown"] {
+  --article-foreground: #64473a;
   color: #64473a;
 }
-.article-body [data-text-color="red"] {
+.article-body [data-text-color="red"],
+.article-body [data-style-type="textColor"][data-value="red"] {
+  --article-foreground: #e03e3e;
   color: #e03e3e;
 }
-.article-body [data-text-color="orange"] {
+.article-body [data-text-color="orange"],
+.article-body [data-style-type="textColor"][data-value="orange"] {
+  --article-foreground: #d9730d;
   color: #d9730d;
 }
-.article-body [data-text-color="yellow"] {
+.article-body [data-text-color="yellow"],
+.article-body [data-style-type="textColor"][data-value="yellow"] {
+  --article-foreground: #dfab01;
   color: #dfab01;
 }
-.article-body [data-text-color="green"] {
+.article-body [data-text-color="green"],
+.article-body [data-style-type="textColor"][data-value="green"] {
+  --article-foreground: #4d6461;
   color: #4d6461;
 }
-.article-body [data-text-color="blue"] {
+.article-body [data-text-color="blue"],
+.article-body [data-style-type="textColor"][data-value="blue"] {
+  --article-foreground: #0b6e99;
   color: #0b6e99;
 }
-.article-body [data-text-color="purple"] {
+.article-body [data-text-color="purple"],
+.article-body [data-style-type="textColor"][data-value="purple"] {
+  --article-foreground: #6940a5;
   color: #6940a5;
 }
-.article-body [data-text-color="pink"] {
+.article-body [data-text-color="pink"],
+.article-body [data-style-type="textColor"][data-value="pink"] {
+  --article-foreground: #ad1a72;
   color: #ad1a72;
 }
 .article-body [data-background-color="gray"] {
