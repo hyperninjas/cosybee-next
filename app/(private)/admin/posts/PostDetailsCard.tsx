@@ -38,6 +38,7 @@ export function PostDetailsCard({
   description,
   setDescription,
   setSlug,
+  onSlugAvailable,
   authorDate,
   setAuthorDate,
   lede,
@@ -53,6 +54,11 @@ export function PostDetailsCard({
   description: string;
   setDescription: (v: string) => void;
   setSlug: (v: string) => void;
+  /**
+   * Fired when a settled slug comes back free, so a post with no id yet can be
+   * brought into existence and autosave has somewhere to write.
+   */
+  onSlugAvailable?: (slug: string) => void;
   authorDate: string;
   setAuthorDate: (v: string) => void;
   lede: string;
@@ -70,13 +76,18 @@ export function PostDetailsCard({
     let cancelled = false;
     const timer = setTimeout(async () => {
       const result = await checkSlug(blog, slug, postId);
-      if (!cancelled) setChecked({ slug, result });
+      if (cancelled) return;
+      setChecked({ slug, result });
+      // The address is settled and free — the moment a draft can safely be
+      // created for it. Announced rather than acted on here: this card knows
+      // about slugs, not about whether the post exists.
+      if (result.state === "available") onSlugAvailable?.(slug);
     }, CHECK_DEBOUNCE_MS);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [blog, slug, postId]);
+  }, [blog, slug, postId, onSlugAvailable]);
 
   // Only trust an answer that is about the slug currently in the box. Storing
   // the slug alongside the result — rather than clearing state on every

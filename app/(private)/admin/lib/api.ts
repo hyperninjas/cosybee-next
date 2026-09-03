@@ -61,6 +61,16 @@ export interface AdminPost {
   contentJson: Record<string, unknown> | null;
   contentHtml: string | null;
 
+  /**
+   * Edits saved but not yet made live, and when they were last touched.
+   *
+   * Only ever set on a PUBLISHED post: its columns ARE the live article, so
+   * autosave stages here instead of overwriting them. A draft has nothing to
+   * protect and autosaves straight into its own fields, leaving this null.
+   */
+  draft?: Partial<PostInput> | null;
+  draftUpdatedAt?: string | null;
+
   // Timestamps
   createdAt: string;
   updatedAt: string;
@@ -276,6 +286,31 @@ export const adminApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     });
+  },
+
+  /**
+   * Autosave. The backend decides where it lands — straight into a draft's
+   * own columns, or staged aside on a published post — so callers don't have
+   * to know. Never changes publication: `status` is rejected here, not
+   * ignored.
+   */
+  async stageDraft(id: string, data: Partial<PostInput>): Promise<AdminPost> {
+    return fetchApi<AdminPost>(`/api/posts/${id}/draft`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /** Make the staged edits the live article. */
+  async publishDraft(id: string): Promise<AdminPost> {
+    return fetchApi<AdminPost>(`/api/posts/${id}/draft/publish`, {
+      method: "POST",
+    });
+  },
+
+  /** Throw the staged edits away; the live article is untouched. */
+  async discardDraft(id: string): Promise<AdminPost> {
+    return fetchApi<AdminPost>(`/api/posts/${id}/draft`, { method: "DELETE" });
   },
 
   /** Delete a post. */

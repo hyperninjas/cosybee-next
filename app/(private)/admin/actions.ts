@@ -6,7 +6,7 @@ import { slugify, normalizeTag } from "@/app/lib/slug";
 import { excerptFromJson } from "@/app/lib/read-time";
 import { contentJsonToHtml } from "@/app/lib/blocknote";
 import { findContentImagesMissingAlt } from "@/app/lib/content-images";
-import { adminApi, type AdminPost } from "./lib/api";
+import { adminApi, type AdminPost, type PostInput } from "./lib/api";
 import { api, type Blog } from "@/app/lib/api";
 import type { EntitySaveState } from "./lib/form-state";
 import { assertAdmin } from "./lib/auth";
@@ -397,6 +397,147 @@ export async function savePost(
   // its `id` field would still be empty and the next save would write a
   // second post instead of updating this one.
   return { ok: true, entity: saved };
+}
+
+// ── Autosave ────────────────────────────────────────────────────────────────
+
+/** What an autosave tells the editor about where its work went. */
+export type AutosaveResult =
+  | {
+      ok: true;
+      /** Whether the patch was staged aside rather than applied to the post. */
+      staged: boolean;
+      /** When the staged patch was last touched; null once nothing is pending. */
+      draftUpdatedAt: string | null;
+      savedAt: string;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Create the post the moment its address is settled, so there is something to
+ * autosave INTO.
+ *
+ * Everything else about the article is left blank on purpose. A post used to
+ * require a title, description, cover alt text, byline date, body and a full
+ * taxonomy before it could exist at all, which is why the editor had nothing
+ * to save against until the author had finished — and why it invented
+ * placeholder values to get a row written. The backend now accepts a draft
+ * with nothing but a blog and a slug, and refuses to PUBLISH one that is
+ * still missing the rest.
+ */
+export async function createDraft(
+  blog: string,
+  rawSlug: string,
+): Promise<{ ok: true; post: AdminPost } | { ok: false; error: string }> {
+  await assertAdmin();
+
+  const targetBlog = BLOGS.has(blog) ? (blog as "hive" | "learn") : "hive";
+  const slug = slugify(rawSlug);
+  if (!slug) return { ok: false, error: "Add a slug first." };
+
+  // The same check the inline hint runs. Worth repeating: a draft created on a
+  // taken address would collide with the unique index as an opaque 500.
+  const check = await checkSlug(targetBlog, slug);
+  if (check.state !== "available") {
+    return {
+      ok: false,
+      error: "message" in check ? check.message : "That slug isn't available.",
+    };
+  }
+
+  try {
+    const post = await adminApi.createPost({
+      blog: targetBlog,
+      slug,
+    } as Parameters<typeof adminApi.createPost>[0]);
+    // Only the dashboard's list changes — a draft is invisible to readers, so
+    // there is no public page to rebuild.
+    revalidatePath("/admin");
+    return { ok: true, post };
+  } catch (e) {
+    return { ok: false, error: `Could not start the draft: ${(e as Error).message}` };
+  }
+}
+
+/**
+ * Save the author's work without deciding anything about publication.
+ *
+ * A deliberately cheap sibling of `savePost`, because this runs while someone
+ * is typing rather than when they press a button:
+ *
+ *   - No slug availability check. `savePost` walks up to twenty pages of the
+ *     admin listing to run it, which is fine once per save and absurd every
+ *     few seconds — and the slug isn't changing here anyway.
+ *   - No revalidation. Either the post is a draft, which no reader can see, or
+ *     the patch is staged and the live page has not moved.
+ *   - No status. The backend rejects one on this route rather than ignoring
+ *     it; typing must never publish anything.
+ */
+export async function autosavePost(
+  id: string,
+  patch: {
+    title?: string;
+    contentJson?: unknown[];
+    description?: string;
+    lede?: string | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+  },
+): Promise<AutosaveResult> {
+  await assertAdmin();
+  if (!id) return { ok: false, error: "The post hasn't been created yet." };
+
+  const body: Record<string, unknown> = {};
+  if (patch.title !== undefined) body.title = patch.title;
+  if (patch.description !== undefined) body.description = patch.description;
+  if (patch.lede !== undefined) body.lede = patch.lede;
+  if (patch.seoTitle !== undefined) body.seoTitle = patch.seoTitle;
+  if (patch.seoDescription !== undefined) body.seoDescription = patch.seoDescription;
+
+  if (patch.contentJson !== undefined) {
+    const blocks = Array.isArray(patch.contentJson) ? patch.contentJson : [];
+    // An image with no alt text is refused upstream, and an autosave that
+    // 400s on every keystroke would be worse than useless — so say what is
+    // wrong once, clearly, and let the author fix it.
+    const missing = findContentImagesMissingAlt(blocks);
+    if (missing.length > 0) {
+      const list = missing.map((m) => `#${m.index}`).join(", ");
+      return {
+        ok: false,
+        error: `Not saved — add alt text to content image${missing.length === 1 ? "" : "s"} ${list}.`,
+      };
+    }
+    body.contentJson = { blocks };
+    body.contentHtml = await contentJsonToHtml(blocks);
+  }
+
+  if (Object.keys(body).length === 0) {
+    return { ok: true, staged: false, draftUpdatedAt: null, savedAt: new Date().toISOString() };
+  }
+
+  try {
+    const saved = await adminApi.stageDraft(id, body as Partial<PostInput>);
+    return {
+      ok: true,
+      staged: saved.draftUpdatedAt != null,
+      draftUpdatedAt: saved.draftUpdatedAt ?? null,
+      savedAt: new Date().toISOString(),
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+/** Throw a published post's staged edits away. */
+export async function discardStagedChanges(id: string): Promise<ActionResult> {
+  await assertAdmin();
+  try {
+    await adminApi.discardDraft(id);
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
 }
 
 /** Result of a dashboard quick-action — the caller toasts on this. */

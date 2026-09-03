@@ -11,7 +11,13 @@ import {
 import dynamic from "next/dynamic";
 import { Alert, Spinner, toast } from "@heroui/react";
 import type { PartialBlock } from "@blocknote/core";
-import { savePost } from "@/app/(private)/admin/actions";
+import {
+  savePost,
+  createDraft,
+  autosavePost,
+  discardStagedChanges,
+} from "@/app/(private)/admin/actions";
+import { useAutosave } from "./useAutosave";
 import {
   initialSaveState,
   type EntitySaveState,
@@ -88,6 +94,8 @@ export type FormPost = {
   // Display
   readTime: number;
   authorDate: string | null;
+  /** Set when the post is already live and holding edits nobody has seen. */
+  draftUpdatedAt?: string | null;
 
   // Featured/Carousel
   featured: boolean;
@@ -321,6 +329,12 @@ export default function PostForm({
 
   // ── Status ──────────────────────────────────────────────────────────
   const [status, setStatus] = useState<PostStatus>(post?.status ?? "DRAFT");
+
+  // Edits a live post is holding back. Seeded from the record and kept in step
+  // with what autosave reports, so the bar appears the moment work is staged.
+  const [hasStaged, setHasStaged] = useState(Boolean(post?.draftUpdatedAt));
+  const [stagedBusy, setStagedBusy] = useState(false);
+
 
   // ── Taxonomy ────────────────────────────────────────────────────────
   const [authorId, setAuthorId] = useState(post?.author?.id ?? "");
@@ -626,6 +640,14 @@ export default function PostForm({
       status: entity.status,
     });
     setInitialSnapshot(submittedSnapshot.current);
+    // An explicit save writes the WHOLE form live, which makes any staged
+    // patch stale — it is a subset of what was just published. Leaving it
+    // would keep offering "Make changes live" for edits already live, and
+    // promoting it later would republish an older body.
+    if (hasStaged) {
+      setHasStaged(false);
+      void discardStagedChanges(entity.id);
+    }
     const href = `/${entity.blog}/${entity.slug}`;
     toast.success(
       entity.status === "PUBLISHED"
@@ -644,10 +666,109 @@ export default function PostForm({
           }
         : undefined,
     );
-  }, [state, saved]);
+  }, [state, saved, hasStaged]);
 
   const liveHref =
     saved?.status === "PUBLISHED" ? `/${saved.blog}/${saved.slug}` : undefined;
+
+  // ── Create-on-slug + autosave ───────────────────────────────────────
+  //
+  // A post used to come into existence only when someone pressed Save, so
+  // until then there was nothing to autosave into and an hour of writing lived
+  // in one browser tab. It is now created as soon as its address is settled
+  // and free, and everything typed after that is kept on its own.
+
+  /** Guards against a second create while the first is still in the air. */
+  const creatingRef = useRef(false);
+
+  const startDraft = useCallback(
+    async (nextSlug: string) => {
+      if (saved || creatingRef.current) return;
+      creatingRef.current = true;
+      const result = await createDraft(blog, nextSlug);
+      creatingRef.current = false;
+      if (!result.ok) {
+        // Not fatal — pressing Save still creates the post the old way. Say so
+        // once rather than blocking the author.
+        toast.danger(result.error);
+        return;
+      }
+      setSaved({
+        id: result.post.id,
+        blog: result.post.blog,
+        slug: result.post.slug,
+        status: result.post.status,
+      });
+      // Move the address bar onto the real edit URL without a navigation, so a
+      // reload lands on the draft instead of a blank "new post" form.
+      window.history.replaceState(null, "", `/admin/posts/${result.post.id}/edit`);
+    },
+    [blog, saved],
+  );
+
+  const autosaveValue = useMemo(
+    () => ({ title, blocks, description, lede, seoTitle, seoDescription }),
+    [title, blocks, description, lede, seoTitle, seoDescription],
+  );
+
+  const autosaveState = useAutosave({
+    value: autosaveValue,
+    // Nothing to save into until the post exists.
+    enabled: Boolean(saved?.id),
+    save: async (v, previous) => {
+      // Only what actually changed. The body is the expensive field by a wide
+      // margin — the server re-renders it to HTML through jsdom on every save
+      // — so a request that only moves the title should not carry it. On the
+      // first save `previous` is undefined and everything goes.
+      const patch: Parameters<typeof autosavePost>[1] = {};
+      if (!previous || v.title !== previous.title) patch.title = v.title;
+      // Compared by content, not identity: BlockNote hands back a fresh array
+      // for changes that leave the document alone (a cursor move), and the
+      // body is the one field worth a stringify to be sure about.
+      if (
+        !previous ||
+        (v.blocks !== previous.blocks &&
+          JSON.stringify(v.blocks) !== JSON.stringify(previous.blocks))
+      ) {
+        patch.contentJson = v.blocks as unknown[];
+      }
+      if (!previous || v.description !== previous.description) {
+        patch.description = v.description;
+      }
+      if (!previous || v.lede !== previous.lede) patch.lede = v.lede || null;
+      if (!previous || v.seoTitle !== previous.seoTitle) {
+        patch.seoTitle = v.seoTitle || null;
+      }
+      if (!previous || v.seoDescription !== previous.seoDescription) {
+        patch.seoDescription = v.seoDescription || null;
+      }
+      const result = await autosavePost(saved!.id, patch);
+      // Set here rather than in an effect on the autosave state: this is an
+      // event callback, so it cannot cascade renders the way a synchronous
+      // setState inside an effect does.
+      if (result.ok && result.staged) setHasStaged(true);
+      return result.ok
+        ? { ok: true as const, staged: result.staged }
+        : { ok: false as const, error: result.error };
+    },
+  });
+
+  const dropStagedChanges = useCallback(async () => {
+    if (!saved) return;
+    setStagedBusy(true);
+    const result = await discardStagedChanges(saved.id);
+    setStagedBusy(false);
+    if (!result.ok) {
+      toast.danger(result.error ?? "Could not discard the changes.");
+      return;
+    }
+    setHasStaged(false);
+    // The editor was seeded with the staged text, so clearing the patch alone
+    // would leave the discarded version on screen — and the next keystroke
+    // would stage it straight back. Reloading is what actually returns the
+    // author to the live article.
+    window.location.reload();
+  }, [saved]);
 
   /**
    * Arm the next submit with a publication change — or with none.
@@ -811,6 +932,12 @@ export default function PostForm({
         liveHref={liveHref}
         disabled={missingAlts.length > 0}
         hasIssues={issues.length > 0}
+        autosave={autosaveState}
+        staged={
+          hasStaged && status === "PUBLISHED"
+            ? { onDiscard: dropStagedChanges, busy: stagedBusy }
+            : null
+        }
       />
 
       <PublishIssuesDialog
@@ -978,12 +1105,13 @@ export default function PostForm({
             <PostDetailsCard
               blog={blog}
               slug={slug}
-              postId={post?.id}
+              postId={saved?.id}
               title={title}
               slugError={errors.slug}
               description={description}
               setDescription={setDescription}
               setSlug={setSlug}
+              onSlugAvailable={startDraft}
               authorDate={authorDate}
               setAuthorDate={setAuthorDate}
               lede={lede}

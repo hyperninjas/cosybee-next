@@ -12,6 +12,7 @@ import { ArrowUpRightFromSquare, TriangleExclamation } from "@gravity-ui/icons";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { AppLink } from "@/app/components/ui/AppLink";
+import type { AutosaveState } from "./useAutosave";
 
 export type PostStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -27,6 +28,8 @@ export function ActionBar({
   liveHref,
   disabled = false,
   hasIssues = false,
+  autosave,
+  staged = null,
 }: {
   editing: boolean;
   status: PostStatus;
@@ -47,6 +50,10 @@ export function ActionBar({
   /** The post has advisory issues — mark the publish button and let the form
    *  show them before it publishes. Advisory only; nothing is blocked. */
   hasIssues?: boolean;
+  /** Autosave's current state, rendered as the quiet line beside the chip. */
+  autosave?: AutosaveState;
+  /** Set when a live post is holding edits nobody has made live yet. */
+  staged?: { onDiscard: () => void; busy: boolean } | null;
 }) {
   const { pending } = useFormStatus();
   // Which button was pressed, so only that one spins. It used to be inferred
@@ -71,6 +78,20 @@ export function ActionBar({
     : isArchived
       ? "Archived"
       : "Draft";
+  // Deliberately understated: autosave is background work, and a loud status
+  // beside the buttons would read as something needing attention. Only a
+  // failure raises its voice, because that one does.
+  const autosaveNote =
+    autosave?.status === "saving"
+      ? "Saving…"
+      : autosave?.status === "dirty"
+        ? "Unsaved changes"
+        : autosave?.status === "saved"
+          ? autosave.staged
+            ? "Saved — not live yet"
+            : "Saved"
+          : null;
+
   return (
     <Card className="sticky top-20 z-30 mb-6 flex-row items-center justify-between">
       <div className="flex items-center gap-3">
@@ -102,9 +123,41 @@ export function ActionBar({
         >
           {chipLabel}
         </Chip>
+        {autosaveNote && (
+          <span
+            className="hidden text-xs text-muted sm:inline"
+            // Spoken only when it settles, not on every keystroke.
+            aria-live="polite"
+          >
+            {autosaveNote}
+          </span>
+        )}
+        {autosave?.status === "error" && (
+          <span className="text-xs font-medium text-danger" role="alert">
+            {autosave.message}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
+        {/* A live post holding edits nobody has seen.
+            There is no "make these live" button here on purpose: Update
+            already does that, and does it properly. This acts only on the
+            staged patch — it would have published the subset autosave
+            tracks, so an author who had also changed the cover or the tags
+            would have shipped the body and silently left those behind. */}
+        {staged && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onPress={staged.onDiscard}
+            isDisabled={staged.busy || pending}
+            isPending={staged.busy}
+          >
+            Discard changes
+          </Button>
+        )}
         {liveHref && (
           <AppLink
             href={liveHref}
