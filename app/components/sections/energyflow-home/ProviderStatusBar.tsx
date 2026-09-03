@@ -54,7 +54,7 @@ function ProviderRow({
       };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
       <div
         className={`flex size-9 shrink-0 items-center justify-center rounded-full ${tone.soft} ${tone.text}`}
       >
@@ -65,25 +65,31 @@ function ProviderRow({
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-foreground">{title}</div>
+        {/* Connected chip sits next to the title so the pair reads left-to-
+            right as "Sunsynk · connected", instead of the earlier layout
+            where the chip floated across the row with a large gap in
+            between. Wraps to a second line only on very narrow widths. */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-semibold text-foreground">{title}</span>
+          {connected && (
+            <Chip color="success" variant="soft" size="sm">
+              <CircleCheckFill className="mr-1 inline size-3 align-middle" />
+              Connected
+            </Chip>
+          )}
+        </div>
         <div className="truncate text-xs text-muted">{subtitle}</div>
       </div>
       {connected ? (
-        <div className="flex items-center gap-2">
-          <Chip color="success" variant="soft" size="sm">
-            <CircleCheckFill className="mr-1 inline size-3 align-middle" />
-            Connected
-          </Chip>
-          {/* Post-connect actions: disconnect (both providers) and switch
-              inverter (SunSync only). The "Manage" label is the same on both
-              providers so the row layout stays uniform; the dialog itself
-              adapts to what that provider supports. */}
-          <ManageModal>
-            <Button size="sm" variant="tertiary">
-              Manage
-            </Button>
-          </ManageModal>
-        </div>
+        // Post-connect actions: disconnect (both providers) and switch
+        // inverter (SunSync only). "Manage" is the same word on both
+        // providers so the row layout stays uniform; the dialog itself
+        // adapts to what that provider supports.
+        <ManageModal>
+          <Button size="sm" variant="tertiary">
+            Manage
+          </Button>
+        </ManageModal>
       ) : (
         <ConnectModal>
           <Button size="sm" variant="primary">
@@ -158,8 +164,13 @@ export function ProviderStatusBar({
     </ManageOctopusModal>
   );
 
+  // Each provider now sits in its OWN bordered card side-by-side instead of
+  // sharing one container. Reads as two independent status tiles — the
+  // Sunsynk block and the Octopus block are unrelated concerns (one drives
+  // the flow diagram, the other drives cost), and a shared border was
+  // grouping them by chance of layout rather than by meaning.
   return (
-    <div className="grid gap-3 rounded-xl border border-border bg-surface p-4 md:grid-cols-2">
+    <div className="grid gap-3 md:grid-cols-2">
       <ProviderRow
         accent="solar"
         title="Sunsynk"

@@ -66,6 +66,8 @@ export interface EnergyFlowStyle {
   readonly nodeSize: Size;
   /** Size of the home node. Defaults to `nodeSize`. */
   readonly homeNodeSize?: Size;
+  /** Size of the battery node. Defaults to `nodeSize`. */
+  readonly batteryNodeSize?: Size;
   /** Horizontal gap between nodes in the same row. */
   readonly nodeSpacing: number;
   /** Vertical gap between rows. */
@@ -142,6 +144,10 @@ export const DEFAULT_STYLE: EnergyFlowStyle = {
 /** The effective home node size. */
 export const effectiveHomeNodeSize = (style: EnergyFlowStyle): Size =>
   style.homeNodeSize ?? style.nodeSize;
+
+/** The effective battery node size. */
+export const effectiveBatteryNodeSize = (style: EnergyFlowStyle): Size =>
+  style.batteryNodeSize ?? style.nodeSize;
 
 /** Merges partial overrides over the defaults, as Flutter's `copyWith` does. */
 export function resolveStyle(overrides?: Partial<EnergyFlowStyle>): EnergyFlowStyle {

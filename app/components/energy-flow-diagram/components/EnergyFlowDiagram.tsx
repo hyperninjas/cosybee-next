@@ -232,21 +232,30 @@ export function EnergyFlowDiagram({
   // ── Grid ──────────────────────────────────────────────────────────────────
   if (layoutHas(layout, NODE_IDS.grid)) {
     const outage = input.isPowerOutage ?? false;
+    // Grid splits its two readings around the icon: export ABOVE, import
+    // BELOW. Stacking them both under the icon (the previous layout) made
+    // the node feel unbalanced, with a heavy bottom half and empty top.
+    // The reverse arrow for export is a *fallback* presentation — once
+    // the export has a node of its own, we suppress it here so the same
+    // energy isn't shown in two places.
+    const showExportInline =
+      !outage &&
+      input.gridExport !== undefined &&
+      !layoutHas(layout, NODE_IDS.export);
+
+    const linesAbove: EnergyNodeLine[] = showExportInline
+      ? [
+          {
+            icon: <ArrowBackIcon size={arrowSize} color={style.palette.gridExport} />,
+            text: format(solution.gridExport),
+            color: style.palette.gridExport,
+          },
+        ]
+      : [];
+
     const lines: EnergyNodeLine[] = outage
       ? [{ text: grid.label ?? "Outage", color: style.palette.gridImport }]
       : [
-          // The reverse arrow is the *fallback* presentation of export. Once
-          // export has a node of its own, repeating it here would give the same
-          // energy two places to be.
-          ...(input.gridExport !== undefined && !layoutHas(layout, NODE_IDS.export)
-            ? [
-                {
-                  icon: <ArrowBackIcon size={arrowSize} color={style.palette.gridExport} />,
-                  text: format(solution.gridExport),
-                  color: style.palette.gridExport,
-                },
-              ]
-            : []),
           {
             icon: <ArrowForwardIcon size={arrowSize} color={style.palette.gridImport} />,
             text: format(solution.gridImport),
@@ -273,6 +282,7 @@ export function EnergyFlowDiagram({
         {...(grid.secondary !== undefined ? { secondary: grid.secondary } : {})}
         {...(grid.onTap !== undefined ? { onTap: grid.onTap } : {})}
         ariaLabel={grid.label ?? "Grid"}
+        linesAbove={linesAbove}
         lines={lines}
       />,
       grid.label ?? "Grid",
@@ -333,6 +343,57 @@ export function EnergyFlowDiagram({
     const soc = input.batteryStateOfCharge;
     const BatteryIcon = batteryIconFor(soc);
     const r = rectOf(layout, NODE_IDS.battery)!;
+    // 🔴 `Number.isFinite`, not just `!== undefined`. An unusable state of
+    // charge rendered the literal string "NaN%" on the battery node —
+    // the one number on this diagram a customer reads as a fact about
+    // their hardware. Absent falls back to just the icon.
+    const socText = Number.isFinite(soc) ? `${Math.round(soc!)}%` : null;
+    // Battery icon gets its own overlay for the SOC — the two same-weight
+    // charge/discharge readings then sit ABOVE and BELOW the icon (like
+    // the Grid node's export/import), so the node reads top-to-bottom as
+    // discharge → battery+SOC → charge instead of stacking three lines
+    // under a tiny icon.
+    const batteryIconSize = Math.max(iconProps.size, 37);
+    const defaultBatteryIcon = (
+      <div
+        style={{
+          position: "relative",
+          width: batteryIconSize,
+          height: batteryIconSize,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <BatteryIcon size={batteryIconSize} color={style.palette.batteryIn} />
+        {socText !== null && (
+          <span
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 6,
+              fontWeight: 600,
+              lineHeight: 1,
+              // Pinned to the SAME hex the palette's `batteryIn` uses
+              // (mobile's #6366F1 indigo) so the SOC digit reads as part
+              // of the charge-in family regardless of any per-theme
+              // palette overrides.
+              color: "#6366F1",
+              // White stroke keeps the digits legible over the coloured
+              // fill of any battery-bar variant.
+              textShadow:
+                "0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff",
+              pointerEvents: "none",
+            }}
+          >
+            {socText}
+          </span>
+        )}
+      </div>
+    );
     place(
       NODE_IDS.battery,
       <EnergyNodeView
@@ -340,24 +401,18 @@ export function EnergyFlowDiagram({
         width={r.width}
         height={r.height}
         borderColor={style.palette.batteryIn}
-        icon={battery.icon ?? <BatteryIcon {...iconProps} color={style.palette.batteryIn} />}
-        {...(battery.secondary !== undefined
-          ? { secondary: battery.secondary }
-          : // 🔴 `Number.isFinite`, not just `!== undefined`. An unusable state of
-            // charge rendered the literal string "NaN%" on the battery node —
-            // the one number on this diagram a customer reads as a fact about
-            // their hardware. Absent is the honest answer.
-            Number.isFinite(soc)
-            ? { secondary: `${Math.round(soc!)}%` }
-            : {})}
+        icon={battery.icon ?? defaultBatteryIcon}
+        {...(battery.secondary !== undefined ? { secondary: battery.secondary } : {})}
         {...(battery.onTap !== undefined ? { onTap: battery.onTap } : {})}
         ariaLabel={battery.label ?? "Battery"}
-        lines={[
+        linesAbove={[
           {
             icon: <ArrowUpwardIcon size={arrowSize} color={style.palette.batteryOut} />,
             text: directed(format(solution.batteryDischarge), battery.outLabel),
             color: style.palette.batteryOut,
           },
+        ]}
+        lines={[
           {
             icon: <ArrowDownwardIcon size={arrowSize} color={style.palette.batteryIn} />,
             text: directed(format(solution.batteryCharge), battery.inLabel),

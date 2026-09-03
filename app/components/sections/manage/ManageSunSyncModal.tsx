@@ -3,8 +3,8 @@
 import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
 import {
+  Accordion,
   Button,
-  Checkbox,
   Chip,
   Modal,
   Radio,
@@ -53,7 +53,12 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
   // Switch-inverter picker state
   const [plants, setPlants] = useState<LinkedPlant[] | null>(null);
   const [selectedInverter, setSelectedInverter] = useState<string | null>(null); // "plantId::serial"
-  const [confirmDiscard, setConfirmDiscard] = useState(false);
+
+  // Plant ID that holds the currently-linked inverter — used to auto-expand
+  // the matching accordion item so the user sees which node they're moving
+  // away from without clicking through every group.
+  const currentPlantId =
+    plants?.find((p) => p.inverters.some((i) => i.isCurrent))?.id ?? null;
 
   // Load the plant list when the user enters the switch view. Runs client-
   // side (Server Action call) so the dialog can open instantly on the menu
@@ -83,7 +88,6 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
     setView("menu");
     setError(null);
     setSelectedInverter(null);
-    setConfirmDiscard(false);
     // Keep `plants` cached — reopening the modal doesn't need a refetch.
   }
 
@@ -103,10 +107,6 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
     setError(null);
     if (!selectedInverter) {
       setError("Pick an inverter first.");
-      return;
-    }
-    if (!confirmDiscard) {
-      setError("Confirm that the previous inverter's history will be discarded.");
       return;
     }
     const [plantId, inverterSerial] = selectedInverter.split("::");
@@ -129,7 +129,7 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
     <Modal>
       <Modal.Trigger>{children}</Modal.Trigger>
       <Modal.Backdrop>
-        <Modal.Container size="lg" placement="center">
+        <Modal.Container size="lg" placement="center" scroll="inside">
           <Modal.Dialog>
             <Modal.Header className="flex-row items-start gap-3">
               <Modal.Icon className="bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
@@ -203,48 +203,97 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
                     </p>
                   )}
                   {plants !== null && plants.length > 0 && (
+                    // One RadioGroup wraps the whole Accordion so radios in
+                    // any expanded panel share the same selection state (a
+                    // pick in one plant deselects a pick in another). The
+                    // plant containing the currently-linked inverter is
+                    // expanded by default so the user immediately sees
+                    // which node they're moving away from.
+                    //
+                    // Explicit max-height + overflow-y-auto around the
+                    // Accordion because HeroUI Modal's `scroll="inside"`
+                    // only sets `overflow-y-auto` on Modal.Body — it doesn't
+                    // give Body a bounded height, so the modal grew past
+                    // the viewport on accounts with many plants (footer
+                    // pushed off-screen, no scrollbar). A hard max-height
+                    // here scrolls the Accordion inline while the footer
+                    // stays visible below.
                     <RadioGroup
                       aria-label="Inverter"
                       value={selectedInverter ?? ""}
                       onChange={setSelectedInverter}
-                      className="flex flex-col gap-4"
+                      className="max-h-[min(60vh,32rem)] overflow-y-auto overscroll-contain rounded-md border border-separator"
                     >
-                      {plants.map((plant) => (
-                        <fieldset
-                          key={plant.id}
-                          className="rounded-lg border border-border bg-surface-secondary p-4"
-                        >
-                          <legend className="px-2 text-sm font-semibold text-foreground">
-                            {plant.label}
-                          </legend>
-                          <div className="mt-2 flex flex-col gap-2">
-                            {plant.inverters.map((inv) => (
-                              <Radio
-                                key={`${plant.id}::${inv.serial}`}
-                                value={`${plant.id}::${inv.serial}`}
-                              >
-                                <span className="mr-2">{inv.label}</span>
-                                {inv.isCurrent && (
-                                  <Chip color="success" variant="soft" size="sm">
-                                    Currently linked
-                                  </Chip>
-                                )}
-                              </Radio>
-                            ))}
-                          </div>
-                        </fieldset>
-                      ))}
+                      <Accordion
+                        variant="default"
+                        defaultExpandedKeys={
+                          currentPlantId ? [currentPlantId] : []
+                        }
+                      >
+                        {plants.map((plant) => {
+                          const currentCount = plant.inverters.filter(
+                            (i) => i.isCurrent,
+                          ).length;
+                          return (
+                            <Accordion.Item key={plant.id} id={plant.id}>
+                              <Accordion.Heading>
+                                <Accordion.Trigger className="flex w-full items-center justify-between gap-3 py-3 text-left">
+                                  <span className="flex flex-wrap items-center gap-2">
+                                    <span className="text-sm font-semibold text-foreground">
+                                      {plant.label}
+                                    </span>
+                                    <span className="text-xs text-muted">
+                                      {plant.inverters.length}{" "}
+                                      {plant.inverters.length === 1
+                                        ? "inverter"
+                                        : "inverters"}
+                                    </span>
+                                    {currentCount > 0 && (
+                                      <Chip
+                                        color="success"
+                                        variant="soft"
+                                        size="sm"
+                                      >
+                                        Current
+                                      </Chip>
+                                    )}
+                                  </span>
+                                  <Accordion.Indicator />
+                                </Accordion.Trigger>
+                              </Accordion.Heading>
+                              <Accordion.Panel>
+                                <Accordion.Body className="flex flex-col gap-1 pb-3">
+                                  {plant.inverters.map((inv) => (
+                                    <InverterPickerRow
+                                      key={`${plant.id}::${inv.serial}`}
+                                      value={`${plant.id}::${inv.serial}`}
+                                      label={inv.label}
+                                      isCurrent={inv.isCurrent}
+                                    />
+                                  ))}
+                                </Accordion.Body>
+                              </Accordion.Panel>
+                            </Accordion.Item>
+                          );
+                        })}
+                      </Accordion>
                     </RadioGroup>
                   )}
-                  <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
-                    <Checkbox
-                      isSelected={confirmDiscard}
-                      onChange={setConfirmDiscard}
-                    >
-                      I understand switching inverters discards this home's stored
-                      readings, daily totals, and intraday ledger for the currently
-                      linked inverter.
-                    </Checkbox>
+                  {/* Warning as pure informational text — clicking the
+                      "Switch inverter" button IS the confirmation. The
+                      earlier "check this box, then click the button"
+                      pattern gated one decision behind two steps and
+                      surfaced a redundant "please confirm" error when
+                      users clicked the button without checking. The
+                      backend still requires `confirmDiscardHistory: true`;
+                      that's now sent unconditionally on submit. */}
+                  <div className="flex items-start gap-2 rounded-md bg-warning/10 px-3 py-2.5 text-xs text-warning-foreground">
+                    <span aria-hidden="true">⚠️</span>
+                    <span>
+                      Switching inverters discards this home&apos;s stored
+                      readings, daily totals and intraday ledger for the
+                      currently linked inverter.
+                    </span>
                   </div>
                 </div>
               )}
@@ -280,6 +329,91 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
         </Modal.Container>
       </Modal.Backdrop>
     </Modal>
+  );
+}
+
+/**
+ * One inverter row in the switch picker. Mirrors the `PickerRow` composition
+ * in `ConnectSunSyncModal` — Radio.Control renders the actual radio dial and
+ * the whole card is the hit target, so a tap anywhere on the row selects it.
+ * Without this the bare `<Radio>{children}</Radio>` renders nothing visible
+ * to click.
+ */
+/**
+ * Splits the backend's `<serial> (online|offline)` label into its parts so
+ * the row can style the status as a small coloured dot next to the serial
+ * instead of raw text-in-parens. Anything that doesn't match the pattern
+ * falls through unchanged — the row still displays the raw label.
+ */
+function parseInverterLabel(label: string): {
+  serial: string;
+  status: string | null;
+  isOnline: boolean;
+} {
+  const match = /^(.+?)\s*\((online|offline)\)\s*$/i.exec(label);
+  if (!match) return { serial: label, status: null, isOnline: false };
+  const status = match[2]!.toLowerCase();
+  return { serial: match[1]!, status, isOnline: status === "online" };
+}
+
+function InverterPickerRow({
+  value,
+  label,
+  isCurrent,
+}: {
+  value: string;
+  /** Already formatted as `<serial> (online|offline)` — matches onboarding. */
+  label: string;
+  isCurrent: boolean;
+}) {
+  const { serial, status, isOnline } = parseInverterLabel(label);
+  // Borderless row: the row itself is `flex items-center gap-3` (matching
+  // HeroUI's `.radio` default so the dial + content sit tight next to
+  // each other, not with a stretched flex-1 gap). Serial + status pill
+  // group hugs the left; a `Currently linked` chip when present pushes
+  // to the right via `ml-auto`.
+  return (
+    <Radio
+      value={value}
+      className="cursor-pointer rounded-md px-3 py-2 text-sm transition-colors hover:bg-surface-secondary data-[selected=true]:bg-[color:var(--efh-solar)]/10"
+    >
+      <Radio.Control>
+        <Radio.Indicator />
+      </Radio.Control>
+      {/* HeroUI's `.radio__content` defaults to `flex flex-col gap-0`, so
+          a className overriding to horizontal via just `flex items-center`
+          gets tailwind-merged AWAY (no explicit `flex-row` to displace
+          `flex-col`). Wrapping in an inner div sidesteps that entirely
+          and pins the layout — Radio.Content just holds one full-width
+          child, and the inner div owns the row layout. */}
+      <Radio.Content className="w-full min-w-0 flex-1">
+        <div className="flex w-full items-center gap-3">
+          <span className="truncate font-mono text-[13px] text-foreground">
+            {serial}
+          </span>
+          {status && (
+            <span
+              className={`inline-flex shrink-0 items-center gap-1 text-[11px] ${
+                isOnline ? "text-success" : "text-muted"
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`inline-block size-1.5 rounded-full ${
+                  isOnline ? "bg-success" : "bg-muted-foreground"
+                }`}
+              />
+              {status}
+            </span>
+          )}
+          {isCurrent && (
+            <Chip color="success" variant="soft" size="sm" className="ml-auto shrink-0">
+              Currently linked
+            </Chip>
+          )}
+        </div>
+      </Radio.Content>
+    </Radio>
   );
 }
 

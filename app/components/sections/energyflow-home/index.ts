@@ -15,6 +15,7 @@ export { StatStrip } from "./StatStrip";
 export { PowerHistoryChart } from "./PowerHistoryChart";
 export { DashboardShell } from "./DashboardShell";
 export { SyncingDataBanner } from "./SyncingDataBanner";
+export { OctopusBackfillWatcher } from "./OctopusBackfillWatcher";
 export { getDashboardData } from "./data";
 export type {
   BatteryState,

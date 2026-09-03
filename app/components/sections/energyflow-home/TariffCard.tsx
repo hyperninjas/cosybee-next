@@ -17,10 +17,46 @@ function formatPence(pence: number): string {
   return `${pence.toFixed(2)}p`;
 }
 
+/**
+ * Friendly product name for an Octopus import tariff code, e.g.
+ * `E-1R-IOG-SMB-FIX-12M-26-06-13-G` → `Intelligent Octopus Go`.
+ *
+ * Octopus tariff codes are `{fuel}-{rateCount}R-{productSlug}-...`, and
+ * the readable name is entirely determined by the product slug. Anything
+ * we don't recognise falls back to the raw code so the card never lies
+ * about which tariff is live.
+ */
+function friendlyTariffName(code: string): string | null {
+  const parts = code.trim().toUpperCase().split("-");
+  if (parts.length < 3) return null;
+  const [, rateCount, slug] = parts as [string, string, string];
+  const nameBySlug: Record<string, string> = {
+    IOG: "Intelligent Octopus Go",
+    GO: "Octopus Go",
+    AGILE: "Octopus Agile",
+    COSY: "Cosy Octopus",
+    TRACKER: "Octopus Tracker",
+    FLUX: "Octopus Flux",
+    VAR: "Octopus Flexible",
+    FIX: "Octopus Fixed",
+    OUTGOING: "Outgoing Octopus",
+    OE: "Octopus Energy",
+  };
+  const base = nameBySlug[slug];
+  if (!base) return null;
+  return rateCount === "2R" ? `${base} (Economy 7)` : base;
+}
+
 export function TariffCard({ tariff }: { tariff: TariffInfo }) {
   // A tariff of zero pence is either a fixed contract or a temporarily
   // free window — either way it's celebration-worthy on this dashboard.
   const isFree = tariff.importPence <= 0;
+  const friendly = friendlyTariffName(tariff.name);
+  const displayName = friendly ?? tariff.name;
+  // Only show the raw product code as a subtitle when we managed to derive
+  // a human name from it — otherwise the raw code IS the title and
+  // repeating it would just add clutter.
+  const subtitle = friendly ? tariff.name : null;
 
   return (
     <Card variant="default" className="h-full">
@@ -39,9 +75,17 @@ export function TariffCard({ tariff }: { tariff: TariffInfo }) {
           </Chip>
         </div>
 
-        <Card.Title className="mt-3 text-2xl leading-tight">
-          {tariff.name}
+        <Card.Title className="mt-3 text-2xl leading-tight truncate">
+          {displayName}
         </Card.Title>
+        {subtitle && (
+          <div
+            className="mt-0.5 truncate text-[11px] font-mono text-muted"
+            title={subtitle}
+          >
+            {subtitle}
+          </div>
+        )}
         <div className="mt-1 flex items-baseline gap-1.5">
           <span className="text-xl font-semibold text-success tabular-nums">
             {formatPence(tariff.importPence)}

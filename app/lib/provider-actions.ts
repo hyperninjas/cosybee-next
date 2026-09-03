@@ -102,6 +102,13 @@ export async function disconnectOctopus(): Promise<ProviderActionResult> {
 export interface LinkedInverter {
   serial: string;
   label: string;
+  /**
+   * Sunsynk's own reachability flag for the inverter. Surfaced so the picker
+   * can annotate offline units the same way the initial connect flow does
+   * (`<serial> (online|offline)`), so the customer isn't asked to pick a
+   * unit that upstream reports as unreachable without any warning.
+   */
+  online: boolean;
   /** True when this is the inverter the dashboard currently reads. */
   isCurrent: boolean;
 }
@@ -142,30 +149,47 @@ export async function listSunSyncPlants(): Promise<LinkedPlantsResult> {
       const message = err.ok ? "Couldn't fetch your Sunsynk plants." : err.error;
       return { ok: false, error: message };
     }
-    // The backend envelope. Defensive parsing — every field defaulted so a
-    // minor upstream tweak (e.g. renaming `inverterSerial` to `serial`) doesn't
-    // blow up the picker; the strict source of truth is the backend's own
-    // response schema in `sunsynk.controller.ts`.
+    // Backend envelope (see `sunsynkLinkedPlantsResponseSchema` in
+    // eb-auth/src/modules/sunsynk/sunsynk.response-schemas.ts):
+    //   { count, plants: [{ plantId, name, inverters: [{ serial, status, online }] }],
+    //     current: { plantId, inverterSerial } }
+    // "Currently linked" isn't a per-inverter flag upstream — it's derived by
+    // matching the top-level `current` pair against each (plantId, serial).
     const body = (await res.json()) as {
       plants?: Array<{
-        id?: string;
-        label?: string;
-        inverters?: Array<{
-          serial?: string;
-          label?: string;
-          isCurrent?: boolean;
-        }>;
+        plantId?: string;
+        name?: string | null;
+        inverters?: Array<{ serial?: string; online?: boolean }>;
       }>;
+      current?: { plantId?: string | null; inverterSerial?: string | null };
     };
-    const plants: LinkedPlant[] = (body.plants ?? []).map((p) => ({
-      id: String(p.id ?? ""),
-      label: String(p.label ?? p.id ?? "Unnamed site"),
-      inverters: (p.inverters ?? []).map((inv) => ({
-        serial: String(inv.serial ?? ""),
-        label: String(inv.label ?? inv.serial ?? "Inverter"),
-        isCurrent: inv.isCurrent === true,
-      })),
-    }));
+    const currentPlantId = body.current?.plantId ?? null;
+    const currentInverterSerial = body.current?.inverterSerial ?? null;
+    const plants: LinkedPlant[] = (body.plants ?? []).map((p) => {
+      const plantId = String(p.plantId ?? "");
+      const trimmedName = p.name?.trim();
+      return {
+        id: plantId,
+        label:
+          trimmedName && trimmedName.length > 0
+            ? trimmedName
+            : `Sunsynk plant ${plantId}`,
+        inverters: (p.inverters ?? []).map((inv) => {
+          const serial = String(inv.serial ?? "");
+          const online = inv.online === true;
+          return {
+            serial,
+            // Match the onboarding picker's format so switching feels like the
+            // same list the user picked from at connect time
+            // (see sunsynk.errors.ts → SunsynkMultipleInvertersError details).
+            label: `${serial} (${online ? "online" : "offline"})`,
+            online,
+            isCurrent:
+              currentPlantId === plantId && currentInverterSerial === serial,
+          };
+        }),
+      };
+    });
     return { ok: true, plants };
   } catch {
     return { ok: false, error: "Couldn't reach Sunsynk. Try again in a moment." };

@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
-import { AppLink as Link } from "@/app/components/ui/AppLink";
 import { requireUser } from "@/app/lib/server-session";
 
 /**
  * Onboarding shell.
  *
- * The funnel lives in its own route group so it can render WITHOUT the
- * site navbar / footer (same pattern as `(auth)/layout.tsx`) — the user
- * has one job on each step and every extra link is a chance to bail out
- * of the funnel. Progress-bar header is rendered inside each page
- * (`OnboardingProgress`) so the step count is co-located with the step
- * markup, rather than trying to infer the current step from the URL in
- * this layout.
+ * The site Navbar is rendered by the root layout — this shell just wraps
+ * the funnel content in a centred column so the step markup lines up
+ * with the app's usual page width. Progress-bar header is rendered
+ * inside each page (`OnboardingProgress`) so the step count is
+ * co-located with the step markup, rather than inferred from the URL
+ * here.
  *
- * Auth-gated: an unauthenticated visitor to `/onboarding/*` is bounced to
- * `/login` with a redirect back here.
+ * ### Access
+ *
+ *   • Not signed in → `/login?redirect=/onboarding/address`.
+ *   • Signed in → allowed. Individual pages (address, building-profile)
+ *     add the "already has property → send to dashboard" gate because
+ *     steps 3 (sunsync) and 4 (octopus) run AFTER the property is
+ *     created and would otherwise be blocked by a blanket layout gate.
  */
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -31,18 +34,7 @@ export default async function OnboardingLayout({
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4">
-          <Link
-            href="/"
-            className="text-xl font-extrabold tracking-tight text-foreground"
-          >
-            Energie<span className="text-accent">Bee</span>
-          </Link>
-          <span className="text-xs text-muted">Setting up your home</span>
-        </div>
-      </header>
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8">
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-10">
         {children}
       </div>
     </main>

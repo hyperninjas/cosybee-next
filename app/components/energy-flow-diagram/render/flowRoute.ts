@@ -60,9 +60,16 @@ const ANCHORS = {
   solarExitToGrid: 135,
   solarExitToBattery: 90,
 
-  homeEntryFromSolar: 215,
+  // Home entries at 225° / 180° / 135° — a symmetric ±45° fan around the
+  // horizontal Grid↔Home line, matching the ±45° fan already used on the
+  // Grid node (315° / 0° / 45°). This gives every diagonal edge into Home
+  // a clean 45°/45° mirror at its two anchors — so Solar↔Home and
+  // Battery↔Home draw with the same curve character as Solar↔Grid and
+  // Battery↔Grid. The previous 215° / 145° pair fanned inward by 10°,
+  // which flattened both Home-side edges relative to their Grid twins.
+  homeEntryFromSolar: 225,
   homeEntryFromGrid: 180,
-  homeEntryFromBattery: 145,
+  homeEntryFromBattery: 135,
   homeEntryFromIndividual: 270,
 
   gridEntryFromSolar: 315,

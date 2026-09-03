@@ -1,7 +1,11 @@
 import type { EnergyNodeId, Rect } from "../model/types";
 import { NODE_IDS, bottomOf, centerOf, nodeId, nodeKey, rect, translate } from "../model/types";
 import { clampFinite, nonNegative, positive } from "../model/finite";
-import { effectiveHomeNodeSize, type EnergyFlowStyle } from "./style";
+import {
+  effectiveBatteryNodeSize,
+  effectiveHomeNodeSize,
+  type EnergyFlowStyle,
+} from "./style";
 
 /**
  * Computes where each node sits for a given width.
@@ -100,6 +104,9 @@ export function computeLayout(args: ComputeLayoutArgs): EnergyFlowLayout {
   const home = effectiveHomeNodeSize(style);
   const baseHomeW = positive(home.width, baseNodeW);
   const baseHomeH = positive(home.height, baseNodeH);
+  const batteryBase = effectiveBatteryNodeSize(style);
+  const baseBatteryW = positive(batteryBase.width, baseNodeW);
+  const baseBatteryH = positive(batteryBase.height, baseNodeH);
   const baseGap = nonNegative(style.nodeSpacing, 24);
 
   // ── How much width does the widest row actually need? ─────────────────────
@@ -129,6 +136,8 @@ export function computeLayout(args: ComputeLayoutArgs): EnergyFlowLayout {
   const nodeH = baseNodeH * scale;
   const homeW = baseHomeW * scale;
   const homeH = baseHomeH * scale;
+  const batteryW = baseBatteryW * scale;
+  const batteryH = baseBatteryH * scale;
   const gap = baseGap * scale;
   const rowGap = nonNegative(style.rowSpacing, 42) * scale;
 
@@ -136,6 +145,10 @@ export function computeLayout(args: ComputeLayoutArgs): EnergyFlowLayout {
   const left = 0;
   const right = Math.max(0, boxWidth - homeW);
   const centre = Math.max(0, (boxWidth - nodeW) / 2);
+  // Battery may be sized independently of `nodeW`, so its centred x anchor
+  // has to be computed against its own width to stay on the vertical axis
+  // that Solar sits on.
+  const batteryCentre = Math.max(0, (boxWidth - batteryW) / 2);
 
   const middleRowHeight = Math.max(nodeH, homeH);
 
@@ -229,24 +242,40 @@ export function computeLayout(args: ComputeLayoutArgs): EnergyFlowLayout {
     // Export takes the left column so it sits directly under the grid node; the
     // battery keeps the centre it has always had, so adding an export node
     // never moves the battery.
-    const batteryClearsExport = !hasExport || !hasBattery || centre >= left + nodeW + gap;
+    const bottomRowHeight = Math.max(nodeH, batteryH);
+    const batteryClearsExport =
+      !hasExport || !hasBattery || batteryCentre >= left + nodeW + gap;
     if (batteryClearsExport) {
-      if (hasExport) rects.set(nodeKey(NODE_IDS.export), rect(left, y, nodeW, nodeH));
-      if (hasBattery) rects.set(nodeKey(NODE_IDS.battery), rect(centre, y, nodeW, nodeH));
+      if (hasExport)
+        rects.set(
+          nodeKey(NODE_IDS.export),
+          rect(left, y + (bottomRowHeight - nodeH) / 2, nodeW, nodeH),
+        );
+      if (hasBattery)
+        rects.set(
+          nodeKey(NODE_IDS.battery),
+          rect(batteryCentre, y + (bottomRowHeight - batteryH) / 2, batteryW, batteryH),
+        );
     } else {
       // Same fallback the top row uses: when the preferred columns would
       // overlap, spread the row evenly rather than letting nodes collide.
-      const total = bottomCount * nodeW + (bottomCount - 1) * gap;
+      const total = nodeW + gap + batteryW;
       let x = Math.max(0, (boxWidth - total) / 2);
-      rects.set(nodeKey(NODE_IDS.export), rect(x, y, nodeW, nodeH));
+      rects.set(
+        nodeKey(NODE_IDS.export),
+        rect(x, y + (bottomRowHeight - nodeH) / 2, nodeW, nodeH),
+      );
       x += nodeW + gap;
-      rects.set(nodeKey(NODE_IDS.battery), rect(x, y, nodeW, nodeH));
+      rects.set(
+        nodeKey(NODE_IDS.battery),
+        rect(x, y + (bottomRowHeight - batteryH) / 2, batteryW, batteryH),
+      );
     }
     for (const id of [NODE_IDS.export, NODE_IDS.battery]) {
       const r = rects.get(nodeKey(id));
       if (r) labels.set(nodeKey(id), labelBelow(r));
     }
-    y += nodeH + labelHeight;
+    y += bottomRowHeight + labelHeight;
   }
 
   // Shift everything if the diagram is narrower than the space available.

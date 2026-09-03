@@ -6,6 +6,8 @@ import {
   DEFAULT_FLOW_RATE,
   EnergyFlowDiagram as BaseEnergyFlowDiagram,
   fromSigned,
+  GridIcon,
+  HomeIcon,
   wattsFormat,
   type EnergyFlowInput,
   type EnergyFlowPalette,
@@ -115,28 +117,25 @@ function toEnergyFlowInput(flow: EnergyFlowSnapshot): EnergyFlowInput {
 }
 
 /**
- * Semantic tokens the site already defines under `.efh-scope` in
- * globals.css. Import / export share the grid hue (we only publish one
- * "grid" token), and the battery in/out share the battery hue for the
- * same reason. When a future palette adds distinct export / discharge
- * tokens, wire them here — nothing else needs to change.
+ * Fixed palette matching the mobile EnergieBee energy-flow card
+ * (energiebeemobile → phase1/presentation/widgets/solar/energy_flow_card.dart).
+ * Each role gets a distinct hue so the direction of energy is legible from
+ * colour alone, not just from the arrow direction. Web and mobile now
+ * render identical colours for the same flow.
  *
- * 🔴 Solar stays on the theme token — an earlier pass pinned it to
- * `#ff9800` for the solar node, but the same entry drives the SOLAR
- * SEGMENT on the home node's consumption ring (see `EnergyNodeView.tsx`
- * → `push(ringShares.solar, style.palette.solar)`), so a saturated
- * amber wrapped the entire home node whenever solar was supplying the
- * house. Palette must stay a single per-source colour until the library
- * grows a separate "solar-ring" key.
+ * Grid export uses the light-mode teal from mobile's shared chart
+ * palette (`chartPalette.export` = #00695C). Mobile swaps it to #3FCBB4
+ * in dark mode; if this dashboard grows a dark theme, wire the same
+ * swap through globals.css rather than hard-coding two hexes here.
  */
 const PALETTE: EnergyFlowPalette = {
-  gridImport: "var(--efh-grid)",
-  gridExport: "var(--efh-grid)",
-  solar: "var(--efh-solar)",
-  batteryIn: "var(--efh-battery)",
-  batteryOut: "var(--efh-battery)",
-  lowCarbon: "var(--success)",
-  individuals: ["var(--efh-home)", "var(--warning)"],
+  gridImport: "#EF4444", // red — importing costs money
+  gridExport: "#00695C", // teal — exporting earns
+  solar: "#F59E0B", // amber — generation
+  batteryIn: "#6366F1", // indigo — charging
+  batteryOut: "#A78BFA", // light violet — discharging
+  lowCarbon: "#059669", // green — clean supply
+  individuals: ["#D0CC5B", "#964CB5"],
 };
 
 export interface EnergyFlowDiagramProps {
@@ -208,6 +207,23 @@ export function EnergyFlowDiagram({ flow, now, freshness = "fresh" }: EnergyFlow
                   node is ever made wider. */}
               <BaseEnergyFlowDiagram
                 input={input}
+                // Library defaults use `palette.gridImport` for BOTH the Grid
+                // AND Home icons. That was fine when gridImport was blue,
+                // but the mobile palette makes it a saturated red — which
+                // then rendered the Home hexagon's glyph as an "alert red",
+                // reading as an error where there's actually no issue.
+                //   • Grid icon → foreground text, matching every other
+                //     hexagon's icon tone. The red is still carried by the
+                //     grid → home edge, which is where "import" belongs.
+                //   • Home icon → the same rose that drives Home's ring
+                //     border, so the icon reads as part of the "consumption"
+                //     channel instead of as an alarm.
+                grid={{
+                  icon: <GridIcon size={27} color="var(--foreground)" />,
+                }}
+                home={{
+                  icon: <HomeIcon size={27} color="var(--efh-home)" />,
+                }}
                 style={{
                   palette: PALETTE,
                   // Matches mobile: raw watts below 1 kW ("260 W"), one decimal
@@ -219,16 +235,41 @@ export function EnergyFlowDiagram({ flow, now, freshness = "fresh" }: EnergyFlow
                   // pinned every dot to the slowest speed once we started
                   // feeding it watts. Mirrors mobile's `FlowRate(50, 5000)`.
                   flowRate: { ...DEFAULT_FLOW_RATE, minExpected: 50, maxExpected: 5000 },
-                  // Node border thickness — client-specified 1.5.
-                  //
-                  // 🔴 The Home node draws a SEGMENTED consumption ring
-                  // instead of a plain border (`!hasRing && borderWidth > 0`
-                  // in EnergyNodeView.tsx), so `borderWidth` alone would
-                  // leave Home on the library-default `ringWidth: 4`.
-                  // Match the two so every node — Home included — reads
-                  // at the same 1.5 stroke.
-                  borderWidth: 1.5,
-                  ringWidth: 1.5,
+                  // Match mobile's `energy_flow_card.dart`, which uses the
+                  // library defaults: 2 for the plain hexagon border, 4 for
+                  // Home's segmented consumption ring. The thicker ring on
+                  // Home reads as a distinct "consumption meter" band
+                  // instead of a hairline that blends into the outline.
+                  borderWidth: 2,
+                  ringWidth: 4,
+                  // Every node at 93×93 (library default is 80×80). Extra
+                  // breathing room across the whole diagram — the Battery in
+                  // particular carries three stacked readings (discharge,
+                  // SOC overlay, charge) and was cramped at the default.
+                  nodeSize: { width: 93, height: 93 },
+                  // +5 over the library default (22) so every glyph reads
+                  // at the same slightly-larger size the nodes now use.
+                  iconSize: 27,
+                  // Values inside each node ("680 W", "→ 6.8 kW", etc.):
+                  // −2 from library default (12→10) so they don't crowd
+                  // the hex outline on the Battery node's three-row stack,
+                  // + semibold + explicit foreground so plain-text lines
+                  // (Solar's "680 W", Home's "260 W") read as prominent
+                  // instead of thin-and-grey. Colored lines still win
+                  // their per-line palette hue via `line.color`.
+                  valueStyle: {
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "var(--foreground)",
+                  },
+                  // Labels under each node ("Solar", "Grid", "Home",
+                  // "Battery"): semibold foreground so the names sit at
+                  // the same visual weight as the values above, instead
+                  // of the library's browser-default light grey.
+                  labelStyle: {
+                    fontWeight: 600,
+                    color: "var(--foreground)",
+                  },
                 }}
               />
               {overhead >= OVERHEAD_MIN_W && (

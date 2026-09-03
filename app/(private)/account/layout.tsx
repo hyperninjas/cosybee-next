@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requireUser } from "@/app/lib/server-session";
+import { requireOnboarded } from "@/app/lib/server-session";
 import { AccountNav } from "./AccountNav";
 import { VerifyEmailBanner } from "@/app/components/account/VerifyEmailBanner";
 
@@ -14,8 +14,10 @@ export default async function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Secure gate for the whole member area (backs up the optimistic proxy check).
-  const { user } = await requireUser("/account");
+  // Secure gate for the whole member area (backs up the optimistic proxy
+  // check). Non-onboarded users are routed to /onboarding/address; admins
+  // are exempt so operators can still reach account tooling.
+  const { user } = await requireOnboarded("/account");
 
   return (
     <main className="min-h-[70vh] bg-background px-4 py-10 sm:px-6 lg:px-10">

@@ -25,6 +25,13 @@ export interface EnergyNodeViewProps {
   readonly icon?: ReactNode;
   /** Readings rendered under the icon. */
   readonly lines: readonly EnergyNodeLine[];
+  /**
+   * Readings rendered ABOVE the icon, styled identically to `lines`. Use
+   * when a node has two same-weight readings that read better as
+   * "top-of-icon / bottom-of-icon" than stacked underneath (e.g. the Grid
+   * node's export and import values).
+   */
+  readonly linesAbove?: readonly EnergyNodeLine[];
   /** Small line above the icon. */
   readonly secondary?: string;
   /** When set, draws the segmented ring instead of a plain border. */
@@ -63,6 +70,7 @@ export function EnergyNodeView({
   borderColor,
   icon,
   lines,
+  linesAbove,
   secondary,
   ringShares,
   onTap,
@@ -211,6 +219,21 @@ export function EnergyNodeView({
         }}
       >
         {secondary !== undefined && <div style={secondaryStyle}>{secondary}</div>}
+        {linesAbove?.map((line, i) => (
+          <div
+            key={`above:${line.text}:${i}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              ...valueStyle,
+              ...(line.color === undefined ? {} : { color: line.color }),
+            }}
+          >
+            {line.icon}
+            <span>{line.text}</span>
+          </div>
+        ))}
         {icon}
         {lines.map((line, i) => (
           <div
