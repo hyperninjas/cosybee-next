@@ -1,17 +1,14 @@
 import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 // import { CtaButton } from "@/app/components/ui/Cta";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-import womenOnCouch from "@/public/hex-images/women-on-couch.png";
-import hubDevice from "@/public/hex-images/hub-device.avif";
-import deviceImg from "@/public/hex-images/app-ss-connecting-devices.png";
+import featureImage from "@/public/homepage-images/everything-connected-in-one-place.png";
 import Hexagon from "@/app/components/ui/Hexagon";
 
 /**
  * "Everything in perfect harmony" — text + 3 feature items on the left,
- * three-image hive cluster on the right.
+ * composed artwork on the right.
  */
 export default function PerfectHarmony() {
   return (
@@ -58,36 +55,15 @@ export default function PerfectHarmony() {
             Experience the App
           </CtaButton> */}
         </div>
-        {/* cluster — right */}
-        <HiveHexCluster
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
-          gap={5}
-          cornerInset={4}
-          left={{
-            src: womenOnCouch,
-            color: "#B7C0A8",
-            alt: "women using energiebee app - sitting on couch",
-          }}
-          // Above-the-fold (section right below the hero) → eager-load so it
-          // isn't flagged as an un-prioritised LCP image.
-          topRight={{
-            src: hubDevice,
-            color: "#D8A9B6",
-            priority: true,
-            alt: "connection hub for devices - image",
-          }}
-          bottomRight={{
-            color: "#c9dfe9",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="EnergieBee app preview"
-                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
-                quality={85}
-                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork — right. Above the fold (this section sits right below the
+            hero), so it eager-loads rather than being flagged as an
+            un-prioritised LCP image. */}
+        <Image
+          src={featureImage}
+          alt="An EnergieBee hub on the wall and the app's live energy flow — 170 W of solar, 350 W imported, 870 W reaching the house"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          priority
         />
       </Container>
     </Section>

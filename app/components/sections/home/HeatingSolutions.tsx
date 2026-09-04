@@ -1,21 +1,15 @@
-// import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
 import Hexagon from "@/app/components/ui/Hexagon";
-// import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
-// import sideImage from "@/public/energy-monitoring.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/homepage-images/energiebee-device-heating-solutions.png";
-import radiatorValveImg from "@/public/ss-image/ss-small-2.png";
-import tempControllerImg from "@/public/hex-images/temperature-controller.avif";
+import featureImage from "@/public/homepage-images/heating-solutions.png";
 
 /**
  * "Heating Solutions" — same layout as WhyEnergieBeeSolar, with the
- * positions flipped: hive cluster on the left, title + check-glyph
- * feature cards on the right, cream decorative hex bleeding in from
- * the top-right (instead of top-left).bg-[#f7f7f7]
+ * positions flipped: artwork on the left, title + check-glyph feature
+ * cards on the right, cream decorative hex bleeding in from the
+ * top-right (instead of top-left).bg-[#f7f7f7]
  */
 export default function HeatingSolutions() {
   return (
@@ -26,34 +20,14 @@ export default function HeatingSolutions() {
           color="#F7F2E1"
           className="pointer-events-none absolute -right-24 -top-10 w-[18rem] sm:-right-36 sm:w-88 lg:w-76.75"
         />
-        {/* cluster — left */}
-
-        <HiveHexCluster
-          className="order-2 min-[1200px]:order-1 mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
-          gap={5}
-          cornerInset={4}
-          left={{
-            src: radiatorValveImg,
-            color: "#E8E6E0",
-            alt: "heating radiator valve image",
-          }}
-          topRight={{
-            src: tempControllerImg,
-            color: "#9AA08C",
-            alt: "temperature controller device image",
-          }}
-          bottomRight={{
-            color: "#e6e6e5",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="EnergieBee app - Heating solutions"
-                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
-                quality={85}
-                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork — left. Ordered after the text below 1200px, where the
+            single column reads title first. */}
+        <Image
+          src={featureImage}
+          alt="A radiator valve and a 20°C room thermostat beside the app, working a 52 m² home's heating potential from C up to A"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          className="order-2 min-[1200px]:order-1"
         />
         {/* text — right */}
         <div className="order-1 min-[1200px]:order-2 min-[1200px]:max-w-183.5 md:max-w-153.5 flex flex-col max-[1200px]:mx-auto  z-9">
