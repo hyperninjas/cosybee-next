@@ -810,7 +810,7 @@
    the loudest thing in the card. */
 .article-cta-heading {
   margin: 0;
-  font-size: 2rem !important;
+  font-size: 1.75rem !important;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.1 !important;
@@ -818,7 +818,7 @@
 }
 @media (min-width: 900px) {
   .article-cta-heading {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 }
 .article-cta-body {
