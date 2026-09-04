@@ -1,13 +1,10 @@
 import Hexagon from "@/app/components/ui/Hexagon";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
 import {
   FeatureItem,
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import windTurbineImg from "@/public/wind-turbine.png";
-import beeFlowerImg from "@/public/bee-flower.png";
-import deviceImg from "@/public/heating/energiebee-app-heating-overview.png";
+import featureImage from "@/public/heating/why-choose-energiebee.png";
 import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -22,27 +19,13 @@ export default function WhyChoose() {
   return (
     <Section spacing="md" surface="base" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
-        {/* 3-hex hive cluster — three distinct cells */}
-        <HiveHexCluster
-          gap={5}
-          cornerInset={4}
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
-          left={{ src: windTurbineImg, alt: "Wind turbines", color: "#7FA9C9" }}
-          topRight={{
-            src: beeFlowerImg,
-            alt: "Bee on a flower",
-            color: "#D4A017",
-          }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="energie bee app screen"
-                className="absolute left-1/2 top-[12%] w-[59%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="The app's savings tips — £300 a year from a heat pump, £392 from solar — beside a blended 2.63p per kWh against a 33.75p standard rate"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          className="z-9"
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon
