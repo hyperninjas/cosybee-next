@@ -4,13 +4,13 @@ import {
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import deviceImg from "@/public/energy/energiebee-app-weekly-energy-spend-graph.png";
+import featureImage from "@/public/energy/why-choose-energiebee-energy.png";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
 export default function WhyEnergieBee() {
-  // Two-column band: title + lead + feature cards on the left, phone mockup on
-  // the right.
+  // Two-column band: title + lead + feature cards on the left, artwork on the
+  // right.
   return (
     <Section surface="base" spacing="lg">
       <Container
@@ -45,14 +45,13 @@ export default function WhyEnergieBee() {
           </div>
         </div>
 
-        {/* phone — right */}
-        <div className="mx-auto w-full max-w-82.5">
+        {/* artwork — right */}
+        <div className="mx-auto w-full">
           <Image
-            src={deviceImg}
-            alt="energy analytics dashboard"
-            sizes="(min-width: 1200px) 330px, 280px"
-            quality={85}
-            className="h-auto w-full"
+            src={featureImage}
+            alt="The app splitting a day's demand 18% direct solar, 27% battery, 55% grid — beside an Aug 26 bill of £4.82, £1.26 of it earned exporting"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+            quality={100}
           />
         </div>
       </Container>

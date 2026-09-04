@@ -4,10 +4,7 @@ import {
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/energy/energiebee-app-live-solar-energy-flow.png";
-import cottageImg from "@/public/ss-image/ss-small-9.png";
-import beeDisplayImg from "@/public/ss-image/ss-small-10.png";
+import featureImage from "@/public/energy/battery-and-solar-ready.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -20,21 +17,12 @@ export default function WhyEnergieBeeSolar() {
       className="py-16 pb-8 text-foreground lg:py-20 lg:pb-10"
     >
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
-        {/* hexagon cluster — same canonical hive shape as the rest of the page */}
-        <HiveHexCluster
-          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
-          left={{ src: cottageImg, color: "#B7C0A8" }}
-          topRight={{ src: beeDisplayImg, color: "#C9CBCD" }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="cosy bee app"
-                className="absolute left-1/2 top-[15.8%] w-[65%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="A rooftop array and a Sunsynk inverter beside the app's live energy flow, with today running 96% on the grid at 12.6 kWh"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
         />
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon

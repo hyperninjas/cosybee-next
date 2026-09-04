@@ -29,6 +29,7 @@ export default function TurnEnergyData() {
               glyph="savings"
               title="Savings Intelligence"
               description="Identify opportunities to reduce heating costs through smarter decisions."
+              descWidth="md:max-w-[70%]"
             />
             <FeatureItem
               glyph="energy"
