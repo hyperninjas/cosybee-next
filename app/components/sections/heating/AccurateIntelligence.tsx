@@ -1,7 +1,7 @@
 import Hexagon from "@/app/components/ui/Hexagon";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImage from "@/public/heating/energiebee-app-heating-device-mockup.webp";
+import featureImage from "@/public/heating/accurate-intelligence-for-a-smarter-greener-home.png";
+import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
@@ -9,12 +9,13 @@ export default function AccurateIntelligence() {
   return (
     <Section spacing="md" surface="surface" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
-        {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImage}
-          gap={5}
-          cornerInset={4}
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5 z-9"
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="An air source heat pump and a 20°C room thermostat beside the app, rating the home's heating potential C up to A"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
+          className="z-9"
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

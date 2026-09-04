@@ -1,12 +1,12 @@
 import { FeatureCard, SectionTitle } from "@/app/components/ui/SectionContent";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import deviceImg from "@/public/heating/energiebee-app-heating-energy-flow.png";
+import featureImage from "@/public/heating/a-smarter-understanding-of-your-home.png";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import Hexagon from "../../ui/Hexagon";
 
 export default function SmarterUnderstanding() {
-  // Two-column band: title + feature cards on the left, phone mockup on the right.
+  // Two-column band: title + feature cards on the left, artwork on the right.
   return (
     <Section surface="base" spacing="lg">
       <Container
@@ -42,14 +42,13 @@ export default function SmarterUnderstanding() {
           </div>
         </div>
 
-        {/* phone — right */}
-        <div className="mx-auto w-full max-w-78.75">
+        {/* artwork — right */}
+        <div className="mx-auto w-full">
           <Image
-            src={deviceImg}
-            alt="energy dashboard"
-            sizes="(min-width: 1200px) 315px, 280px"
-            quality={85}
-            className="h-auto w-full"
+            src={featureImage}
+            alt="An EnergieBee room display beside the app, splitting a billed 14.96 kWh grid import 80% to the house and 20% to the battery"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+            quality={100}
           />
         </div>
       </Container>

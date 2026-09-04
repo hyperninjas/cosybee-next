@@ -1,8 +1,7 @@
 import Hexagon from "@/app/components/ui/Hexagon";
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import sideImg from "@/public/energy-management.png";
-import SharedImageHexCluster from "@/app/components/ui/SharedImageHexCluster";
-import { HIVE_3_PLACEMENTS, HIVE_3_VIEWBOX } from "@/app/lib/hex";
+import featureImage from "@/public/heating/turn-energy-data-into-real-savings.png";
+import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 
@@ -10,12 +9,12 @@ export default function TurnEnergyData() {
   return (
     <Section spacing="md" surface="surface" className="text-foreground">
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-38">
-        {/* uniform 3-hex hive cluster */}
-        <SharedImageHexCluster
-          src={sideImg.src}
-          viewBox={HIVE_3_VIEWBOX}
-          placements={HIVE_3_PLACEMENTS}
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-125.5"
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="The app's 30-day view at 15.4 kWh a day billed, beside a carbon card reading 41.8 g CO2 per kWh — 43% cleaner than the grid"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
         />
         {/* cream decorative hex bleeding from the top-right */}
         <Hexagon

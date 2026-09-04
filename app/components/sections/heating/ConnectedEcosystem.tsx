@@ -5,10 +5,7 @@ import {
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
 import { CtaButton } from "@/app/components/ui/Cta";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/heating/energiebee-app-smart-thermostat.png";
-import ecosystemBeeImg from "@/public/ss-image/ss-small-5.png";
-import radiatorValveImg from "@/public/ss-image/ss-small-13.png";
+import featureImage from "@/public/heating/energiebee-is-evolving-into-a-connected-home-energy-ecosystem.png";
 import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
@@ -83,22 +80,12 @@ export default function ConnectedEcosystem() {
           </div>
         </div>
 
-        {/* hexagon cluster */}
-        <HiveHexCluster
-          className="mx-auto w-full max-w-105 sm:max-w-125 lg:max-w-120"
-          cornerInset={4}
-          left={{ src: ecosystemBeeImg, color: "#C9C3B8" }}
-          topRight={{ src: radiatorValveImg, color: "#E8E6E0" }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="cosy bee app"
-                className="absolute left-1/2 top-[13%] w-[65%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork — right */}
+        <Image
+          src={featureImage}
+          alt="An EnergieBee hub and a 21.5° hybrid heating control beside the app's live energy flow — 170 W solar, 350 W imported, 870 W to the house"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
         />
       </Container>
     </Section>
