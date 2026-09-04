@@ -4,7 +4,7 @@ import {
   SectionLead,
   SectionTitle,
 } from "@/app/components/ui/SectionContent";
-import { CtaButton } from "@/app/components/ui/Cta";
+// import { CtaButton } from "@/app/components/ui/Cta";
 import featureImage from "@/public/heating/energiebee-is-evolving-into-a-connected-home-energy-ecosystem.png";
 import Image from "next/image";
 import { Container } from "@/app/components/ui/Container";
@@ -17,7 +17,7 @@ export default function ConnectedEcosystem() {
           above the section's own <h2>, so an <h3> here inverted the document
           order. Its headline is also deliberately smaller than SectionTitle —
           at 36px it out-shouted the heading it precedes. */}
-      <Container className="mb-20">
+      {/* <Container className="mb-20">
         <aside
           aria-label="Early access"
           className="flex flex-col gap-5 rounded-2xl border border-border bg-background p-6 sm:p-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:p-10"
@@ -34,18 +34,12 @@ export default function ConnectedEcosystem() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* <a
-              href="/get-started"
-              className="inline-flex shrink-0 h-12 lg:h-[58.66px] items-center justify-center rounded-lg border border-border bg-surface px-6 text-base lg:text-lg leading-[135%] font-semibold text-foreground transition-colors hover:bg-surface-tertiary"
-            >
-              Pre-order access
-            </a> */}
             <CtaButton href="/contact" size="sm">
               Register Interest
             </CtaButton>
           </div>
         </aside>
-      </Container>
+      </Container> */}
       <Container className="grid grid-cols-1 items-center gap-12 min-[1200px]:grid-cols-2 min-[1200px]:gap-16">
         {/* cream decorative hex bleeding from the top-left */}
         <Hexagon
