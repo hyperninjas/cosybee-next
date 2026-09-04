@@ -80,11 +80,14 @@ function Slide({
             {formatReadTime(slide.readTime)}
           </span>
         </div>
-        <h2
-          title={slide.title}
-          className="text-2xl line-clamp-3 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[30px] mt-3"
-        >
-          {slide.title}
+        <h2 className="text-2xl line-clamp-3 tracking-[-0.03em] font-extrabold text-foreground sm:text-3xl lg:text-[30px] mt-3">
+          <Link
+            title={slide.title}
+            href={`${basePath}/${slide.slug}`}
+            className="underline-offset-4 hover:underline"
+          >
+            {slide.title}
+          </Link>
         </h2>
         {slide.carouselIntro && (
           <p className="text-muted mt-4">{slide.carouselIntro}</p>
