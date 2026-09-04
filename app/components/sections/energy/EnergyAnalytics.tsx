@@ -1,12 +1,12 @@
 import { FeatureItem, SectionTitle } from "@/app/components/ui/SectionContent";
-import deviceImg from "@/public/energy/energiebee-octopus-energy-tariff-dashboard.png";
+import featureImage from "@/public/energy/energy-and-savings-analytics.png";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import Hexagon from "../../ui/Hexagon";
 
 export default function EnergyAnalytics() {
-  // Two-column band: title + features on the left, phone mockup on the right.
+  // Two-column band: title + features on the left, artwork on the right.
   return (
     <Section surface="base" spacing="lg">
       <Container
@@ -44,14 +44,13 @@ export default function EnergyAnalytics() {
           </div>
         </div>
 
-        {/* phone — right */}
-        <div className="mx-auto w-full max-w-75">
+        {/* artwork — right */}
+        <div className="mx-auto w-full">
           <Image
-            src={deviceImg}
-            alt="energy analytics dashboard"
-            sizes="(min-width: 1200px) 300px, 280px"
-            quality={85}
-            className="h-auto w-full"
+            src={featureImage}
+            alt="The app's solar tab: a £1.46 bill, £0.35 earned exporting 2.9 kWh, and a 41.8 g CO2 per kWh footprint — 43% cleaner than the grid"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+            quality={100}
           />
         </div>
       </Container>
