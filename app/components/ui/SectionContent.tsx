@@ -210,7 +210,7 @@ export function MediaCard({
     <article className="overflow-hidden max-w-115 rounded-3xl border border-border bg-surface shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06)]">
       {media && (
         <div
-          className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-6 overflow-hidden max-h-100"
+          className="flex items-end justify-center mx-6 mt-6 rounded-xl pt-6 overflow-hidden max-h-90"
           style={{ backgroundColor: mediaBg }}
         >
           {media}

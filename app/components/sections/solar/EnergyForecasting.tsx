@@ -1,8 +1,8 @@
 // import { CtaCard } from "@/app/components/ui/Cta";
 import { MediaCard, SectionHeader } from "@/app/components/ui/SectionContent";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import deviceImg from "@/public/smart/energiebee-energy-usage.png";
-import deviceWeatherImg from "@/public/smart/energiebee-weather-forecasts.png";
+import forecastImg from "@/public/solar/simulated-solar-forecasts.png";
+import recommendationsImg from "@/public/solar/smart-energy-usage-recommendations.png";
 import { Section } from "../../ui/Section";
 import Hexagon from "../../ui/Hexagon";
 import { Container } from "@/app/components/ui/Container";
@@ -30,10 +30,10 @@ export default function EnergyForecasting() {
           <MediaCard
             media={
               <Image
-                alt="Simulated Solar Forecasts"
-                src={deviceWeatherImg}
-                sizes="(min-width: 1024px) 256px, (min-width: 640px) 190px, 180px"
-                className="w-45 sm:w-47.5 lg:w-64"
+                alt="Today's solar cycle in the app: sunrise 06:42, a 3.0 kW peak at 13:00, sunset 20:18, and a 44.5 kWh seven-day forecast"
+                src={forecastImg}
+                sizes="(min-width: 1024px) 256px, (min-width: 640px) 224px, 208px"
+                className="w-52 self-start sm:w-56 lg:w-64"
               />
             }
             title="Simulated Solar Forecasts"
@@ -47,10 +47,10 @@ export default function EnergyForecasting() {
           <MediaCard
             media={
               <Image
-                alt="Smart Energy Usage Recommendations"
-                src={deviceImg}
-                sizes="(min-width: 1024px) 256px, (min-width: 640px) 190px, 180px"
-                className="w-45 sm:w-47.5 lg:w-64"
+                alt="The app's cleanest window to charge — 02:30 to 08:00 at 63.4 gCO2 per kWh, a shift that would cut 62 g, or 20%"
+                src={recommendationsImg}
+                sizes="(min-width: 1024px) 256px, (min-width: 640px) 224px, 208px"
+                className="w-52 self-start sm:w-56 lg:w-64"
               />
             }
             title="Smart Energy Usage Recommendations"
