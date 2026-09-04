@@ -3,14 +3,11 @@ import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import Hexagon from "@/app/components/ui/Hexagon";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import HiveHexCluster from "@/app/components/ui/HiveHexCluster";
-import deviceImg from "@/public/homepage-images/energiebee-device-energy-management.png";
-import energyDisplayImg from "@/public/ss-image/ss-small-11.png";
-import gatewayImg from "@/public/ss-image/ss-small-6.png";
+import featureImage from "@/public/homepage-images/energy-management.png";
 
 /**
  * Home "Energy Management" — dark variant with title + 3 feature cards
- * on the left and a hive cluster on the right.
+ * on the left and composed artwork on the right.
  */
 export default function HomeEnergyManagement() {
   return (
@@ -21,25 +18,12 @@ export default function HomeEnergyManagement() {
           color="#F7F2E2"
           className="pointer-events-none absolute -top-10 w-[18rem] sm:-right-28 sm:w-88 lg:w-76.75"
         />
-        {/* cluster — right */}
-        <HiveHexCluster
-          className="mx-auto w-full max-w-100 sm:max-w-110 lg:max-w-130.5"
-          gap={5}
-          cornerInset={4}
-          left={{ src: energyDisplayImg, color: "#AEB2B4", alt: "" }}
-          topRight={{ src: gatewayImg, color: "#4E6472", alt: "" }}
-          bottomRight={{
-            color: "#E9E19E",
-            children: (
-              <Image
-                src={deviceImg}
-                alt="EnergieBee app - Energy management"
-                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 180px"
-                quality={85}
-                className="absolute left-1/2 top-[12%] w-[58%] -translate-x-1/2"
-              />
-            ),
-          }}
+        {/* artwork */}
+        <Image
+          src={featureImage}
+          alt="The app's weekly electricity view — £10.45 spent, £3.26 of it standing charge — beside a day that ran 96% on the grid at 12.6 kWh"
+          sizes="(min-width: 1440px) 1440px, 100vw"
+          quality={100}
         />
         {/* text — left */}
         <div className=" flex flex-col max-[1200px]:items-center  z-9">
