@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { IS_PRODUCTION_DEPLOYMENT } from "@/app/lib/site";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
@@ -14,6 +15,10 @@ const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
  * before this loader runs (`afterInteractive`). So any consent-gated tags you
  * add inside the GTM container stay gated until Consently grants consent.
  *
+ * Gated on IS_PRODUCTION_DEPLOYMENT, not `NODE_ENV`: every deployment builds
+ * with NODE_ENV=production, and the sandbox sets NEXT_PUBLIC_GTM_ID to the
+ * same container as production, so sandbox traffic was firing the live one.
+ *
  * NOTE: Do NOT add a GA4 configuration tag inside this container — GA4 is
  * already loaded directly by Analytics.tsx, and a second GA4 tag here would
  * double-count every event. Use GTM for other tags (ads, pixels, etc.).
@@ -22,7 +27,7 @@ const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
  * placed immediately after the opening <body> tag (see app/layout.tsx).
  */
 export default function GoogleTagManager() {
-  if (process.env.NODE_ENV !== "production" || !GTM_ID) return null;
+  if (!IS_PRODUCTION_DEPLOYMENT || !GTM_ID) return null;
 
   return (
     <Script id="gtm-loader" strategy="afterInteractive">
@@ -36,7 +41,7 @@ export default function GoogleTagManager() {
  * <body> tag. No-op outside production / when the container ID is unset.
  */
 export function GoogleTagManagerNoScript() {
-  if (process.env.NODE_ENV !== "production" || !GTM_ID) return null;
+  if (!IS_PRODUCTION_DEPLOYMENT || !GTM_ID) return null;
 
   return (
     <noscript>

@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { IS_PRODUCTION_DEPLOYMENT } from "@/app/lib/site";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -18,7 +19,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
  * wiring.
  */
 export default function Analytics() {
-  if (process.env.NODE_ENV !== "production" || !GA_ID) return null;
+  if (!IS_PRODUCTION_DEPLOYMENT || !GA_ID) return null;
 
   return (
     <>

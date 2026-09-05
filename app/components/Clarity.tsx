@@ -1,13 +1,17 @@
 import Script from "next/script";
+import { IS_PRODUCTION_DEPLOYMENT } from "@/app/lib/site";
 
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
 
 /**
  * Microsoft Clarity — session replay and heatmaps.
  *
- * Renders nothing unless we're in production AND a project ID is set, so
- * dev/staging stay tracking-free and this is a safe no-op until the env var is
- * configured.
+ * Renders nothing unless this is the production DEPLOYMENT and a project ID
+ * is set. The gate is IS_PRODUCTION_DEPLOYMENT, not `NODE_ENV`: `next build`
+ * sets NODE_ENV to "production" for the sandbox too, and the sandbox does set
+ * NEXT_PUBLIC_CLARITY_PROJECT_ID — to the SAME project as production — so this
+ * component's old promise that "dev/staging stay tracking-free" was not being
+ * kept: sandbox sessions were recorded into the live Clarity project.
  *
  * `afterInteractive` rather than `lazyOnload`: Clarity records the session from
  * the moment it boots, so deferring to browser idle would drop the first clicks
@@ -22,7 +26,7 @@ const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
  * if this site needs Clarity to be consent-gated for GDPR/PECR.
  */
 export default function Clarity() {
-  if (process.env.NODE_ENV !== "production" || !CLARITY_ID) return null;
+  if (!IS_PRODUCTION_DEPLOYMENT || !CLARITY_ID) return null;
 
   return (
     <Script id="clarity-loader" strategy="afterInteractive">

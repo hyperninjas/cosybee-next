@@ -25,6 +25,28 @@ export const SITE_URL = (
  */
 export const IS_PRODUCTION = SITE_URL === PRODUCTION_URL;
 
+/**
+ * True ONLY on the real production website: the canonical host, in a
+ * production build. This is the gate for third-party scripts that must not
+ * run anywhere else — a consent banner, analytics, session recording.
+ *
+ * Why both halves are needed, and why neither alone is enough:
+ *
+ *  - `NODE_ENV === "production"` is true for EVERY `next build`, so it does
+ *    not exclude the sandbox or preview deploys. Gating on it alone is what
+ *    put the Consently banner on the sandbox.
+ *  - `IS_PRODUCTION` is derived from NEXT_PUBLIC_SITE_URL, which is unset on a
+ *    developer's machine (.env is dockerignored and carries no site URL), so
+ *    it falls back to PRODUCTION_URL and is true in local dev. Gating on it
+ *    alone would load third-party scripts while you develop.
+ *
+ * Indexing (robots.txt, X-Robots-Tag) deliberately still uses IS_PRODUCTION
+ * on its own: a local robots.txt saying "Disallow" is harmless, whereas a
+ * local cookie banner phoning home is not.
+ */
+export const IS_PRODUCTION_DEPLOYMENT =
+  IS_PRODUCTION && process.env.NODE_ENV === "production";
+
 export const SITE_NAME = "EnergieBee";
 
 export const SITE_TAGLINE = "Smart home energy control that pays for itself";

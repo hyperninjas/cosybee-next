@@ -1,5 +1,5 @@
 import { Heading, Text } from "@/app/components/ui/Typography";
-import { AppImage as Image } from "@/app/components/ui/AppImage";
+import HeroBackground from "@/app/components/ui/HeroBackground";
 import { Section } from "@/app/components/ui/Section";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import heroBgImg from "@/public/Cover/energiebee-contact-cover.png";
@@ -23,31 +23,7 @@ export default function Hero() {
       className="isolate flex flex-col justify-center min-h-[50vh]"
     >
       {/* background photo + gradient */}
-      <div aria-hidden className="absolute inset-0 -z-20">
-        <Image
-          src={heroBgImgMobile}
-          alt=""
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          quality={85}
-          placeholder="blur"
-          className="object-cover object-center sm:hidden"
-        />
-        <Image
-          src={heroBgImg}
-          alt=""
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          quality={85}
-          placeholder="blur"
-          className="hidden object-cover object-center sm:block"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/40 h-full" />
-      </div>
+      <HeroBackground image={heroBgImg} imageMobile={heroBgImgMobile} />
 
       <div className="relative mx-auto w-full max-w-360 items-center pt-16 pb-24 px-6 lg:px-30 lg:pt-15 lg:pb-11">
         <div className="relative z-10">
