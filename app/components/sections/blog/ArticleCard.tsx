@@ -7,8 +7,8 @@ import {
   type Tag,
   formatDate,
   formatReadTime,
-  isExternalUrl,
 } from "@/app/lib/article-types";
+import { crossOriginOf, unoptimizedFor } from "@/app/lib/image-optimization";
 import Avatar from "@/app/components/ui/Avatar";
 import Divider from "@/app/components/ui/Divider";
 import Dot from "@/app/components/ui/Dot";
@@ -97,11 +97,17 @@ function AuthorByline({ author }: { author: Article["author"] }) {
  * title, excerpt, tags, and an author byline. Linked to the article page.
  */
 export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
-  const apiURL = process.env.NEXT_PUBLIC_API_URL;
+  // Warm up the host the BROWSER will fetch this cover from. Optimizable
+  // covers are served by our own origin via /_next/image (the optimizer does
+  // the cross-origin fetch server-side), so they need no hint at all — only a
+  // cover that stays unoptimized is a real third-party connection. This used
+  // to preconnect to NEXT_PUBLIC_API_URL unconditionally, which warmed a host
+  // no cover is served from.
+  const coverOrigin = crossOriginOf(a.coverImage);
   return (
     <>
-      {/* Warm up the cross-origin media host (React 19 hoists + dedups this). */}
-      <link rel="preconnect" href={apiURL} />
+      {/* React 19 hoists + dedups this, so N cards share one connection. */}
+      {coverOrigin && <link rel="preconnect" href={coverOrigin} />}
       <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-[0px_1px_3px_0px_rgba(0,0,0,0.08)] transition duration-300 hover:shadow-xl">
         <div className="relative h-50">
           <Image
@@ -110,7 +116,7 @@ export function ArticleCard({ a, basePath }: { a: Article; basePath: string }) {
             fill
             sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-103 motion-reduce:transform-none motion-reduce:transition-none"
-            unoptimized={isExternalUrl(a.coverImage)}
+            unoptimized={unoptimizedFor(a.coverImage)}
           />
           <CategoryBadge name={a.category?.name ?? "Uncategorised"} />
         </div>

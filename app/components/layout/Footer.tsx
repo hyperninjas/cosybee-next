@@ -151,9 +151,18 @@ export default async function Footer() {
               SOCIAL MEDIA
             </h3>
             <SocialCluster className="mt-5 h-auto pb-4 w-46" {...SOCIAL} />
+            {/* `width`/`height` OVERRIDE the 3585x1200 intrinsic size of the
+                import. Without them Next has no idea the logo renders at
+                `w-50` (200px) and emits a single 2048px candidate — a 47KB
+                decode for a 200px slot, on every page, eagerly. Given the real
+                width it emits 256px 1x / 640px 2x instead (~14KB). Prefer this
+                over a `sizes` string: a `sizes` carrying no `vw` unit makes
+                Next fall back to offering the entire 15-rung ladder. */}
             <Image
               src={MaidInBritain}
               alt="EnergieBee"
+              width={200}
+              height={67}
               className="h-auto w-50 -ml-2"
               quality={85}
               loading="eager"

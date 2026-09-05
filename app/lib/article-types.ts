@@ -197,13 +197,12 @@ export function formatDate(isoDate: string): string {
   }
 }
 
-/**
- * External (http/https) URLs need Next's `unoptimized` to bypass the Image
- * Optimization pipeline, since the cross-origin host serves its own derivatives.
- */
-export function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
-}
+// NOTE: `isExternalUrl` used to live here and fed `<Image unoptimized>` on every
+// article cover, on the premise that "the cross-origin host serves its own
+// derivatives". It does not — covers are raw uploads on S3, so the test opted
+// every cover out of resizing and AVIF/WebP and shipped ~1MB PNGs into 400px
+// cards. Use `unoptimizedFor` from app/lib/image-optimization.ts instead: it
+// asks whether the OPTIMIZER can serve the URL, which is the actual question.
 
 /**
  * Articles per page on the blog hubs. Used by both the server (to compute
