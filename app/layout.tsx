@@ -14,6 +14,7 @@ import Clarity from "./components/Clarity";
 import { DeferredClientLayer } from "./components/DeferredClientLayer";
 import {
   IS_PRODUCTION,
+  IS_PRODUCTION_DEPLOYMENT,
   ORG_ADDRESS,
   ORG_CONTACT_EMAIL,
   ORG_LEGAL_NAME,
@@ -283,8 +284,14 @@ export default function RootLayout({
          *  tracking stays gated regardless of load order — Google Consent Mode
          *  defaults all signals to `denied` (see Analytics.tsx, with
          *  `wait_for_update: 500`) and GA stays cookieless until Consently
-         *  issues `gtag('consent','update',…)`. */}
-        {process.env.NODE_ENV === "production" && (
+         *  issues `gtag('consent','update',…)`.
+         *
+         *  Gated on IS_PRODUCTION_DEPLOYMENT, NOT `NODE_ENV`. `next build`
+         *  sets NODE_ENV to "production" for EVERY deployment, sandbox
+         *  included, so that test loaded the banner (and its 66 KiB) on the
+         *  sandbox — and unlike GA/GTM/Clarity there is no empty-ID escape
+         *  hatch here, because the banner id is hardcoded. */}
+        {IS_PRODUCTION_DEPLOYMENT && (
           <Script
             src="https://app.consently.net/consently.js"
             data-bannerid="6a229f9186e4ca8d56f54ed0"
