@@ -4,9 +4,12 @@ import {
   type Article,
   formatDate,
   formatReadTime,
-  isExternalUrl,
   UNCATEGORISED_SLUG,
 } from "@/app/lib/article-types";
+import {
+  optimizeArticleImages,
+  unoptimizedFor,
+} from "@/app/lib/image-optimization";
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
 import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
 import { contentJsonToHtml, stripPastedColors } from "@/app/lib/blocknote";
@@ -109,9 +112,15 @@ export default async function ArticleDetail({
   // heading ids for the TOC, a scroll wrapper around each table, and — for the
   // stored-`contentHtml` fallback, which may predate the export-side pass —
   // the pasted-in colours that would otherwise outrank `--article-foreground`.
-  const { html, items: toc } = buildToc(
+  const { html: tocHtml, items: toc } = buildToc(
     wrapArticleTables(stripPastedColors(rawHtml)),
   );
+  // Route the body's <img> tags through the image optimizer. It runs LAST
+  // because the passes above walk tags with broad `<[^>]*>` patterns and have
+  // no need to scan the `srcset` this adds. Done at render rather than at
+  // publish so the whole archive benefits without a re-save, and so
+  // `contentHtml` stays a faithful record of what was authored.
+  const html = optimizeArticleImages(tocHtml);
   // The sidebar "On this page" outline lists top-level sections (h2) only.
   // Anchors and the in-article /toc block still cover h3 subsections.
   const sidebarToc = toc.filter((item) => item.level === 2);
@@ -306,7 +315,7 @@ export default async function ArticleDetail({
                   priority
                   sizes="(min-width: 800px) 800px, 100vw"
                   className="object-cover"
-                  unoptimized={isExternalUrl(article.coverImageReal)}
+                  unoptimized={unoptimizedFor(article.coverImageReal)}
                 />
               </div>
               {(article.coverImageCaption || article.coverImageCredit) && (

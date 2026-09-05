@@ -4,8 +4,8 @@ import {
   type Article,
   formatDate,
   formatReadTime,
-  isExternalUrl,
 } from "@/app/lib/article-types";
+import { unoptimizedFor } from "@/app/lib/image-optimization";
 import Dot from "@/app/components/ui/Dot";
 
 /**
@@ -34,7 +34,7 @@ export function MoreArticlesCard({
           fill
           sizes="112px"
           className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
-          unoptimized={isExternalUrl(a.coverImage)}
+          unoptimized={unoptimizedFor(a.coverImage)}
         />
       </div>
       <div className="flex min-w-0 flex-col">

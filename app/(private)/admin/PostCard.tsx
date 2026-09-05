@@ -15,7 +15,8 @@ import {
 import { Button, Card, Chip, Modal, Tooltip } from "@heroui/react";
 import { Focusable } from "react-aria-components";
 import { AppImage as Image } from "@/app/components/ui/AppImage";
-import { isExternalUrl, resolveCoverImage } from "@/app/lib/article-types";
+import { resolveCoverImage } from "@/app/lib/article-types";
+import { unoptimizedFor } from "@/app/lib/image-optimization";
 import { type Row } from "./PostsTable";
 
 function relativeTime(iso: string): string {
@@ -125,7 +126,7 @@ export function PostCard({
             fill
             sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-103 motion-reduce:transform-none motion-reduce:transition-none"
-            unoptimized={isExternalUrl(imageUrl)}
+            unoptimized={unoptimizedFor(imageUrl)}
           />
 
           <span className={statusPillClass}>

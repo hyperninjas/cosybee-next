@@ -11,8 +11,8 @@ import {
   type Article,
   formatDate,
   formatReadTime,
-  isExternalUrl,
 } from "@/app/lib/article-types";
+import { unoptimizedFor } from "@/app/lib/image-optimization";
 import Dot from "@/app/components/ui/Dot";
 import { Button } from "@heroui/react";
 
@@ -67,7 +67,7 @@ function Slide({
           sizes="(min-width: 1024px) 600px, 100vw"
           className="object-cover"
           priority={priority}
-          unoptimized={isExternalUrl(slide.coverImage)}
+          unoptimized={unoptimizedFor(slide.coverImage)}
         />
       </div>
       <div className="flex flex-col h-full p-8 sm:p-10">
