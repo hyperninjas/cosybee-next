@@ -27,6 +27,15 @@ import {
 } from "./site";
 import { escapeXml } from "./xml";
 
+/**
+ * `<channel><language>` when a feed does not ask for something else.
+ *
+ * `en-GB` is what the site is — the `<html lang>`, the date formatting and the
+ * spelling all agree — so it stays the default and the other four feeds are
+ * unaffected by a partner's preference.
+ */
+const DEFAULT_FEED_LANGUAGE = "en-GB";
+
 /** Best-effort RFC-822 date (required by RSS) from an ISO string. */
 export function rfc822(iso: string | null): string {
   const d = iso ? new Date(iso) : new Date();
@@ -39,8 +48,25 @@ export type FeedDefinition = {
   path: string;
   /** `<channel><title>`. */
   title: string;
-  /** `<channel><description>`. Defaults to the site description. */
+  /**
+   * `<channel><description>`. Defaults to `SITE_DESCRIPTION`.
+   *
+   * Worth setting on a news feed. `SITE_DESCRIPTION` is the site's PRODUCT
+   * pitch — it is the homepage meta description, the OG card and the JSON-LD,
+   * and it names a competitor and a saving figure. That reads oddly as the
+   * standing description of a news channel in an aggregator's directory, which
+   * is a different audience answering a different question.
+   */
   description?: string;
+  /**
+   * `<channel><language>`. Defaults to `en-GB`, which is what the site is.
+   *
+   * Overridable because an aggregator may want the bare ISO 639 code instead —
+   * SmartNews asked for `en`. RSS itself accepts either (the spec points at
+   * RFC 1766, where `en-GB` is well-formed), so this is about the partner's
+   * parser rather than about correctness.
+   */
+  language?: string;
   /**
    * Emit `content:encoded` carrying the whole article body.
    *
@@ -161,6 +187,13 @@ export const FEEDS = {
   smartnews: {
     path: "/smartnews/smartnews.xml",
     title: `${SITE_NAME} — News`,
+    // Describes the CHANNEL, not the product. This is what shows against the
+    // publication in SmartNews, where the reader is choosing a news source
+    // rather than an app — so the site-wide pitch is the wrong copy here.
+    description:
+      "Latest smart energy news, solar insights, heating tips & home energy updates.",
+    // SmartNews asked for the bare ISO 639 code rather than `en-GB`.
+    language: "en",
     fullContent: true,
     thumbnails: true,
     // SmartNews asked for the latest 10, after 20 was still too heavy for them.
@@ -433,7 +466,7 @@ export function buildRssFeed(
     <link>${escapeXml(SITE_URL)}</link>
     <atom:link href="${escapeXml(url(feed.path))}" rel="self" type="application/rss+xml" />
     <description>${escapeXml(feed.description ?? SITE_DESCRIPTION)}</description>
-    <language>en-GB</language>
+    <language>${escapeXml(feed.language ?? DEFAULT_FEED_LANGUAGE)}</language>
     <copyright>© ${ORG_LEGAL_NAME}</copyright>
     <managingEditor>${escapeXml(ORG_CONTACT_EMAIL)} (${escapeXml(ORG_LEGAL_NAME)})</managingEditor>
     <lastBuildDate>${lastBuild}</lastBuildDate>
