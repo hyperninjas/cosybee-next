@@ -18,6 +18,7 @@ import {
   type ResolvedAddress,
 } from "@/app/lib/onboarding-actions";
 import { CONSTRUCTION_ERAS } from "@/app/lib/epc-field-options";
+import { OPTION_CARD } from "@/app/components/ui/OptionCard";
 
 /**
  * Client half of the building-profile step, rendered ONLY on the two
@@ -137,8 +138,15 @@ export function BuildingProfileClient({ address, epcs }: Props) {
           >
             <Label>Which one is your home?</Label>
             {epcs.map((cert) => (
-              <Radio key={cert.certificateNumber} value={cert.certificateNumber}>
-                <div className="flex flex-col">
+              <Radio
+                key={cert.certificateNumber}
+                value={cert.certificateNumber}
+                className={OPTION_CARD}
+              >
+                <Radio.Control>
+                  <Radio.Indicator />
+                </Radio.Control>
+                <Radio.Content>
                   <span className="text-sm font-semibold text-foreground">
                     {cert.address ?? cert.certificateNumber}
                     {cert.currentEnergyRating && (
@@ -153,7 +161,7 @@ export function BuildingProfileClient({ address, epcs }: Props) {
                       .join(" · ")}
                     {cert.lodgementDate && ` · Lodged ${cert.lodgementDate}`}
                   </span>
-                </div>
+                </Radio.Content>
               </Radio>
             ))}
           </RadioGroup>
@@ -200,16 +208,18 @@ export function BuildingProfileClient({ address, epcs }: Props) {
           value={constructionEra}
           onChange={setConstructionEra}
         >
-          <Label>When was your home built?</Label>
-          <Description>
+          <Label className="text-base font-semibold text-foreground">
+            When was your home built?
+          </Label>
+          <Description className="mb-1">
             Its age tells us most of what we need to estimate your rating.
           </Description>
           {CONSTRUCTION_ERAS.map((era) => (
-            <Radio key={era.value} value={era.value}>
-              <Radio.Content>
-                <Radio.Control>
-                  <Radio.Indicator />
-                </Radio.Control>
+            <Radio key={era.value} value={era.value} className={OPTION_CARD}>
+              <Radio.Control>
+                <Radio.Indicator />
+              </Radio.Control>
+              <Radio.Content className="text-sm font-medium text-foreground">
                 {era.label}
               </Radio.Content>
             </Radio>
