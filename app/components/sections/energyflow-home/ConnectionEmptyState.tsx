@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Button, Card, Chip } from "@heroui/react";
 import {
   ArrowRight,
@@ -13,6 +14,7 @@ import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOc
 import { PropertySetupModal } from "@/app/components/sections/connect/PropertySetupModal";
 import { EnergySetupModal } from "@/app/components/sections/energy/EnergySetupModal";
 import { SolarSetupModal } from "@/app/components/sections/solar/SolarSetupModal";
+import { EstimatePreview } from "./EstimatePreview";
 import type { EnergyProvider, EnergySetup } from "@/app/lib/energy-actions";
 import type { SolarOptions, SolarSetup } from "@/app/lib/solar-actions";
 
@@ -31,11 +33,93 @@ import type { SolarOptions, SolarSetup } from "@/app/lib/solar-actions";
  */
 
 /**
+ * The shell both declared-state cards use.
+ *
+ * One object rather than two similar ones: the solar and tariff cards sit
+ * side by side, so any drift in padding, baseline or action placement
+ * between them is visible at a glance. Sharing the frame also means the two
+ * lead figures line up, which is what makes them scannable as a pair.
+ *
+ * `tone` is the energy-flow channel colour — solar orange, grid blue — so a
+ * card is identifiable before its title is read, and matches the hue that
+ * channel already has in the flow diagram.
+ */
+function SetupCard({
+  tone,
+  icon,
+  title,
+  subtitle,
+  lead,
+  specs,
+  badge,
+  actions,
+}: {
+  tone: string;
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+  /** The figure the card exists to communicate. Null when we don't hold it. */
+  lead: { value: string; unit: string } | null;
+  /** Supporting facts, rendered as one quiet line. */
+  specs: string[];
+  badge: string | null;
+  actions: ReactNode;
+}) {
+  return (
+    <Card className="border-border">
+      <Card.Content className="flex h-full flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div
+              className="flex size-9 shrink-0 items-center justify-center rounded-full"
+              style={{ backgroundColor: `color-mix(in oklch, ${tone} 12%, transparent)`, color: tone }}
+            >
+              {icon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">{title}</p>
+              <p className="truncate text-xs text-muted">{subtitle}</p>
+            </div>
+          </div>
+          {badge && (
+            <Chip color="default" variant="soft" size="sm">
+              {badge}
+            </Chip>
+          )}
+        </div>
+
+        {lead && (
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold tabular-nums tracking-tight text-foreground">
+              {lead.value}
+            </span>
+            <span className="text-sm text-muted">{lead.unit}</span>
+          </div>
+        )}
+
+        {specs.length > 0 && (
+          // Non-breaking spaces around the separator: HTML collapses the
+          // repeated ordinary spaces this needs, leaving the dots crowding
+          // the words on either side.
+          <p className="text-xs text-muted">{specs.join("\u00A0 · \u00A0")}</p>
+        )}
+
+        <div className="mt-auto flex flex-wrap gap-2 pt-1">{actions}</div>
+      </Card.Content>
+    </Card>
+  );
+}
+
+/**
  * The solar slot once a system is declared.
  *
- * Mirrors {@link TariffCard}: their answer, what it buys them, and a way to
- * change it. Connecting an inverter we can read live is an extra action
- * beside it, not a replacement for it.
+ * Leads with the figure that matters — what the array should make in a year
+ * — and demotes the rest to a spec line beneath it. The previous version
+ * gave four facts equal weight as a tick list, which reads as marketing
+ * bullets rather than a description of this customer's own home.
+ *
+ * Connecting an inverter we can read live is an extra action beside
+ * changing the system, never a replacement for showing it.
  */
 function SolarCard({
   solar,
@@ -48,42 +132,34 @@ function SolarCard({
   canConnect: boolean;
 }) {
   const a = solar.analysis;
-  const lines = [
-    a.capacityKwp !== null ? `${a.capacityKwp} kWp of panels` : null,
-    a.estimatedAnnualGenerationKwh !== null
-      ? `About ${a.estimatedAnnualGenerationKwh.toLocaleString()} kWh a year, estimated`
-      : null,
+  const specs = [
+    a.capacityKwp !== null ? `${a.capacityKwp} kWp` : null,
     a.batteryCapacityKwh !== null && a.batteryCapacityKwh > 0
-      ? `${a.batteryCapacityKwh} kWh battery storage`
+      ? `${a.batteryCapacityKwh} kWh battery`
       : null,
-    a.segEligible ? "Eligible to be paid for what you export" : null,
-  ].filter((line): line is string => line !== null);
+    a.systemAgeYears !== null && a.systemAgeYears > 0
+      ? `${a.systemAgeYears} yr${a.systemAgeYears === 1 ? "" : "s"} old`
+      : null,
+  ].filter((x): x is string => x !== null);
 
   return (
-    <Card className="border-border">
-      <Card.Content className="flex h-full flex-col gap-3 p-5">
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
-            <Sun className="size-4" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">Your solar</p>
-            <p className="truncate text-xs text-muted">
-              {solar.combinationLabel || solar.brandLabel}
-            </p>
-          </div>
-        </div>
-
-        <ul className="flex flex-col gap-1.5">
-          {lines.map((line) => (
-            <li key={line} className="flex items-start gap-2 text-sm text-muted">
-              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-solar)]" />
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-auto flex flex-wrap gap-2 pt-1">
+    <SetupCard
+      tone="var(--efh-solar)"
+      icon={<Sun className="size-4" />}
+      title="Your solar"
+      subtitle={solar.combinationLabel || solar.brandLabel}
+      lead={
+        a.estimatedAnnualGenerationKwh !== null
+          ? {
+              value: Math.round(a.estimatedAnnualGenerationKwh).toLocaleString(),
+              unit: "kWh a year, estimated",
+            }
+          : null
+      }
+      specs={specs}
+      badge={a.segEligible ? "Paid to export" : null}
+      actions={
+        <>
           {canConnect && (
             <ConnectSunSyncModal>
               <Button variant="primary" size="sm">
@@ -98,9 +174,9 @@ function SolarCard({
               </Button>
             </SolarSetupModal>
           )}
-        </div>
-      </Card.Content>
-    </Card>
+        </>
+      }
+    />
   );
 }
 
@@ -224,13 +300,11 @@ function ChooseSupplierCard({
 /**
  * The tariff slot once a supplier is chosen.
  *
- * Shows what the customer actually set up, and lets them change it. An
- * earlier version replaced this whole card with "Connect Octopus" whenever
- * the supplier happened to be Octopus — which threw away the tariff they had
- * just picked and looked identical to having set nothing up at all.
- *
- * Connecting is an *additional* action for the suppliers we can read live,
- * never a substitute for showing their answer back to them.
+ * Mirrors {@link SolarCard}: the monthly spend leads, the tariff name and
+ * supplier sit under it as identity, and connecting is an extra action
+ * rather than something that replaces the whole card. An earlier version
+ * did replace it whenever the supplier was Octopus, which threw away the
+ * tariff the customer had just picked.
  */
 function TariffCard({
   energy,
@@ -244,39 +318,26 @@ function TariffCard({
   /** True when this supplier can be linked and isn't yet. */
   canConnect: boolean;
 }) {
-  const lines = [
-    `${energy.providerName} unit rates and standing charge`,
-    energy.displayBill
-      ? `Costs estimated from ${energy.displayBill}`
-      : "Costs estimated from your monthly spend",
-    canConnect
-      ? "Connect the account for measured readings"
-      : `Swap to measured readings when we support live ${energy.providerName} accounts`,
-  ];
+  const specs = [
+    energy.providerName,
+    energy.dailyKwh !== null ? `${energy.dailyKwh.toFixed(1)} kWh a day` : null,
+  ].filter((x): x is string => x !== null && x.length > 0);
+
+  const amount = energy.displayBill.split("/")[0] ?? energy.displayBill;
 
   return (
-    <Card className="border-border">
-      <Card.Content className="flex h-full flex-col gap-3 p-5">
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
-            <ThunderboltFill className="size-4" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">Your tariff</p>
-            <p className="truncate text-xs text-muted">{energy.displayTariff}</p>
-          </div>
-        </div>
-
-        <ul className="flex flex-col gap-1.5">
-          {lines.map((line) => (
-            <li key={line} className="flex items-start gap-2 text-sm text-muted">
-              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-grid)]" />
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-auto flex flex-wrap gap-2 pt-1">
+    <SetupCard
+      tone="var(--efh-grid)"
+      icon={<ThunderboltFill className="size-4" />}
+      title="Your tariff"
+      subtitle={energy.tariffName}
+      lead={
+        energy.displayBill ? { value: amount, unit: "a month, estimated" } : null
+      }
+      specs={specs}
+      badge={canConnect ? null : "Estimated rates"}
+      actions={
+        <>
           {canConnect && (
             <ConnectOctopusModal>
               <Button variant="primary" size="sm">
@@ -289,9 +350,9 @@ function TariffCard({
               Change tariff
             </Button>
           </EnergySetupModal>
-        </div>
-      </Card.Content>
-    </Card>
+        </>
+      }
+    />
   );
 }
 
@@ -323,6 +384,9 @@ export function ConnectionEmptyState({
     energy?.providerName.toLowerCase().includes("octopus") ?? false;
   const isSunsynkOwner =
     solar?.brandLabel.toLowerCase().includes("sunsynk") ?? false;
+  // With nothing declared there is no picture to draw, so the hero stays a
+  // prompt rather than an empty frame with headings and no figures in it.
+  const hasEstimates = energy != null || solar != null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -380,6 +444,10 @@ export function ConnectionEmptyState({
             </PropertySetupModal>
           </Card.Content>
         </Card>
+      ) : hasEstimates ? (
+        /* Something is declared, so show the picture we can already draw
+           rather than describing one the customer can't see. */
+        <EstimatePreview energy={energy ?? null} solar={solar ?? null} />
       ) : (
         <Card variant="default" className="w-full">
           <Card.Content className="flex flex-col items-center gap-3 py-10 text-center">
@@ -387,43 +455,13 @@ export function ConnectionEmptyState({
               <ThunderboltFill className="size-7" />
             </div>
             <h2 className="text-xl font-semibold text-foreground">
-              {energy
-                ? "Your costs are estimated for now"
-                : "Connect your home to see live energy"}
+              Connect your home to see live energy
             </h2>
             <p className="max-w-xl text-sm text-muted">
-              {energy ? (
-                <>
-                  We&apos;re estimating your usage from your tariff. Connect
-                  your inverter or your supplier and these become measured
-                  readings instead of estimates.
-                </>
-              ) : (
-                <>
-                  Your dashboard turns on the moment we can talk to your
-                  inverter and your energy supplier. Nothing is filled in with
-                  averages or fake numbers — you either see your data or you
-                  see this screen.
-                </>
-              )}
+              Add your solar system or your tariff below and we&rsquo;ll
+              estimate what your home uses and generates. Connect an account
+              and those estimates become measured readings.
             </p>
-            {energy && (
-              <div className="mt-4 flex flex-col items-center gap-1">
-                <p className="text-sm font-medium text-foreground">
-                  {energy.displayTariff}
-                </p>
-                <p className="text-xs text-muted">
-                  {[
-                    energy.displayBill,
-                    energy.dailyKwh !== null
-                      ? `about ${energy.dailyKwh.toFixed(1)} kWh a day`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              </div>
-            )}
           </Card.Content>
         </Card>
       )}
