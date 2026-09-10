@@ -170,17 +170,21 @@ call in `itemXml`.
 ### The logos
 
 `snf:logo` is shown above the article in SmartView. SmartFormat specifies a
-**700×100 PNG**.
+**700×100 PNG with an alpha channel** — PNG specifically; SVG is not accepted,
+so these stay raster even though the source is vector.
 
 | File | Used for | Look |
 | --- | --- | --- |
-| `public/smartnews-logo.png` | `snf:logo` | Near-black lockup on white |
+| `public/smartnews-logo.png` | `snf:logo` | Near-black lockup, transparent |
 | `public/smartnews-logo-dark.png` | `snf:darkModeLogo` | White lockup, transparent |
 
-Both are generated from `public/energieBee-logo.svg` (512×80, `#1C1C1E`). The
-dark variant is the same file with the mark colour swapped to white — note that
-the lone `fill="white"` rect in that SVG is the **clipPath bounds**, not a
-background; removing it clips the whole logo away.
+Both are rendered from a committed SVG pair, `public/smartnews-logo.svg` (black)
+and `public/smartnews-logo-dark.svg` (white), each 773×145. Those vectors are the
+source of truth — edit them, then re-run the command below.
+
+Padding is deliberately minimal. 773×145 is 5.33:1 against a 7:1 slot, so a
+generous margin letterboxes the lockup down to ~425px of the 700 and it reads
+small in SmartView's header; at these values it spans ~510px.
 
 Regenerate both together after a brand change, or they will disagree between
 light and dark:
@@ -188,14 +192,25 @@ light and dark:
 ```bash
 node -e '
 const sharp=require("sharp"), fs=require("fs");
-const src=fs.readFileSync("public/energieBee-logo.svg","utf8");
-const dark=src.replace(/#1C1C1E/gi,"#FFFFFF");
-const render=(svg,out,flat)=>{let p=sharp(Buffer.from(svg),{density:600})
-  .resize(660,80,{fit:"contain",background:{r:0,g:0,b:0,alpha:0}})
-  .extend({top:10,bottom:10,left:20,right:20,background:{r:0,g:0,b:0,alpha:0}});
-  if(flat)p=p.flatten({background:flat});return p.png({compressionLevel:9}).toFile(out);};
-render(src,"public/smartnews-logo.png",{r:255,g:255,b:255});
-render(dark,"public/smartnews-logo-dark.png",null);'
+const render=(src,out)=>sharp(fs.readFileSync(src),{density:600})
+  .resize(690,96,{fit:"contain",background:{r:0,g:0,b:0,alpha:0}})
+  .extend({top:2,bottom:2,left:5,right:5,background:{r:0,g:0,b:0,alpha:0}})
+  .png({compressionLevel:9}).toFile(out);
+render("public/smartnews-logo.svg","public/smartnews-logo.png");
+render("public/smartnews-logo-dark.svg","public/smartnews-logo-dark.png");'
+```
+
+**Do not add `.flatten()`.** The format wants an alpha channel, and `sharp`
+applies operations in a fixed internal order rather than call order — `flatten`
+runs *before* `extend`, so flattening onto white produced an opaque white
+rectangle sitting inside a transparent border. It looks correct in any viewer
+that paints transparency white, and shows as a white box the moment SmartView's
+chrome is anything else. Check a regenerated logo by compositing it onto a
+colour, not by opening it:
+
+```bash
+node -e 'require("sharp")("public/smartnews-logo.png")
+  .flatten({background:{r:200,g:60,b:60}}).png().toFile("/tmp/probe.png")'
 ```
 
 ### Validating
