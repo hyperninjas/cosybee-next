@@ -11,6 +11,8 @@ import {
 import { ConnectSunSyncModal } from "@/app/components/sections/connect/ConnectSunSyncModal";
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
 import { PropertySetupModal } from "@/app/components/sections/connect/PropertySetupModal";
+import { EnergySetupModal } from "@/app/components/sections/energy/EnergySetupModal";
+import type { EnergyProvider, EnergySetup } from "@/app/lib/energy-actions";
 
 /**
  * Tier-0 onboarding: rendered when the user has neither SunSync nor Octopus
@@ -114,13 +116,127 @@ function ProviderCard({
  * POST /api/properties first." error, which is what shipped screenshot
  * #1 was showing.
  */
+/**
+ * The no-tariff slot: pick a supplier, right here.
+ *
+ * This replaces a "Connect Octopus" card that was useless to anyone not with
+ * Octopus — which, given the catalog holds twenty-one suppliers, is most
+ * people. Choosing a supplier works for all of them, and connecting an
+ * account is then offered inside the flow to the ones we can actually read.
+ */
+function ChooseSupplierCard({
+  providers,
+  postcode,
+}: {
+  providers: EnergyProvider[];
+  postcode: string;
+}) {
+  return (
+    <Card className="border-border">
+      <Card.Content className="flex h-full flex-col gap-4 p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
+            <ThunderboltFill className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              Add your energy tariff
+            </p>
+            <p className="truncate text-xs text-muted">
+              Your supplier and what you pay
+            </p>
+          </div>
+        </div>
+
+        <ul className="flex flex-col gap-1.5">
+          {[
+            "Your supplier's real unit rates and standing charge",
+            "An estimate of what your energy costs each day",
+            "Connect the account too, if we support it live",
+          ].map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-muted">
+              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-grid)]" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-auto pt-1">
+          <EnergySetupModal providers={providers} postcode={postcode}>
+            <Button variant="primary" fullWidth isDisabled={providers.length === 0}>
+              Choose your supplier
+              <ArrowRight className="size-4" />
+            </Button>
+          </EnergySetupModal>
+        </div>
+      </Card.Content>
+    </Card>
+  );
+}
+
+/**
+ * What a customer on a supplier we can't read live sees in place of the
+ * Octopus connect card.
+ *
+ * Deliberately not a call to action: there is nothing for them to connect
+ * yet. It exists so the slot says "here is what your tariff already buys
+ * you" rather than advertising a provider they told us they aren't with.
+ */
+function TariffCardStatic({ energy }: { energy: EnergySetup }) {
+  return (
+    <Card className="border-border">
+      <Card.Content className="flex flex-col gap-3 p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
+            <ThunderboltFill className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">Your tariff</p>
+            <p className="truncate text-xs text-muted">{energy.displayTariff}</p>
+          </div>
+        </div>
+
+        <ul className="flex flex-col gap-1.5">
+          {[
+            `${energy.providerName} unit rates and standing charge`,
+            energy.displayBill
+              ? `Costs estimated from ${energy.displayBill}`
+              : "Costs estimated from your monthly spend",
+            "Swap to measured readings when we support live " +
+              `${energy.providerName} accounts`,
+          ].map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-muted">
+              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-grid)]" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      </Card.Content>
+    </Card>
+  );
+}
+
 export function ConnectionEmptyState({
   demoHref,
   hasProperty,
+  energy,
+  providers,
+  postcode,
 }: {
   demoHref: string;
   hasProperty: boolean;
+  /** The tariff chosen during onboarding, or null if none yet. */
+  energy?: EnergySetup | null;
+  /** Supplier catalog, for choosing a tariff from here. Only needed when
+   *  `energy` is null — the page skips the fetch otherwise. */
+  providers?: EnergyProvider[];
+  postcode?: string;
 }) {
+  // Matched on the provider name the backend returns rather than a slug: this
+  // is display copy either way, and the name is what the customer picked.
+  const isOctopusCustomer =
+    energy?.providerName.toLowerCase().includes("octopus") ?? false;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header row — matches the layout of DashboardHeader so the two
@@ -184,13 +300,43 @@ export function ConnectionEmptyState({
               <ThunderboltFill className="size-7" />
             </div>
             <h2 className="text-xl font-semibold text-foreground">
-              Connect your home to see live energy
+              {energy
+                ? "Your costs are estimated for now"
+                : "Connect your home to see live energy"}
             </h2>
             <p className="max-w-xl text-sm text-muted">
-              Your dashboard turns on the moment we can talk to your inverter
-              and your energy supplier. Nothing is filled in with averages or
-              fake numbers — you either see your data or you see this screen.
+              {energy ? (
+                <>
+                  We&apos;re estimating your usage from your tariff. Connect
+                  your inverter or your supplier and these become measured
+                  readings instead of estimates.
+                </>
+              ) : (
+                <>
+                  Your dashboard turns on the moment we can talk to your
+                  inverter and your energy supplier. Nothing is filled in with
+                  averages or fake numbers — you either see your data or you
+                  see this screen.
+                </>
+              )}
             </p>
+            {energy && (
+              <div className="mt-4 flex flex-col items-center gap-1">
+                <p className="text-sm font-medium text-foreground">
+                  {energy.displayTariff}
+                </p>
+                <p className="text-xs text-muted">
+                  {[
+                    energy.displayBill,
+                    energy.dailyKwh !== null
+                      ? `about ${energy.dailyKwh.toFixed(1)} kWh a day`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </div>
+            )}
           </Card.Content>
         </Card>
       )}
@@ -212,18 +358,32 @@ export function ConnectionEmptyState({
           ctaLabel="Connect Sunsynk"
           Modal={ConnectSunSyncModal}
         />
-        <ProviderCard
-          accent="grid"
-          title="Connect Octopus"
-          subtitle="Your tariff and grid consumption"
-          bullets={[
-            "Live import, export and standing rates in p/kWh",
-            "Half-hourly grid consumption from your smart meter",
-            "Daily cost and export earnings in £",
-          ]}
-          ctaLabel="Connect Octopus"
-          Modal={ConnectOctopusModal}
-        />
+        {/* Three states for this slot, because one "Connect Octopus" button
+            served only the customers already with Octopus:
+              • no tariff yet   → pick a supplier, same flow as onboarding
+              • with Octopus    → offer the live connection, it's real for them
+              • anyone else     → show what their tariff already gives them */}
+        {energy == null ? (
+          <ChooseSupplierCard
+            providers={providers ?? []}
+            postcode={postcode ?? ""}
+          />
+        ) : isOctopusCustomer ? (
+          <ProviderCard
+            accent="grid"
+            title="Connect Octopus"
+            subtitle="Your tariff and grid consumption"
+            bullets={[
+              "Live import, export and standing rates in p/kWh",
+              "Half-hourly grid consumption from your smart meter",
+              "Daily cost and export earnings in £",
+            ]}
+            ctaLabel="Connect Octopus"
+            Modal={ConnectOctopusModal}
+          />
+        ) : (
+          <TariffCardStatic energy={energy} />
+        )}
       </div>
 
       {/* Footer strip — muted, gives a way back to the demo for design and

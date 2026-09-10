@@ -5,6 +5,9 @@ import { breadcrumbSchema } from "@/app/lib/structured-data";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import { requireOnboarded } from "@/app/lib/server-session";
+import { getEpcRating } from "@/app/lib/epc-actions";
+import { getEnergySetup, listEnergyProviders } from "@/app/lib/energy-actions";
+import { EpcRatingCard } from "@/app/components/sections/epc/EpcRatingCard";
 import { getConnectionState } from "@/app/lib/connection-state";
 import { getActiveProperty, listProperties } from "@/app/lib/property-state";
 import type { ActiveProperty } from "@/app/lib/property-state";
@@ -92,16 +95,42 @@ export default async function EnergyFlowHomePage({
   // memoised so re-reads within this render don't hit the backend twice.
   // Property state runs alongside so the empty state can gate the provider
   // step on whether the user has a home configured yet.
-  const [{ sunsync, octopus }, property, properties] = await Promise.all([
+  const [{ sunsync, octopus }, property, properties, epc, energy] = await Promise.all([
     getConnectionState(),
     getActiveProperty(),
     listProperties(),
+    // Fetched here rather than beside the live data below so it is available
+    // to BOTH branches — a home has an energy rating whether or not any
+    // hardware is linked. Resolves to an empty state rather than throwing
+    // when the backend has no profile.
+    getEpcRating(),
+    // The tariff chosen in onboarding. Drives the empty state's copy and
+    // decides whether the Octopus card is relevant to this customer at all.
+    getEnergySetup(),
   ]);
   const anyConnected = sunsync.connected || octopus.connected;
 
+  // Only fetched when there's no tariff yet: that is the sole branch that
+  // renders the picker, and pulling twenty-one suppliers on every dashboard
+  // load to render nothing would be waste on the common path.
+  const providers = energy === null ? await listEnergyProviders(property?.postcode) : [];
+
   if (!anyConnected)
     return wrapper(
-      <ConnectionEmptyState demoHref="?demo=1" hasProperty={property !== null} />,
+      <div className="flex flex-col gap-4">
+        {/* The rating comes from the home itself, not from a provider, so it
+            belongs on this screen too. Without it, anyone who finishes
+            onboarding and skips both connect steps has no way to see their
+            estimate or reach the refine flow. */}
+        {epc.hasProfile && <EpcRatingCard rating={epc} />}
+        <ConnectionEmptyState
+          demoHref="?demo=1"
+          hasProperty={property !== null}
+          energy={energy}
+          providers={providers}
+          postcode={property?.postcode ?? ""}
+        />
+      </div>,
     );
 
   // Live data — server pre-fetches today's flow, history and stats so the
@@ -141,7 +170,7 @@ export default async function EnergyFlowHomePage({
           the Connect CTAs once ANY provider was linked, which meant you
           could connect Octopus first and then have no way to add SunSync
           from the page. */}
-      <ProviderStatusBar sunsync={sunsync} octopus={octopus} />
+      <ProviderStatusBar sunsync={sunsync} octopus={octopus} epc={epc} />
 
       {/* Behaviour-only: refreshes the page while Octopus is still back-
           filling so the Octopus tile subtitle flips from
