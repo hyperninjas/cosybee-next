@@ -4,6 +4,8 @@ import { ConnectSunSyncModal } from "@/app/components/sections/connect/ConnectSu
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
 import { ManageSunSyncModal } from "@/app/components/sections/manage/ManageSunSyncModal";
 import { ManageOctopusModal } from "@/app/components/sections/manage/ManageOctopusModal";
+import { EpcRatingCard } from "@/app/components/sections/epc/EpcRatingCard";
+import type { EpcRating } from "@/app/lib/epc-actions";
 
 /**
  * Persistent connections summary on the dashboard.
@@ -134,8 +136,9 @@ function formatRelativeSync(iso: string | null): string {
 export function ProviderStatusBar({
   sunsync,
   octopus,
+  epc,
   activePropertyLabel,
-}: ProviderStatusBarProps) {
+}: ProviderStatusBarProps & { epc?: EpcRating }) {
   const sunsyncSubtitle = sunsync.connected
     ? formatRelativeSync(sunsync.lastSyncedAt)
     : "Add your inverter for live power flow";
@@ -169,8 +172,11 @@ export function ProviderStatusBar({
   // Sunsynk block and the Octopus block are unrelated concerns (one drives
   // the flow diagram, the other drives cost), and a shared border was
   // grouping them by chance of layout rather than by meaning.
+  // The rating sits between the two providers rather than after them: the
+  // inverter tile is about power, the Octopus tile about cost, and the
+  // home's own efficiency is what connects the two.
   return (
-    <div className="grid gap-3 md:grid-cols-2">
+    <div className={`grid gap-3 ${epc ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
       <ProviderRow
         accent="solar"
         title="Sunsynk"
@@ -179,6 +185,7 @@ export function ProviderStatusBar({
         ConnectModal={ConnectSunSyncModal}
         ManageModal={SunSyncManage}
       />
+      {epc && <EpcRatingCard rating={epc} />}
       <ProviderRow
         accent="grid"
         title="Octopus"
