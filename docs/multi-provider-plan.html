@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Connecting More Providers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --paper:        #FAF8F1;
+    --surface:      #FFFFFF;
+    --surface-2:    #F2EFE4;
+    --ink:          #17160F;
+    --ink-soft:     #55523F;
+    --ink-faint:    #83806B;
+    --rule:         #E2DDCA;
+    --honey:        #E4D84B;
+    --honey-deep:   #7C7213;
+    --honey-wash:   #FBF6D2;
+    --live:         #2F7D3A;
+    --live-wash:    #E4F1E2;
+    --declared:     #A8620E;
+    --declared-wash:#FBEEDC;
+    --catalog:      #75725F;
+    --catalog-wash: #EDEAE0;
+    --stop:         #A32F2F;
+    --stop-wash:    #F8E7E5;
+    --shadow: 0 1px 2px rgba(23,22,15,.05), 0 10px 28px -14px rgba(23,22,15,.16);
+    --display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#131209; --surface:#1C1B12; --surface-2:#24231A;
+      --ink:#F4F1E4; --ink-soft:#BDB9A5; --ink-faint:#8C8977; --rule:#33321F;
+      --honey:#E4D84B; --honey-deep:#E9DF7A; --honey-wash:#2A2811;
+      --live:#7FC08A; --live-wash:#1B2A1D;
+      --declared:#E0A253; --declared-wash:#2C2113;
+      --catalog:#9A978A; --catalog-wash:#262519;
+      --stop:#E08B84; --stop-wash:#2E1917;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#131209; --surface:#1C1B12; --surface-2:#24231A;
+    --ink:#F4F1E4; --ink-soft:#BDB9A5; --ink-faint:#8C8977; --rule:#33321F;
+    --honey:#E4D84B; --honey-deep:#E9DF7A; --honey-wash:#2A2811;
+    --live:#7FC08A; --live-wash:#1B2A1D;
+    --declared:#E0A253; --declared-wash:#2C2113;
+    --catalog:#9A978A; --catalog-wash:#262519;
+    --stop:#E08B84; --stop-wash:#2E1917;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 52rem; margin: 0 auto;
+    padding: 3.5rem 1.5rem 6rem;
+    display: flex; flex-direction: column; gap: 4.5rem;
+  }
+  h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -0.02em; }
+  h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 800; line-height: 1.06; }
+  h2 { font-size: clamp(1.45rem, 3vw, 1.95rem); font-weight: 700; line-height: 1.18; }
+  h3 { font-size: 1.05rem; font-weight: 700; }
+  p { margin: 0; }
+  :focus-visible { outline: 2px solid var(--honey-deep); outline-offset: 3px; }
+  .mono { font-family: var(--mono); font-size: .86em; }
+
+  .step-label {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  section { display: flex; flex-direction: column; gap: 1.4rem; }
+  .sechead { display: flex; flex-direction: column; gap: .55rem; }
+  .say { font-size: 1.08rem; color: var(--ink-soft); max-width: 38rem; }
+  .say strong { color: var(--ink); font-weight: 600; }
+
+  header { display: flex; flex-direction: column; gap: 1.2rem; }
+  .honeyrule { height: 5px; width: 4rem; background: var(--honey); border-radius: 3px; }
+  .lede { font-size: 1.25rem; color: var(--ink-soft); max-width: 36rem; }
+
+  /* ── Big simple comparison ──────────────────────────────── */
+  .scoreboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+  .score {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 1.4rem 1.5rem;
+    display: flex; flex-direction: column; gap: .35rem; box-shadow: var(--shadow);
+  }
+  .score .big {
+    font-size: 3.4rem; font-weight: 800; line-height: 1;
+    letter-spacing: -0.04em; font-variant-numeric: tabular-nums;
+  }
+  .score .of { font-size: 1rem; color: var(--ink-faint); font-weight: 500; }
+  .score .cap { font-size: .95rem; color: var(--ink-soft); }
+  .score .works { color: var(--live); }
+
+  /* ── Story ───────────────────────────────────────────────── */
+  .story {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .story-row {
+    display: grid; grid-template-columns: 8.5rem 1fr auto;
+    gap: 1rem; align-items: center;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--rule);
+  }
+  .story-row:last-child { border-bottom: 0; }
+  .story-row .who { font-family: var(--mono); font-size: .78rem; color: var(--ink-faint); }
+  .story-row .said { font-size: .98rem; }
+  .outcome {
+    font-size: .82rem; font-weight: 600; white-space: nowrap;
+    padding: .28rem .7rem; border-radius: 999px;
+  }
+  .outcome.bad  { background: var(--stop-wash); color: var(--stop); }
+  .outcome.good { background: var(--live-wash); color: var(--live); }
+  .outcome.ok   { background: var(--declared-wash); color: var(--declared); }
+  @media (max-width: 34rem) {
+    .story-row { grid-template-columns: 1fr; gap: .4rem; }
+    .story-row .outcome { justify-self: start; }
+  }
+
+  /* ── Three levels ───────────────────────────────────────── */
+  .levels { display: flex; flex-direction: column; gap: .8rem; }
+  .level {
+    display: grid; grid-template-columns: 3.2rem 1fr; gap: 1.2rem;
+    background: var(--surface); border: 1px solid var(--rule);
+    border-left: 4px solid var(--tone); border-radius: 0 14px 14px 0;
+    padding: 1.2rem 1.4rem;
+  }
+  .level .mark {
+    font-size: 1.7rem; font-weight: 800; color: var(--tone);
+    line-height: 1.2; letter-spacing: -0.03em;
+  }
+  .level .body { display: flex; flex-direction: column; gap: .45rem; }
+  .level h3 { color: var(--tone); }
+  .level p { font-size: .96rem; color: var(--ink-soft); }
+  .level .gets { font-size: .9rem; color: var(--ink); }
+  .level .gets b { font-weight: 600; }
+  .lv1 { --tone: var(--catalog); }
+  .lv2 { --tone: var(--declared); }
+  .lv3 { --tone: var(--live); }
+
+  /* ── Screens ────────────────────────────────────────────── */
+  .screens { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.1rem; }
+  .screen { border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .screen > .bar {
+    padding: .8rem 1.2rem; font-size: .88rem; font-weight: 700;
+    border-bottom: 1px solid var(--rule); background: var(--surface-2); color: var(--ink-soft);
+  }
+  .screen.after > .bar { background: var(--honey-wash); color: var(--honey-deep); border-bottom-color: var(--honey); }
+  .screen .inner { padding: 1.2rem; display: flex; flex-direction: column; gap: .75rem; }
+  .q { font-size: 1.02rem; font-weight: 700; }
+  .opt {
+    border: 1px solid var(--rule); border-radius: 9px; padding: .55rem .8rem;
+    font-size: .9rem; color: var(--ink-soft); display: flex; align-items: center; gap: .5rem;
+  }
+  .opt.pick { border-color: var(--honey); background: var(--honey-wash); color: var(--ink); font-weight: 600; }
+  .opt .dot { width: 9px; height: 9px; border-radius: 999px; border: 1px solid var(--ink-faint); flex: none; }
+  .opt.pick .dot { border-color: var(--honey-deep); background: var(--honey-deep); }
+  .note { font-size: .85rem; color: var(--ink-faint); }
+  .note.warm { color: var(--live); }
+
+  /* ── Work ───────────────────────────────────────────────── */
+  .work { display: flex; flex-direction: column; gap: .7rem; counter-reset: w; }
+  .job {
+    display: grid; grid-template-columns: 2.1rem 1fr; gap: 1rem;
+    padding: 1.05rem 1.3rem; background: var(--surface);
+    border: 1px solid var(--rule); border-radius: 12px; align-items: start;
+  }
+  .job::before {
+    counter-increment: w; content: counter(w);
+    font-family: var(--mono); font-size: .8rem; font-weight: 500;
+    background: var(--honey); color: #17160F; border-radius: 6px;
+    text-align: center; line-height: 1.7rem; height: 1.75rem;
+  }
+  .job .t { font-weight: 700; font-size: .98rem; }
+  .job .d { font-size: .92rem; color: var(--ink-soft); }
+
+  /* ── Asks ───────────────────────────────────────────────── */
+  .asks { display: flex; flex-direction: column; gap: .7rem; }
+  .ask {
+    background: var(--honey-wash); border: 1px solid var(--honey);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; flex-direction: column; gap: .3rem;
+  }
+  .ask q { font-weight: 700; font-size: 1rem; quotes: none; }
+  .ask p { font-size: .92rem; color: var(--ink-soft); }
+
+  details.tech {
+    border: 1px solid var(--rule); border-radius: 12px;
+    background: var(--surface); padding: 1rem 1.3rem;
+  }
+  details.tech summary {
+    cursor: pointer; font-weight: 600; font-size: .95rem; color: var(--ink-soft);
+  }
+  details.tech .in { display: flex; flex-direction: column; gap: .7rem; padding-top: .9rem; font-size: .92rem; color: var(--ink-soft); }
+  details.tech code {
+    font-family: var(--mono); font-size: .84em; background: var(--surface-2);
+    padding: .1em .4em; border-radius: 3px; color: var(--ink);
+  }
+
+  footer { border-top: 1px solid var(--rule); padding-top: 1.2rem; font-size: .85rem; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="step-label">EnergieBee · plan</p>
+    <h1>Connecting more providers</h1>
+    <div class="honeyrule"></div>
+    <p class="lede">
+      Right now our app only works properly if you are with Octopus and own a Sunsynk
+      inverter. Everyone else hits a dead end. Here is how we fix that.
+    </p>
+  </header>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">The problem</p>
+      <h2>We know many providers. We can only use two.</h2>
+    </div>
+    <p class="say">
+      Our database already has <strong>21 energy suppliers</strong> and
+      <strong>12 solar brands</strong> in it. We use them for prices and for
+      guessing equipment. But a customer can only <strong>connect their account</strong>
+      to two of them.
+    </p>
+
+    <div class="scoreboard">
+      <div class="score">
+        <div><span class="big works">1</span> <span class="of">of 21</span></div>
+        <p class="cap">Energy suppliers a customer can connect.<br>Only Octopus.</p>
+      </div>
+      <div class="score">
+        <div><span class="big works">1</span> <span class="of">of 12</span></div>
+        <p class="cap">Solar brands a customer can connect.<br>Only Sunsynk.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">What it feels like</p>
+      <h2>Meet a normal customer</h2>
+    </div>
+    <p class="say">
+      She is with <strong>EDF</strong> and has a <strong>GivEnergy</strong> battery.
+      Both are in our database. This is her sign-up today.
+    </p>
+
+    <div class="story">
+      <div class="story-row">
+        <span class="who">Step 1</span>
+        <span class="said">She types her address</span>
+        <span class="outcome good">Works</span>
+      </div>
+      <div class="story-row">
+        <span class="who">Step 2</span>
+        <span class="said">She answers when her home was built</span>
+        <span class="outcome good">Works</span>
+      </div>
+      <div class="story-row">
+        <span class="who">Step 3</span>
+        <span class="said">“Connect Sunsynk” — but she has GivEnergy</span>
+        <span class="outcome bad">Can only skip</span>
+      </div>
+      <div class="story-row">
+        <span class="who">Step 4</span>
+        <span class="said">“Connect Octopus” — but she is with EDF</span>
+        <span class="outcome bad">Can only skip</span>
+      </div>
+      <div class="story-row">
+        <span class="who">Result</span>
+        <span class="said">An empty dashboard. We never even asked who she is with.</span>
+        <span class="outcome bad">Nothing</span>
+      </div>
+    </div>
+
+    <p class="say">
+      This is the real problem. Not that we cannot read her GivEnergy battery — that is
+      hard and takes time. The problem is <strong>we never asked</strong>. We already
+      know EDF's prices. We could have estimated her bill. Instead she got a blank screen.
+    </p>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">The idea</p>
+      <h2>Three levels instead of on-or-off</h2>
+    </div>
+    <p class="say">
+      Today a provider is either connected or invisible. That is why she got nothing.
+      If we split it into three levels, <strong>everybody gets something</strong>.
+    </p>
+
+    <div class="levels">
+      <div class="level lv1">
+        <span class="mark">1</span>
+        <div class="body">
+          <h3>We know them</h3>
+          <p>The provider is in our list. Nothing to do with this customer yet.</p>
+          <p class="gets">She sees: <b>EDF in the dropdown.</b></p>
+        </div>
+      </div>
+      <div class="level lv2">
+        <span class="mark">2</span>
+        <div class="body">
+          <h3>She tells us</h3>
+          <p>She picks EDF and GivEnergy from a list. No password, no account. Just her word.</p>
+          <p class="gets">She gets: <b>estimated bills using EDF's real prices, and solar figures sized to her battery.</b> We label them “estimated”, honestly.</p>
+        </div>
+      </div>
+      <div class="level lv3">
+        <span class="mark">3</span>
+        <div class="body">
+          <h3>She connects</h3>
+          <p>She logs in to her provider. Real data starts flowing.</p>
+          <p class="gets">She gets: <b>real meter readings and live power.</b> Estimates become measurements.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="say">
+      Level 3 is what we have today, for two providers. <strong>Level 2 is the big win</strong>
+      — it works for all 33 providers immediately, and it needs no deal with anyone.
+    </p>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">The screens</p>
+      <h2>Same four steps, different question</h2>
+    </div>
+    <p class="say">
+      We do not add steps. We change what step 3 and step 4 ask.
+    </p>
+
+    <div class="screens">
+      <div class="screen">
+        <div class="bar">Today · step 4</div>
+        <div class="inner">
+          <p class="q">Connect your Octopus account</p>
+          <div class="opt"><span class="dot"></span> Email and password</div>
+          <p class="note">Skip for now</p>
+          <p class="note">If she is not with Octopus, skip is the only button that applies to her.</p>
+        </div>
+      </div>
+      <div class="screen after">
+        <div class="bar">Proposed · step 4</div>
+        <div class="inner">
+          <p class="q">Who is your energy supplier?</p>
+          <div class="opt pick"><span class="dot"></span> EDF Energy</div>
+          <div class="opt"><span class="dot"></span> British Gas</div>
+          <div class="opt"><span class="dot"></span> Octopus Energy</div>
+          <p class="note">…and 18 more</p>
+          <p class="note warm">→ “We'll use EDF's rates to estimate your costs.”</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="say">
+      If she picks <strong>Octopus</strong>, we then offer to log in — exactly like today,
+      nothing lost. If she picks <strong>EDF</strong>, we save it and use their prices.
+      Either way she finishes the step. Nobody skips any more.
+    </p>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">The work</p>
+      <h2>Four jobs, in this order</h2>
+    </div>
+
+    <div class="work">
+      <div class="job">
+        <div>
+          <p class="t">Let people tell us who they are with</p>
+          <p class="d">Show all 21 suppliers and 12 solar brands. Save the answer. Use their prices for estimates. This alone fixes the empty dashboard for most customers.</p>
+        </div>
+      </div>
+      <div class="job">
+        <div>
+          <p class="t">Tidy up our own code first</p>
+          <p class="d">Today Octopus and Sunsynk are written twice, separately. We replace that with one list. Nothing changes on screen — but after this, adding a provider is a small job instead of a big one.</p>
+        </div>
+      </div>
+      <div class="job">
+        <div>
+          <p class="t">Do the same on the server</p>
+          <p class="d">The server has the right design already, but the provider names are typed in by hand in three places. Make that list flexible.</p>
+        </div>
+      </div>
+      <div class="job">
+        <div>
+          <p class="t">Add a real third provider</p>
+          <p class="d">Pick one and connect it properly, end to end. If jobs 1–3 were done right, this is quick — and it proves the rest works.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="say">
+      Job 1 is the one customers feel. Jobs 2 and 3 are invisible but make everything
+      after them cheap. Job 4 is the test.
+    </p>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="step-label">Over to you</p>
+      <h2>Four things I need you to decide</h2>
+    </div>
+    <div class="asks">
+      <div class="ask">
+        <q>Which provider should be the third one?</q>
+        <p>A solar brand like GivEnergy is much easier than a big energy supplier, because we do not need a business agreement first. I suggest a solar brand.</p>
+      </div>
+      <div class="ask">
+        <q>If she only tells us her supplier, is sign-up finished?</q>
+        <p>I think yes — otherwise most people still end on a skip. But it means “finished” no longer means “connected”.</p>
+      </div>
+      <div class="ask">
+        <q>Should we say “coming soon” for providers we cannot connect?</q>
+        <p>It is honest, and it tells us which provider to build next based on real demand. But it is a promise we then have to keep.</p>
+      </div>
+      <div class="ask">
+        <q>Should I do the server work too?</q>
+        <p>Jobs 3 and 4 are in the other project (<span class="mono">eb-auth</span>). I have only touched the website so far.</p>
+      </div>
+    </div>
+  </section>
+
+  <details class="tech">
+    <summary>Technical detail — for whoever builds it</summary>
+    <div class="in">
+      <p>
+        The server is already built the right way. <code>integration-status.ts</code> is a
+        neutral registry: each provider registers itself at startup, and one endpoint reads
+        them all back without knowing any provider by name. Its own comment says
+        <code>"octopus" | "sunsynk" | future</code>.
+      </p>
+      <p>Three places break that and all are small:</p>
+      <p>
+        <b>1.</b> <code>KNOWN_INTEGRATIONS = ["octopus", "sunsynk"]</code> — a hardcoded list
+        sitting directly above the registry designed to avoid it.<br>
+        <b>2.</b> An <code>if (kind === "octopus") … else if (kind === "sunsynk")</code> chain
+        decides who gets prompted to connect.<br>
+        <b>3.</b> Connect routes are per-vendor (<code>/api/sunsynk/connect</code>). That is
+        fine to keep — each login really is different — but the website needs one lookup
+        table instead of two hand-written modals.
+      </p>
+      <p>
+        Website side: <code>connection-state.ts</code> declares two separate status types and
+        there are four modals, two per vendor. These become one provider definition — id,
+        name, logo, which fields its form needs — rendered by one generic modal.
+      </p>
+    </div>
+  </details>
+
+  <footer>
+    Numbers checked against the running dev database on 10 September 2026:
+    21 energy suppliers, 12 solar brands, 2 connectable.
+  </footer>
+
+</div>
+</body>
+</html>
