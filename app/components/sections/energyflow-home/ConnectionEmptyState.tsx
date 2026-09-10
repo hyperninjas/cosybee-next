@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Button, Card, Chip } from "@heroui/react";
+import { Button, Card, Chip, Surface } from "@heroui/react";
 import {
   ArrowRight,
   Check,
@@ -70,12 +70,16 @@ function SetupCard({
       <Card.Content className="flex h-full flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div
+            <Surface
+              variant="transparent"
               className="flex size-9 shrink-0 items-center justify-center rounded-full"
-              style={{ backgroundColor: `color-mix(in oklch, ${tone} 12%, transparent)`, color: tone }}
+              style={{
+                backgroundColor: `color-mix(in oklch, ${tone} 12%, transparent)`,
+                color: tone,
+              }}
             >
               {icon}
-            </div>
+            </Surface>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground">{title}</p>
               <p className="truncate text-xs text-muted">{subtitle}</p>

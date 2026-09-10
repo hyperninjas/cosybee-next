@@ -1,4 +1,4 @@
-import { Meter } from "@heroui/react";
+import { Card, Meter, Surface } from "@heroui/react";
 
 import type { EnergySetup } from "@/app/lib/energy-actions";
 import type { SolarSetup } from "@/app/lib/solar-actions";
@@ -92,7 +92,8 @@ export function EstimatePreview({
   if (tiles.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-6">
+    <Card className="border-border">
+      <Card.Content className="flex flex-col gap-5 p-6">
       <div className="flex flex-col gap-1">
         <p className="text-xs font-medium uppercase tracking-wider text-muted">
           Estimated
@@ -108,9 +109,10 @@ export function EstimatePreview({
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (
-          <div
+          <Surface
             key={tile.label}
-            className="flex flex-col gap-1 rounded-xl bg-surface-secondary p-4"
+            variant="secondary"
+            className="flex flex-col gap-1 rounded-xl p-4"
           >
             <span
               className="text-xs font-medium"
@@ -124,7 +126,7 @@ export function EstimatePreview({
               </span>
               <span className="text-xs text-muted">{tile.unit}</span>
             </span>
-          </div>
+          </Surface>
         ))}
       </div>
 
@@ -154,6 +156,7 @@ export function EstimatePreview({
           </Meter.Track>
         </Meter>
       )}
-    </section>
+      </Card.Content>
+    </Card>
   );
 }
