@@ -80,13 +80,26 @@ export function EstimatePreview({
     });
   }
 
-  // The one figure worth deriving: how much of a year's usage the array
-  // could cover. Both sides are estimates, so this is only shown when we
-  // actually hold both — never half-computed from a default.
+  // A year of generation against a year of usage. Both sides are estimates,
+  // so this is only shown when we hold both — never half-computed from a
+  // default.
+  //
+  // ⚠️ This is a comparison of annual totals, NOT self-sufficiency, and the
+  // copy has to say so. Solar peaks at midday and in summer while a home's
+  // demand is evenings and winter, so a house that generates 107% of what it
+  // uses still imports most winter evenings — real self-consumption for a
+  // domestic array with a battery is nearer 40-60%. An earlier version read
+  // "your panels could cover about 100% of what you use", which invites the
+  // reader to expect a near-zero bill.
+  //
+  // Computing the true figure is possible — /forecast/solar returns seasonal
+  // hourly curves and the load profile returns an hourly distribution — but
+  // it is a real piece of work, not a ratio. Until then, say plainly what
+  // this number is.
   const annualUseKwh = dailyKwh !== null ? dailyKwh * DAYS_PER_YEAR : null;
-  const coverage =
+  const ratioPct =
     annualSolarKwh !== null && annualUseKwh !== null && annualUseKwh > 0
-      ? Math.min(100, Math.round((annualSolarKwh / annualUseKwh) * 100))
+      ? Math.round((annualSolarKwh / annualUseKwh) * 100)
       : null;
 
   if (tiles.length === 0) return null;
@@ -130,21 +143,23 @@ export function EstimatePreview({
         ))}
       </div>
 
-      {coverage !== null && (
+      {ratioPct !== null && (
         <Meter
-          value={coverage}
+          // The bar is capped at the track, but the figure beside it is not:
+          // an array that out-generates the home is worth saying out loud.
+          value={Math.min(100, ratioPct)}
           maxValue={100}
-          aria-label="Share of your yearly usage your panels could cover"
+          aria-label="A year of generation compared with a year of usage"
           className="flex flex-col gap-2"
         >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-sm text-foreground">
-              Your panels could cover about{" "}
-              <span className="font-semibold tabular-nums">{coverage}%</span> of
-              what you use in a year
+              Over a year your panels make about{" "}
+              <span className="font-semibold tabular-nums">{ratioPct}%</span> of
+              what your home uses
             </span>
             <span className="text-xs text-muted tabular-nums">
-              {Math.round(annualSolarKwh ?? 0).toLocaleString()} of{" "}
+              {Math.round(annualSolarKwh ?? 0).toLocaleString()} vs{" "}
               {Math.round(annualUseKwh ?? 0).toLocaleString()} kWh
             </span>
           </div>
@@ -154,6 +169,11 @@ export function EstimatePreview({
               style={{ backgroundColor: "var(--efh-solar)" }}
             />
           </Meter.Track>
+          <p className="text-xs text-muted">
+            Totals for the year, not how much you&rsquo;d actually use
+            yourself &mdash; panels generate around midday and in summer, so
+            some of it gets exported rather than used at home.
+          </p>
         </Meter>
       )}
       </Card.Content>
