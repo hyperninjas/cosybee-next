@@ -12,7 +12,9 @@ import { ConnectSunSyncModal } from "@/app/components/sections/connect/ConnectSu
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
 import { PropertySetupModal } from "@/app/components/sections/connect/PropertySetupModal";
 import { EnergySetupModal } from "@/app/components/sections/energy/EnergySetupModal";
+import { SolarSetupModal } from "@/app/components/sections/solar/SolarSetupModal";
 import type { EnergyProvider, EnergySetup } from "@/app/lib/energy-actions";
+import type { SolarOptions, SolarSetup } from "@/app/lib/solar-actions";
 
 /**
  * Tier-0 onboarding: rendered when the user has neither SunSync nor Octopus
@@ -116,6 +118,113 @@ function ProviderCard({
  * POST /api/properties first." error, which is what shipped screenshot
  * #1 was showing.
  */
+/**
+ * What a customer with a brand we can't read live sees in the solar slot.
+ *
+ * Their system is described, so we can say what it should generate — the
+ * point being that declaring it was worth something, not that they're
+ * missing out on a connection they can't have.
+ */
+function SolarCardStatic({ solar }: { solar: SolarSetup }) {
+  const a = solar.analysis;
+  const lines = [
+    a.capacityKwp !== null ? `${a.capacityKwp} kWp of panels` : null,
+    a.estimatedAnnualGenerationKwh !== null
+      ? `About ${a.estimatedAnnualGenerationKwh.toLocaleString()} kWh a year, estimated`
+      : null,
+    a.batteryCapacityKwh !== null && a.batteryCapacityKwh > 0
+      ? `${a.batteryCapacityKwh} kWh battery storage`
+      : null,
+    a.segEligible ? "Eligible to be paid for what you export" : null,
+  ].filter((line): line is string => line !== null);
+
+  return (
+    <Card className="border-border">
+      <Card.Content className="flex flex-col gap-3 p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
+            <Sun className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">Your solar</p>
+            <p className="truncate text-xs text-muted">
+              {solar.combinationLabel || solar.brandLabel}
+            </p>
+          </div>
+        </div>
+
+        <ul className="flex flex-col gap-1.5">
+          {lines.map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-muted">
+              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-solar)]" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      </Card.Content>
+    </Card>
+  );
+}
+
+/**
+ * The nothing-declared slot: describe your system, right here.
+ *
+ * Replaces a "Connect Sunsynk" button that only ever applied to one brand
+ * of the twelve we model.
+ */
+function DeclareSolarCard({ options }: { options: SolarOptions | null }) {
+  return (
+    <Card className="border-border">
+      <Card.Content className="flex h-full flex-col gap-4 p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
+            <Sun className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              Add your solar and battery
+            </p>
+            <p className="truncate text-xs text-muted">
+              Any brand — we model twelve
+            </p>
+          </div>
+        </div>
+
+        <ul className="flex flex-col gap-1.5">
+          {[
+            "What your panels should generate each year",
+            "Your battery capacity and system age",
+            "Connect the inverter too, if we support it live",
+          ].map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-muted">
+              <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-solar)]" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-auto pt-1">
+          {options === null ? (
+            <ConnectSunSyncModal>
+              <Button variant="primary" fullWidth>
+                Connect Sunsynk
+                <ArrowRight className="size-4" />
+              </Button>
+            </ConnectSunSyncModal>
+          ) : (
+            <SolarSetupModal options={options}>
+              <Button variant="primary" fullWidth>
+                Add your system
+                <ArrowRight className="size-4" />
+              </Button>
+            </SolarSetupModal>
+          )}
+        </div>
+      </Card.Content>
+    </Card>
+  );
+}
+
 /**
  * The no-tariff slot: pick a supplier, right here.
  *
@@ -222,6 +331,8 @@ export function ConnectionEmptyState({
   energy,
   providers,
   postcode,
+  solar,
+  solarOptions,
 }: {
   demoHref: string;
   hasProperty: boolean;
@@ -231,11 +342,17 @@ export function ConnectionEmptyState({
    *  `energy` is null — the page skips the fetch otherwise. */
   providers?: EnergyProvider[];
   postcode?: string;
+  /** The declared solar system, or null if none yet. */
+  solar?: SolarSetup | null;
+  /** Brand catalog, only needed when `solar` is null. */
+  solarOptions?: SolarOptions | null;
 }) {
   // Matched on the provider name the backend returns rather than a slug: this
   // is display copy either way, and the name is what the customer picked.
   const isOctopusCustomer =
     energy?.providerName.toLowerCase().includes("octopus") ?? false;
+  const isSunsynkOwner =
+    solar?.brandLabel.toLowerCase().includes("sunsynk") ?? false;
 
   return (
     <div className="flex flex-col gap-4">
@@ -346,18 +463,28 @@ export function ConnectionEmptyState({
         className={`grid gap-4 lg:grid-cols-2 ${hasProperty ? "" : "pointer-events-none opacity-40"}`}
         aria-hidden={!hasProperty}
       >
-        <ProviderCard
-          accent="solar"
-          title="Connect Sunsynk"
-          subtitle="Your inverter and battery"
-          bullets={[
-            "Live solar generation, battery charge and discharge",
-            "Home load and grid flow in real time",
-            "Daily kWh totals and 24-hour power history",
-          ]}
-          ctaLabel="Connect Sunsynk"
-          Modal={ConnectSunSyncModal}
-        />
+        {/* Same three states as the tariff slot opposite: nothing declared
+            offers the flow, a Sunsynk owner gets the live connect because
+            it's real for them, everyone else sees what their declared
+            system already gives them. */}
+        {solar == null ? (
+          <DeclareSolarCard options={solarOptions ?? null} />
+        ) : isSunsynkOwner ? (
+          <ProviderCard
+            accent="solar"
+            title="Connect Sunsynk"
+            subtitle="Your inverter and battery"
+            bullets={[
+              "Live solar generation, battery charge and discharge",
+              "Home load and grid flow in real time",
+              "Daily kWh totals and 24-hour power history",
+            ]}
+            ctaLabel="Connect Sunsynk"
+            Modal={ConnectSunSyncModal}
+          />
+        ) : (
+          <SolarCardStatic solar={solar} />
+        )}
         {/* Three states for this slot, because one "Connect Octopus" button
             served only the customers already with Octopus:
               • no tariff yet   → pick a supplier, same flow as onboarding

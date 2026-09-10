@@ -7,6 +7,7 @@ import { Section } from "@/app/components/ui/Section";
 import { requireOnboarded } from "@/app/lib/server-session";
 import { getEpcRating } from "@/app/lib/epc-actions";
 import { getEnergySetup, listEnergyProviders } from "@/app/lib/energy-actions";
+import { getSolarOptions, getSolarSetup } from "@/app/lib/solar-actions";
 import { EpcRatingCard } from "@/app/components/sections/epc/EpcRatingCard";
 import { getConnectionState } from "@/app/lib/connection-state";
 import { getActiveProperty, listProperties } from "@/app/lib/property-state";
@@ -95,7 +96,8 @@ export default async function EnergyFlowHomePage({
   // memoised so re-reads within this render don't hit the backend twice.
   // Property state runs alongside so the empty state can gate the provider
   // step on whether the user has a home configured yet.
-  const [{ sunsync, octopus }, property, properties, epc, energy] = await Promise.all([
+  const [{ sunsync, octopus }, property, properties, epc, energy, solar] =
+    await Promise.all([
     getConnectionState(),
     getActiveProperty(),
     listProperties(),
@@ -107,13 +109,20 @@ export default async function EnergyFlowHomePage({
     // The tariff chosen in onboarding. Drives the empty state's copy and
     // decides whether the Octopus card is relevant to this customer at all.
     getEnergySetup(),
+    // The declared solar system, for the slot opposite the tariff.
+    getSolarSetup(),
   ]);
   const anyConnected = sunsync.connected || octopus.connected;
 
   // Only fetched when there's no tariff yet: that is the sole branch that
   // renders the picker, and pulling twenty-one suppliers on every dashboard
   // load to render nothing would be waste on the common path.
-  const providers = energy === null ? await listEnergyProviders(property?.postcode) : [];
+  // Both catalogs are fetched only when their slot needs a picker, so the
+  // common path doesn't pay for options it won't render.
+  const [providers, solarOptions] = await Promise.all([
+    energy === null ? listEnergyProviders(property?.postcode) : Promise.resolve([]),
+    solar === null ? getSolarOptions() : Promise.resolve(null),
+  ]);
 
   if (!anyConnected)
     return wrapper(
@@ -129,6 +138,8 @@ export default async function EnergyFlowHomePage({
           energy={energy}
           providers={providers}
           postcode={property?.postcode ?? ""}
+          solar={solar}
+          solarOptions={solarOptions}
         />
       </div>,
     );
