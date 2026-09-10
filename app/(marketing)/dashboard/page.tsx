@@ -117,14 +117,16 @@ export default async function EnergyFlowHomePage({
   // Only fetched when there's no tariff yet: that is the sole branch that
   // renders the picker, and pulling twenty-one suppliers on every dashboard
   // load to render nothing would be waste on the common path.
-  // Both catalogs are fetched only when their slot needs a picker, so the
-  // common path doesn't pay for options it won't render.
-  const [providers, solarOptions] = await Promise.all([
-    energy === null ? listEnergyProviders(property?.postcode) : Promise.resolve([]),
-    solar === null ? getSolarOptions() : Promise.resolve(null),
-  ]);
+  if (!anyConnected) {
+    // Fetched inside this branch so a connected dashboard never pays for
+    // them, and unconditionally within it because both slots offer a way to
+    // change the answer — a "Change tariff" button with no catalog behind it
+    // would open an empty dialog.
+    const [providers, solarOptions] = await Promise.all([
+      listEnergyProviders(property?.postcode),
+      getSolarOptions(),
+    ]);
 
-  if (!anyConnected)
     return wrapper(
       <div className="flex flex-col gap-4">
         {/* The rating comes from the home itself, not from a provider, so it
@@ -143,6 +145,7 @@ export default async function EnergyFlowHomePage({
         />
       </div>,
     );
+  }
 
   // Live data — server pre-fetches today's flow, history and stats so the
   // client shell paints in one shot. The shell then handles date navigation

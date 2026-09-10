@@ -30,102 +30,23 @@ import type { SolarOptions, SolarSetup } from "@/app/lib/solar-actions";
  * dashboard without any real user data.
  */
 
-interface ProviderCardProps {
-  title: string;
-  subtitle: string;
-  bullets: string[];
-  ctaLabel: string;
-  /**
-   * The modal-trigger component to render around the CTA button. Kept as
-   * a slot so this card stays provider-agnostic and the specific modal
-   * (SunSync / Octopus) lives one file away.
-   */
-  Modal: React.ComponentType<{ children: React.ReactNode }>;
-  accent: "solar" | "grid";
-}
-
-function ProviderCard({
-  title,
-  subtitle,
-  bullets,
-  ctaLabel,
-  Modal,
-  accent,
-}: ProviderCardProps) {
-  // Semantic tokens so a theme change re-tints these without touching the
-  // component. Solar → warm, grid → blue — matches the diagram's own hexes
-  // so the user's eye already knows which provider feeds which channel.
-  const tone =
-    accent === "solar"
-      ? {
-          text: "text-[color:var(--efh-solar)]",
-          border: "border-[color:var(--efh-solar)]/30",
-          soft: "bg-[color:var(--efh-solar)]/10",
-        }
-      : {
-          text: "text-[color:var(--efh-grid)]",
-          border: "border-[color:var(--efh-grid)]/30",
-          soft: "bg-[color:var(--efh-grid)]/10",
-        };
-
-  return (
-    <Card variant="default" className={`flex h-full w-full flex-col ${tone.border}`}>
-      <Card.Header className="flex-row items-start gap-3">
-        <div
-          className={`flex size-10 shrink-0 items-center justify-center rounded-full ${tone.soft} ${tone.text}`}
-        >
-          {accent === "solar" ? (
-            <Sun className="size-5" />
-          ) : (
-            <ThunderboltFill className="size-5" />
-          )}
-        </div>
-        <div className="flex-1">
-          <Card.Title>{title}</Card.Title>
-          <Card.Description>{subtitle}</Card.Description>
-        </div>
-      </Card.Header>
-
-      <Card.Content className="flex flex-1 flex-col justify-between gap-4">
-        <ul className="space-y-2">
-          {bullets.map((b) => (
-            <li key={b} className="flex items-start gap-2 text-sm text-foreground">
-              <Check className={`mt-0.5 size-4 shrink-0 ${tone.text}`} />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* The modal wrapper owns the "open on click" behaviour via
-            HeroUI's DialogTrigger. Wrapping the button rather than
-            navigating to a page keeps the user in-place. */}
-        <Modal>
-          <Button variant="primary" className="w-full">
-            {ctaLabel}
-            <ArrowRight className="ml-1 size-4" />
-          </Button>
-        </Modal>
-      </Card.Content>
-    </Card>
-  );
-}
-
 /**
- * `hasProperty` gates the second half of the empty state. When false we
- * show only the "Set up your home" card because the SunSync / Octopus
- * connect endpoints refuse to run without an active property — trying
- * them anyway hits the backend's "No active property. Create one via
- * POST /api/properties first." error, which is what shipped screenshot
- * #1 was showing.
- */
-/**
- * What a customer with a brand we can't read live sees in the solar slot.
+ * The solar slot once a system is declared.
  *
- * Their system is described, so we can say what it should generate — the
- * point being that declaring it was worth something, not that they're
- * missing out on a connection they can't have.
+ * Mirrors {@link TariffCard}: their answer, what it buys them, and a way to
+ * change it. Connecting an inverter we can read live is an extra action
+ * beside it, not a replacement for it.
  */
-function SolarCardStatic({ solar }: { solar: SolarSetup }) {
+function SolarCard({
+  solar,
+  options,
+  canConnect,
+}: {
+  solar: SolarSetup;
+  options: SolarOptions | null;
+  /** True when this brand can be linked and isn't yet. */
+  canConnect: boolean;
+}) {
   const a = solar.analysis;
   const lines = [
     a.capacityKwp !== null ? `${a.capacityKwp} kWp of panels` : null,
@@ -140,7 +61,7 @@ function SolarCardStatic({ solar }: { solar: SolarSetup }) {
 
   return (
     <Card className="border-border">
-      <Card.Content className="flex flex-col gap-3 p-5">
+      <Card.Content className="flex h-full flex-col gap-3 p-5">
         <div className="flex items-center gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-solar)]/10 text-[color:var(--efh-solar)]">
             <Sun className="size-4" />
@@ -161,6 +82,23 @@ function SolarCardStatic({ solar }: { solar: SolarSetup }) {
             </li>
           ))}
         </ul>
+
+        <div className="mt-auto flex flex-wrap gap-2 pt-1">
+          {canConnect && (
+            <ConnectSunSyncModal>
+              <Button variant="primary" size="sm">
+                Connect {solar.brandLabel}
+              </Button>
+            </ConnectSunSyncModal>
+          )}
+          {options !== null && (
+            <SolarSetupModal options={options}>
+              <Button variant="tertiary" size="sm">
+                Change system
+              </Button>
+            </SolarSetupModal>
+          )}
+        </div>
       </Card.Content>
     </Card>
   );
@@ -284,17 +222,41 @@ function ChooseSupplierCard({
 }
 
 /**
- * What a customer on a supplier we can't read live sees in place of the
- * Octopus connect card.
+ * The tariff slot once a supplier is chosen.
  *
- * Deliberately not a call to action: there is nothing for them to connect
- * yet. It exists so the slot says "here is what your tariff already buys
- * you" rather than advertising a provider they told us they aren't with.
+ * Shows what the customer actually set up, and lets them change it. An
+ * earlier version replaced this whole card with "Connect Octopus" whenever
+ * the supplier happened to be Octopus — which threw away the tariff they had
+ * just picked and looked identical to having set nothing up at all.
+ *
+ * Connecting is an *additional* action for the suppliers we can read live,
+ * never a substitute for showing their answer back to them.
  */
-function TariffCardStatic({ energy }: { energy: EnergySetup }) {
+function TariffCard({
+  energy,
+  providers,
+  postcode,
+  canConnect,
+}: {
+  energy: EnergySetup;
+  providers: EnergyProvider[];
+  postcode: string;
+  /** True when this supplier can be linked and isn't yet. */
+  canConnect: boolean;
+}) {
+  const lines = [
+    `${energy.providerName} unit rates and standing charge`,
+    energy.displayBill
+      ? `Costs estimated from ${energy.displayBill}`
+      : "Costs estimated from your monthly spend",
+    canConnect
+      ? "Connect the account for measured readings"
+      : `Swap to measured readings when we support live ${energy.providerName} accounts`,
+  ];
+
   return (
     <Card className="border-border">
-      <Card.Content className="flex flex-col gap-3 p-5">
+      <Card.Content className="flex h-full flex-col gap-3 p-5">
         <div className="flex items-center gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
             <ThunderboltFill className="size-4" />
@@ -306,20 +268,28 @@ function TariffCardStatic({ energy }: { energy: EnergySetup }) {
         </div>
 
         <ul className="flex flex-col gap-1.5">
-          {[
-            `${energy.providerName} unit rates and standing charge`,
-            energy.displayBill
-              ? `Costs estimated from ${energy.displayBill}`
-              : "Costs estimated from your monthly spend",
-            "Swap to measured readings when we support live " +
-              `${energy.providerName} accounts`,
-          ].map((line) => (
+          {lines.map((line) => (
             <li key={line} className="flex items-start gap-2 text-sm text-muted">
               <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--efh-grid)]" />
               <span>{line}</span>
             </li>
           ))}
         </ul>
+
+        <div className="mt-auto flex flex-wrap gap-2 pt-1">
+          {canConnect && (
+            <ConnectOctopusModal>
+              <Button variant="primary" size="sm">
+                Connect {energy.providerName}
+              </Button>
+            </ConnectOctopusModal>
+          )}
+          <EnergySetupModal providers={providers} postcode={postcode}>
+            <Button variant="tertiary" size="sm">
+              Change tariff
+            </Button>
+          </EnergySetupModal>
+        </div>
       </Card.Content>
     </Card>
   );
@@ -463,53 +433,35 @@ export function ConnectionEmptyState({
         className={`grid gap-4 lg:grid-cols-2 ${hasProperty ? "" : "pointer-events-none opacity-40"}`}
         aria-hidden={!hasProperty}
       >
-        {/* Same three states as the tariff slot opposite: nothing declared
-            offers the flow, a Sunsynk owner gets the live connect because
-            it's real for them, everyone else sees what their declared
-            system already gives them. */}
+        {/* Two states, not three. Declaring and connecting are different
+            things: once a system is declared we always show it, and the
+            connect offer rides along inside that card for the brands we can
+            read live. Swapping the whole card for a connect CTA hid the
+            answer the customer had just given us. */}
         {solar == null ? (
           <DeclareSolarCard options={solarOptions ?? null} />
-        ) : isSunsynkOwner ? (
-          <ProviderCard
-            accent="solar"
-            title="Connect Sunsynk"
-            subtitle="Your inverter and battery"
-            bullets={[
-              "Live solar generation, battery charge and discharge",
-              "Home load and grid flow in real time",
-              "Daily kWh totals and 24-hour power history",
-            ]}
-            ctaLabel="Connect Sunsynk"
-            Modal={ConnectSunSyncModal}
-          />
         ) : (
-          <SolarCardStatic solar={solar} />
+          <SolarCard
+            solar={solar}
+            options={solarOptions ?? null}
+            canConnect={isSunsynkOwner}
+          />
         )}
-        {/* Three states for this slot, because one "Connect Octopus" button
-            served only the customers already with Octopus:
-              • no tariff yet   → pick a supplier, same flow as onboarding
-              • with Octopus    → offer the live connection, it's real for them
-              • anyone else     → show what their tariff already gives them */}
+
+        {/* Same shape as the solar slot: show the answer, offer the live
+            connection alongside it when it applies to this supplier. */}
         {energy == null ? (
           <ChooseSupplierCard
             providers={providers ?? []}
             postcode={postcode ?? ""}
           />
-        ) : isOctopusCustomer ? (
-          <ProviderCard
-            accent="grid"
-            title="Connect Octopus"
-            subtitle="Your tariff and grid consumption"
-            bullets={[
-              "Live import, export and standing rates in p/kWh",
-              "Half-hourly grid consumption from your smart meter",
-              "Daily cost and export earnings in £",
-            ]}
-            ctaLabel="Connect Octopus"
-            Modal={ConnectOctopusModal}
-          />
         ) : (
-          <TariffCardStatic energy={energy} />
+          <TariffCard
+            energy={energy}
+            providers={providers ?? []}
+            postcode={postcode ?? ""}
+            canConnect={isOctopusCustomer}
+          />
         )}
       </div>
 
