@@ -28,14 +28,14 @@ export default function ConnectSunSyncStep() {
         description="Link your Sunsynk account to watch power move around your home."
       />
       <ConnectStep
-        skipHref="/onboarding/connect-octopus"
+        skipHref="/onboarding/energy"
         points={[
           "Live solar, battery, grid and home flow",
           "Today's generation and battery charge",
           "Updates every few minutes, on its own",
         ]}
       >
-        <ConnectSunSyncModal successHref="/onboarding/connect-octopus">
+        <ConnectSunSyncModal successHref="/onboarding/energy">
           <Button variant="primary" size="lg">
             Connect Sunsynk
           </Button>
