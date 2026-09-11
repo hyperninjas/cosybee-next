@@ -52,14 +52,15 @@ export const MAX_NEWS_URLS = 1000;
  * the brief ("keep only recent news articles") expressed as one number.
  *
  * A consequence worth knowing before anyone reports it as a bug: on a site that
- * publishes weekly, this file is EMPTY most of the time. That is the specified
- * behaviour, not a failure — an empty `<urlset>` is valid XML, returns 200, and
- * Search Console reports it as a sitemap with zero URLs. Articles are still
- * discovered through `/sitemap.xml`, which lists every one of them forever.
+ * publishes weekly, the window holds NO articles most of the time. The file is
+ * not empty then — an empty `<urlset>` is schema-invalid and Search Console
+ * flags it as an error — so the newest article is listed as a plain `<url>`
+ * with no news metadata (see the fallback in `buildNewsSitemap`). Articles are
+ * still discovered through `/sitemap.xml`, which lists every one of them.
  *
- * Don't widen this to keep the file looking populated: stale entries are what
- * the spec asks publishers to remove, and they earn nothing — Googlebot-News
- * ignores an article outside the window wherever it finds it.
+ * Don't widen this to keep the file looking populated: stale entries WITH news
+ * metadata are what the spec asks publishers to remove, and they earn nothing —
+ * Googlebot-News ignores an article outside the window wherever it finds it.
  */
 export const NEWS_WINDOW_DAYS = 2;
 
@@ -113,12 +114,33 @@ function urlXml(article: Article, published: Date): string {
   </url>`;
 }
 
+/**
+ * One `<url>` with no news metadata — the aged-out form Google sanctions.
+ * Used only to keep the document schema-valid when the window is empty; see
+ * the fallback in `buildNewsSitemap`.
+ */
+function plainUrlXml(article: Article): string {
+  const loc = `${SITE_URL}/${article.blog}/${article.slug}`;
+  return `  <url>
+    <loc>${escapeXml(loc)}</loc>
+  </url>`;
+}
+
 export interface NewsSitemap {
   xml: string;
-  /** Entries actually listed. */
+  /**
+   * `<news:news>` entries listed — i.e. articles inside the window. Zero is a
+   * real, common answer; it does not mean the file is empty (`placeholder`).
+   */
   urlCount: number;
   /** Entries that qualified before the 1,000 cap was applied. */
   qualifiedCount: number;
+  /**
+   * True when the window was empty and the newest article was listed as a
+   * plain `<url>` so the `<urlset>` is not empty. Distinguishes "nothing new
+   * this week" from "no articles exist" without parsing the body.
+   */
+  placeholder: boolean;
 }
 
 /**
@@ -146,29 +168,58 @@ export function buildNewsSitemap(
 ): NewsSitemap {
   const cutoff = now.getTime() - NEWS_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
-  const qualified = articles
+  // Every news article we could describe at all, newest first. The window is
+  // applied to this below; the fallback reads it too.
+  const describable = articles
     .filter(isNewsArticle)
     .map((article) => ({ article, published: publishedAt(article) }))
     .filter(
       (entry): entry is { article: Article; published: Date } =>
         entry.published !== null && entry.article.title.trim() !== "",
     )
-    // Strictly greater than the cutoff. A future-dated post — one the backend
-    // has marked PUBLISHED ahead of its stated date — passes, which is correct:
-    // the page is live, so the sitemap should say so, and testing the other end
-    // of the window would make the file sensitive to a second of clock skew.
-    .filter((entry) => entry.published.getTime() > cutoff)
     .sort((a, b) => b.published.getTime() - a.published.getTime());
+
+  // Strictly greater than the cutoff. A future-dated post — one the backend
+  // has marked PUBLISHED ahead of its stated date — passes, which is correct:
+  // the page is live, so the sitemap should say so, and testing the other end
+  // of the window would make the file sensitive to a second of clock skew.
+  const qualified = describable.filter((e) => e.published.getTime() > cutoff);
 
   const listed = qualified.slice(0, MAX_NEWS_URLS);
 
-  const body = listed.length
-    ? `\n${listed.map((e) => urlXml(e.article, e.published)).join("\n")}\n`
-    : "\n";
+  // NEVER an empty <urlset>. The sitemaps.org schema declares `<url>` with no
+  // minOccurs — i.e. at least one is REQUIRED — so an empty set is well-formed
+  // XML but schema-invalid, and Search Console reports it as an error ("Missing
+  // XML tag: url") rather than as a sitemap with nothing in it. On a site that
+  // publishes weekly the window is empty most days, so this is the common case,
+  // not an edge one.
+  //
+  // Google's own guidance for an article that has aged out of the window is to
+  // "remove those URLs from the news sitemap or remove the <news:news>
+  // metadata". The second option is what keeps the document valid: the newest
+  // news article stays as a plain `<url>` carrying only its `<loc>`. With no
+  // news block it makes no claim to be news, so it cannot be reported as too
+  // old — it reads as an ordinary sitemap entry for a URL that `/sitemap.xml`
+  // already lists.
+  //
+  // Only when there are no news articles at all (a brand-new catalogue) is the
+  // set empty, and then there is genuinely nothing to put in it.
+  const fallback =
+    listed.length === 0 && describable.length > 0 ? describable[0] : null;
+
+  const entries = listed.map((e) => urlXml(e.article, e.published));
+  if (fallback) entries.push(plainUrlXml(fallback.article));
+
+  const body = entries.length ? `\n${entries.join("\n")}\n` : "\n";
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">${body}</urlset>`;
 
-  return { xml, urlCount: listed.length, qualifiedCount: qualified.length };
+  return {
+    xml,
+    urlCount: listed.length,
+    qualifiedCount: qualified.length,
+    placeholder: fallback !== null,
+  };
 }

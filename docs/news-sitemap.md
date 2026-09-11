@@ -26,26 +26,79 @@ Each entry carries exactly the four fields Google requires — `news:name`,
 published schema demands. No optional fields (`news:genres`, `news:keywords`,
 `news:stock_tickers`) are emitted; add them to `urlXml` if a reason ever appears.
 
-## It is usually empty, and that is correct
+## When nothing is new, it lists one plain URL
 
 Google's rule is that a news sitemap holds articles "created in the last two
-days", and that older URLs be removed. On a site that publishes weekly, that
-means an **empty `<urlset>` most of the time**.
+days". On a site that publishes weekly, the window is **empty most days**.
 
-An empty file is valid XML, returns HTTP 200, and Search Console reports it as a
-sitemap with zero URLs — not an error. Those articles are still indexed; they're
-listed in `/sitemap.xml` like everything else.
+The file is never empty, though. **An empty `<urlset>` is schema-invalid**: the
+sitemaps.org schema declares `<url>` with no `minOccurs`, so at least one is
+required. Search Console reports it as an error — *"Sitemap can be read, but has
+errors · Missing XML tag · Parent tag: urlset, Tag: url"* — rather than as a
+sitemap with nothing in it. (That is how this was found: the first version shipped
+an empty `<urlset>` on the assumption it was fine. It was well-formed XML, which
+is not the same thing.)
+
+So when the window is empty, the newest news article is listed as a plain
+`<url>` carrying only its `<loc>` — no `<news:news>` block. That is the form
+Google's own guidance sanctions for an aged-out article: *"remove those URLs from
+the news sitemap or remove the `<news:news>` metadata"*. With no news block it
+makes no claim to be news, so it cannot be flagged as too old; it reads as an
+ordinary sitemap entry for a URL `/sitemap.xml` already lists.
+
+```xml
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://energiebee.com/hive/newest-article</loc>
+  </url>
+</urlset>
+```
+
+The only time the set is genuinely empty is a catalogue with **no hive articles
+at all**, when there is nothing to put in it. A backend failure does not produce
+that state — the read throws and the route 500s instead.
 
 **Do not widen `NEWS_WINDOW_DAYS` to make the file look busier.** Stale entries
-are precisely what the spec asks publishers to remove, and they buy nothing:
-Googlebot-News ignores an out-of-window article wherever it finds it.
+*with* news metadata are what the spec asks publishers to remove, and they buy
+nothing: Googlebot-News ignores an out-of-window article wherever it finds it.
 
-Quick check on whether the file is empty for the right reason — the route sets a
-header with the entry count, so you don't have to read the body:
+The route reports which state it is in, so you don't have to read the body:
 
 ```bash
-curl -sI https://energiebee.com/news-sitemap.xml | grep -i x-news-article-count
+curl -sI https://energiebee.com/news-sitemap.xml | grep -iE "x-news"
 ```
+
+| `X-News-Article-Count` | `X-News-Placeholder` | Meaning |
+| --- | --- | --- |
+| `≥1` | `0` | Articles in the window, listed with news metadata |
+| `0` | `1` | Nothing new in two days — newest article listed plainly (normal) |
+| `0` | `0` | No hive articles exist at all |
+
+### Validating it properly
+
+Check a change against **both** schemas at once. The core sitemap schema admits
+`news:news` through a *strict* wildcard, so validating against it alone fails on
+every populated file for want of the news schema — and validating the news
+fragments alone never looks at the `<urlset>` around them, which is exactly how
+the empty-set bug got through. A driver schema that imports both:
+
+```xml
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:import namespace="http://www.sitemaps.org/schemas/sitemap/0.9"
+              schemaLocation="https://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"/>
+  <xsd:import namespace="http://www.google.com/schemas/sitemap-news/0.9"
+              schemaLocation="https://www.google.com/schemas/sitemap-news/0.9/sitemap-news.xsd"/>
+</xsd:schema>
+```
+
+```bash
+curl -s https://energiebee.com/news-sitemap.xml -o news.xml
+xmllint --noout --schema driver.xsd news.xml
+```
+
+Run it on a day with nothing new as well as a day with fresh articles — the
+empty-window case is the one that broke.
 
 ## How it stays fresh
 
@@ -98,7 +151,7 @@ separate submission to make.
 # 200, XML content type, and how many articles are listed
 curl -sI https://energiebee.com/news-sitemap.xml
 
-# Parses cleanly
+# Parses cleanly (well-formed only — see "Validating it properly" for the schema check)
 curl -s https://energiebee.com/news-sitemap.xml | xmllint --noout - && echo OK
 
 # Listed URLs actually resolve
