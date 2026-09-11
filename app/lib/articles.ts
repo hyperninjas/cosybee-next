@@ -427,6 +427,36 @@ export async function getFeedArticles(): Promise<Article[]> {
   });
 }
 
+/**
+ * The newest `limit` published articles across both blogs, WITH their body
+ * JSON — the read behind a full-content syndication feed (`/smartnews`).
+ *
+ * Two reads deep by necessity: the list endpoint strips `contentJson`, so the
+ * body only arrives from the detail endpoint, one request per article. The
+ * `limit` is applied BEFORE those requests, not after — slicing afterwards
+ * would pay for every article in the archive to publish fifty of them. Bounded
+ * concurrency for the same reason the video sitemap uses it: a few hundred
+ * simultaneous sockets is how a poller takes the backend down.
+ *
+ * Tolerant, like the other feeds: `getFeedArticles` already swallows a backend
+ * error into an empty list, and a detail read that fails leaves that article
+ * without a body rather than failing the whole poll. The caller decides what an
+ * article with no body means — for SmartNews it means the item is dropped,
+ * since `content:encoded` is the entire point of that feed.
+ */
+export async function getFeedArticlesWithContent(
+  limit: number,
+): Promise<Article[]> {
+  const newest = (await getFeedArticles()).slice(0, limit);
+  const details = await mapLimited(newest, DETAIL_CONCURRENCY, (a) =>
+    api.getPostForCrawl(a.blog, a.slug).catch(() => null),
+  );
+  // A null is a post unpublished mid-poll, or a read that failed. Fall back to
+  // the list-endpoint article: it still has every field except the body, so the
+  // caller can decide rather than losing the article silently here.
+  return details.map((detail, i) => (detail ? toArticle(detail) : newest[i]));
+}
+
 /** Does an author object carry any profile detail worth a page header? */
 function hasAuthorDetail(a: Author): boolean {
   return Boolean(a.bio || a.avatarUrl || a.role);
@@ -529,24 +559,49 @@ function hasForeignCanonical(p: ApiPost): boolean {
 }
 
 /**
- * Published article URLs for the sitemap, excluding anything the article page
- * itself asks Google to skip.
+ * May this published post be advertised to a search engine at its own URL?
  *
- * The sitemap is an explicit "please index this". A post the detail page renders
- * as `noindex`, or points at a foreign canonical, must not appear here — a
- * sitemap that contradicts the page it lists is a Search Console warning and a
- * wasted crawl, not a second opinion.
+ * The one test behind every file that enumerates the catalogue for a crawler —
+ * `/sitemap.xml`, `/video-sitemap.xml` and `/news-sitemap.xml`. A sitemap is an
+ * explicit "please index this", so a post the detail page renders as `noindex`,
+ * or points at a foreign canonical, must not appear in any of them: a sitemap
+ * that contradicts the page it lists is a Search Console warning and a wasted
+ * crawl, not a second opinion.
+ *
+ * Shared rather than repeated so the three files cannot drift into disagreeing
+ * about what is publishable.
+ */
+function isAdvertisable(p: ApiPost): boolean {
+  return !p.noindex && !hasForeignCanonical(p);
+}
+
+/**
+ * Published article URLs for the sitemap, excluding anything the article page
+ * itself asks Google to skip — see `isAdvertisable`.
  */
 export async function getSitemapArticles(
   blog: Blog,
 ): Promise<{ path: string; lastModified: Date }[]> {
   const posts = await getAllPublishedPosts(blog);
-  return posts
-    .filter((p) => !p.noindex && !hasForeignCanonical(p))
-    .map((p) => ({
-      path: `/${blog}/${p.slug}`,
-      lastModified: lastModifiedOf(p),
-    }));
+  return posts.filter(isAdvertisable).map((p) => ({
+    path: `/${blog}/${p.slug}`,
+    lastModified: lastModifiedOf(p),
+  }));
+}
+
+/**
+ * Every published, indexable article for a blog — the list-endpoint read, so no
+ * body JSON (see `getIndexableArticlesWithContent` when the body is needed).
+ *
+ * The full-article counterpart to `getSitemapArticles`, for the crawler files
+ * that need more than a URL and a date: `/news-sitemap.xml` reads each
+ * article's headline and publication instant. Same `isAdvertisable` filter, so
+ * it lists exactly the URLs `/sitemap.xml` does. Throws rather than truncating —
+ * see `getAllPublishedPosts`.
+ */
+export async function getIndexableArticles(blog: Blog): Promise<Article[]> {
+  const posts = await getAllPublishedPosts(blog);
+  return posts.filter(isAdvertisable).map(toArticle);
 }
 
 /**
@@ -590,16 +645,16 @@ async function mapLimited<T, R>(
  * options as the article pages' own reads, so they share Data Cache entries
  * rather than doubling traffic, and `revalidateContent()` clears both together.
  *
- * Filtered by the same predicate as `getSitemapArticles`: an article the page
- * marks `noindex`, or which points its canonical elsewhere, must not be
- * advertised here either. Throws rather than truncating — see
+ * Filtered by `isAdvertisable`, the same predicate as `getSitemapArticles`: an
+ * article the page marks `noindex`, or which points its canonical elsewhere,
+ * must not be advertised here either. Throws rather than truncating — see
  * `getAllPublishedPosts`.
  */
 export async function getIndexableArticlesWithContent(
   blog: Blog,
 ): Promise<Article[]> {
   const posts = await getAllPublishedPosts(blog);
-  const indexable = posts.filter((p) => !p.noindex && !hasForeignCanonical(p));
+  const indexable = posts.filter(isAdvertisable);
   const details = await mapLimited(indexable, DETAIL_CONCURRENCY, (p) =>
     api.getPostForCrawl(blog, p.slug),
   );

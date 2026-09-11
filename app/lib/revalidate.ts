@@ -34,7 +34,13 @@ export function revalidateContent(): void {
   // Derived files that enumerate the whole catalogue.
   revalidatePath("/sitemap.xml");
   revalidatePath("/video-sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   revalidatePath("/llms.txt");
+  // Belt-and-braces, exactly like /video-sitemap.xml above: this route renders
+  // per request today, so `updateTag` alone already makes the next poll see the
+  // new post. The line costs nothing and covers the day it stops being dynamic.
+  revalidatePath("/smartnews/smartnews.xml");
+  revalidatePath("/newsbreak/newsbreak.xml");
 
   // Archives whose content can change without their own slug being touched.
   revalidatePath("/author/[slug]", "page");

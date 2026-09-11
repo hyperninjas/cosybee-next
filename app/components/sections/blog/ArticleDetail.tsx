@@ -11,8 +11,8 @@ import {
   unoptimizedFor,
 } from "@/app/lib/image-optimization";
 import { buildToc, wrapArticleTables } from "@/app/lib/toc";
-import { renderLegacyContent, isLegacyContent } from "@/app/lib/legacy-content";
-import { contentJsonToHtml, stripPastedColors } from "@/app/lib/blocknote";
+import { renderArticleBody } from "@/app/lib/article-body";
+import { stripPastedColors } from "@/app/lib/blocknote";
 import { collectFaqItems } from "@/app/lib/blocknoteSchema";
 import { ArticleCard } from "./ArticleCard";
 import { MoreArticlesCard } from "./MoreArticlesCard";
@@ -27,7 +27,7 @@ import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
 import { Container } from "@/app/components/ui/Container";
 import { Section } from "@/app/components/ui/Section";
 import {
-  blogPostingSchema,
+  articleSchema,
   breadcrumbSchema,
   faqPageSchema,
   videoObjectSchema,
@@ -93,21 +93,11 @@ export default async function ArticleDetail({
   related,
   basePath,
 }: Props) {
-  // Resolve the article body. The document is authored in BlockNote, so the
-  // BlockNote server renderer is the source of truth: render `contentJson`
-  // with the shared schema (multi-column included) for perfect fidelity.
-  // Older posts may instead carry the legacy `{ sections }` shape, and we keep
-  // the backend-rendered `contentHtml` as a last-resort fallback.
-  let rawHtml: string;
-  if (isLegacyContent(article.contentJson)) {
-    rawHtml =
-      renderLegacyContent(article.contentJson) ?? article.contentHtml ?? "";
-  } else {
-    const blockNoteHtml = article.contentJson
-      ? await contentJsonToHtml(article.contentJson)
-      : "";
-    rawHtml = blockNoteHtml || article.contentHtml || "";
-  }
+  // Resolve the article body — BlockNote `contentJson` first, then the legacy
+  // shape, then the backend's stored HTML. Shared with the SmartNews feed's
+  // `content:encoded` (see lib/article-body.ts) so the syndicated copy cannot
+  // come from a different source than the page.
+  const rawHtml = await renderArticleBody(article);
   // Post-process the rendered body regardless of which source produced it:
   // heading ids for the TOC, a scroll wrapper around each table, and — for the
   // stored-`contentHtml` fallback, which may predate the export-side pass —
@@ -175,13 +165,14 @@ export default async function ArticleDetail({
       {/* Warm up the connection to the media host — article images load from
           it cross-origin (React 19 hoists this to <head> and dedups it). */}
       <link rel="preconnect" href="https://eb-api.technext.it" />
-      {/* Prefer the backend-rendered Article schema when present — single
-          source of truth. Fall back to the locally-built schema only when
-          the backend didn't ship it (older API responses). Breadcrumb
-          schema is always our own concern. */}
+      {/* The backend-rendered Article schema merged over the locally-built one
+          — the backend owns the post's content, this side fills in the
+          site-level identity it has no way to know (publisher, url) and pins
+          the type. See `articleSchema`. Breadcrumb schema is always our own
+          concern. */}
       <JsonLd
         data={[
-          article.jsonLd ?? blogPostingSchema(article, path),
+          articleSchema(article, path),
           breadcrumbSchema(crumbs),
           // One VideoObject per embedded video — omitted entirely when the
           // article has none.
