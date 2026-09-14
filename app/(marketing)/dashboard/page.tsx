@@ -152,9 +152,14 @@ export default async function EnergyFlowHomePage({
   // on the client without a page reload.
   const { data, liveFields, activePropertyId, todayIso } =
     await getLiveDashboardData();
+  // Tariff and cost only count as "still on demo" when Octopus is linked.
+  // Without it those cards are replaced by a connect prompt, so there are no
+  // demo figures on screen to warn about.
+  const tariffPending = octopus.connected && !liveFields.tariff;
+  const costPending = octopus.connected && !liveFields.cost;
   const stillSyncing =
-    !liveFields.tariff ||
-    !liveFields.cost ||
+    tariffPending ||
+    costPending ||
     !liveFields.stats ||
     !liveFields.history.live;
 
@@ -202,8 +207,8 @@ export default async function EnergyFlowHomePage({
             {liveFields.flow.live ? "Showing live power flow. " : ""}
             {(() => {
               const pending = [
-                liveFields.tariff ? null : "tariff",
-                liveFields.cost ? null : "cost",
+                tariffPending ? "tariff" : null,
+                costPending ? "cost" : null,
                 liveFields.stats ? null : "stats",
                 liveFields.history.live ? null : "history",
               ].filter((s): s is string => s !== null);
@@ -224,6 +229,7 @@ export default async function EnergyFlowHomePage({
         activePropertyId={activePropertyId}
         historyLive={liveFields.history.live}
         todayIso={todayIso}
+        octopusConnected={octopus.connected}
       />
     </div>,
   );

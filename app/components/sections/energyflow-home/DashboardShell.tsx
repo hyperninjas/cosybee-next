@@ -6,6 +6,7 @@ import type { ActiveProperty } from "@/app/lib/property-state";
 import type { EnergyFlowFetchResult } from "@/app/lib/energy-flow";
 import { integratePoints } from "@/app/lib/history-integration";
 import { buildLiveStats, findPeakSolar } from "@/app/lib/live-stats";
+import { ConnectOctopusCostCard } from "./ConnectOctopusCostCard";
 import { DailyCostCard } from "./DailyCostCard";
 import { DashboardHeader } from "./DashboardHeader";
 import { EnergyFlowDiagram } from "./EnergyFlowDiagram";
@@ -64,6 +65,12 @@ interface Props {
   activePropertyId: string | null;
   historyLive: boolean;
   todayIso: string;
+  /**
+   * Whether Octopus is linked. Without it there is no tariff or consumption
+   * to show, so the tariff + cost cards give way to a connect prompt instead
+   * of rendering the demo fixture as if it were this home's bill.
+   */
+  octopusConnected: boolean;
 }
 
 export function DashboardShell({
@@ -74,6 +81,7 @@ export function DashboardShell({
   activePropertyId,
   historyLive,
   todayIso,
+  octopusConnected,
 }: Props) {
   const [dayIso, setDayIso] = useState<string>(todayIso);
   const [history, setHistory] = useState<PowerHistory | null>(
@@ -207,10 +215,14 @@ export function DashboardShell({
             />
           )}
         </div>
-        <div className="grid gap-4 lg:grid-rows-[auto_1fr]">
-          <TariffCard tariff={data.tariff} />
-          <DailyCostCard cost={data.cost} />
-        </div>
+        {octopusConnected ? (
+          <div className="grid gap-4 lg:grid-rows-[auto_1fr]">
+            <TariffCard tariff={data.tariff} />
+            <DailyCostCard cost={data.cost} />
+          </div>
+        ) : (
+          <ConnectOctopusCostCard />
+        )}
       </div>
 
       <StatStrip stats={stats} />

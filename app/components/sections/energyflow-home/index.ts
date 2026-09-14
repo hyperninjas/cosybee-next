@@ -11,6 +11,7 @@ export { EnergyFlowDiagramLive } from "./EnergyFlowDiagramLive";
 export { PropertySwitcher } from "./PropertySwitcher";
 export { TariffCard } from "./TariffCard";
 export { DailyCostCard } from "./DailyCostCard";
+export { ConnectOctopusCostCard } from "./ConnectOctopusCostCard";
 export { StatStrip } from "./StatStrip";
 export { PowerHistoryChart } from "./PowerHistoryChart";
 export { DashboardShell } from "./DashboardShell";
