@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Button, Modal, Spinner, useOverlayState } from "@heroui/react";
@@ -8,8 +9,6 @@ import {
   ArrowUpRightFromSquare,
   CircleCheckFill,
   Person,
-  ShieldCheck,
-  ThunderboltFill,
 } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
 import { PasswordField } from "@/app/components/ui/PasswordField";
@@ -30,14 +29,22 @@ import type { ConnectResult } from "@/app/lib/connect-actions";
  *   • Sibling of ConnectSunSyncModal and deliberately identical in
  *     shape: same header anatomy, same reassurance block, same footer
  *     pair, same loading and success cards.
- *   • The header tint is a HeroUI semantic token. It used to be
+ *   • Header icon tile uses HeroUI semantic tokens (`bg-accent-soft` /
+ *     `text-accent-soft-foreground`) — an earlier version referenced
  *     `var(--efh-grid)`, which is scoped to `.efh-scope` in globals.css
- *     — this dialog portals to `document.body`, outside that scope, so
- *     the tint resolved to nothing and the bolt sat on a blank square.
+ *     and resolves to nothing here because the dialog portals to
+ *     `document.body`, outside that scope.
  *   • The "where do I find this" link rides on the API-key label rather
- *     than sitting on its own line under the fields, and the read-only
- *     promise plus the back-fill note share one footnote block. Three
- *     separate paragraphs became one.
+ *     than sitting on its own line under the fields.
+ *   • No `autoFocus` on the account-number field: the theme's accent
+ *     focus ring on an empty required field on modal-open reads as an
+ *     error state ("orange border, red asterisk"). React Aria's dialog
+ *     focus scope still parks focus somewhere reasonable inside the
+ *     dialog.
+ *   • The read-only promise is an `Alert` with a real border and
+ *     soft-tinted background so it can't be mistaken for a disabled
+ *     input, which is what happened when it was a bare `bg-secondary`
+ *     div matching the field surfaces above it.
  */
 
 const OCTOPUS_API_KEY_URL =
@@ -160,11 +167,20 @@ export function ConnectOctopusModal({
                 });
               }}
             >
-              {/* `pe-10` keeps the copy clear of the close button. */}
-              <Modal.Header className="flex-row items-start gap-3 pe-10">
-                <Modal.Icon className="bg-accent-soft text-accent-soft-foreground">
-                  <ThunderboltFill aria-hidden className="size-5" />
-                </Modal.Icon>
+              {/* `pe-10` keeps the copy clear of the close button.
+                  Header icon is the Octopus Energy brand mark (shared with
+                  the mobile app under lib/assets/brand/suppliers) rather
+                  than the generic bolt — instant recognition for anyone
+                  who's already used the mobile app. */}
+              <Modal.Header className="flex-row items-center gap-3 pe-10">
+                <Image
+                  src="/brand/octopus-energy.png"
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="size-12 shrink-0 rounded-2xl"
+                  priority
+                />
                 <div className="flex flex-1 flex-col gap-1">
                   <Modal.Heading>Connect Octopus</Modal.Heading>
                   <p className="text-sm leading-5 text-muted">
@@ -197,7 +213,6 @@ export function ConnectOctopusModal({
                     autoComplete="off"
                     icon={<Person aria-hidden className="size-4 text-muted" />}
                     isRequired={showFields}
-                    autoFocus={showFields}
                     description="Top of your Octopus dashboard."
                   />
 
@@ -228,17 +243,25 @@ export function ConnectOctopusModal({
                     }
                   />
 
-                  <div className="flex items-start gap-2.5 rounded-2xl bg-surface-secondary px-3.5 py-3">
-                    <ShieldCheck
-                      aria-hidden
-                      className="mt-0.5 size-4 shrink-0 text-success"
-                    />
-                    <p className="text-xs leading-5 text-muted">
-                      Read-only — we never write to your Octopus account.
-                      We&apos;ll back-fill about 13 months of consumption so
-                      your charts have history from day one.
-                    </p>
-                  </div>
+                  {/* Soft success-tinted panel with a real border — reads
+                      as an info panel rather than a disabled input. The
+                      body copy stays neutral foreground (not green) so the
+                      colour is a signal, not the payload. */}
+                  <Alert
+                    status="success"
+                    className="rounded-2xl border border-success/25 bg-success-soft/40 px-4 py-3"
+                  >
+                    <Alert.Indicator className="text-success" />
+                    <Alert.Content>
+                      <Alert.Title className="text-sm font-semibold text-foreground">
+                        Read-only — we never write to your Octopus account
+                      </Alert.Title>
+                      <Alert.Description className="text-xs leading-5 text-muted">
+                        We&apos;ll back-fill about 13 months of consumption so
+                        your charts have history from day one.
+                      </Alert.Description>
+                    </Alert.Content>
+                  </Alert>
                 </div>
               </Modal.Body>
 

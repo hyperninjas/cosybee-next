@@ -1,21 +1,23 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  Accordion,
   Alert,
   Button,
   Chip,
   Description,
-  Header,
   Label,
   ListBox,
   Modal,
+  SearchField,
   Separator,
   Spinner,
 } from "@heroui/react";
 import {
   ArrowsRotateLeft,
+  ChevronDown,
   ChevronRight,
   LinkSlash,
   Sun,
@@ -89,41 +91,87 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
   // "plantId::serial" of the row currently being applied, so that row can
   // show a spinner while every other row locks.
   const [switching, setSwitching] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  // Which accordion panels are open. Controlled so a search query can
+  // expand every matching plant automatically instead of forcing the user
+  // to open each one after typing.
+  const [expandedKeys, setExpandedKeys] = useState<Set<string | number>>(
+    new Set(),
+  );
 
   // Plants with no inverters can't be switched to — the API still lists
   // them, but as rows they're dead weight.
   const plantsWithInverters =
     plants?.filter((p) => p.inverters.length > 0) ?? null;
 
-  // The row you're already on. Disabled: re-picking it discards your
-  // history for no gain.
-  const currentKey =
-    plants
-      ?.flatMap((p) => p.inverters.map((i) => ({ p, i })))
-      .find(({ i }) => i.isCurrent) ?? null;
-  const currentId = currentKey
-    ? `${currentKey.p.id}::${currentKey.i.serial}`
-    : null;
+  // Filter by plant label OR serial, case-insensitive. The linked
+  // inverter stays inside its plant — the accordion trigger carries the
+  // "Linked" chip so the plant is easy to spot without pinning a
+  // duplicate section above the list.
+  const filteredPlants = useMemo(() => {
+    if (!plantsWithInverters) return null;
+    const q = query.trim().toLowerCase();
+    if (!q) return plantsWithInverters;
+    return plantsWithInverters
+      .map((p) => {
+        const plantMatches = p.label.toLowerCase().includes(q);
+        // If the plant name matches, keep all its inverters — the user
+        // was looking for the plant, not narrowing within it.
+        const matched = plantMatches
+          ? p.inverters
+          : p.inverters.filter(
+              (i) =>
+                i.serial.toLowerCase().includes(q) ||
+                i.label.toLowerCase().includes(q),
+            );
+        return { ...p, inverters: matched };
+      })
+      .filter((p) => p.inverters.length > 0);
+  }, [plantsWithInverters, query]);
 
   // Load the plant list when the user enters the switch view. Runs client-
   // side (Server Action call) so the dialog can open instantly on the menu
   // view without the network round-trip if the user only wants to disconnect.
+  // The plant holding the currently-linked inverter is auto-expanded here
+  // (in the same tick as the setPlants) so the user lands on the row
+  // they'd want to keep or switch away from without a manual click, and
+  // there's no cascading render from a follow-up effect.
   useEffect(() => {
     if (view !== "switch" || plants !== null) return;
     void (async () => {
       const result = await listSunSyncPlants();
-      if (result.ok) {
-        setPlants(result.plants);
-      } else {
+      if (!result.ok) {
         setError(result.error);
+        return;
       }
+      setPlants(result.plants);
+      const linkedPlantId = result.plants.find((p) =>
+        p.inverters.some((i) => i.isCurrent),
+      )?.id;
+      if (linkedPlantId) setExpandedKeys(new Set([linkedPlantId]));
     })();
   }, [view, plants]);
+
+  /**
+   * Merges the query filter with the accordion state: every plant that
+   * survives the filter is auto-opened while the user is typing so the
+   * matched inverters are visible without a follow-up click on each
+   * plant. Clearing the query leaves the current expansion state alone —
+   * the user's original picks are preserved.
+   */
+  function handleQueryChange(next: string) {
+    setQuery(next);
+    if (next.trim() && filteredPlants) {
+      setExpandedKeys(new Set(filteredPlants.map((p) => p.id)));
+    }
+  }
 
   function reset() {
     setView("menu");
     setError(null);
     setSwitching(null);
+    setQuery("");
+    setExpandedKeys(new Set());
     // Keep `plants` cached — reopening the modal doesn't need a refetch.
   }
 
@@ -176,9 +224,9 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
           scroll="inside"
         >
           <Modal.Dialog>
-            <Modal.Header className="flex-row items-start gap-3 pe-10">
-              <Modal.Icon className="bg-warning-soft text-warning-soft-foreground">
-                <Sun aria-hidden className="size-5" />
+            <Modal.Header className="flex-row items-center gap-3 pe-10">
+              <Modal.Icon className="size-12 bg-warning-soft text-warning-soft-foreground">
+                <Sun aria-hidden className="size-7" />
               </Modal.Icon>
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -295,85 +343,116 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
 
                   {plantsWithInverters !== null &&
                     plantsWithInverters.length > 0 && (
-                      // Bounded height + overflow because HeroUI Modal's
-                      // `scroll="inside"` sets overflow on Modal.Body but
-                      // never gives it a height, so a long account pushed
-                      // the footer off-screen with no scrollbar.
-                      <ListBox
-                        aria-label="Inverter"
-                        selectionMode="none"
-                        disabledKeys={
-                          pending
-                            ? plantsWithInverters.flatMap((p) =>
-                                p.inverters.map((i) => `${p.id}::${i.serial}`),
-                              )
-                            : currentId
-                              ? [currentId]
-                              : []
-                        }
-                        onAction={(key) => handleSwitch(String(key))}
-                        className="max-h-[min(55vh,26rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface p-2"
-                      >
-                        {plantsWithInverters.map((plant, plantIdx) => (
-                          <ListBox.Section key={plant.id}>
-                            {/* A rule above every group but the first —
-                                react-aria's collection builder won't walk a
-                                Fragment, so a real <Separator /> between
-                                sections can't be produced from a .map(). */}
-                            <Header
-                              className={`text-[11px] font-semibold tracking-wider uppercase ${
-                                plantIdx > 0
-                                  ? "mt-2 border-t border-separator pt-3.5"
-                                  : ""
-                              }`}
+                      <>
+                        {/* Search kicks in once there's enough to scroll —
+                            below that threshold it's just a target the eye
+                            has to skip over on the way to the list. */}
+                        {plantsWithInverters.reduce(
+                          (n, p) => n + p.inverters.length,
+                          0,
+                        ) > 4 && (
+                          <SearchField
+                            aria-label="Filter inverters"
+                            value={query}
+                            onChange={handleQueryChange}
+                            variant="secondary"
+                            fullWidth
+                          >
+                            <SearchField.Group>
+                              <SearchField.SearchIcon />
+                              <SearchField.Input placeholder="Search by plant or serial…" />
+                              <SearchField.ClearButton />
+                            </SearchField.Group>
+                          </SearchField>
+                        )}
+
+                        {/* Bounded height + overflow because HeroUI Modal's
+                            `scroll="inside"` sets overflow on Modal.Body but
+                            never gives it a height, so a long account pushed
+                            the footer off-screen with no scrollbar. */}
+                        <div className="max-h-[min(60vh,28rem)] overflow-y-auto overscroll-contain">
+                          {filteredPlants && filteredPlants.length === 0 ? (
+                            <p className="rounded-2xl bg-surface-secondary px-4 py-6 text-center text-sm text-muted">
+                              {query
+                                ? `No inverters match “${query}”.`
+                                : "No other inverters on this Sunsynk account."}
+                            </p>
+                          ) : (
+                            <Accordion
+                              variant="surface"
+                              allowsMultipleExpanded
+                              expandedKeys={expandedKeys}
+                              onExpandedChange={setExpandedKeys}
+                              className="w-full"
                             >
-                              {plant.label}
-                            </Header>
-                            {plant.inverters.map((inv) => {
-                              const id = `${plant.id}::${inv.serial}`;
-                              const { serial, status, isOnline } =
-                                parseInverterLabel(inv.label);
-                              return (
-                                <ListBox.Item
-                                  key={id}
-                                  id={id}
-                                  textValue={`${plant.label} ${serial}`}
-                                >
-                                  {/* The dot already says online/offline, so
-                                      the word only appears when it's the
-                                      exceptional one. Every row was two
-                                      lines tall to print "online". */}
-                                  <span
-                                    aria-hidden
-                                    className={`size-2 shrink-0 rounded-full ${
-                                      isOnline ? "bg-success" : "bg-muted/50"
-                                    }`}
-                                  />
-                                  <Label className="truncate font-mono text-[13px]">
-                                    {serial}
-                                  </Label>
-                                  {switching === id ? (
-                                    <Spinner size="sm" className="ms-auto" />
-                                  ) : inv.isCurrent ? (
-                                    <Chip
-                                      color="success"
-                                      variant="soft"
-                                      size="sm"
-                                      className="ms-auto shrink-0"
-                                    >
-                                      Linked
-                                    </Chip>
-                                  ) : !isOnline && status ? (
-                                    <span className="ms-auto shrink-0 text-xs text-muted">
-                                      {status}
-                                    </span>
-                                  ) : null}
-                                </ListBox.Item>
-                              );
-                            })}
-                          </ListBox.Section>
-                        ))}
-                      </ListBox>
+                              {filteredPlants?.map((plant) => {
+                                const holdsLinked = plant.inverters.some(
+                                  (i) => i.isCurrent,
+                                );
+                                return (
+                                  <Accordion.Item
+                                    key={plant.id}
+                                    id={plant.id}
+                                    isDisabled={pending}
+                                  >
+                                    <Accordion.Heading>
+                                      <Accordion.Trigger>
+                                        <span className="me-3 flex min-w-0 flex-1 items-center gap-2">
+                                          <span className="truncate font-medium text-foreground">
+                                            {plant.label}
+                                          </span>
+                                          {holdsLinked && (
+                                            <Chip
+                                              color="success"
+                                              variant="soft"
+                                              size="sm"
+                                              className="shrink-0"
+                                            >
+                                              Linked
+                                            </Chip>
+                                          )}
+                                        </span>
+                                        <Chip
+                                          color="default"
+                                          variant="soft"
+                                          size="sm"
+                                          className="me-3 shrink-0"
+                                        >
+                                          {plant.inverters.length}{" "}
+                                          {plant.inverters.length === 1
+                                            ? "inverter"
+                                            : "inverters"}
+                                        </Chip>
+                                        <Accordion.Indicator>
+                                          <ChevronDown />
+                                        </Accordion.Indicator>
+                                      </Accordion.Trigger>
+                                    </Accordion.Heading>
+                                    <Accordion.Panel>
+                                      <Accordion.Body className="pt-0 pb-2">
+                                        <ul className="flex flex-col gap-1">
+                                          {plant.inverters.map((inv) => (
+                                            <li key={inv.serial}>
+                                              <InverterRow
+                                                plantId={plant.id}
+                                                plantLabel={plant.label}
+                                                inverter={inv}
+                                                switching={switching}
+                                                pending={pending}
+                                                onSelect={handleSwitch}
+                                              />
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </Accordion.Body>
+                                    </Accordion.Panel>
+                                  </Accordion.Item>
+                                );
+                              })}
+                            </Accordion>
+                          )}
+                        </div>
+                      </>
                     )}
                 </div>
               )}
@@ -430,6 +509,85 @@ function parseInverterLabel(label: string): {
   if (!match) return { serial: label, status: null, isOnline: false };
   const status = match[2]!.toLowerCase();
   return { serial: match[1]!, status, isOnline: status === "online" };
+}
+
+/**
+ * A single inverter row inside an expanded accordion panel. Plain
+ * `<button>` on purpose — nesting HeroUI's `ListBox` inside an
+ * `Accordion.Body` blanks the item labels (react-aria's collection
+ * builder doesn't like the wrapper), and a button hands us complete
+ * control over layout and the disabled/current tint without fighting
+ * that. Keyboard access is intact: tab moves between rows and Enter
+ * triggers the click.
+ */
+interface InverterRowProps {
+  plantId: string;
+  plantLabel: string;
+  inverter: LinkedPlant["inverters"][number];
+  switching: string | null;
+  pending: boolean;
+  onSelect: (id: string) => void;
+}
+
+function InverterRow({
+  plantId,
+  plantLabel,
+  inverter,
+  switching,
+  pending,
+  onSelect,
+}: InverterRowProps) {
+  const id = `${plantId}::${inverter.serial}`;
+  const { serial, status, isOnline } = parseInverterLabel(inverter.label);
+  const isSwitching = switching === id;
+  const isCurrent = inverter.isCurrent;
+  const isDisabled = pending || isCurrent;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(id)}
+      disabled={isDisabled}
+      aria-label={`${plantLabel} ${serial}${isCurrent ? " (currently linked)" : ""}`}
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none ${
+        isCurrent
+          ? "bg-success-soft/50 ring-1 ring-inset ring-success/30"
+          : isDisabled
+            ? "opacity-60"
+            : "hover:bg-hover"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`size-2 shrink-0 rounded-full ${
+          isOnline ? "bg-success" : "bg-muted/50"
+        }`}
+      />
+      <span className="truncate font-mono text-[13px] text-foreground">
+        {serial}
+      </span>
+      {isSwitching ? (
+        <Spinner size="sm" className="ms-auto" />
+      ) : isCurrent ? (
+        <Chip
+          color="success"
+          variant="soft"
+          size="sm"
+          className="ms-auto shrink-0"
+        >
+          Linked
+        </Chip>
+      ) : (
+        <Chip
+          color={isOnline ? "success" : "default"}
+          variant="soft"
+          size="sm"
+          className="ms-auto shrink-0"
+        >
+          {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
+        </Chip>
+      )}
+    </button>
+  );
 }
 
 

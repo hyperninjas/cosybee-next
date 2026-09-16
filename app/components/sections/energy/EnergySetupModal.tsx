@@ -43,13 +43,22 @@ export function EnergySetupModal({
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
-            <Modal.Header className="flex-row items-start gap-3">
-              <Modal.Icon className="bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
-                <ThunderboltFill className="size-5" />
+            {/* `--efh-grid` is scoped to `.efh-scope` in globals.css and
+                doesn't resolve here (dialog portals to `document.body`),
+                so the tile used to render as an empty square with the
+                bolt floating on plain modal surface. Semantic
+                accent-soft tokens give it a real filled tile. Bottom
+                border makes the header a distinct band from the first
+                question below it. */}
+            <Modal.Header className="flex-row items-center gap-3 border-b border-separator pb-5">
+              <Modal.Icon className="size-12 bg-accent-soft text-accent-soft-foreground">
+                <ThunderboltFill className="size-7" />
               </Modal.Icon>
               <div className="flex-1">
-                <Modal.Heading>Your energy supplier</Modal.Heading>
-                <p className="text-xs text-muted">
+                <Modal.Heading className="text-xl leading-tight">
+                  Your energy supplier
+                </Modal.Heading>
+                <p className="mt-0.5 text-sm leading-5 text-muted">
                   We use your tariff to work out what your energy costs.
                 </p>
               </div>

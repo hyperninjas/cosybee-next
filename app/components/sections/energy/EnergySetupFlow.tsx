@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import {
   Alert,
@@ -63,6 +64,45 @@ interface Props {
  * single edit.
  */
 const LINKABLE_SLUGS = new Set(["octopus-energy", "octopus"]);
+
+/**
+ * Supplier icons live in `public/brand/suppliers/`, mirrored from the
+ * mobile app's brand pack. Backend `slug` values don't always match the
+ * on-disk name ("E.ON Next" ships as `e-on-next.png`), so we normalise
+ * the supplier name to the same kebab shape and only render an icon
+ * when the file exists — anything unknown falls back to a first-letter
+ * tile so the row still aligns.
+ */
+const SUPPLIER_ICON_SLUGS = new Set([
+  "affect-energy",
+  "bristol-energy",
+  "british-gas",
+  "bulb-octopus",
+  "e-on-next",
+  "ecotricity",
+  "edf-energy",
+  "good-energy",
+  "green-energy-uk",
+  "igloo-energy",
+  "octopus-energy",
+  "opus-energy",
+  "outfox-the-market",
+  "ovo-energy",
+  "scottish-power",
+  "shell-energy",
+  "so-energy",
+  "utility-warehouse",
+]);
+
+function supplierIcon(name: string): string | null {
+  const slug = name
+    .toLowerCase()
+    .replace(/[.\s]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return SUPPLIER_ICON_SLUGS.has(slug) ? `/brand/suppliers/${slug}.png` : null;
+}
 
 type Phase = "supplier" | "connect" | "tariff" | "bill";
 
@@ -164,26 +204,50 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
           ) : (
             <RadioGroup
               aria-label="Energy supplier"
-              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto"
+              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto pe-1"
               value={providerId}
               onChange={setProviderId}
             >
-              {filtered.map((p) => (
-                <Radio key={p.id} value={p.id} className={OPTION_CARD}>
-                  <Radio.Control>
-                    <Radio.Indicator />
-                  </Radio.Control>
-                  <Radio.Content>
-                    <span className="text-sm font-medium text-foreground">
-                      {p.name}
-                    </span>
-                    <span className="text-xs text-muted">
-                      {p.tariffCount} {p.tariffCount === 1 ? "tariff" : "tariffs"}
-                      {LINKABLE_SLUGS.has(p.slug) && " · can connect for live data"}
-                    </span>
-                  </Radio.Content>
-                </Radio>
-              ))}
+              {filtered.map((p) => {
+                const icon = supplierIcon(p.name);
+                return (
+                  <Radio
+                    key={p.id}
+                    value={p.id}
+                    className={`${OPTION_CARD} !gap-3 !px-3 !py-2`}
+                  >
+                    {icon ? (
+                      <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
+                        <Image
+                          src={icon}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="size-10 object-contain"
+                        />
+                      </span>
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-sm font-semibold text-muted"
+                      >
+                        {p.name.charAt(0)}
+                      </span>
+                    )}
+                    <Radio.Content>
+                      <span className="text-sm font-semibold text-foreground">
+                        {p.name}
+                      </span>
+                      <span className="text-xs text-muted">
+                        {p.tariffCount}{" "}
+                        {p.tariffCount === 1 ? "tariff" : "tariffs"}
+                        {LINKABLE_SLUGS.has(p.slug) &&
+                          " · can connect for live data"}
+                      </span>
+                    </Radio.Content>
+                  </Radio>
+                );
+              })}
             </RadioGroup>
           )}
 
@@ -272,17 +336,18 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
           ) : (
             <RadioGroup
               aria-label="Tariff"
-              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto"
+              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto pe-1"
               value={tariffId}
               onChange={setTariffId}
             >
               {tariffs.map((t) => (
-                <Radio key={t.id} value={t.id} className={OPTION_CARD}>
-                  <Radio.Control>
-                    <Radio.Indicator />
-                  </Radio.Control>
+                <Radio
+                  key={t.id}
+                  value={t.id}
+                  className={`${OPTION_CARD} !gap-3 !px-3 !py-2.5`}
+                >
                   <Radio.Content>
-                    <span className="text-sm font-medium text-foreground">
+                    <span className="text-sm font-semibold text-foreground">
                       {t.name}
                     </span>
                     <span className="text-xs text-muted">

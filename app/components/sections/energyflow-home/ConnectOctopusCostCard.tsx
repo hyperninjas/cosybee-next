@@ -1,5 +1,5 @@
 import { Button, Card } from "@heroui/react";
-import { CircleCheck, ThunderboltFill } from "@gravity-ui/icons";
+import { ArrowRight, Check, ThunderboltFill } from "@gravity-ui/icons";
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
 
 /**
@@ -13,6 +13,24 @@ import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOc
  *
  * The button opens the same {@link ConnectOctopusModal} as the Octopus tile
  * in the provider strip, so there is one connect flow, not two.
+ *
+ * ### Layout
+ *
+ * Three-band vertical stack inside a single {@link Card}:
+ *
+ *  1. Centred hero — tinted circle icon, bold headline, muted lead.
+ *  2. A soft inset panel listing what the user unlocks by connecting.
+ *     Each bullet uses a small filled success chip instead of a bare
+ *     checkmark glyph so the row scans as "confirmed benefit".
+ *  3. A two-column footer — the "octopus energy" wordmark on the left,
+ *     the primary CTA on the right. The wordmark tags who the button
+ *     will hand the user off to; it is intentionally text-only (no
+ *     mascot asset in the repo) and coloured against Octopus brand
+ *     purple.
+ *
+ * A faint wave decoration is painted along the bottom edge as a
+ * pointer-events-none pseudo layer so the CTA still looks like the
+ * mockup without adding an asset dependency.
  */
 
 const UNLOCKS = [
@@ -23,36 +41,73 @@ const UNLOCKS = [
 
 export function ConnectOctopusCostCard() {
   return (
-    <Card variant="default" className="h-full justify-center">
-      <Card.Header className="items-center gap-3 text-center">
-        <span className="flex size-11 items-center justify-center rounded-full bg-[color:var(--efh-grid)]/10 text-[color:var(--efh-grid)]">
-          <ThunderboltFill className="size-5" aria-hidden="true" />
-        </span>
-        <Card.Title className="text-lg leading-snug">
-          Connect Octopus to see your tariff and daily cost
-        </Card.Title>
-        <Card.Description className="max-w-xs">
-          We read your rates and meter readings from Octopus, so these figures
-          stay empty until it&apos;s linked.
-        </Card.Description>
-      </Card.Header>
+    <Card
+      variant="default"
+      className="relative h-full overflow-hidden [background:linear-gradient(180deg,var(--color-surface)_60%,color-mix(in_oklab,var(--color-primary)_6%,var(--color-surface))_100%)]"
+    >
+      {/* Decorative wave band at the bottom — CSS-only so no extra
+          asset ships with the bundle. Sits behind everything with
+          pointer-events off. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 opacity-60"
+        style={{
+          backgroundImage:
+            "radial-gradient(120% 60% at 50% 100%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 60%), radial-gradient(80% 40% at 15% 100%, color-mix(in oklab, var(--color-primary) 8%, transparent) 0%, transparent 55%), radial-gradient(80% 40% at 85% 100%, color-mix(in oklab, var(--color-primary) 8%, transparent) 0%, transparent 55%)",
+        }}
+      />
 
-      <Card.Content className="items-center">
-        <ul className="flex flex-col gap-2">
-          {UNLOCKS.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-sm text-muted">
-              <CircleCheck className="size-4 shrink-0 text-success" aria-hidden="true" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Card.Content>
+      <div className="relative flex h-full flex-col">
+        <Card.Header className="items-center gap-4 px-6 pt-8 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-primary-soft ring-8 ring-primary-soft/40">
+            <ThunderboltFill
+              className="size-6 text-primary"
+              aria-hidden="true"
+            />
+          </span>
+          <Card.Title className="max-w-md text-balance text-xl font-bold leading-tight sm:text-2xl">
+            Connect Octopus to see your tariff and daily cost
+          </Card.Title>
+          <Card.Description className="max-w-md text-balance text-base leading-relaxed">
+            We read your rates and meter readings from Octopus, so these figures
+            stay empty until it&apos;s linked.
+          </Card.Description>
+        </Card.Header>
 
-      <Card.Footer className="justify-center">
-        <ConnectOctopusModal>
-          <Button variant="primary">Connect Octopus</Button>
-        </ConnectOctopusModal>
-      </Card.Footer>
+        <Card.Content className="px-6">
+          <ul className="flex flex-col gap-3 rounded-2xl bg-surface-secondary/70 p-4 sm:p-5">
+            {UNLOCKS.map((item) => (
+              <li key={item} className="flex items-center gap-3">
+                <span
+                  aria-hidden
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white shadow-sm"
+                >
+                  <Check className="size-3.5" />
+                </span>
+                <span className="text-sm leading-6 text-foreground sm:text-base">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card.Content>
+
+        <Card.Footer className="mt-auto flex-row items-center justify-between gap-4 px-6 pt-4 pb-6">
+          <span
+            aria-label="Octopus Energy"
+            className="text-lg leading-none font-bold tracking-tight"
+          >
+            <span style={{ color: "#100030" }}>octopus</span>
+            <span className="font-normal text-muted"> energy</span>
+          </span>
+          <ConnectOctopusModal>
+            <Button variant="primary" className="rounded-full">
+              Connect Octopus
+              <ArrowRight className="ms-1 size-4" aria-hidden />
+            </Button>
+          </ConnectOctopusModal>
+        </Card.Footer>
+      </div>
     </Card>
   );
 }

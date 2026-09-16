@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import {
   Alert,
@@ -48,6 +49,33 @@ interface Props {
  * so adopting that call later is a single edit.
  */
 const LINKABLE_BRANDS = new Set(["sunsynk"]);
+
+/**
+ * Brand-id → filename in `public/brand/solar/`. The catalog id sometimes
+ * differs from the marketing spelling ("foxess" vs "Fox ESS"), so a small
+ * explicit table beats normalising on every render. Falls back to no icon
+ * — the row still renders label + subtitle text.
+ */
+const BRAND_ICON_FILES: Record<string, string> = {
+  alphaess: "alphaess.png",
+  enphase: "enphase.png",
+  foxess: "fox-ess.png",
+  givenergy: "givenergy.png",
+  goodwe: "goodwe.png",
+  growatt: "growatt.png",
+  luxpower: "luxpower.png",
+  sigenergy: "sigenergy.png",
+  solaredge: "solaredge.png",
+  solis: "solis.png",
+  sunsynk: "sunsynk.png",
+  tesla: "tesla.png",
+};
+
+function brandIcon(id: string): string | null {
+  const key = id.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const file = BRAND_ICON_FILES[key];
+  return file ? `/brand/solar/${file}` : null;
+}
 
 type Phase = "brand" | "connect" | "product" | "panels";
 
@@ -150,30 +178,58 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
 
           <RadioGroup
             aria-label="Inverter brand"
-            className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto"
+            className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto pe-1"
             value={brandId}
             onChange={setBrandId}
           >
-            {options.brands.map((b) => (
-              <Radio key={b.id} value={b.id} className={OPTION_CARD}>
-                <Radio.Control>
-                  <Radio.Indicator />
-                </Radio.Control>
-                <Radio.Content>
-                  <span className="text-sm font-medium text-foreground">
-                    {b.label}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {[
-                      b.subtitle,
-                      LINKABLE_BRANDS.has(b.id) ? "can connect for live data" : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </Radio.Content>
-              </Radio>
-            ))}
+            {options.brands.map((b) => {
+              const icon = brandIcon(b.id);
+              return (
+                <Radio
+                  key={b.id}
+                  value={b.id}
+                  className={`${OPTION_CARD} !gap-3 !px-3 !py-2`}
+                >
+                  {/* No `Radio.Control` — the whole card selects on
+                      click and the accent border on `data-selected` in
+                      OPTION_CARD is the visual state. A separate dot
+                      alongside the brand tile was redundant here. */}
+                  {icon ? (
+                    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
+                      <Image
+                        src={icon}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="size-10 object-contain"
+                      />
+                    </span>
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-sm font-semibold text-muted"
+                    >
+                      {b.label.charAt(0)}
+                    </span>
+                  )}
+                  <Radio.Content>
+                    <span className="text-sm font-semibold text-foreground">
+                      {b.label}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {[
+                        b.subtitle,
+                        LINKABLE_BRANDS.has(b.id)
+                          ? "can connect for live data"
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </Radio.Content>
+                </Radio>
+              );
+            })}
           </RadioGroup>
 
           <div className="flex flex-wrap gap-3">
@@ -252,27 +308,31 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
           ) : (
             <RadioGroup
               aria-label="System"
-              className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto"
+              className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto pe-1"
               value={combinationId}
               onChange={setCombinationId}
             >
-              {products.map((p) => (
-                <Radio key={p.id} value={p.id} className={OPTION_CARD}>
-                  <Radio.Control>
-                    <Radio.Indicator />
-                  </Radio.Control>
-                  <Radio.Content>
-                    <span className="text-sm font-medium text-foreground">
-                      {p.label}
-                    </span>
-                    <span className="text-xs text-muted">
-                      {p.batteryKwh !== null && p.batteryKwh > 0
-                        ? `${p.inverterKw} kW inverter · ${p.batteryKwh} kWh battery`
-                        : `${p.inverterKw} kW inverter · no battery`}
-                    </span>
-                  </Radio.Content>
-                </Radio>
-              ))}
+              {products.map((p) => {
+                const hasBattery = p.batteryKwh !== null && p.batteryKwh > 0;
+                return (
+                  <Radio
+                    key={p.id}
+                    value={p.id}
+                    className={`${OPTION_CARD} !gap-3 !px-3 !py-2.5`}
+                  >
+                    <Radio.Content>
+                      <span className="text-sm font-semibold text-foreground">
+                        {p.label}
+                      </span>
+                      <span className="text-xs text-muted">
+                        {hasBattery
+                          ? `${p.inverterKw} kW inverter · ${p.batteryKwh} kWh battery`
+                          : `${p.inverterKw} kW inverter · no battery`}
+                      </span>
+                    </Radio.Content>
+                  </Radio>
+                );
+              })}
             </RadioGroup>
           )}
 
@@ -293,9 +353,9 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
 
       {/* ── Panels and age ──────────────────────────────────────────── */}
       {phase === "panels" && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className="text-lg font-semibold text-foreground">
               Tell us about your panels
             </h3>
             <p className="text-sm text-muted">
@@ -303,15 +363,19 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          {/* Two-up on wider screens, stacked on narrow. No `autoFocus`
+              — the theme's accent focus ring on a required numeric field
+              on modal-open reads as an "error" state. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               value={panelCount}
               onChange={setPanelCount}
               isInvalid={countError !== null}
-              className="w-40"
             >
-              <Label>How many panels?</Label>
-              <Input inputMode="numeric" placeholder="12" autoFocus />
+              <Label className="text-sm font-medium text-foreground">
+                How many panels?
+              </Label>
+              <Input inputMode="numeric" placeholder="12" />
               {countError && (
                 <Description className="text-danger">{countError}</Description>
               )}
@@ -321,9 +385,10 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
               value={installYear}
               onChange={setInstallYear}
               isInvalid={yearError !== null}
-              className="w-40"
             >
-              <Label>Year installed</Label>
+              <Label className="text-sm font-medium text-foreground">
+                Year installed
+              </Label>
               <Input inputMode="numeric" placeholder={String(max - 2)} />
               {yearError && (
                 <Description className="text-danger">{yearError}</Description>
@@ -337,28 +402,36 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
             value={panelWattage}
             onChange={setPanelWattage}
           >
-            <Label>Panel size</Label>
-            <Description>
+            <Label className="text-sm font-medium text-foreground">
+              Panel size
+            </Label>
+            <Description className="text-xs text-muted">
               Most modern panels are 400W. If you&apos;re unsure, leave it as it
               is.
             </Description>
-            <div className="flex flex-wrap gap-2">
+            {/* Fixed-width rectangular pills so every value sits on the
+                same baseline and the row reads as a group. `rounded-full`
+                + variable-length labels made 400W (which used to carry a
+                "common" sub-label) taller than the neighbours; that hint
+                lives in the description above the row instead. */}
+            <div className="mt-1 flex flex-wrap gap-2">
               {options.panelWattages.map((w) => (
-                <Radio key={w} value={String(w)} className={OPTION_CARD}>
-                  <Radio.Control>
-                    <Radio.Indicator />
-                  </Radio.Control>
-                  <Radio.Content>
-                    <span className="text-sm font-medium text-foreground">
-                      {w}W
-                    </span>
-                  </Radio.Content>
+                <Radio
+                  key={w}
+                  value={String(w)}
+                  className={
+                    "flex min-w-[4.5rem] cursor-pointer items-center justify-center rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-foreground transition-colors " +
+                    "data-[hovered=true]:bg-surface-secondary " +
+                    "data-[selected=true]:border-accent data-[selected=true]:bg-accent/10"
+                  }
+                >
+                  <Radio.Content>{w}W</Radio.Content>
                 </Radio>
               ))}
             </div>
           </RadioGroup>
 
-          <div className="flex gap-3">
+          <div className="flex justify-end gap-2 border-t border-separator pt-5">
             <Button
               variant="tertiary"
               isDisabled={saving}

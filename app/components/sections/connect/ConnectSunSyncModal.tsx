@@ -372,9 +372,9 @@ export function ConnectSunSyncModal({
             >
               {/* `pe-10` keeps the copy clear of the absolutely-positioned
                   close button in the top-right corner. */}
-              <Modal.Header className="flex-row items-start gap-3 pe-10">
-                <Modal.Icon className="bg-warning-soft text-warning-soft-foreground">
-                  <Sun aria-hidden className="size-5" />
+              <Modal.Header className="flex-row items-center gap-3 pe-10">
+                <Modal.Icon className="size-12 bg-warning-soft text-warning-soft-foreground">
+                  <Sun aria-hidden className="size-7" />
                 </Modal.Icon>
                 <div className="flex flex-1 flex-col gap-1">
                   <Modal.Heading>Connect Sunsynk</Modal.Heading>

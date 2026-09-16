@@ -49,9 +49,9 @@ export function PropertySetupModal({ children }: { children: ReactNode }) {
       <Modal.Backdrop>
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
-            <Modal.Header className="flex-row items-start gap-3">
-              <Modal.Icon className="bg-[color:var(--efh-battery)]/10 text-[color:var(--efh-battery)]">
-                <House className="size-5" />
+            <Modal.Header className="flex-row items-center gap-3">
+              <Modal.Icon className="size-12 bg-[color:var(--efh-battery)]/10 text-[color:var(--efh-battery)]">
+                <House className="size-7" />
               </Modal.Icon>
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">

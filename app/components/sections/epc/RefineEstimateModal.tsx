@@ -226,9 +226,9 @@ function RefineFlow({
 
   return (
     <>
-      <Modal.Header className="flex-row items-start gap-3">
-        <Modal.Icon className="bg-accent/10 text-accent">
-          <Sliders className="size-5" />
+      <Modal.Header className="flex-row items-center gap-3">
+        <Modal.Icon className="size-12 bg-accent/10 text-accent">
+          <Sliders className="size-7" />
         </Modal.Icon>
         <div className="flex-1">
           <Modal.Heading>Refine your estimate</Modal.Heading>
