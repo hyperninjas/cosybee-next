@@ -2,7 +2,7 @@
 "use no memo";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Spinner } from "@heroui/react";
 import { ArrowRotateRight } from "@gravity-ui/icons";
 
@@ -28,11 +28,18 @@ import { ArrowRotateRight } from "@gravity-ui/icons";
  *
  * ### Auto-refresh
  *
- * Polls the page every `refreshIntervalMs` (default 45 s) while shown, so
+ * Polls the page every `refreshIntervalMs` (default 15 s) while shown, so
  * the banner disappears on its own the moment the backend catches up.
  * Router.refresh() re-runs the server component's fetches without a full
  * page reload, so scroll position and modal state survive. The customer
  * can also refresh manually via the button; both do the same thing.
+ *
+ * `router` is stored in a ref so the interval sets up ONCE on mount and
+ * doesn't tear down between renders — an earlier version depended on
+ * `router` in the effect array and, under React 19 + React Compiler,
+ * that identity could change often enough that the 15 s timer was
+ * cleared before it ever fired (each render tick < interval), which is
+ * why the banner appeared to only refresh when the user hit the button.
  */
 
 interface Props {
@@ -40,16 +47,28 @@ interface Props {
   refreshIntervalMs?: number;
 }
 
-export function SyncingDataBanner({ refreshIntervalMs = 45_000 }: Props) {
+export function SyncingDataBanner({ refreshIntervalMs = 15_000 }: Props) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
+  // Latest `router` reference kept in a ref so the interval callback
+  // always calls the current instance without having to declare
+  // `router` as an effect dep (which was rebuilding the interval on
+  // every render).
+  const routerRef = useRef(router);
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
+
   useEffect(() => {
     const t = setInterval(() => {
-      router.refresh();
+      // Skip refresh when the tab is backgrounded — no visible UI to
+      // update, and each refresh is a network round-trip.
+      if (typeof document !== "undefined" && document.hidden) return;
+      routerRef.current.refresh();
     }, refreshIntervalMs);
     return () => clearInterval(t);
-  }, [router, refreshIntervalMs]);
+  }, [refreshIntervalMs]);
 
   const handleRefresh = () => {
     setRefreshing(true);
