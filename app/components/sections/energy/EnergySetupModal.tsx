@@ -40,7 +40,7 @@ export function EnergySetupModal({
   return (
     <Modal state={overlay}>
       <Modal.Trigger>{children}</Modal.Trigger>
-      <Modal.Backdrop>
+      <Modal.Backdrop variant="blur">
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
             {/* `--efh-grid` is scoped to `.efh-scope` in globals.css and
@@ -64,7 +64,7 @@ export function EnergySetupModal({
               </div>
             </Modal.Header>
 
-            <Modal.Body>
+            <Modal.Body className="pt-2">
               {/* Keyed on open state so a dialog closed halfway through
                   reopens at the first question rather than resuming a
                   half-answered run. */}

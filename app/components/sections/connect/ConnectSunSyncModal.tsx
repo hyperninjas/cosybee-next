@@ -22,7 +22,6 @@ import {
   Cpu,
   Envelope,
   House,
-  ShieldCheck,
   Sun,
 } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
@@ -371,18 +370,22 @@ export function ConnectSunSyncModal({
               }}
             >
               {/* `pe-10` keeps the copy clear of the absolutely-positioned
-                  close button in the top-right corner. */}
-              <Modal.Header className="flex-row items-center gap-3 pe-10">
+                  close button in the top-right corner. Bottom border makes
+                  the header a distinct band from the body — matches the
+                  SolarSetup / EnergySetup modal treatment. */}
+              <Modal.Header className="flex-row items-center gap-3 border-b border-separator pb-5 pe-10">
                 <Modal.Icon className="size-12 bg-warning-soft text-warning-soft-foreground">
                   <Sun aria-hidden className="size-7" />
                 </Modal.Icon>
-                <div className="flex flex-1 flex-col gap-1">
-                  <Modal.Heading>Connect Sunsynk</Modal.Heading>
-                  <p className="text-sm leading-5 text-muted">{blurb}</p>
+                <div className="flex flex-1 flex-col">
+                  <Modal.Heading className="text-xl leading-tight">
+                    Connect Sunsynk
+                  </Modal.Heading>
+                  <p className="mt-0.5 text-sm leading-5 text-muted">{blurb}</p>
                 </div>
               </Modal.Header>
 
-              <Modal.Body className="flex flex-col gap-5">
+              <Modal.Body className="flex flex-col gap-5 pt-2">
                 <Stepper step={currentStep} isDone={succeeded} />
 
                 {isPending && <LoadingCard />}
@@ -420,7 +423,6 @@ export function ConnectSunSyncModal({
                     inputMode="email"
                     icon={<Envelope aria-hidden className="size-4 text-muted" />}
                     isRequired={showCredentialsInBody}
-                    autoFocus={showCredentialsInBody}
                   />
 
                   <PasswordField
@@ -431,21 +433,26 @@ export function ConnectSunSyncModal({
                     isRequired={showCredentialsInBody}
                   />
 
-                  {/* One reassurance block instead of three stacked
-                      paragraphs: what happens to the password, and what
-                      happens next. */}
-                  <div className="flex items-start gap-2.5 rounded-2xl bg-surface-secondary px-3.5 py-3">
-                    <ShieldCheck
-                      aria-hidden
-                      className="mt-0.5 size-4 shrink-0 text-success"
-                    />
-                    <p className="text-xs leading-5 text-muted">
-                      Stored encrypted (AES-256-GCM) and used only to talk to
-                      the Sunsynk API on your behalf. If your account has more
-                      than one site or inverter, you&apos;ll pick which to link
-                      next.
-                    </p>
-                  </div>
+                  {/* Soft success-tinted panel with a real border — reads
+                      as an info panel rather than a disabled input. Same
+                      treatment as the Octopus modal, so the two connect
+                      flows read as siblings. */}
+                  <Alert
+                    status="success"
+                    className="rounded-2xl border border-success/25 bg-success-soft/40 px-4 py-3"
+                  >
+                    <Alert.Indicator className="text-success" />
+                    <Alert.Content>
+                      <Alert.Title className="text-sm font-semibold text-foreground">
+                        Stored encrypted (AES-256-GCM)
+                      </Alert.Title>
+                      <Alert.Description className="text-xs leading-5 text-muted">
+                        Used only to talk to the Sunsynk API on your behalf. If
+                        your account has more than one site or inverter,
+                        you&apos;ll pick which to link next.
+                      </Alert.Description>
+                    </Alert.Content>
+                  </Alert>
                 </Fieldset>
 
                 {showPlantInBody && "pickPlant" in result! && (

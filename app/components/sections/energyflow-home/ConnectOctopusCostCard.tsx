@@ -41,73 +41,65 @@ const UNLOCKS = [
 
 export function ConnectOctopusCostCard() {
   return (
+    // Both axes centred: `items-center` on the horizontal, and
+    // `justify-center` on the vertical. Card.Content was stretching to
+    // fill the column (HeroUI's default), which prevented the stack
+    // from moving as a group — with the content back to shrink-to-fit
+    // (see the `flex-none` below), the three bands cluster together
+    // and float to the middle with even space above and below.
     <Card
       variant="default"
-      className="relative h-full overflow-hidden [background:linear-gradient(180deg,var(--color-surface)_60%,color-mix(in_oklab,var(--color-primary)_6%,var(--color-surface))_100%)]"
+      className="flex h-full w-full flex-col items-center justify-center gap-2"
     >
-      {/* Decorative wave band at the bottom — CSS-only so no extra
-          asset ships with the bundle. Sits behind everything with
-          pointer-events off. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 opacity-60"
-        style={{
-          backgroundImage:
-            "radial-gradient(120% 60% at 50% 100%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 60%), radial-gradient(80% 40% at 15% 100%, color-mix(in oklab, var(--color-primary) 8%, transparent) 0%, transparent 55%), radial-gradient(80% 40% at 85% 100%, color-mix(in oklab, var(--color-primary) 8%, transparent) 0%, transparent 55%)",
-        }}
-      />
+      <Card.Header className="items-center gap-4 text-center">
+        <span className="flex size-14 items-center justify-center rounded-full bg-primary-soft ring-8 ring-primary-soft/40">
+          <ThunderboltFill className="size-6 text-primary" aria-hidden />
+        </span>
+        <Card.Title className="text-balance text-xl leading-tight font-bold sm:text-2xl">
+          Connect Octopus to see your tariff and daily cost
+        </Card.Title>
+        <Card.Description className="text-balance text-sm leading-relaxed sm:text-base">
+          We read your rates and meter readings from Octopus, so these figures
+          stay empty until it&apos;s linked.
+        </Card.Description>
+      </Card.Header>
 
-      <div className="relative flex h-full flex-col">
-        <Card.Header className="items-center gap-4 px-6 pt-8 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-primary-soft ring-8 ring-primary-soft/40">
-            <ThunderboltFill
-              className="size-6 text-primary"
-              aria-hidden="true"
-            />
-          </span>
-          <Card.Title className="max-w-md text-balance text-xl font-bold leading-tight sm:text-2xl">
-            Connect Octopus to see your tariff and daily cost
-          </Card.Title>
-          <Card.Description className="max-w-md text-balance text-base leading-relaxed">
-            We read your rates and meter readings from Octopus, so these figures
-            stay empty until it&apos;s linked.
-          </Card.Description>
-        </Card.Header>
+      {/* `flex-none` so Content sizes to the ul and doesn't stretch to
+          fill the column — otherwise the header + footer can't cluster
+          with it in a single centred group. */}
+      <Card.Content className="!flex-none">
+        <ul className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-2xl bg-surface-secondary p-4 sm:p-5">
+          {UNLOCKS.map((item) => (
+            <li key={item} className="flex items-center gap-3">
+              <span
+                aria-hidden
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white shadow-sm"
+              >
+                <Check className="size-3.5" />
+              </span>
+              <span className="text-sm leading-6 text-foreground sm:text-base">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Card.Content>
 
-        <Card.Content className="px-6">
-          <ul className="flex flex-col gap-3 rounded-2xl bg-surface-secondary/70 p-4 sm:p-5">
-            {UNLOCKS.map((item) => (
-              <li key={item} className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white shadow-sm"
-                >
-                  <Check className="size-3.5" />
-                </span>
-                <span className="text-sm leading-6 text-foreground sm:text-base">
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card.Content>
-
-        <Card.Footer className="mt-auto flex-row items-center justify-between gap-4 px-6 pt-4 pb-6">
-          <span
-            aria-label="Octopus Energy"
-            className="text-lg leading-none font-bold tracking-tight"
-          >
-            <span style={{ color: "#100030" }}>octopus</span>
-            <span className="font-normal text-muted"> energy</span>
-          </span>
-          <ConnectOctopusModal>
-            <Button variant="primary" className="rounded-full">
-              Connect Octopus
-              <ArrowRight className="ms-1 size-4" aria-hidden />
-            </Button>
-          </ConnectOctopusModal>
-        </Card.Footer>
-      </div>
+      <Card.Footer className="flex-row items-center justify-center gap-6">
+        <span
+          aria-label="Octopus Energy"
+          className="text-lg leading-none font-bold tracking-tight"
+        >
+          <span style={{ color: "#100030" }}>octopus</span>
+          <span className="font-normal text-muted"> energy</span>
+        </span>
+        <ConnectOctopusModal>
+          <Button variant="primary" className="rounded-full">
+            Connect Octopus
+            <ArrowRight className="ms-1 size-4" aria-hidden />
+          </Button>
+        </ConnectOctopusModal>
+      </Card.Footer>
     </Card>
   );
 }

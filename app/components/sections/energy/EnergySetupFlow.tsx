@@ -187,8 +187,14 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
             aria-label="Search suppliers"
             value={query}
             onChange={setQuery}
+            variant="secondary"
+            fullWidth
           >
-            <Input placeholder="Search suppliers" />
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="Search suppliers" />
+              <SearchField.ClearButton />
+            </SearchField.Group>
           </SearchField>
 
           {providers.length === 0 ? (
@@ -204,7 +210,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
           ) : (
             <RadioGroup
               aria-label="Energy supplier"
-              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto pe-1"
+              className="flex max-h-[26rem] flex-col !gap-1 overflow-y-auto pe-1"
               value={providerId}
               onChange={setProviderId}
             >
@@ -214,7 +220,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
                   <Radio
                     key={p.id}
                     value={p.id}
-                    className={`${OPTION_CARD} !gap-3 !px-3 !py-2`}
+                    className={`${OPTION_CARD} !mt-2 !items-center !gap-3 !px-3 !py-2`}
                   >
                     {icon ? (
                       <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
@@ -257,14 +263,15 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
             </p>
           )}
 
-          <Button
-            className="self-start"
-            variant="primary"
-            isDisabled={providerId.length === 0 || loadingTariffs}
-            onPress={handleSupplierNext}
-          >
-            {loadingTariffs ? "Loading tariffs…" : "Continue"}
-          </Button>
+          <div className="flex justify-end border-t border-separator pt-5">
+            <Button
+              variant="primary"
+              isDisabled={providerId.length === 0 || loadingTariffs}
+              onPress={handleSupplierNext}
+            >
+              {loadingTariffs ? "Loading tariffs…" : "Continue"}
+            </Button>
+          </div>
         </>
       )}
 
@@ -272,7 +279,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
       {phase === "connect" && provider !== null && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className="text-lg leading-tight font-semibold text-foreground">
               Do you have an {provider.name} account?
             </h3>
             <p className="text-sm text-muted">
@@ -307,15 +314,14 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
       {/* ── Phase 3: which tariff ───────────────────────────────────── */}
       {phase === "tariff" && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Which {provider?.name} tariff are you on?
-            </h3>
-            <p className="text-sm text-muted">
-              If you&apos;re not sure, pick the standard variable one — you can
-              change it later.
-            </p>
-          </div>
+          {/* Single muted lead line — the modal header already carries
+              the "Your energy supplier / We use your tariff…" framing,
+              so a full h3 + description block on top of it read as a
+              second, competing header. */}
+          <p className="text-sm text-muted">
+            Pick your {provider?.name} tariff — the standard variable one is
+            fine if you&apos;re not sure. You can change it later.
+          </p>
 
           {loadingTariffs ? (
             <div role="status" className="flex items-center gap-3">
@@ -336,7 +342,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
           ) : (
             <RadioGroup
               aria-label="Tariff"
-              className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto pe-1"
+              className="flex max-h-[26rem] flex-col !gap-1 overflow-y-auto pe-1"
               value={tariffId}
               onChange={setTariffId}
             >
@@ -344,7 +350,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
                 <Radio
                   key={t.id}
                   value={t.id}
-                  className={`${OPTION_CARD} !gap-3 !px-3 !py-2.5`}
+                  className={`${OPTION_CARD} !mt-2 !items-center !gap-3 !px-3 !py-2.5`}
                 >
                   <Radio.Content>
                     <span className="text-sm font-semibold text-foreground">
@@ -379,16 +385,16 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
       {/* ── Phase 4: monthly spend ──────────────────────────────────── */}
       {phase === "bill" && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Roughly what do you spend a month?
-            </h3>
-            <p className="text-sm text-muted">
-              This is how we turn your tariff into a daily usage estimate. A
-              rough figure is fine.
-            </p>
-          </div>
+          {/* Single muted lead line — no full h3 block competing with
+              the modal header ("Your energy supplier / We use your
+              tariff…"). */}
+          <p className="text-sm text-muted">
+            Roughly what do you spend a month? A rough figure is fine — we use
+            it to turn your tariff into a daily usage estimate.
+          </p>
 
+          {/* No `autoFocus`: the theme's accent focus ring on a required
+              numeric field on modal-open reads as an "error" state. */}
           <TextField
             value={bill}
             onChange={setBill}
@@ -396,7 +402,7 @@ export function EnergySetupFlow({ providers, postcode, onDone }: Props) {
             className="max-w-56"
           >
             <Label>Monthly energy spend (£)</Label>
-            <Input inputMode="decimal" placeholder="95" autoFocus />
+            <Input inputMode="decimal" placeholder="95" />
             {billError && (
               <Description className="text-danger">{billError}</Description>
             )}

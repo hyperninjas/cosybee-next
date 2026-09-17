@@ -32,7 +32,7 @@ export function SolarSetupModal({
   return (
     <Modal state={overlay}>
       <Modal.Trigger>{children}</Modal.Trigger>
-      <Modal.Backdrop>
+      <Modal.Backdrop variant="blur">
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>
             {/* `--efh-solar` is scoped to `.efh-scope` in globals.css and
@@ -58,7 +58,7 @@ export function SolarSetupModal({
               </div>
             </Modal.Header>
 
-            <Modal.Body>
+            <Modal.Body className="pt-2">
               {/* Keyed on open state so a dialog closed halfway reopens at
                   the first question rather than resuming a partial answer. */}
               <SolarSetupFlow

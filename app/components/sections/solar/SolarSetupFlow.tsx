@@ -6,12 +6,13 @@ import {
   Alert,
   Button,
   Description,
-  Input,
+  InputGroup,
   Label,
   Radio,
   RadioGroup,
   TextField,
 } from "@heroui/react";
+import { Calendar, Hashtag } from "@gravity-ui/icons";
 
 import { OPTION_CARD } from "@/app/components/ui/OptionCard";
 import { ConnectSunSyncModal } from "@/app/components/sections/connect/ConnectSunSyncModal";
@@ -166,19 +167,12 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
       {/* ── Which brand ─────────────────────────────────────────────── */}
       {phase === "brand" && (
         <>
-          <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
-              What solar or battery system do you have?
-            </h3>
-            <p className="text-sm text-muted">
-              We use it to estimate what your panels generate and what your
-              battery can store.
-            </p>
-          </div>
-
+          {/* No phase heading here — the modal header ("Your solar setup /
+              Tell us what you have and we'll estimate what it generates.")
+              already tells the user what this first step is. */}
           <RadioGroup
             aria-label="Inverter brand"
-            className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto pe-1"
+            className="flex max-h-[24rem] flex-col !gap-1 overflow-y-auto pe-1"
             value={brandId}
             onChange={setBrandId}
           >
@@ -188,7 +182,7 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
                 <Radio
                   key={b.id}
                   value={b.id}
-                  className={`${OPTION_CARD} !gap-3 !px-3 !py-2`}
+                  className={`${OPTION_CARD} !mt-2 !items-center !gap-3 !px-3 !py-2`}
                 >
                   {/* No `Radio.Control` — the whole card selects on
                       click and the accent border on `data-selected` in
@@ -232,7 +226,14 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
             })}
           </RadioGroup>
 
-          <div className="flex flex-wrap gap-3">
+          {/* Tertiary skip on the left, primary Continue on the right —
+              matches the panels phase footer. */}
+          <div className="flex items-center justify-end gap-2 border-t border-separator pt-5">
+            {onSkip && (
+              <Button variant="tertiary" onPress={onSkip}>
+                I don&apos;t have solar
+              </Button>
+            )}
             <Button
               variant="primary"
               isDisabled={brandId.length === 0}
@@ -240,11 +241,6 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
             >
               Continue
             </Button>
-            {onSkip && (
-              <Button variant="tertiary" onPress={onSkip}>
-                I don&apos;t have solar
-              </Button>
-            )}
           </div>
         </>
       )}
@@ -252,23 +248,24 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
       {/* ── Offer the live link ─────────────────────────────────────── */}
       {phase === "connect" && brand !== null && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Do you have a {brand.label} account?
-            </h3>
-            <p className="text-sm text-muted">
-              Connecting it reads your inverter directly, so generation and
-              battery levels are live rather than estimated.
-            </p>
-          </div>
+          {/* Single muted lead line — no full h3 block competing with
+              the modal header. */}
+          <p className="text-sm text-muted">
+            Do you have a {brand.label} account? Connecting it reads your
+            inverter directly, so generation and battery levels are live rather
+            than estimated.
+          </p>
 
-          <div className="flex flex-wrap gap-3">
-            <ConnectSunSyncModal>
-              <Button variant="primary">Connect {brand.label}</Button>
-            </ConnectSunSyncModal>
+          {/* Tertiary "describe instead" on the left, primary "Connect"
+              on the right — same right-anchored footer treatment as the
+              other phases. */}
+          <div className="flex items-center justify-end gap-2 border-t border-separator pt-5">
             <Button variant="tertiary" onPress={() => setPhase("product")}>
               No — describe my system instead
             </Button>
+            <ConnectSunSyncModal>
+              <Button variant="primary">Connect {brand.label}</Button>
+            </ConnectSunSyncModal>
           </div>
 
           <button
@@ -284,15 +281,14 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
       {/* ── Which product ───────────────────────────────────────────── */}
       {phase === "product" && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Which {brand?.label} system?
-            </h3>
-            <p className="text-sm text-muted">
-              The inverter size and battery capacity are usually on the unit
-              itself, or on your installation paperwork.
-            </p>
-          </div>
+          {/* Single muted lead line — no full h3 block competing with
+              the modal header ("Your solar setup / Tell us what you
+              have and we'll estimate what it generates."). */}
+          <p className="text-sm text-muted">
+            Pick your {brand?.label} system — the inverter size and battery
+            capacity are usually on the unit itself, or on your installation
+            paperwork.
+          </p>
 
           {products.length === 0 ? (
             <Alert status="warning">
@@ -308,7 +304,7 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
           ) : (
             <RadioGroup
               aria-label="System"
-              className="flex max-h-[24rem] flex-col gap-2 overflow-y-auto pe-1"
+              className="flex max-h-[24rem] flex-col !gap-1 overflow-y-auto pe-1"
               value={combinationId}
               onChange={setCombinationId}
             >
@@ -318,7 +314,7 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
                   <Radio
                     key={p.id}
                     value={p.id}
-                    className={`${OPTION_CARD} !gap-3 !px-3 !py-2.5`}
+                    className={`${OPTION_CARD} !mt-2 !items-center !gap-3 !px-3 !py-2.5`}
                   >
                     <Radio.Content>
                       <span className="text-sm font-semibold text-foreground">
@@ -354,14 +350,12 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
       {/* ── Panels and age ──────────────────────────────────────────── */}
       {phase === "panels" && (
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-semibold text-foreground">
-              Tell us about your panels
-            </h3>
-            <p className="text-sm text-muted">
-              Panel count and age set how much we expect the array to generate.
-            </p>
-          </div>
+          {/* Single muted lead line — no full h3 block competing with
+              the modal header. */}
+          <p className="text-sm text-muted">
+            Tell us about your panels — count and age set how much we expect
+            the array to generate.
+          </p>
 
           {/* Two-up on wider screens, stacked on narrow. No `autoFocus`
               — the theme's accent focus ring on a required numeric field
@@ -375,7 +369,15 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
               <Label className="text-sm font-medium text-foreground">
                 How many panels?
               </Label>
-              <Input inputMode="numeric" placeholder="12" />
+              <InputGroup variant="secondary">
+                <InputGroup.Prefix>
+                  <Hashtag
+                    aria-hidden
+                    className="size-4 text-muted"
+                  />
+                </InputGroup.Prefix>
+                <InputGroup.Input inputMode="numeric" placeholder="12" />
+              </InputGroup>
               {countError && (
                 <Description className="text-danger">{countError}</Description>
               )}
@@ -389,7 +391,15 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
               <Label className="text-sm font-medium text-foreground">
                 Year installed
               </Label>
-              <Input inputMode="numeric" placeholder={String(max - 2)} />
+              <InputGroup variant="secondary">
+                <InputGroup.Prefix>
+                  <Calendar aria-hidden className="size-4 text-muted" />
+                </InputGroup.Prefix>
+                <InputGroup.Input
+                  inputMode="numeric"
+                  placeholder={String(max - 2)}
+                />
+              </InputGroup>
               {yearError && (
                 <Description className="text-danger">{yearError}</Description>
               )}
