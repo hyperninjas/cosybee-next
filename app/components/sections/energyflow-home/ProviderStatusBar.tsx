@@ -1,11 +1,13 @@
 import { Button, Chip } from "@heroui/react";
-import { CircleCheckFill, Sun, ThunderboltFill } from "@gravity-ui/icons";
+import { CircleCheckFill, HouseFill, Sun, ThunderboltFill } from "@gravity-ui/icons";
 import { ConnectSunSyncModal } from "@/app/components/sections/connect/ConnectSunSyncModal";
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
 import { ManageSunSyncModal } from "@/app/components/sections/manage/ManageSunSyncModal";
 import { ManageOctopusModal } from "@/app/components/sections/manage/ManageOctopusModal";
+import { ManagePropertyModal } from "@/app/components/sections/manage/ManagePropertyModal";
 import { EpcRatingCard } from "@/app/components/sections/epc/EpcRatingCard";
 import type { EpcRating } from "@/app/lib/epc-actions";
+import type { ActiveProperty } from "@/app/lib/property-state";
 
 /**
  * Persistent connections summary on the dashboard.
@@ -129,6 +131,59 @@ function ProviderRow({
   );
 }
 
+/**
+ * The Property tile leads the row so the customer sees WHICH home the
+ * cards below refer to before anything else — the provider tiles, the
+ * flow diagram, the cost card and the history strip are all scoped to
+ * the active property, and displaying them without naming it first is
+ * how "why is my dashboard showing the wrong house?" support tickets
+ * happen. Positioned first for that reason, per 2026-09-21 design pass.
+ *
+ * The Manage button opens {@link ManagePropertyModal}, which handles
+ * both editing this home (rename / re-address) AND — when the account
+ * has more than one — switching the active home. Two responsibilities
+ * in one dialog because the tile only affords one trigger.
+ */
+function PropertyRow({
+  active,
+  properties,
+}: {
+  active: ActiveProperty;
+  properties: ActiveProperty[];
+}) {
+  // Truncated single-line preview. The full address (and postcode) stays
+  // available inside the Manage modal for anyone who needs to see it in full.
+  const subtitle = active.address?.trim() || active.postcode || "No address on file";
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
+      <div
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-default-100 text-default-600"
+      >
+        <HouseFill className="size-5" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-semibold text-foreground">
+            {active.label || "Property"}
+          </span>
+          {properties.length > 1 && (
+            <Chip color="default" variant="soft" size="sm">
+              {properties.length} homes
+            </Chip>
+          )}
+        </div>
+        <div className="truncate text-xs text-muted">{subtitle}</div>
+      </div>
+      <ManagePropertyModal active={active} properties={properties}>
+        <Button size="sm" variant="tertiary">
+          Manage
+        </Button>
+      </ManagePropertyModal>
+    </div>
+  );
+}
+
 export interface ProviderStatusBarProps {
   sunsync: {
     connected: boolean;
@@ -143,6 +198,21 @@ export interface ProviderStatusBarProps {
    * resolved yet (single-property, unnamed, or backend refused).
    */
   activePropertyLabel?: string | null;
+  /**
+   * The home currently pinned to this session. When present, renders the
+   * Property tile as the first column of the row. Omitting it (or passing
+   * `null`) drops the tile entirely — a Tier-0 defensive default; in
+   * practice this component only mounts after a provider is linked, which
+   * requires an active property upstream.
+   */
+  activeProperty?: ActiveProperty | null;
+  /**
+   * Every non-archived home on the account. Powers the "Switch home" list
+   * inside the Manage-property dialog. Passing a single-element list (or
+   * one containing only the active home) collapses that section — the tile
+   * still renders with just the edit form.
+   */
+  properties?: ActiveProperty[];
 }
 
 /**
@@ -169,6 +239,8 @@ export function ProviderStatusBar({
   octopus,
   epc,
   activePropertyLabel,
+  activeProperty,
+  properties,
 }: ProviderStatusBarProps & { epc?: EpcRating }) {
   // When the inverter is reporting fresh, "Synced X min ago" against the
   // reading timestamp is the honest signal (falls back to the sync-job
@@ -218,8 +290,29 @@ export function ProviderStatusBar({
   // The rating sits between the two providers rather than after them: the
   // inverter tile is about power, the Octopus tile about cost, and the
   // home's own efficiency is what connects the two.
+  //
+  // The Property tile leads the row (added 2026-09-21). It only mounts
+  // when `activeProperty` is present; a Tier-0 render without a home
+  // falls back to the earlier three-column layout so nothing shifts for
+  // that path.
+  const showProperty = activeProperty !== null && activeProperty !== undefined;
+  // Column count grows with the number of tiles actually rendered. The
+  // earlier layout was `EPC ? 3 : 2`; now it's `(EPC ? 3 : 2) + property`
+  // — spelled out because Tailwind cannot resolve string interpolation
+  // for column counts and each combination has to appear as a literal
+  // class name in source.
+  const gridColsClass = showProperty
+    ? epc
+      ? "md:grid-cols-4"
+      : "md:grid-cols-3"
+    : epc
+      ? "md:grid-cols-3"
+      : "md:grid-cols-2";
   return (
-    <div className={`grid gap-3 ${epc ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+    <div className={`grid gap-3 ${gridColsClass}`}>
+      {showProperty && (
+        <PropertyRow active={activeProperty} properties={properties ?? [activeProperty]} />
+      )}
       <ProviderRow
         accent="solar"
         title="Sunsynk"

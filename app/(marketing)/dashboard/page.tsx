@@ -198,7 +198,13 @@ export default async function EnergyFlowHomePage({
           the Connect CTAs once ANY provider was linked, which meant you
           could connect Octopus first and then have no way to add SunSync
           from the page. */}
-      <ProviderStatusBar sunsync={sunsync} octopus={octopus} epc={epc} />
+      <ProviderStatusBar
+        sunsync={sunsync}
+        octopus={octopus}
+        epc={epc}
+        activeProperty={property}
+        properties={properties}
+      />
 
       {/* Behaviour-only: refreshes the page while Octopus is still back-
           filling so the Octopus tile subtitle flips from

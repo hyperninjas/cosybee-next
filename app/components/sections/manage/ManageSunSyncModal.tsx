@@ -206,8 +206,36 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
         confirmDiscardHistory: true,
       });
       setSwitching(null);
-      if (!result.ok) setError(result.error);
-      else reset();
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      // 🔴 Optimistic cache update — the "Linked" chip must move HERE.
+      //
+      // `plants` is client-cached across the modal's lifetime (see the
+      // "Keep `plants` cached" note in `reset()` — reopening the modal
+      // does not refetch). `revalidatePath("/dashboard")` inside
+      // `switchSunSyncSelection` invalidates the SERVER-rendered
+      // dashboard, but this list came from a Server Action call in a
+      // `useEffect`, which `revalidatePath` cannot reach. Without this
+      // patch a user who switched to a new inverter and then went back
+      // into the switch view (or just glanced at the list before
+      // navigating away) still saw the OLD inverter labelled "Linked",
+      // which reads as "the change didn't take" — reported 2026-09-21.
+      //
+      // The backend has already confirmed the switch with `ok: true`,
+      // so mirroring the flip locally is safe: we're not guessing at
+      // upstream state, we're propagating the state we just wrote.
+      setPlants((prev) =>
+        prev?.map((p) => ({
+          ...p,
+          inverters: p.inverters.map((inv) => ({
+            ...inv,
+            isCurrent: p.id === plantId && inv.serial === inverterSerial,
+          })),
+        })) ?? null,
+      );
+      reset();
     });
   }
 
