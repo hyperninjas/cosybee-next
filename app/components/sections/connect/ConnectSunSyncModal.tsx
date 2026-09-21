@@ -249,6 +249,7 @@ function PickerFieldset({
 export function ConnectSunSyncModal({
   children,
   successHref,
+  onSuccess,
 }: {
   children: ReactNode;
   /**
@@ -259,6 +260,13 @@ export function ConnectSunSyncModal({
    * the action already updates the current page, so we just close.
    */
   successHref?: string;
+  /**
+   * Called after the modal closes on success. Used by SolarSetupFlow to run
+   * its own `onDone` (which drives both the onboarding router.push AND the
+   * dashboard's declaration-flow completion) instead of hard-coding the
+   * onboarding URL here.
+   */
+  onSuccess?: () => void;
 }) {
   const [result, formAction, isPending] = useActionState(
     async (_prev: SunSyncConnectResult | null, form: FormData) =>
@@ -299,9 +307,10 @@ export function ConnectSunSyncModal({
     const t = setTimeout(() => {
       close();
       if (successHref) router.push(successHref);
+      onSuccess?.();
     }, 900);
     return () => clearTimeout(t);
-  }, [succeeded, successHref, close, router]);
+  }, [succeeded, successHref, onSuccess, close, router]);
 
   const blurb =
     currentStep === "plant"

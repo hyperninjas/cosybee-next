@@ -24,6 +24,20 @@ import type { EpcRating } from "@/app/lib/epc-actions";
 
 interface ProviderRowProps {
   connected: boolean;
+  /**
+   * Sunsynk-only tri-state: `true` = inverter is reporting fresh readings
+   * (green "Connected" chip); `false` = linked but the physical inverter
+   * has gone silent (amber "Connected · No live data" chip); `undefined`
+   * = the provider doesn't distinguish (Octopus, which is OAuth-fetched
+   * on demand and can't be "linked but silent" the same way).
+   *
+   * This is the fix for the silent-degradation bug: pre-2026-09, a green
+   * "Connected · Synced just now" chip could sit above a flow diagram
+   * that was actually rendering modelled fallback watts, because the
+   * chip only checked the sync-job success and the diagram only checked
+   * reading freshness — two independent signals shown as one.
+   */
+  liveReporting?: boolean;
   title: string;
   subtitle: string;
   accent: "solar" | "grid";
@@ -39,6 +53,7 @@ interface ProviderRowProps {
 
 function ProviderRow({
   connected,
+  liveReporting,
   title,
   subtitle,
   accent,
@@ -74,10 +89,21 @@ function ProviderRow({
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-sm font-semibold text-foreground">{title}</span>
           {connected && (
-            <Chip color="success" variant="soft" size="sm">
-              <CircleCheckFill className="mr-1 inline size-3 align-middle" />
-              Connected
-            </Chip>
+            liveReporting === false ? (
+              // Linked, but the inverter isn't reporting inside the flow
+              // endpoint's 20-min freshness window. Amber, not green — the
+              // dashboard's diagram is showing the modelled fallback right
+              // now, and pretending otherwise is what we're fixing here.
+              <Chip color="warning" variant="soft" size="sm">
+                <CircleCheckFill className="mr-1 inline size-3 align-middle" />
+                Connected · No live data
+              </Chip>
+            ) : (
+              <Chip color="success" variant="soft" size="sm">
+                <CircleCheckFill className="mr-1 inline size-3 align-middle" />
+                Connected
+              </Chip>
+            )
           )}
         </div>
         <div className="truncate text-xs text-muted">{subtitle}</div>
@@ -104,7 +130,12 @@ function ProviderRow({
 }
 
 export interface ProviderStatusBarProps {
-  sunsync: { connected: boolean; lastSyncedAt: string | null };
+  sunsync: {
+    connected: boolean;
+    lastSyncedAt: string | null;
+    liveReporting: boolean;
+    latestReadingAt: string | null;
+  };
   octopus: { connected: boolean; accountNumber: string | null; backfillComplete: boolean };
   /**
    * Passed through to the manage modals as a chip so a user with several
@@ -139,8 +170,20 @@ export function ProviderStatusBar({
   epc,
   activePropertyLabel,
 }: ProviderStatusBarProps & { epc?: EpcRating }) {
+  // When the inverter is reporting fresh, "Synced X min ago" against the
+  // reading timestamp is the honest signal (falls back to the sync-job
+  // timestamp for old backends that don't send latestReadingAt yet).
+  //
+  // When it's linked but silent, sync-job success is not what the user
+  // needs to see — they need to know their inverter went dark and roughly
+  // when. `formatRelativeSync` returns "Synced …" phrasing so we strip
+  // the prefix before re-labelling it "Inverter last reported …".
   const sunsyncSubtitle = sunsync.connected
-    ? formatRelativeSync(sunsync.lastSyncedAt)
+    ? sunsync.liveReporting
+      ? formatRelativeSync(sunsync.latestReadingAt ?? sunsync.lastSyncedAt)
+      : sunsync.latestReadingAt
+        ? `Inverter last reported ${formatRelativeSync(sunsync.latestReadingAt).replace(/^Synced /, "")}`
+        : "Waiting for first reading"
     : "Add your inverter for live power flow";
 
   const octopusSubtitle = octopus.connected
@@ -182,6 +225,7 @@ export function ProviderStatusBar({
         title="Sunsynk"
         subtitle={sunsyncSubtitle}
         connected={sunsync.connected}
+        liveReporting={sunsync.liveReporting}
         ConnectModal={ConnectSunSyncModal}
         ManageModal={SunSyncManage}
       />

@@ -8,6 +8,8 @@ import { ThunderboltFill } from "@gravity-ui/icons";
 import { EnergySetupFlow } from "./EnergySetupFlow";
 import type { EnergyProvider } from "@/app/lib/energy-actions";
 
+type OverlayState = ReturnType<typeof useOverlayState>;
+
 /**
  * The dashboard's way into the supplier → tariff → bill flow.
  *
@@ -28,18 +30,33 @@ export function EnergySetupModal({
   providers,
   postcode,
   children,
+  state,
 }: {
   providers: EnergyProvider[];
   postcode: string;
-  /** The trigger — usually the card's CTA button. */
-  children: ReactNode;
+  /**
+   * The trigger — usually the card's CTA button. Optional when `state` is
+   * passed by the parent: some callers (e.g. the icon in
+   * ConnectOctopusCostCard's declared-tariff panel) drive the overlay
+   * themselves so they can render the trigger anywhere in the layout
+   * without the wrapping Modal.Trigger div interfering with positioning.
+   */
+  children?: ReactNode;
+  /**
+   * Externally-owned overlay state. When supplied, the caller controls
+   * open/close via `state.open()` and `state.close()`; `children` becomes
+   * optional. When omitted, we create our own state and expect `children`
+   * as the trigger (the original inline usage).
+   */
+  state?: OverlayState;
 }) {
-  const overlay = useOverlayState();
+  const own = useOverlayState();
+  const overlay = state ?? own;
   const router = useRouter();
 
   return (
     <Modal state={overlay}>
-      <Modal.Trigger>{children}</Modal.Trigger>
+      {children ? <Modal.Trigger>{children}</Modal.Trigger> : null}
       <Modal.Backdrop variant="blur">
         <Modal.Container size="lg" placement="center">
           <Modal.Dialog>

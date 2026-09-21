@@ -263,7 +263,7 @@ export function SolarSetupFlow({ options, onDone, onSkip }: Props) {
             <Button variant="tertiary" onPress={() => setPhase("product")}>
               No — describe my system instead
             </Button>
-            <ConnectSunSyncModal>
+            <ConnectSunSyncModal onSuccess={onDone}>
               <Button variant="primary">Connect {brand.label}</Button>
             </ConnectSunSyncModal>
           </div>

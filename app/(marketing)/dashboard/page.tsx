@@ -182,6 +182,15 @@ export default async function EnergyFlowHomePage({
   // completion without a manual reload.
   const octopusBackfilling = octopus.connected && !octopus.backfillComplete;
 
+  // Providers for the "Change supplier" modal on the connect-Octopus card.
+  // Only fetched when it will actually render — Octopus not linked AND the
+  // customer has declared a tariff we're echoing back to them. A connected
+  // dashboard with Octopus linked pays nothing for this catalog.
+  const providers =
+    !octopus.connected && energy !== null
+      ? await listEnergyProviders(property?.postcode)
+      : [];
+
   return wrapper(
     <div className="flex flex-col gap-4">
       {/* Persistent connections strip — makes the second provider reachable
@@ -230,6 +239,9 @@ export default async function EnergyFlowHomePage({
         historyLive={liveFields.history.live}
         todayIso={todayIso}
         octopusConnected={octopus.connected}
+        energySetup={energy}
+        providers={providers}
+        postcode={property?.postcode ?? ""}
       />
     </div>,
   );

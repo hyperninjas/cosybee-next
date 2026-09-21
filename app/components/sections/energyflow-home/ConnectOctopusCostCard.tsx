@@ -1,6 +1,10 @@
-import { Button, Card } from "@heroui/react";
-import { ArrowRight, Check, ThunderboltFill } from "@gravity-ui/icons";
+"use client";
+
+import { Button, Card, useOverlayState } from "@heroui/react";
+import { ArrowRight, Check, Pencil, ThunderboltFill } from "@gravity-ui/icons";
 import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOctopusModal";
+import { EnergySetupModal } from "@/app/components/sections/energy/EnergySetupModal";
+import type { EnergyProvider, EnergySetup } from "@/app/lib/energy-actions";
 
 /**
  * Right-column empty state for a dashboard with no Octopus connection.
@@ -11,26 +15,18 @@ import { ConnectOctopusModal } from "@/app/components/sections/connect/ConnectOc
  * fixture ("Octopus Agile", 22.50p, £1.97, "£2.15 saved vs yesterday")
  * under a "Live" chip, which read as this customer's real bill.
  *
- * The button opens the same {@link ConnectOctopusModal} as the Octopus tile
- * in the provider strip, so there is one connect flow, not two.
+ * ### Two variants share ONE frame
  *
- * ### Layout
+ * The layout — centred hero header, panel in the middle, wordmark + CTA
+ * footer — is identical in both cases. Only the middle panel changes:
  *
- * Three-band vertical stack inside a single {@link Card}:
+ *  • Nothing declared → three benefit bullets (what connecting unlocks).
+ *  • Tariff declared  → the provider · plan · monthly spend the customer
+ *    typed in onboarding, so the card reads their answer back to them
+ *    instead of an empty pitch.
  *
- *  1. Centred hero — tinted circle icon, bold headline, muted lead.
- *  2. A soft inset panel listing what the user unlocks by connecting.
- *     Each bullet uses a small filled success chip instead of a bare
- *     checkmark glyph so the row scans as "confirmed benefit".
- *  3. A two-column footer — the "octopus energy" wordmark on the left,
- *     the primary CTA on the right. The wordmark tags who the button
- *     will hand the user off to; it is intentionally text-only (no
- *     mascot asset in the repo) and coloured against Octopus brand
- *     purple.
- *
- * A faint wave decoration is painted along the bottom edge as a
- * pointer-events-none pseudo layer so the CTA still looks like the
- * mockup without adding an asset dependency.
+ * Keeping the outer frame fixed means the card's silhouette on the
+ * dashboard doesn't lurch as declared/undeclared state changes.
  */
 
 const UNLOCKS = [
@@ -39,7 +35,39 @@ const UNLOCKS = [
   "How that compares with yesterday",
 ] as const;
 
-export function ConnectOctopusCostCard() {
+interface Props {
+  /**
+   * The tariff the customer declared in onboarding when they picked a
+   * non-Octopus supplier. Null when nothing has been declared yet — the card
+   * falls back to the benefit bullets.
+   */
+  energySetup?: EnergySetup | null;
+  /** Provider catalog, only needed for the "Change supplier" modal. */
+  providers?: EnergyProvider[];
+  /** Postcode for tariff lookups inside "Change supplier". */
+  postcode?: string;
+}
+
+/**
+ * Split the backend-formatted "Provider — Tariff name" into its two parts so
+ * the tariff name doesn't wrap into a second line of the provider heading.
+ * The dash comes from the backend and is always the em/en-dash separator;
+ * when it isn't present (older payloads) we render the whole thing as the
+ * heading.
+ */
+function splitTariff(displayTariff: string): { provider: string; tariff: string | null } {
+  const match = displayTariff.match(/^(.+?)\s+[—–-]\s+(.+)$/);
+  if (match) return { provider: match[1]!.trim(), tariff: match[2]!.trim() };
+  return { provider: displayTariff.trim(), tariff: null };
+}
+
+export function ConnectOctopusCostCard({
+  energySetup = null,
+  providers = [],
+  postcode = "",
+}: Props) {
+  const declared = energySetup !== null;
+
   return (
     // Both axes centred: `items-center` on the horizontal, and
     // `justify-center` on the vertical. Card.Content was stretching to
@@ -56,33 +84,30 @@ export function ConnectOctopusCostCard() {
           <ThunderboltFill className="size-6 text-primary" aria-hidden />
         </span>
         <Card.Title className="text-balance text-xl leading-tight font-bold sm:text-2xl">
-          Connect Octopus to see your tariff and daily cost
+          {declared
+            ? "Connect Octopus for live rates and daily cost"
+            : "Connect Octopus to see your tariff and daily cost"}
         </Card.Title>
         <Card.Description className="text-balance text-sm leading-relaxed sm:text-base">
-          We read your rates and meter readings from Octopus, so these figures
-          stay empty until it&apos;s linked.
+          {declared
+            ? "You told us the estimate below. Link Octopus and we'll replace it with your actual import, export and daily cost."
+            : "We read your rates and meter readings from Octopus, so these figures stay empty until it's linked."}
         </Card.Description>
       </Card.Header>
 
-      {/* `flex-none` so Content sizes to the ul and doesn't stretch to
+      {/* `flex-none` so Content sizes to the panel and doesn't stretch to
           fill the column — otherwise the header + footer can't cluster
           with it in a single centred group. */}
       <Card.Content className="!flex-none">
-        <ul className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-2xl bg-surface-secondary p-4 sm:p-5">
-          {UNLOCKS.map((item) => (
-            <li key={item} className="flex items-center gap-3">
-              <span
-                aria-hidden
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white shadow-sm"
-              >
-                <Check className="size-3.5" />
-              </span>
-              <span className="text-sm leading-6 text-foreground sm:text-base">
-                {item}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {declared ? (
+          <DeclaredPanel
+            setup={energySetup}
+            providers={providers}
+            postcode={postcode}
+          />
+        ) : (
+          <UnlocksPanel />
+        )}
       </Card.Content>
 
       <Card.Footer className="flex-row items-center justify-center gap-6">
@@ -101,5 +126,114 @@ export function ConnectOctopusCostCard() {
         </ConnectOctopusModal>
       </Card.Footer>
     </Card>
+  );
+}
+
+function UnlocksPanel() {
+  return (
+    <ul className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-2xl bg-surface-secondary p-4 sm:p-5">
+      {UNLOCKS.map((item) => (
+        <li key={item} className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white shadow-sm"
+          >
+            <Check className="size-3.5" />
+          </span>
+          <span className="text-sm leading-6 text-foreground sm:text-base">
+            {item}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * The "declared tariff" panel — same rounded-secondary frame as
+ * {@link UnlocksPanel} so the card's silhouette doesn't shift. Two-column
+ * key/value grid: supplier + plan on the left, monthly spend + daily kWh on
+ * the right. Values are backend-formatted strings; render verbatim.
+ */
+function DeclaredPanel({
+  setup,
+  providers,
+  postcode,
+}: {
+  setup: EnergySetup;
+  providers: EnergyProvider[];
+  postcode: string;
+}) {
+  const { provider, tariff } = splitTariff(setup.displayTariff);
+  const dailyKwh =
+    setup.dailyKwh !== null && Number.isFinite(setup.dailyKwh)
+      ? `${setup.dailyKwh.toFixed(1)} kWh`
+      : null;
+
+  // Owned overlay state so the edit icon can sit ANYWHERE in this layout
+  // (absolute-positioned in the corner) without being trapped inside
+  // Modal.Trigger's wrapper div — the wrapper's zero-flow height was
+  // eating the click through the react-aria trigger context.
+  const overlay = useOverlayState();
+
+  return (
+    <div className="relative mx-auto w-full max-w-md rounded-2xl bg-surface-secondary p-4 text-left sm:p-5">
+      {/* Plain <button> deliberately: onClick is direct DOM, not
+          routed via react-aria's DialogTrigger context, so it fires
+          reliably from an absolute-positioned corner slot. */}
+      <button
+        type="button"
+        aria-label="Change supplier"
+        onClick={() => overlay.open()}
+        className="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <Pencil className="size-4" aria-hidden />
+      </button>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-4 pe-8">
+        <PanelField label="Supplier" value={provider} title={provider} />
+        <PanelField
+          label="Monthly spend"
+          value={setup.displayBill || "—"}
+        />
+        <PanelField
+          label="Plan"
+          value={tariff ?? "—"}
+          title={tariff ?? undefined}
+        />
+        <PanelField label="Estimated use" value={dailyKwh ?? "—"} />
+      </div>
+
+      {/* Modal without a trigger — controlled by `state` above. */}
+      <EnergySetupModal
+        providers={providers}
+        postcode={postcode}
+        state={overlay}
+      />
+    </div>
+  );
+}
+
+function PanelField({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: string;
+  title?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="text-xs uppercase tracking-[0.08em] text-muted">
+        {label}
+      </div>
+      <div
+        className="mt-1 truncate text-sm font-semibold text-foreground sm:text-base"
+        title={title}
+      >
+        {value}
+      </div>
+    </div>
   );
 }

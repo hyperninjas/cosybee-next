@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActiveProperty } from "@/app/lib/property-state";
 import type { EnergyFlowFetchResult } from "@/app/lib/energy-flow";
+import type { EnergyProvider, EnergySetup } from "@/app/lib/energy-actions";
 import { integratePoints } from "@/app/lib/history-integration";
 import { buildLiveStats, findPeakSolar } from "@/app/lib/live-stats";
 import { ConnectOctopusCostCard } from "./ConnectOctopusCostCard";
@@ -71,6 +72,18 @@ interface Props {
    * of rendering the demo fixture as if it were this home's bill.
    */
   octopusConnected: boolean;
+  /**
+   * The tariff the customer declared in onboarding when they picked a
+   * non-Octopus supplier. Passed to the connect-Octopus card so it can show
+   * their own numbers alongside the CTA instead of an all-empty state.
+   * Ignored when `octopusConnected` is true — the real TariffCard renders
+   * instead.
+   */
+  energySetup?: EnergySetup | null;
+  /** Provider catalog for the "Change supplier" modal on the connect card. */
+  providers?: EnergyProvider[];
+  /** Postcode for tariff lookups inside the "Change supplier" modal. */
+  postcode?: string;
 }
 
 export function DashboardShell({
@@ -82,6 +95,9 @@ export function DashboardShell({
   historyLive,
   todayIso,
   octopusConnected,
+  energySetup = null,
+  providers = [],
+  postcode = "",
 }: Props) {
   const [dayIso, setDayIso] = useState<string>(todayIso);
   const [history, setHistory] = useState<PowerHistory | null>(
@@ -221,7 +237,11 @@ export function DashboardShell({
             <DailyCostCard cost={data.cost} />
           </div>
         ) : (
-          <ConnectOctopusCostCard />
+          <ConnectOctopusCostCard
+            energySetup={energySetup}
+            providers={providers}
+            postcode={postcode}
+          />
         )}
       </div>
 

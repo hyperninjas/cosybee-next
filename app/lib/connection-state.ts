@@ -28,6 +28,16 @@ export interface SunSyncConnectionStatus {
   status: string | null;
   lastSyncedAt: string | null;
   lastError: string | null;
+  /**
+   * True when the inverter's latest reading is inside the flow endpoint's
+   * 20-min freshness window — i.e. the diagram will show measured watts,
+   * not the modelled fallback. Distinct from `connected` (OAuth link) and
+   * `lastSyncedAt` (sync job success) because both of those can be green
+   * while the physical inverter is offline.
+   */
+  liveReporting: boolean;
+  /** ISO timestamp of the newest reading, or null if none exist yet. */
+  latestReadingAt: string | null;
 }
 
 /** Subset of eb-auth's OctopusConnectionStatus we actually consume. */
@@ -60,6 +70,8 @@ const DISCONNECTED_SUNSYNC: SunSyncConnectionStatus = {
   status: null,
   lastSyncedAt: null,
   lastError: null,
+  liveReporting: false,
+  latestReadingAt: null,
 };
 
 const DISCONNECTED_OCTOPUS: OctopusConnectionStatus = {
@@ -107,6 +119,11 @@ async function fetchSunSyncStatus(
       status: data.status ?? null,
       lastSyncedAt: data.lastSyncedAt ?? null,
       lastError: data.lastError ?? null,
+      // Default to `false` when the field is absent so an old backend during
+      // a rolling deploy fails safe: no confident "Live" chip, just the same
+      // subtitle we always showed.
+      liveReporting: data.liveReporting ?? false,
+      latestReadingAt: data.latestReadingAt ?? null,
     };
   } catch {
     return DISCONNECTED_SUNSYNC;
