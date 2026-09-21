@@ -69,11 +69,40 @@ export interface TodayEnergyMix {
   importedFromGridKwh: number | null;
 }
 
+/**
+ * Per-block provenance emitted by `eb-auth`'s
+ * `energy-flow.engine.ts:EnergyFlowProvenance`. The realtime block is either
+ * measured (an inverter answered and the frame balances), modelled (no
+ * inverter — a synthetic bell curve is standing in), or unavailable.
+ *
+ * Only `realTime` is consumed here; `todayMix` provenance lives with the
+ * stats-strip card and gets typed there when it lands.
+ */
+interface EnergyFlowProvenanceResponse {
+  realTime?: "measured" | "modelled" | "unavailable";
+}
+
 interface EnergyFlowResponse {
   realTime?: RealTimeFlowResponse;
   todayMix?: Partial<TodayEnergyMix>;
   /** Server clock — used only as a last-resort fallback if `measuredAt` is absent. */
   timestamp?: string;
+  /**
+   * Legacy discriminator, kept on the wire for clients that predate
+   * `provenance`. `true` exactly when `source === "simulated"` — the backend
+   * derives one from the other, we treat them as one signal on the read.
+   */
+  isSimulated?: boolean;
+  /**
+   * Payload-wide roll-up. `"live"` is emitted only when every published
+   * `todayMix` field is measured; any modelled field degrades this to
+   * `"mixed"`; nothing usable at all is `"unavailable"`. `"simulated"` is the
+   * pure-fallback case — no inverter linked, curves standing in for the
+   * whole payload.
+   */
+  source?: "simulated" | "live" | "mixed" | "unavailable";
+  /** Per-block provenance. Authoritative — checked before `isSimulated`/`source`. */
+  provenance?: EnergyFlowProvenanceResponse;
 }
 
 // ── Direction inference ──────────────────────────────────────────────────
@@ -120,6 +149,36 @@ const toWatts = (kw: number | undefined): number =>
 export function realTimeToSnapshot(body: EnergyFlowResponse): EnergyFlowSnapshot | null {
   const rt = body.realTime;
   if (!rt) return null;
+
+  // 🔴 Refuse to paint modelled watts as measured.
+  //
+  // The backend's `/api/energy-profile/energy-flow` ALWAYS returns a
+  // `realTime` block: for users with a live inverter it's measured, but
+  // for users with no link (or a link with a silent inverter) it's a
+  // synthetic bell curve stamped with the same shape. The backend is
+  // honest about which is which — it labels the payload three different
+  // ways at once — but the diagram, historically, read the numbers and
+  // dropped every provenance signal on the floor. Result: a not-connected
+  // account displayed 700 W of "Solar" beside an "Updated just now"
+  // badge, and `measuredAt: null` (the honest server signal) was silently
+  // overwritten by `body.timestamp` further down so the freshness check
+  // read "just now" too.
+  //
+  // All three flags are checked because they are set together on the
+  // server (`isSimulated` derives from `source`, `source: "simulated"`
+  // implies `provenance.realTime: "modelled"`) and if a future refactor
+  // drops one we do NOT want a silent regression. If any one says
+  // modelled, we treat the block as unusable and fall through to the
+  // caller's `status: "no-data"` branch, which renders the "Connect your
+  // inverter" empty state — the same code path a fresh property already
+  // hits.
+  if (
+    body.isSimulated === true ||
+    body.source === "simulated" ||
+    body.provenance?.realTime === "modelled"
+  ) {
+    return null;
+  }
 
   const solarW = Math.max(0, toWatts(rt.solarKw));
   const houseW = Math.max(0, toWatts(rt.houseKw));
