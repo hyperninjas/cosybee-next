@@ -49,9 +49,23 @@ import { displayAddress } from "@/app/lib/address-format";
 interface Props {
   address: ResolvedAddress;
   epcs: EpcCertificateRow[];
+  /**
+   * Where to send the user once the property has been created. First-time
+   * onboarding flows on into the Sunsynk connect step (default);
+   * add-property re-entry from the dashboard lands back on `/dashboard`,
+   * where the ProviderStatusBar tiles handle per-property connects. Kept
+   * as a prop rather than derived here so `building-profile/page.tsx` can
+   * decide once from its `flow` search-param and every branch below
+   * (auto, pick, no-EPC) inherits the same target.
+   */
+  nextHref?: string;
 }
 
-export function BuildingProfileClient({ address, epcs }: Props) {
+export function BuildingProfileClient({
+  address,
+  epcs,
+  nextHref = "/onboarding/connect-sunsync",
+}: Props) {
   const router = useRouter();
   const [certificateNumber, setCertificateNumber] = useState<string>(
     epcs[0]?.certificateNumber ?? "",
@@ -92,7 +106,7 @@ export function BuildingProfileClient({ address, epcs }: Props) {
         setError(result.error);
         return;
       }
-      router.push("/onboarding/connect-sunsync");
+      router.push(nextHref);
     });
   }
 

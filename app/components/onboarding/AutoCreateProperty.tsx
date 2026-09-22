@@ -50,11 +50,31 @@ export function AutoCreateProperty({
         certificateNumber,
         label: "Home",
       });
-      // 409 CONFLICT = "You already have an active property at this address"
-      // (eb-auth's `PropertyConflictError`). Treat as success — the property
-      // is exactly what we would have created, so a stalled "Try again" here
-      // would loop the user on a screen with no way out. Just advance.
-      if (result.ok || result.code === "CONFLICT") {
+      // 409 CONFLICT comes back for TWO distinct backend errors —
+      // `PropertyConflictError` ("already have an active property at
+      // this address") AND `PropertyLimitError` ("You can own at most
+      // 25 properties.") — both mapped to `conflict()` in
+      // `eb-auth/src/middleware/error-handler.ts:246`. They deserve
+      // opposite treatment:
+      //
+      //   • Duplicate — the row we would have created already exists,
+      //     so advancing is the right call: a stalled "Try again"
+      //     would loop the user on a screen with no way out.
+      //   • Limit reached — silently advancing here would send the user
+      //     to a nextHref that expects a fresh property they don't
+      //     have, so surface the error and let them back out.
+      //
+      // Backend does not send a distinguishing sub-code (both go out as
+      // `code: "CONFLICT"`), so we key on a substring of the message.
+      // Kept as `at most` — the phrase in `PropertyLimitError`'s
+      // constructor — because it survives copy tweaks better than
+      // "25 properties" would.
+      if (result.ok) {
+        router.push(nextHref);
+      } else if (
+        result.code === "CONFLICT" &&
+        !result.error.toLowerCase().includes("at most")
+      ) {
         router.push(nextHref);
       } else {
         setError(result.error);

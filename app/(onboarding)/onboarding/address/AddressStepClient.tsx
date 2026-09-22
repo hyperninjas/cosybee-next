@@ -20,25 +20,39 @@ import { AddressSearch } from "@/app/components/onboarding/AddressSearch";
  * field swaps to a "Looking up your home…" line instead of leaving the
  * user staring at their search box for 1–2 s while the EPC lookup runs.
  *
- * ### Design notes
- *
- * The step is one labelled field, flush with the heading above it. It
- * used to be a `Card` holding an icon row that repeated the label, the
- * field, and an `Alert` that repeated the page subtitle — a lot of
- * chrome around a single input. The card is gone, so the field aligns
- * with the progress bar and the title on the same left edge.
+ * The `flow` prop switches the on-screen copy AND the query string that
+ * gets forwarded to step 2. `first-time` is the linear 4-step onboarding
+ * that flows on into `/onboarding/connect-sunsync`; `add-property` is the
+ * dashboard re-entry that skips the connect steps and lands back on
+ * `/dashboard` (matches mobile's add-another-home path — the new home
+ * just becomes active and the ProviderStatusBar tiles handle Sunsynk /
+ * Octopus per home from there).
  */
-export function AddressStepClient() {
+interface Props {
+  flow: "first-time" | "add-property";
+}
+
+export function AddressStepClient({ flow }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const isAddProperty = flow === "add-property";
 
   return (
     <>
       <OnboardingProgress
+        // First-time onboarding is 4 steps (address → building profile →
+        // sunsync → octopus). Add-property is 2 (address → building profile
+        // → straight back to dashboard); rendering "Step 1 of 4" on that
+        // path would be a lie in the same shape as the mobile "step 3 of
+        // 4" complaint the guide flagged as a footgun.
         step={1}
-        total={4}
-        title="Where do you live?"
-        description="We use your address to find your home's EPC and your local tariff rates."
+        total={isAddProperty ? 2 : 4}
+        title={isAddProperty ? "Add another home" : "Where do you live?"}
+        description={
+          isAddProperty
+            ? "Search for the home you want to add. It becomes the active home once created — you can switch back from Manage property."
+            : "We use your address to find your home's EPC and your local tariff rates."
+        }
       />
 
       {pending ? (
@@ -54,7 +68,13 @@ export function AddressStepClient() {
           label="Address or postcode"
           description="Start typing, then pick your home from the list."
           onPick={(key, label) => {
-            const q = new URLSearchParams({ key, label }).toString();
+            // Forward the `flow` flag to step 2 so its gate + on-success
+            // redirect match. Absent flag defaults to first-time, so
+            // existing links from other places in the app stay pointed
+            // at the linear funnel.
+            const params: Record<string, string> = { key, label };
+            if (isAddProperty) params["flow"] = "add-property";
+            const q = new URLSearchParams(params).toString();
             startTransition(() =>
               router.push(`/onboarding/building-profile?${q}`),
             );

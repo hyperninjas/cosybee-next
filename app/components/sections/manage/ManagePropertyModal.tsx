@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Button,
@@ -11,13 +12,27 @@ import {
   RadioGroup,
   useOverlayState,
 } from "@heroui/react";
-import { HouseFill } from "@gravity-ui/icons";
+import { HouseFill, Plus } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
 import { AddressSearch } from "@/app/components/onboarding/AddressSearch";
 import { activateProperty, updateProperty } from "@/app/lib/property-actions";
 import { retrieveAddress, type ResolvedAddress } from "@/app/lib/onboarding-actions";
 import { displayAddress } from "@/app/lib/address-format";
 import type { ActiveProperty } from "@/app/lib/property-state";
+
+/**
+ * Matches `MAX_PROPERTIES_PER_USER` in
+ * `eb-auth/src/modules/properties/properties.service.ts` — the backend
+ * throws `PropertyLimitError` (→ 409) once the user reaches this count.
+ * Mirrored client-side so the "Add another home" button can grey out
+ * BEFORE the trip to the backend, and the banner explains what's
+ * happening instead of the flow ending in an opaque red toast.
+ *
+ * If the backend limit changes, update this constant to match — a stale
+ * value here degrades gracefully to "backend rejects, banner shows the
+ * upstream message" instead of blocking users prematurely.
+ */
+const MAX_PROPERTIES_PER_USER = 25;
 
 /**
  * Post-connect management dialog for the active property.
@@ -61,6 +76,12 @@ interface Props {
 
 export function ManagePropertyModal({ children, active, properties }: Props) {
   const overlay = useOverlayState();
+  // `useRouter` from next/navigation for the "Add another home" push.
+  // Closed-overlay-then-push order matters: leaving the modal mounted
+  // through the navigation kept the focus trap on this dialog while the
+  // /onboarding/address page tried to focus its ComboBox, and the trap
+  // won — the address field never took focus without a second Tab.
+  const router = useRouter();
 
   // ── Edit state (rename + re-address share one Save) ───────────────
   //
@@ -229,67 +250,116 @@ export function ManagePropertyModal({ children, active, properties }: Props) {
                 </div>
               )}
 
-              {/* ── Switch (multi-home only) ──────────────────────── */}
-              {canSwitch && (
-                <div className="flex flex-col gap-3 rounded-2xl bg-surface-secondary px-4 py-4">
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-sm font-medium text-foreground">
-                      Switch home
-                    </p>
-                    <p className="text-xs text-muted">
-                      Every card on the dashboard reads the active home.
-                    </p>
-                  </div>
-
-                  {switchError && (
-                    <Alert status="danger">
-                      <Alert.Indicator />
-                      <Alert.Content>
-                        <Alert.Description>{switchError}</Alert.Description>
-                      </Alert.Content>
-                    </Alert>
-                  )}
-
-                  <RadioGroup
-                    aria-label="Active home"
-                    value={switchTarget}
-                    onChange={setSwitchTarget}
-                    className="flex flex-col gap-2"
-                  >
-                    {properties.map((p) => (
-                      <Radio key={p.id} value={p.id}>
-                        <div className="flex min-w-0 flex-col">
-                          <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                            <span className="truncate">
-                              {p.label || "Untitled home"}
-                            </span>
-                            {p.id === active.id && (
-                              <Chip color="success" variant="soft" size="sm">
-                                Active
-                              </Chip>
-                            )}
-                          </span>
-                          <span className="truncate text-xs text-muted">
-                            {p.address}
-                            {p.postcode ? ` · ${p.postcode}` : ""}
-                          </span>
-                        </div>
-                      </Radio>
-                    ))}
-                  </RadioGroup>
-
-                  <div className="flex justify-end">
-                    <Button
-                      variant="tertiary"
-                      size="sm"
-                      onPress={handleSwitch}
-                      isDisabled={switchTarget === active.id || switchPending}
-                    >
-                      {switchPending ? "Switching…" : "Switch home"}
-                    </Button>
-                  </div>
+              {/* ── Your homes ────────────────────────────────────
+                  Always rendered, unlike the previous switch-only block:
+                  even a single-home user reaches the "Add another home"
+                  button through this section. Layout matches mobile's
+                  `AddressSwitcherSheet`
+                  (`energiebeemobile/lib/features/address_switcher/
+                  presentation/widgets/address_switcher_sheet.dart:14`) —
+                  a list of homes with a trailing "Add another address"
+                  action. On the web the radio-list + Switch pattern
+                  survives because that's how we activate; add is a
+                  separate route push, not a modal action. */}
+              <div className="flex flex-col gap-3 rounded-2xl bg-surface-secondary px-4 py-4">
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-sm font-medium text-foreground">
+                    Your homes
+                  </p>
+                  <p className="text-xs text-muted">
+                    {canSwitch
+                      ? "Every card on the dashboard reads the active home."
+                      : "This is the only home on your account."}
+                  </p>
                 </div>
-              )}
+
+                {switchError && (
+                  <Alert status="danger">
+                    <Alert.Indicator />
+                    <Alert.Content>
+                      <Alert.Description>{switchError}</Alert.Description>
+                    </Alert.Content>
+                  </Alert>
+                )}
+
+                {canSwitch && (
+                  <>
+                    <RadioGroup
+                      aria-label="Active home"
+                      value={switchTarget}
+                      onChange={setSwitchTarget}
+                      className="flex flex-col gap-2"
+                    >
+                      {properties.map((p) => (
+                        <Radio key={p.id} value={p.id}>
+                          <div className="flex min-w-0 flex-col">
+                            <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                              <span className="truncate">
+                                {p.label || "Untitled home"}
+                              </span>
+                              {p.id === active.id && (
+                                <Chip color="success" variant="soft" size="sm">
+                                  Active
+                                </Chip>
+                              )}
+                            </span>
+                            <span className="truncate text-xs text-muted">
+                              {p.address}
+                              {p.postcode ? ` · ${p.postcode}` : ""}
+                            </span>
+                          </div>
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+
+                    <div className="flex justify-end">
+                      <Button
+                        variant="tertiary"
+                        size="sm"
+                        onPress={handleSwitch}
+                        isDisabled={
+                          switchTarget === active.id || switchPending
+                        }
+                      >
+                        {switchPending ? "Switching…" : "Switch home"}
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {/* Add-another-home entry point. Modelled on mobile's
+                    "Add another address" row rather than a floating
+                    button — inline placement keeps it obviously part of
+                    the same home-management surface.
+                    Disabled once the account is at the backend's
+                    property cap (`MAX_PROPERTIES_PER_USER`), with the
+                    button label saying WHY so the greyed state isn't
+                    silent — an amber upsell would be misleading here
+                    since there's nothing the user can do short of
+                    archiving. */}
+                <div className="flex flex-col gap-1 border-t border-default-200 pt-3">
+                  <Button
+                    variant="tertiary"
+                    size="sm"
+                    isDisabled={properties.length >= MAX_PROPERTIES_PER_USER}
+                    onPress={() => {
+                      overlay.close();
+                      router.push("/onboarding/address?flow=add-property");
+                    }}
+                    className="justify-start"
+                  >
+                    <Plus aria-hidden className="mr-2 inline size-4" />
+                    {properties.length >= MAX_PROPERTIES_PER_USER
+                      ? `Max of ${MAX_PROPERTIES_PER_USER} homes reached`
+                      : "Add another home"}
+                  </Button>
+                  {properties.length >= MAX_PROPERTIES_PER_USER && (
+                    <p className="text-xs text-muted">
+                      Archive a home to add a new one.
+                    </p>
+                  )}
+                </div>
+              </div>
             </Modal.Body>
 
             <Modal.Footer>
