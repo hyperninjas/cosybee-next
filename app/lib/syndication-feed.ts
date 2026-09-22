@@ -38,11 +38,22 @@ import { escapeXml } from "./xml";
  * NewsBreak's specification asks for, and it is what the body's own images
  * already use — so the lead image and the rest of the article agree.
  */
-function leadImage(article: Article): string {
+function leadImage(article: Article, feed: FeedDefinition): string {
   const cover = article.coverImageReal ?? article.ogImage;
   if (!cover) return "";
   const alt = escapeXml(article.coverImageAlt || article.title);
-  return `<figure><img src="${escapeXml(cover)}" alt="${alt}" /></figure>`;
+  const caption = feed.captionLeadImage
+    ? `<figcaption>${escapeXml(article.coverImageCaption ?? article.coverImageCredit ?? article.title)}</figcaption>`
+    : "";
+  return `<figure><img src="${escapeXml(cover)}" alt="${alt}" />${caption}</figure>`;
+}
+
+function stripUnsafeMarkup(html: string): string {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, "")
+    .replace(/\sstyle="[^"]*"/gi, "");
 }
 
 /**
@@ -55,11 +66,16 @@ function leadImage(article: Article): string {
  * every `<img>` to a site-relative `/_next/image?...` URL that would resolve
  * against the aggregator's host and show nothing.
  */
-function syndicationBody(article: Article, rendered: string, feed: FeedDefinition): string {
+function syndicationBody(
+  article: Article,
+  rendered: string,
+  feed: FeedDefinition,
+): string {
   // Pasted inline colours are stripped for the same reason the page strips
   // them: they outrank the reader's own theme, and here that reader is in
   // someone else's app.
-  let html = leadImage(article) + stripPastedColors(rendered);
+  let html = leadImage(article, feed) + stripPastedColors(rendered);
+  if (feed.stripUnsafeMarkup) html = stripUnsafeMarkup(html);
   if (feed.newsBreak) {
     html = classifyEmbedIframes(html, NEWSBREAK_IFRAME_CLASSES);
   }
@@ -82,6 +98,14 @@ function syndicationBody(article: Article, rendered: string, feed: FeedDefinitio
  * that forgets.
  */
 const DEFAULT_MAX_ITEMS = 50;
+
+function wordCount(value: string): number {
+  const text = value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .trim();
+  return text ? text.split(/\s+/).length : 0;
+}
 
 export interface SyndicationFeed {
   xml: string;
@@ -108,11 +132,26 @@ export async function renderSyndicationFeed(
 
   const bodies = new Map<string, string>();
   for (const article of articles) {
+    if (feed.requireThumbnail && !(article.coverImageReal ?? article.ogImage)) {
+      continue;
+    }
+    if (
+      feed.minDescriptionWords &&
+      wordCount(article.seoDescription ?? article.description ?? "") <
+        feed.minDescriptionWords
+    ) {
+      continue;
+    }
     // Sequential on purpose: the reads are already done and cached by this
     // point, and `contentJsonToHtml` is CPU-bound React rendering — running
     // fifty of those concurrently only contends for the same event loop.
     const rendered = await renderArticleBody(article);
-    if (!rendered.trim()) continue;
+    if (
+      !rendered.trim() ||
+      (feed.minBodyWords && wordCount(rendered) < feed.minBodyWords)
+    ) {
+      continue;
+    }
     bodies.set(article.id, syndicationBody(article, rendered, feed));
   }
 
@@ -134,5 +173,6 @@ export async function renderSyndicationFeed(
  */
 export const SYNDICATION_HEADERS = {
   "Content-Type": "application/rss+xml; charset=utf-8",
-  "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=600",
+  "Cache-Control":
+    "public, max-age=0, s-maxage=300, stale-while-revalidate=600",
 } as const;
