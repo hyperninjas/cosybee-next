@@ -54,9 +54,16 @@ function hasSessionCookie(request: NextRequest): boolean {
  *    Ours says "Disallow: /" on every non-production host (app/robots.ts) and
  *    is the reason sandbox URLs stay out of search — worth more open than shut;
  *  - /.well-known/, used for certificate and domain-ownership challenges, which
- *    are machine-to-machine and cannot type a password.
+ *    are machine-to-machine and cannot type a password;
+ *  - /brand/**, brand-pack PNGs (energy suppliers, solar hardware) mirrored
+ *    from the mobile app. The energy-supplier picker and solar-hardware
+ *    dropdown render these via next/image; before this exception they came
+ *    back as text/html from the gate on the sandbox, and the picker rendered
+ *    as a list of broken image placeholders. Same "readable resource, not
+ *    a page" rationale as the two entries above — a logo doesn't need to
+ *    hide behind a password.
  *
- * `_next/static` is the fourth exception and lives in the `matcher` below,
+ * `_next/static` is the fifth exception and lives in the `matcher` below,
  * because the unlock screen needs its own CSS and JS to render.
  */
 function isAlwaysOpen(pathname: string): boolean {
@@ -64,7 +71,8 @@ function isAlwaysOpen(pathname: string): boolean {
     pathname === GATE_PATH ||
     pathname.startsWith(`${GATE_PATH}/`) ||
     pathname === "/robots.txt" ||
-    pathname.startsWith("/.well-known/")
+    pathname.startsWith("/.well-known/") ||
+    pathname.startsWith("/brand/")
   );
 }
 
