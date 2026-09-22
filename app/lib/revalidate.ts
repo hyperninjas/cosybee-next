@@ -33,6 +33,7 @@ export function revalidateContent(): void {
 
   // Derived files that enumerate the whole catalogue.
   revalidatePath("/sitemap.xml");
+  revalidatePath("/article-sitemap.xml");
   revalidatePath("/video-sitemap.xml");
   revalidatePath("/news-sitemap.xml");
   revalidatePath("/llms.txt");
