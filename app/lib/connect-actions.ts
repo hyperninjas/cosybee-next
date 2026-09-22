@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { invalidateActivePropertyData } from "./active-property-header";
 
 /**
  * `createProperty` is grouped here alongside the connect actions rather
@@ -170,7 +170,7 @@ export async function createProperty(form: FormData): Promise<ConnectResult> {
       };
     }
 
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return {
@@ -231,7 +231,7 @@ export async function connectSunSync(form: FormData): Promise<SunSyncConnectResu
 
     if (res.ok) {
       // Flip the page's tier without a full navigation next paint.
-      revalidatePath("/dashboard");
+      invalidateActivePropertyData();
       return { ok: true };
     }
 
@@ -329,7 +329,7 @@ export async function connectOctopus(form: FormData): Promise<ConnectResult> {
     });
 
     if (res.ok) {
-      revalidatePath("/dashboard");
+      invalidateActivePropertyData();
       return { ok: true };
     }
 

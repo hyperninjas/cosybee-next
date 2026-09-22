@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 /**
  * Web equivalent of mobile's `activePropertyIdProvider` + Dio interceptor
@@ -124,4 +125,36 @@ export async function withPropertyHeader(
   const id = await readActivePropertyId();
   if (id === null) return { ...base };
   return { ...base, "X-Property-Id": id };
+}
+
+/**
+ * Invalidate every server-rendered page that reads active-property data.
+ *
+ * Called after any action that changes which home is active (`activate`,
+ * `archive`) so the next render doesn't paint the previous home's data
+ * against the new selection. Mirrors mobile's
+ * `invalidateActivePropertyData` in shape
+ * (`energiebeemobile/lib/features/properties/presentation/
+ * active_property_invalidation.dart`) — a single point of coordination
+ * so a follow-up page that reads property data doesn't have to remember
+ * to teach every caller to invalidate it — but the MECHANISM differs:
+ * mobile invalidates ~40 Riverpod providers by name, web invalidates
+ * route segments and lets Next.js's fetch cache flush the fetches
+ * inside them.
+ *
+ * `revalidatePath("/dashboard", "layout")` covers the dashboard layout
+ * AND every nested route under it, so a future
+ * `/dashboard/settings`, `/dashboard/heating`, etc. inherits the
+ * invalidation without a new line here.
+ *
+ * The client-polling API routes (`/api/dashboard/energy-flow`,
+ * `/api/dashboard/history`) are NOT listed because they run per-request
+ * without response caching — they read the current cookie and forward.
+ * The next poll after a switch picks up the new home automatically.
+ *
+ * Callable only from a Server Action / Route Handler — `revalidatePath`
+ * itself throws during a render, so this inherits that constraint.
+ */
+export function invalidateActivePropertyData(): void {
+  revalidatePath("/dashboard", "layout");
 }

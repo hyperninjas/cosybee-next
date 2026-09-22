@@ -1,8 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
 import {
+  invalidateActivePropertyData,
   readActivePropertyId,
   writeActivePropertyId,
 } from "./active-property-header";
@@ -69,7 +69,7 @@ export async function activateProperty(propertyId: string): Promise<PropertyActi
     await writeActivePropertyId(propertyId);
     // Invalidate the dashboard so every server-rendered card re-fetches
     // against the newly active home.
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
@@ -155,7 +155,7 @@ export async function updateProperty(
         ...(body?.code ? { code: body.code } : {}),
       };
     }
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
@@ -231,7 +231,7 @@ export async function archiveProperty(
     // cookie's answer synchronously.
     const activeId = await readActivePropertyId();
     if (activeId !== propertyId) {
-      revalidatePath("/dashboard");
+      invalidateActivePropertyData();
       return { ok: true, newActivePropertyId: null };
     }
 
@@ -251,7 +251,7 @@ export async function archiveProperty(
       // (there's nothing to activate).
       const { clearActivePropertyId } = await import("./active-property-header");
       await clearActivePropertyId();
-      revalidatePath("/dashboard");
+      invalidateActivePropertyData();
       return { ok: true, newActivePropertyId: null };
     }
 
@@ -262,7 +262,7 @@ export async function archiveProperty(
     if (!activateResult.ok) {
       // Archive succeeded but reactivation failed — a rare combination.
       // Report as a "partial" so the client at least refreshes.
-      revalidatePath("/dashboard");
+      invalidateActivePropertyData();
       return { ok: true, newActivePropertyId: null };
     }
     return { ok: true, newActivePropertyId: next };

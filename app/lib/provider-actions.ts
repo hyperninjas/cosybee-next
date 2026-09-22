@@ -1,8 +1,10 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { withPropertyHeader } from "./active-property-header";
+import {
+  invalidateActivePropertyData,
+  withPropertyHeader,
+} from "./active-property-header";
 
 /**
  * Server Actions for managing an already-connected provider link.
@@ -65,7 +67,7 @@ export async function disconnectSunSync(): Promise<ProviderActionResult> {
       cache: "no-store",
     });
     if (!res.ok) return readError(res, "Couldn't disconnect Sunsynk.");
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
@@ -87,7 +89,7 @@ export async function disconnectOctopus(): Promise<ProviderActionResult> {
       cache: "no-store",
     });
     if (!res.ok) return readError(res, "Couldn't disconnect Octopus.");
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
@@ -237,7 +239,7 @@ export async function switchSunSyncSelection(input: {
       cache: "no-store",
     });
     if (!res.ok) return readError(res, "Couldn't switch to that inverter.");
-    revalidatePath("/dashboard");
+    invalidateActivePropertyData();
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach Sunsynk. Try again in a moment." };
