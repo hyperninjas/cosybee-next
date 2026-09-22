@@ -170,6 +170,18 @@ export const FEEDS = {
     path: "/newsnow/newsnow.xml",
     title: `${SITE_NAME} — News`,
   },
+  /** Registered with MSN Partner Hub when the publisher account is onboarded. */
+  msn: {
+    path: "/msn/msn.xml",
+    title: `${SITE_NAME} — News`,
+    description:
+      "Latest smart energy news, solar insights, heating tips and home energy updates.",
+    language: "en-GB",
+    fullContent: true,
+    thumbnails: true,
+    // Keep the MSN feed focused on the latest articles and limit payload size.
+    maxItems: 10,
+  },
   /** Polled by Apple News; the title becomes the channel name in the app. */
   applenews: {
     path: "/news/applenews.xml",
