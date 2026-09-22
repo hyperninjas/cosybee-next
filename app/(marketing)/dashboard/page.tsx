@@ -8,7 +8,6 @@ import { requireOnboarded } from "@/app/lib/server-session";
 import { getEpcRating } from "@/app/lib/epc-actions";
 import { getEnergySetup, listEnergyProviders } from "@/app/lib/energy-actions";
 import { getSolarOptions, getSolarSetup } from "@/app/lib/solar-actions";
-import { EpcRatingCard } from "@/app/components/sections/epc/EpcRatingCard";
 import { getConnectionState } from "@/app/lib/connection-state";
 import { getActiveProperty, listProperties } from "@/app/lib/property-state";
 import type { ActiveProperty } from "@/app/lib/property-state";
@@ -129,11 +128,33 @@ export default async function EnergyFlowHomePage({
 
     return wrapper(
       <div className="flex flex-col gap-4">
-        {/* The rating comes from the home itself, not from a provider, so it
-            belongs on this screen too. Without it, anyone who finishes
-            onboarding and skips both connect steps has no way to see their
-            estimate or reach the refine flow. */}
-        {epc.hasProfile && <EpcRatingCard rating={epc} />}
+        {/* Same persistent connections strip the connected tier renders —
+            reinstated on the not-connected tier (2026-09-22) because the
+            earlier "epc-card only" layout had NO surface for the Property
+            tile or the home-switcher pill, so a user who opened the
+            dashboard without any provider linked couldn't see which home
+            they were on, couldn't switch to another home, couldn't add
+            one, and couldn't archive one. ProviderStatusBar handles the
+            Sunsynk / Octopus "Connect" state in each tile, so keeping it
+            here is safe — the tiles below (ConnectionEmptyState) become
+            the detailed CTA behind the compact hint at the top rather
+            than the only surface.
+
+            `property === null` (fresh user with no home yet) safely
+            drops the Property tile — see the showProperty guard in
+            ProviderStatusBar. */}
+        <ProviderStatusBar
+          sunsync={sunsync}
+          octopus={octopus}
+          // Match the earlier Tier-0 behaviour where `EpcRatingCard`
+          // ONLY rendered when the user actually had a profile — passing
+          // it unconditionally would show a "Set up your home to see
+          // its rating" placeholder tile, which is redundant next to the
+          // ConnectionEmptyState below.
+          epc={epc.hasProfile ? epc : undefined}
+          activeProperty={property}
+          properties={properties}
+        />
         <ConnectionEmptyState
           demoHref="?demo=1"
           hasProperty={property !== null}
