@@ -2,17 +2,18 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { writeActivePropertyId } from "./active-property-header";
 
 /**
  * Server Actions for switching the currently active property.
  *
  * The mobile app's Dio interceptor sends `X-Property-Id: <active>` on every
  * eb-auth request (see `energiebeemobile/lib/app/di/network_providers.dart`).
- * The web reaches the same steady state by calling `POST /api/properties/
- * :id/activate`, which primes both the session-scoped Redis marker
- * (`ep:active:{sessionId}`) and the durable `User.defaultPropertyId`. After
- * that, every subsequent request from the session resolves to the picked
- * home even without the header — matching the mobile behaviour end-to-end.
+ * Web reaches the same steady state by pairing the backend's Redis-marker
+ * activation with a browser cookie (see `active-property-header.ts`) so
+ * every subsequent server-side fetch can inject `X-Property-Id` from the
+ * cookie without a client-side store — matching mobile's contract with
+ * the shape server components actually run in.
  */
 
 const API_URL = process.env["API_URL"] ?? "http://localhost:4000";
@@ -56,6 +57,13 @@ export async function activateProperty(propertyId: string): Promise<PropertyActi
         ...(body?.code ? { code: body.code } : {}),
       };
     }
+    // Write the browser cookie in the SAME response the backend activation
+    // returns in. Server-side that means every subsequent fetcher can add
+    // `X-Property-Id` without another round-trip, and closes the small
+    // window in which a request could arrive between the backend Redis
+    // marker being set and the durable defaultPropertyId being read — the
+    // race that made switch-home look flaky in one prior report.
+    await writeActivePropertyId(propertyId);
     // Invalidate the dashboard so every server-rendered card re-fetches
     // against the newly active home.
     revalidatePath("/dashboard");

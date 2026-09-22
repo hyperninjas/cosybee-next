@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { withPropertyHeader } from "./active-property-header";
 
 /**
  * Server-side helper that answers "which providers has this user linked?".
@@ -107,7 +108,12 @@ async function fetchSunSyncStatus(
 ): Promise<SunSyncConnectionStatus> {
   try {
     const res = await fetch(`${API_URL}/api/sunsynk/connection`, {
-      headers: { Cookie: cookieHeader },
+      // `withPropertyHeader` adds `X-Property-Id` when the active-home
+      // cookie is set. Without it the backend still resolves via Redis /
+      // defaultPropertyId, so this is defence-in-depth for the switch
+      // race, not a new requirement — the endpoint has always worked
+      // without the header.
+      headers: await withPropertyHeader({ Cookie: cookieHeader }),
       cache: "no-store",
     });
     if (!res.ok) return DISCONNECTED_SUNSYNC;
@@ -135,7 +141,7 @@ async function fetchOctopusStatus(
 ): Promise<OctopusConnectionStatus> {
   try {
     const res = await fetch(`${API_URL}/api/octopus/connection`, {
-      headers: { Cookie: cookieHeader },
+      headers: await withPropertyHeader({ Cookie: cookieHeader }),
       cache: "no-store",
     });
     if (!res.ok) return DISCONNECTED_OCTOPUS;

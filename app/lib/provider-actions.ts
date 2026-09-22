@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { withPropertyHeader } from "./active-property-header";
 
 /**
  * Server Actions for managing an already-connected provider link.
@@ -60,7 +61,7 @@ export async function disconnectSunSync(): Promise<ProviderActionResult> {
   try {
     const res = await fetch(`${API_URL}/api/sunsynk/connect`, {
       method: "DELETE",
-      headers: { Cookie: cookie },
+      headers: await withPropertyHeader({ Cookie: cookie }),
       cache: "no-store",
     });
     if (!res.ok) return readError(res, "Couldn't disconnect Sunsynk.");
@@ -82,7 +83,7 @@ export async function disconnectOctopus(): Promise<ProviderActionResult> {
   try {
     const res = await fetch(`${API_URL}/api/octopus/connect`, {
       method: "DELETE",
-      headers: { Cookie: cookie },
+      headers: await withPropertyHeader({ Cookie: cookie }),
       cache: "no-store",
     });
     if (!res.ok) return readError(res, "Couldn't disconnect Octopus.");
@@ -139,7 +140,7 @@ export async function listSunSyncPlants(): Promise<LinkedPlantsResult> {
   try {
     const res = await fetch(`${API_URL}/api/sunsynk/connection/plants`, {
       method: "GET",
-      headers: { Cookie: cookie },
+      headers: await withPropertyHeader({ Cookie: cookie }),
       cache: "no-store",
     });
     if (!res.ok) {
@@ -224,7 +225,10 @@ export async function switchSunSyncSelection(input: {
   try {
     const res = await fetch(`${API_URL}/api/sunsynk/connection/selection`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
+      headers: await withPropertyHeader({
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      }),
       body: JSON.stringify({
         plantId: input.plantId,
         inverterSerial: input.inverterSerial,
