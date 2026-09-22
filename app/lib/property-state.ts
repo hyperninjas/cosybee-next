@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { readActivePropertyId } from "./active-property-header";
 
 /**
  * Server-side helper that answers "does this user have an active home?".
@@ -155,7 +156,43 @@ export const listProperties = cache(async (): Promise<ActiveProperty[]> => {
   }
 });
 
+/**
+ * Return the currently-active property.
+ *
+ * 🔴 Do NOT change this back to `list[0]`. That form of the helper
+ * caused a real user-visible bug on 2026-09-22: the Sunsynk tile went
+ * green with "Synced 2 min ago" while the flow diagram sat on "No
+ * inverter reading yet". Two endpoints, two different property ids —
+ * connection-state read the cookie (via `withPropertyHeader`) and
+ * resolved to the property whose readings had actually landed, while
+ * dashboard-data called `getActiveProperty()` and forwarded `list[0]`
+ * as `X-Property-Id` on the flow fetch. When `list[0]` was a
+ * DIFFERENT home (a user with three properties who had switched away
+ * from the first), the flow endpoint targeted a property with no
+ * readings and returned the modelled fallback, which the frontend
+ * guard then hid as "no data".
+ *
+ * The fix is to make this the same source of truth as the other
+ * property-scoped fetchers: the browser cookie set by
+ * {@link activateProperty}. If the cookie is present AND matches a
+ * non-archived home in the list, that's the answer. Otherwise fall
+ * through to `list[0]` — the same fallback the backend resolver uses
+ * when it has no session marker and no `defaultPropertyId`, so first-
+ * time and freshly-signed-in users get the same home they would have
+ * without this helper existing.
+ *
+ * A stale cookie (points to an archived home, or a home the user no
+ * longer owns) also falls through to `list[0]` because `list` is
+ * already filtered to non-archived rows — no risk of returning an
+ * archived one.
+ */
 export const getActiveProperty = cache(async (): Promise<ActiveProperty | null> => {
   const list = await listProperties();
-  return list[0] ?? null;
+  if (list.length === 0) return null;
+  const activeId = await readActivePropertyId();
+  if (activeId !== null) {
+    const found = list.find((p) => p.id === activeId);
+    if (found) return found;
+  }
+  return list[0]!;
 });
