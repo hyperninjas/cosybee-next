@@ -39,7 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.claude
+
+# claude code: local/runtime state stays out, shared hook config is committed
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 
 # prisma / sqlite
 /prisma/*.db
