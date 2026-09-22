@@ -11,7 +11,7 @@ import {
 import { parseDate, type CalendarDate } from "@internationalized/date";
 import { ChevronLeft, ChevronRight, Sun } from "@gravity-ui/icons";
 import type { DashboardData } from "./types";
-// import { PropertySwitcher } from "./PropertySwitcher"; // hidden per design pass 2026-09-03
+import { PropertySwitcher } from "./PropertySwitcher";
 import type { ActiveProperty } from "@/app/lib/property-state";
 
 /**
@@ -82,13 +82,13 @@ export function DashboardHeader({
             <span className="ml-2 text-muted">{achievement.message}</span>
           </Chip>
         )}
-        {/* PropertySwitcher hidden from the dashboard header per the design
-            pass on 2026-09-03. The dashboard is still scoped to the active
-            property under the hood (see `getActiveProperty` in
-            `property-state.ts`); only the visible chip is dropped. Restore
-            by uncommenting when a home-switcher affordance is needed
-            somewhere in the header again. */}
-        {/* <PropertySwitcher properties={properties} activeId={activePropertyId} /> */}
+        {/* Home-switcher pill. Reinstated after the multi-property parity
+            pass (2026-09-22) — the 2026-09-03 hide predated the AFD-based
+            manage dialog and the add-another-home flow, so the header was
+            hiding the entry point to features the user could have but had
+            no way to reach. Now that Manage-property owns switch + add +
+            archive in one place, the pill is a one-tap route into it. */}
+        <PropertySwitcher properties={properties} activeId={activePropertyId} />
       </div>
 
       {interactive ? (
