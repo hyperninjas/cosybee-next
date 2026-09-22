@@ -2,7 +2,10 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { writeActivePropertyId } from "./active-property-header";
+import {
+  readActivePropertyId,
+  writeActivePropertyId,
+} from "./active-property-header";
 
 /**
  * Server Actions for switching the currently active property.
@@ -154,6 +157,115 @@ export async function updateProperty(
     }
     revalidatePath("/dashboard");
     return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
+  }
+}
+
+/**
+ * Result-with-payload variant for archive so the caller knows which home
+ * became active on our behalf (or that none did — the archived one was
+ * already inactive). The dashboard uses this to decide whether to
+ * `router.refresh()` immediately (the active home changed under it) or
+ * to trust the standard `revalidatePath`.
+ */
+export type ArchivePropertyResult =
+  | { ok: true; newActivePropertyId: string | null }
+  | { ok: false; error: string; code?: string };
+
+/**
+ * Archive a property and re-scope the active home if we just archived
+ * it. Mirrors the mobile behaviour in
+ * `energiebeemobile/lib/features/address_switcher/presentation/viewmodel/
+ * saved_addresses_provider.dart:137` — the switcher removes the row,
+ * and if it was active it re-scopes to the first remaining home.
+ *
+ * The backend does its own repointing of `User.defaultPropertyId` when
+ * the archived id was the default (see `properties.service.ts:220`),
+ * but the RUNTIME active property lives in two other places: the Redis
+ * session marker and our browser cookie. Neither gets touched by
+ * archive alone. So this action does what mobile does: pick the first
+ * remaining non-archived home and `activateProperty` onto it, which
+ * refreshes both the marker and our cookie in one shot.
+ *
+ * Returns `newActivePropertyId` so the caller can decide whether to
+ * force a `router.refresh()` (the whole dashboard now reads a different
+ * home) or trust the `revalidatePath` alone (the archived home wasn't
+ * active). `null` means "no reactivation needed" — either the archived
+ * home wasn't active, or there are zero homes left and the user will
+ * bounce to `/onboarding/address` on the next request anyway.
+ */
+export async function archiveProperty(
+  propertyId: string,
+): Promise<ArchivePropertyResult> {
+  if (propertyId.trim().length === 0) return { ok: false, error: "Missing property id." };
+
+  const cookie = await cookieHeader();
+  if (cookie === null) return { ok: false, error: "You need to sign in first." };
+
+  try {
+    const res = await fetch(
+      `${API_URL}/api/properties/${encodeURIComponent(propertyId)}/archive`,
+      {
+        method: "POST",
+        headers: { Cookie: cookie },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as
+        | { message?: string; code?: string }
+        | null;
+      return {
+        ok: false,
+        error: body?.message ?? "Couldn't archive that home.",
+        ...(body?.code ? { code: body.code } : {}),
+      };
+    }
+
+    // If the archived home was ALSO the currently-active home from our
+    // cookie's point of view, re-scope. Reading the cookie rather than
+    // calling `getActiveProperty()` because the latter would list the
+    // homes right after the archive write — a stale read is possible
+    // while the backend commit propagates, and we already know our
+    // cookie's answer synchronously.
+    const activeId = await readActivePropertyId();
+    if (activeId !== propertyId) {
+      revalidatePath("/dashboard");
+      return { ok: true, newActivePropertyId: null };
+    }
+
+    // Re-scope onto the first remaining home. Local import — avoids
+    // pulling the property fetcher into every action that imports this
+    // file, and matches the pattern in `server-session.ts`.
+    const { listProperties } = await import("./property-state");
+    const remaining = await listProperties();
+    // `listProperties` already filters out archived rows, so the freshly
+    // archived id will not appear.
+    const next = remaining[0]?.id ?? null;
+    if (next === null) {
+      // Zero homes left. Clear our cookie so the next fetch doesn't
+      // send `X-Property-Id: <archived>` — the backend would 404 on it.
+      // `revalidatePath` will bounce the user to `/onboarding/address`
+      // via `requireOnboarded`; no `activateProperty` is needed
+      // (there's nothing to activate).
+      const { clearActivePropertyId } = await import("./active-property-header");
+      await clearActivePropertyId();
+      revalidatePath("/dashboard");
+      return { ok: true, newActivePropertyId: null };
+    }
+
+    // Re-fire the activate action so cookie + Redis marker + durable
+    // default all move together. `activateProperty` also runs its own
+    // `revalidatePath`, so we don't double-invalidate here.
+    const activateResult = await activateProperty(next);
+    if (!activateResult.ok) {
+      // Archive succeeded but reactivation failed — a rare combination.
+      // Report as a "partial" so the client at least refreshes.
+      revalidatePath("/dashboard");
+      return { ok: true, newActivePropertyId: null };
+    }
+    return { ok: true, newActivePropertyId: next };
   } catch {
     return { ok: false, error: "Couldn't reach the service. Try again in a moment." };
   }

@@ -12,10 +12,14 @@ import {
   RadioGroup,
   useOverlayState,
 } from "@heroui/react";
-import { HouseFill, Plus } from "@gravity-ui/icons";
+import { HouseFill, Plus, TrashBin } from "@gravity-ui/icons";
 import { TextInputField } from "@/app/components/ui/TextInputField";
 import { AddressSearch } from "@/app/components/onboarding/AddressSearch";
-import { activateProperty, updateProperty } from "@/app/lib/property-actions";
+import {
+  activateProperty,
+  archiveProperty,
+  updateProperty,
+} from "@/app/lib/property-actions";
 import { retrieveAddress, type ResolvedAddress } from "@/app/lib/onboarding-actions";
 import { displayAddress } from "@/app/lib/address-format";
 import type { ActiveProperty } from "@/app/lib/property-state";
@@ -152,6 +156,47 @@ export function ManagePropertyModal({ children, active, properties }: Props) {
     });
   }
 
+  // ── Archive state ─────────────────────────────────────────────────
+  //
+  // Two-step confirm to prevent a stray tap from dropping a home: the
+  // trash-icon per row sets `archiveTarget`, which swaps that row's
+  // right-hand action for a "Confirm archive" pair. Cancel drops back
+  // to the trash icon; Archive fires the server action.
+  //
+  // The archive server action re-scopes the active property when the
+  // archived one WAS active (matches mobile). If that happens, the
+  // return payload carries `newActivePropertyId` — we close the modal
+  // and let `revalidatePath` (inside the server action) repaint the
+  // dashboard against the new home. When the archived one was a
+  // background home, closing the modal is the same UX with a cheaper
+  // re-render.
+  const [archiveTarget, setArchiveTarget] = useState<string | null>(null);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [archivePending, startArchive] = useTransition();
+
+  function handleArchiveRequest(id: string) {
+    setArchiveError(null);
+    setArchiveTarget(id);
+  }
+
+  function handleArchiveCancel() {
+    setArchiveTarget(null);
+    setArchiveError(null);
+  }
+
+  function handleArchiveConfirm() {
+    if (archiveTarget === null) return;
+    setArchiveError(null);
+    startArchive(async () => {
+      const result = await archiveProperty(archiveTarget);
+      if (!result.ok) {
+        setArchiveError(result.error);
+        return;
+      }
+      overlay.close();
+    });
+  }
+
   // The "on file" summary reads from the row, not from an AFD refetch —
   // that stays honest even if the DB drifts from what AFD would return
   // today (postcode boundaries do get redrawn occasionally).
@@ -257,10 +302,17 @@ export function ManagePropertyModal({ children, active, properties }: Props) {
                   `AddressSwitcherSheet`
                   (`energiebeemobile/lib/features/address_switcher/
                   presentation/widgets/address_switcher_sheet.dart:14`) —
-                  a list of homes with a trailing "Add another address"
-                  action. On the web the radio-list + Switch pattern
-                  survives because that's how we activate; add is a
-                  separate route push, not a modal action. */}
+                  a list of homes with per-row archive + a trailing
+                  "Add another address" action. On the web the radio-list
+                  + Switch pattern survives because that's how we
+                  activate; add is a separate route push, not a modal
+                  action.
+
+                  When `archiveTarget` is set, the section's normal
+                  contents swap out for a confirmation panel. Keeping it
+                  IN this section (rather than a nested AlertDialog)
+                  avoids the focus-trap gymnastics HeroUI's dialogs need
+                  when stacked. */}
               <div className="flex flex-col gap-3 rounded-2xl bg-surface-secondary px-4 py-4">
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm font-medium text-foreground">
@@ -282,83 +334,154 @@ export function ManagePropertyModal({ children, active, properties }: Props) {
                   </Alert>
                 )}
 
-                {canSwitch && (
+                {archiveTarget !== null ? (
+                  <ArchiveConfirmPanel
+                    target={
+                      properties.find((p) => p.id === archiveTarget) ?? null
+                    }
+                    isLastHome={properties.length === 1}
+                    isActive={archiveTarget === active.id}
+                    error={archiveError}
+                    pending={archivePending}
+                    onCancel={handleArchiveCancel}
+                    onConfirm={handleArchiveConfirm}
+                  />
+                ) : (
                   <>
-                    <RadioGroup
-                      aria-label="Active home"
-                      value={switchTarget}
-                      onChange={setSwitchTarget}
-                      className="flex flex-col gap-2"
-                    >
-                      {properties.map((p) => (
-                        <Radio key={p.id} value={p.id}>
-                          <div className="flex min-w-0 flex-col">
-                            <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                              <span className="truncate">
-                                {p.label || "Untitled home"}
-                              </span>
-                              {p.id === active.id && (
-                                <Chip color="success" variant="soft" size="sm">
-                                  Active
-                                </Chip>
-                              )}
-                            </span>
-                            <span className="truncate text-xs text-muted">
-                              {p.address}
-                              {p.postcode ? ` · ${p.postcode}` : ""}
-                            </span>
-                          </div>
-                        </Radio>
-                      ))}
-                    </RadioGroup>
+                    {canSwitch && (
+                      <>
+                        <RadioGroup
+                          aria-label="Active home"
+                          value={switchTarget}
+                          onChange={setSwitchTarget}
+                          className="flex flex-col gap-2"
+                        >
+                          {properties.map((p) => (
+                            <div
+                              key={p.id}
+                              className="flex items-start justify-between gap-2"
+                            >
+                              <Radio value={p.id} className="flex-1 min-w-0">
+                                <div className="flex min-w-0 flex-col">
+                                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                                    <span className="truncate">
+                                      {p.label || "Untitled home"}
+                                    </span>
+                                    {p.id === active.id && (
+                                      <Chip color="success" variant="soft" size="sm">
+                                        Active
+                                      </Chip>
+                                    )}
+                                  </span>
+                                  <span className="truncate text-xs text-muted">
+                                    {p.address}
+                                    {p.postcode ? ` · ${p.postcode}` : ""}
+                                  </span>
+                                </div>
+                              </Radio>
+                              {/* Archive trigger. Radio + Button are
+                                  siblings so the button click doesn't
+                                  also toggle the radio — putting the
+                                  button inside the Radio's label makes
+                                  the whole row selectable for the
+                                  trash icon's hit area, which is the
+                                  wrong affordance. */}
+                              <Button
+                                variant="tertiary"
+                                size="sm"
+                                aria-label={`Archive ${p.label || "this home"}`}
+                                onPress={() => handleArchiveRequest(p.id)}
+                                className="shrink-0"
+                              >
+                                <TrashBin aria-hidden className="size-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </RadioGroup>
 
-                    <div className="flex justify-end">
+                        <div className="flex justify-end">
+                          <Button
+                            variant="tertiary"
+                            size="sm"
+                            onPress={handleSwitch}
+                            isDisabled={
+                              switchTarget === active.id || switchPending
+                            }
+                          >
+                            {switchPending ? "Switching…" : "Switch home"}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Single-home users also need the archive trigger —
+                        without it a customer who typo'd their address on
+                        the only home has no way to remove it and start
+                        fresh short of contacting support. */}
+                    {!canSwitch && (
+                      <div className="flex items-start justify-between gap-2 rounded-xl bg-surface px-3 py-2.5">
+                        <div className="flex min-w-0 flex-col">
+                          <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                            <span className="truncate">
+                              {active.label || "Untitled home"}
+                            </span>
+                            <Chip color="success" variant="soft" size="sm">
+                              Active
+                            </Chip>
+                          </span>
+                          <span className="truncate text-xs text-muted">
+                            {active.address}
+                            {active.postcode ? ` · ${active.postcode}` : ""}
+                          </span>
+                        </div>
+                        <Button
+                          variant="tertiary"
+                          size="sm"
+                          aria-label={`Archive ${active.label || "this home"}`}
+                          onPress={() => handleArchiveRequest(active.id)}
+                          className="shrink-0"
+                        >
+                          <TrashBin aria-hidden className="size-4" />
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Add-another-home entry point. Modelled on mobile's
+                        "Add another address" row rather than a floating
+                        button — inline placement keeps it obviously part
+                        of the same home-management surface.
+                        Disabled once the account is at the backend's
+                        property cap (`MAX_PROPERTIES_PER_USER`), with
+                        the button label saying WHY so the greyed state
+                        isn't silent — an amber upsell would be
+                        misleading here since there's nothing the user
+                        can do short of archiving. */}
+                    <div className="flex flex-col gap-1 border-t border-default-200 pt-3">
                       <Button
                         variant="tertiary"
                         size="sm"
-                        onPress={handleSwitch}
                         isDisabled={
-                          switchTarget === active.id || switchPending
+                          properties.length >= MAX_PROPERTIES_PER_USER
                         }
+                        onPress={() => {
+                          overlay.close();
+                          router.push("/onboarding/address?flow=add-property");
+                        }}
+                        className="justify-start"
                       >
-                        {switchPending ? "Switching…" : "Switch home"}
+                        <Plus aria-hidden className="mr-2 inline size-4" />
+                        {properties.length >= MAX_PROPERTIES_PER_USER
+                          ? `Max of ${MAX_PROPERTIES_PER_USER} homes reached`
+                          : "Add another home"}
                       </Button>
+                      {properties.length >= MAX_PROPERTIES_PER_USER && (
+                        <p className="text-xs text-muted">
+                          Archive a home to add a new one.
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
-
-                {/* Add-another-home entry point. Modelled on mobile's
-                    "Add another address" row rather than a floating
-                    button — inline placement keeps it obviously part of
-                    the same home-management surface.
-                    Disabled once the account is at the backend's
-                    property cap (`MAX_PROPERTIES_PER_USER`), with the
-                    button label saying WHY so the greyed state isn't
-                    silent — an amber upsell would be misleading here
-                    since there's nothing the user can do short of
-                    archiving. */}
-                <div className="flex flex-col gap-1 border-t border-default-200 pt-3">
-                  <Button
-                    variant="tertiary"
-                    size="sm"
-                    isDisabled={properties.length >= MAX_PROPERTIES_PER_USER}
-                    onPress={() => {
-                      overlay.close();
-                      router.push("/onboarding/address?flow=add-property");
-                    }}
-                    className="justify-start"
-                  >
-                    <Plus aria-hidden className="mr-2 inline size-4" />
-                    {properties.length >= MAX_PROPERTIES_PER_USER
-                      ? `Max of ${MAX_PROPERTIES_PER_USER} homes reached`
-                      : "Add another home"}
-                  </Button>
-                  {properties.length >= MAX_PROPERTIES_PER_USER && (
-                    <p className="text-xs text-muted">
-                      Archive a home to add a new one.
-                    </p>
-                  )}
-                </div>
               </div>
             </Modal.Body>
 
@@ -378,5 +501,105 @@ export function ManagePropertyModal({ children, active, properties }: Props) {
         </Modal.Container>
       </Modal.Backdrop>
     </Modal>
+  );
+}
+
+/**
+ * Inline confirmation for archiving a home. Rendered inside the "Your
+ * homes" section rather than as a stacked AlertDialog because HeroUI's
+ * dialogs don't compose cleanly when one is already on screen — the
+ * focus trap of the outer dialog fights the inner one and the archive
+ * "Cancel" button often can't take focus without a second Tab.
+ *
+ * Reads as its own view of the section: header + body + two-button
+ * footer. The rest of the section is hidden while this shows, so a
+ * user can't accidentally hit "Switch home" or the trash icon on a
+ * different row mid-confirm.
+ *
+ * ### Empty-target defence
+ *
+ * `target === null` means the caller's `archiveTarget` id didn't match
+ * any current home — a race we shouldn't see in practice, but if the
+ * property list refreshed between the trash click and the render, the
+ * panel would otherwise crash on `target.label`. Render a plain
+ * "Home no longer available" and force Cancel; the parent's state
+ * reset drops the row.
+ */
+function ArchiveConfirmPanel({
+  target,
+  isLastHome,
+  isActive,
+  error,
+  pending,
+  onCancel,
+  onConfirm,
+}: {
+  target: ActiveProperty | null;
+  isLastHome: boolean;
+  isActive: boolean;
+  error: string | null;
+  pending: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (target === null) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted">
+          That home is no longer available. It may have been archived from
+          another tab.
+        </p>
+        <div className="flex justify-end">
+          <Button variant="tertiary" size="sm" onPress={onCancel}>
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-medium text-foreground">
+          Archive &ldquo;{target.label || "Untitled home"}&rdquo;?
+        </p>
+        <p className="text-xs text-muted">
+          {target.address}
+          {target.postcode ? ` · ${target.postcode}` : ""}
+        </p>
+      </div>
+      <p className="text-xs text-muted">
+        Historical readings are kept in your account, but this home no
+        longer appears in your list.{" "}
+        {isLastHome
+          ? "This is your only home — after archiving, you'll be asked to add a new one before the dashboard loads."
+          : isActive
+            ? "The dashboard will re-scope to another of your homes."
+            : "The active home stays as it is."}
+      </p>
+
+      {error && (
+        <Alert status="danger">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Description>{error}</Alert.Description>
+          </Alert.Content>
+        </Alert>
+      )}
+
+      <div className="flex justify-end gap-2">
+        <Button variant="tertiary" size="sm" onPress={onCancel} isDisabled={pending}>
+          Cancel
+        </Button>
+        <Button
+          variant="danger"
+          size="sm"
+          onPress={onConfirm}
+          isDisabled={pending}
+        >
+          {pending ? "Archiving…" : "Archive"}
+        </Button>
+      </div>
+    </div>
   );
 }
