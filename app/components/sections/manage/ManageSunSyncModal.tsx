@@ -79,9 +79,37 @@ interface Props {
    * the right home when the account has more than one linked property.
    */
   propertyLabel?: string | null;
+  /**
+   * Most recent error the sync job wrote to `SunsynkConnection.lastError`
+   * (from eb-auth's `markConnectionError` — the failed-fetch branch of
+   * `syncTelemetryForConnection`). Historically stored, never surfaced,
+   * which meant a customer whose sync had been silently failing for days
+   * had NO way to see why beyond DB inspection.
+   *
+   * `null` when the last sync succeeded (`markConnectionSynced` clears the
+   * column). Any non-null value is a real message from the sync path and
+   * gets rendered verbatim — messages come from the backend's own error
+   * mapper, which is careful not to leak credentials.
+   */
+  lastError?: string | null;
+  /**
+   * Plant name + inverter serial that the connection row currently points
+   * at — shown inside the "Currently reading" summary so a customer with
+   * more than one plant on their Sunsynk account can spot when the wrong
+   * one is picked WITHOUT having to open the Switch-inverter picker.
+   * `null` on a half-linked connection (OAuth done, no plant selected).
+   */
+  linkedPlantId?: string | null;
+  linkedInverterSerial?: string | null;
 }
 
-export function ManageSunSyncModal({ children, propertyLabel }: Props) {
+export function ManageSunSyncModal({
+  children,
+  propertyLabel,
+  lastError,
+  linkedPlantId,
+  linkedInverterSerial,
+}: Props) {
   const [view, setView] = useState<View>("menu");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -282,6 +310,45 @@ export function ManageSunSyncModal({ children, propertyLabel }: Props) {
                     <Alert.Description>{error}</Alert.Description>
                   </Alert.Content>
                 </Alert>
+              )}
+
+              {/* Diagnostic panel — only rendered on the menu view so it
+                  frames the first thing the user sees when opening the
+                  dialog to figure out "why isn't this working?". Two
+                  independent pieces of information:
+                    • A red alert with `lastError` — the exact upstream
+                      message from the last failed sync, when there is one.
+                    • A neutral summary of what the connection is CURRENTLY
+                      pointed at — plant name + serial, so a user can
+                      cross-check against Sunsynk's own portal without
+                      having to open the Switch-inverter picker.
+                  Both stay out of the switch and disconnect views so those
+                  flows aren't cluttered. */}
+              {view === "menu" && (lastError || linkedInverterSerial) && (
+                <div className="mb-4 flex flex-col gap-3">
+                  {lastError && (
+                    <Alert status="danger">
+                      <Alert.Indicator />
+                      <Alert.Content>
+                        <Alert.Title>Last sync failed</Alert.Title>
+                        <Alert.Description>{lastError}</Alert.Description>
+                      </Alert.Content>
+                    </Alert>
+                  )}
+                  {linkedInverterSerial && (
+                    <div className="rounded-2xl bg-surface-secondary px-4 py-3">
+                      <p className="text-xs font-medium text-muted">
+                        Currently reading
+                      </p>
+                      <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                        Plant{linkedPlantId ? ` · ${linkedPlantId}` : ""}
+                      </p>
+                      <p className="mt-0.5 truncate font-mono text-xs text-muted">
+                        Inverter {linkedInverterSerial}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
 
               {view === "menu" && (

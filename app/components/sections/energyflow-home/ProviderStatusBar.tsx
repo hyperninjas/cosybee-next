@@ -27,6 +27,24 @@ import type { ActiveProperty } from "@/app/lib/property-state";
 interface ProviderRowProps {
   connected: boolean;
   /**
+   * Sunsynk-only signal: was a plant AND inverter serial actually chosen?
+   *
+   * The Sunsynk connect flow is TWO steps — OAuth-authenticate the account
+   * (produces the `SunsynkConnection` row and turns `connected` true), and
+   * then pick which of the account's plants + inverters to read from
+   * (writes `plantId` and `inverterSerial` on that row). A row where
+   * either column is `NULL` is "half-linked": the token works, the sync
+   * job even runs, but the sync guard at `sunsynk.sync.ts:149` skips
+   * telemetry for that row — the sync job succeeds without persisting a
+   * single reading, and `lastSyncedAt` still ticks forward. From the
+   * outside that looks identical to a healthy connection, which is
+   * exactly the confusion this chip is fixing.
+   *
+   * `undefined` for Octopus (no plant concept) so the check only fires
+   * on the Sunsynk row.
+   */
+  plantSelected?: boolean;
+  /**
    * Sunsynk-only tri-state: `true` = inverter is reporting fresh readings
    * (green "Connected" chip); `false` = linked but the physical inverter
    * has gone silent (amber "Connected · No live data" chip); `undefined`
@@ -55,6 +73,7 @@ interface ProviderRowProps {
 
 function ProviderRow({
   connected,
+  plantSelected,
   liveReporting,
   title,
   subtitle,
@@ -91,11 +110,26 @@ function ProviderRow({
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-sm font-semibold text-foreground">{title}</span>
           {connected && (
-            liveReporting === false ? (
-              // Linked, but the inverter isn't reporting inside the flow
-              // endpoint's 20-min freshness window. Amber, not green — the
-              // dashboard's diagram is showing the modelled fallback right
-              // now, and pretending otherwise is what we're fixing here.
+            plantSelected === false ? (
+              // Highest-priority warning: OAuth is fine, sync job runs,
+              // but `plantId` or `inverterSerial` is NULL on the
+              // connection row. Whatever the sync did today wrote zero
+              // rows to `sunsynk_reading` (see the guard at
+              // `sunsynk.sync.ts:149`). Shown BEFORE the "no live data"
+              // chip because the two states can co-occur — this one
+              // names the ROOT cause, and the fix is a different button
+              // ("Switch inverter" inside Manage) than for the
+              // silent-inverter case.
+              <Chip color="warning" variant="soft" size="sm">
+                <CircleCheckFill className="mr-1 inline size-3 align-middle" />
+                Connected · No plant selected
+              </Chip>
+            ) : liveReporting === false ? (
+              // Linked, plant/inverter picked, but the inverter itself
+              // isn't reporting inside the flow endpoint's 20-min
+              // freshness window. Amber, not green — the dashboard's
+              // diagram is showing the modelled fallback right now, and
+              // pretending otherwise is what we're fixing here.
               <Chip color="warning" variant="soft" size="sm">
                 <CircleCheckFill className="mr-1 inline size-3 align-middle" />
                 Connected · No live data
@@ -187,7 +221,17 @@ function PropertyRow({
 export interface ProviderStatusBarProps {
   sunsync: {
     connected: boolean;
+    /** `null` on a half-linked connection (OAuth complete, plant never picked). */
+    plantId: string | null;
+    /** `null` on a half-linked connection. Paired with `plantId` — either both set or neither. */
+    inverterSerial: string | null;
     lastSyncedAt: string | null;
+    /**
+     * Verbatim message from the last failed sync (`SunsynkConnection.lastError`).
+     * Threaded through to `ManageSunSyncModal` so a user opening the dialog
+     * sees WHY sync is broken, without having to shell into Postgres.
+     */
+    lastError: string | null;
     liveReporting: boolean;
     latestReadingAt: string | null;
   };
@@ -242,6 +286,14 @@ export function ProviderStatusBar({
   activeProperty,
   properties,
 }: ProviderStatusBarProps & { epc?: EpcRating }) {
+  // Half-linked: OAuth done, plant/inverter never picked. The sync
+  // subtitle would read "Synced 4 min ago" here because the sync JOB
+  // ran, but nothing was persisted for the user to see — that's exactly
+  // the confusion the chip is naming, so the subtitle points at the
+  // fix instead.
+  const plantSelected =
+    sunsync.plantId !== null && sunsync.inverterSerial !== null;
+
   // When the inverter is reporting fresh, "Synced X min ago" against the
   // reading timestamp is the honest signal (falls back to the sync-job
   // timestamp for old backends that don't send latestReadingAt yet).
@@ -251,11 +303,13 @@ export function ProviderStatusBar({
   // when. `formatRelativeSync` returns "Synced …" phrasing so we strip
   // the prefix before re-labelling it "Inverter last reported …".
   const sunsyncSubtitle = sunsync.connected
-    ? sunsync.liveReporting
-      ? formatRelativeSync(sunsync.latestReadingAt ?? sunsync.lastSyncedAt)
-      : sunsync.latestReadingAt
-        ? `Inverter last reported ${formatRelativeSync(sunsync.latestReadingAt).replace(/^Synced /, "")}`
-        : "Waiting for first reading"
+    ? !plantSelected
+      ? "Pick a plant and inverter to start reading"
+      : sunsync.liveReporting
+        ? formatRelativeSync(sunsync.latestReadingAt ?? sunsync.lastSyncedAt)
+        : sunsync.latestReadingAt
+          ? `Inverter last reported ${formatRelativeSync(sunsync.latestReadingAt).replace(/^Synced /, "")}`
+          : "Waiting for first reading"
     : "Add your inverter for live power flow";
 
   const octopusSubtitle = octopus.connected
@@ -268,8 +322,18 @@ export function ProviderStatusBar({
 
   // Currying the property label through each manage modal — done inline so
   // the two providers get identical wiring without a shared factory.
+  //
+  // The Sunsynk variant also gets the diagnostic triple (lastError +
+  // linked plant + linked serial): those are only useful once the user
+  // clicks Manage to figure out why the tile is amber, so they don't
+  // belong on the tile itself — they belong inside the dialog it opens.
   const SunSyncManage = (p: { children: React.ReactNode }) => (
-    <ManageSunSyncModal propertyLabel={activePropertyLabel ?? null}>
+    <ManageSunSyncModal
+      propertyLabel={activePropertyLabel ?? null}
+      lastError={sunsync.lastError}
+      linkedPlantId={sunsync.plantId}
+      linkedInverterSerial={sunsync.inverterSerial}
+    >
       {p.children}
     </ManageSunSyncModal>
   );
@@ -318,6 +382,7 @@ export function ProviderStatusBar({
         title="Sunsynk"
         subtitle={sunsyncSubtitle}
         connected={sunsync.connected}
+        plantSelected={plantSelected}
         liveReporting={sunsync.liveReporting}
         ConnectModal={ConnectSunSyncModal}
         ManageModal={SunSyncManage}
