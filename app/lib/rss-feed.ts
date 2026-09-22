@@ -445,9 +445,7 @@ export function buildRssFeed(
       ? [`xmlns:content="http://purl.org/rss/1.0/modules/content/"`]
       : []),
     ...(feed.thumbnails ? [`xmlns:media="http://search.yahoo.com/mrss/"`] : []),
-    ...(feed.smartFormat
-      ? [`xmlns:snf="http://www.smartnews.be/snf"`]
-      : []),
+    ...(feed.smartFormat ? [`xmlns:snf="http://www.smartnews.be/snf"`] : []),
     ...(feed.newsBreak ? [`xmlns:nb="https://www.newsbreak.com/"`] : []),
   ].join("\n     ");
 
