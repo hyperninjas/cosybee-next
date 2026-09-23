@@ -121,11 +121,14 @@ export default function Navbar({
   const pathname = usePathname();
   const currentPath = activeHref ?? pathname;
 
-  // Live session — reveals the avatar menu without a full page reload.
-  // Anonymous visitors — and the `isPending` window before better-auth's
-  // cookie check resolves — see the download CTA.
+  // Live session — reveals the avatar menu without a full page reload. Only
+  // admins can sign in to this app (members have their own), so a signed-in
+  // visitor here is an admin browsing the public site; the menu is how they
+  // get back to the console or sign out. Everyone else — including the
+  // `isPending` window before better-auth's cookie check resolves — sees the
+  // download CTA.
   const { data, isPending } = authClient.useSession();
-  const signedIn = !isPending && !!data?.user;
+  const signedIn = !isPending && data?.user?.role === "admin";
 
   // A link is active when its href exactly matches the current path or
   // is a prefix of it (so `/solar/details` still highlights "solar").
@@ -219,7 +222,7 @@ export default function Navbar({
           >
             <UserIcon />
           </button> */}
-          {/* Signed-in users get the avatar menu (Profile, Security, Admin,
+          {/* Signed-in admins get the avatar menu (Profile, Security, Admin,
               Sign out). Everyone else gets the "Download free app" CTA — the
               primary conversion goal for the marketing surface, and hidden
               below `sm` because at that width the logo + hamburger already
@@ -285,7 +288,7 @@ export default function Navbar({
             })}
             {/* The CTA the header hides below `sm`. Full width here, matching
                 how the links above fill the panel. Suppressed for signed-in
-                users — the UserMenu already covers the right side of the bar
+                admins — the UserMenu already covers the right side of the bar
                 at every width. */}
             {!signedIn && (
               <li className="mt-2 border-t border-neutral-800 px-2 pt-4 sm:hidden">

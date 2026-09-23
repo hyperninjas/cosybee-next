@@ -21,9 +21,11 @@ export default async function SetPasswordPage() {
   const session = await getServerSession();
   if (!session) redirect("/login?redirect=/set-password");
   if (session.user.banned) redirect("/banned");
-  // Where this user belongs once the flag is gone. Resolved here, on the
-  // server, so the form can navigate straight there.
-  const destination = session.user.role === "admin" ? "/admin" : "/";
+  // Admin panel only — a member session is signed out there, not given a
+  // password form.
+  if (session.user.role !== "admin") redirect("/post-login");
+  // Where this user belongs once the flag is gone.
+  const destination = "/admin";
 
   // Nothing to force — either they already changed it, or they never had to.
   // Deliberately NOT /post-login: that page decides where to go from the

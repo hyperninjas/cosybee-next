@@ -14,8 +14,8 @@ export default async function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Secure gate for the whole account area (backs up the optimistic proxy
-  // check).
+  // Secure gate for the admin's own account pages (backs up the optimistic
+  // proxy check). Admin-only, like the rest of this app.
   const { user } = await requireUser("/account");
 
   return (

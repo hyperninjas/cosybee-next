@@ -7,8 +7,9 @@ import { AppAvatar } from "@/app/components/ui/AppAvatar";
 import { authClient } from "@/app/lib/auth-client";
 
 /**
- * Navbar auth control. Shows Log in / Sign up when signed out, and an avatar
- * dropdown (Profile · Security · Admin* · Sign out) when signed in. Reads the
+ * Navbar auth control for a signed-in admin: an avatar dropdown (Profile ·
+ * Security · Admin dashboard · Sign out). Shows Log in when signed out — there
+ * is no sign-up here; this app is admin-only. Reads the
  * live session from better-auth so it updates without a full reload.
  */
 export function UserMenu() {
@@ -23,8 +24,7 @@ export function UserMenu() {
   if (!user) {
     return (
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Navbar is dark, so the ghost button is re-tinted white; Sign up
-            uses the primary (accent) variant as-is. */}
+        {/* Navbar is dark, so the ghost button is re-tinted white. */}
         <Link
           href="/login"
           className={`${buttonVariants({
@@ -34,17 +34,9 @@ export function UserMenu() {
         >
           Log in
         </Link>
-        <Link
-          href="/register"
-          className={buttonVariants({ variant: "primary", size: "sm" })}
-        >
-          Sign up
-        </Link>
       </div>
     );
   }
-
-  const isAdmin = user.role === "admin";
 
   async function onAction(key: string) {
     if (key === "signout") {
@@ -83,11 +75,9 @@ export function UserMenu() {
           <Dropdown.Item id="/account/security" textValue="Security">
             <Label>Security</Label>
           </Dropdown.Item>
-          {isAdmin && (
-            <Dropdown.Item id="/admin" textValue="Admin dashboard">
-              <Label>Admin dashboard</Label>
-            </Dropdown.Item>
-          )}
+          <Dropdown.Item id="/admin" textValue="Admin dashboard">
+            <Label>Admin dashboard</Label>
+          </Dropdown.Item>
           <Separator />
           <Dropdown.Item id="signout" textValue="Sign out" variant="danger">
             <Label>Sign out</Label>

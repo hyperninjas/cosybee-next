@@ -2,7 +2,7 @@ import { Spinner } from "@heroui/react";
 
 /**
  * Loading fallback for /post-login. The page itself only resolves the session
- * and redirects (admins → dashboard, others → home), so it renders no markup —
+ * and redirects (admins → dashboard, anyone else is signed out), so this
  * this spinner is what the user briefly sees while that server-side lookup and
  * the onward redirect happen.
  */

@@ -90,30 +90,34 @@ export const getServerSession = cache(async (): Promise<ServerSession | null> =>
  */
 const FORCED_PASSWORD_ROUTE = "/set-password";
 
-/** Require any authenticated user. Redirects to login when absent. */
+/**
+ * Where a signed-in non-admin is sent. This app is the admin panel only, so a
+ * member session has no business here — /post-login signs it out and lands
+ * them on /login with an explanation. (Members get their own app.)
+ */
+const NON_ADMIN_ROUTE = "/post-login";
+
+/**
+ * Require a signed-in user of this app — which, since the panel is admin-only,
+ * means an admin. Kept as its own helper for the /account area so the login
+ * redirect can carry the intended path.
+ */
 export async function requireUser(redirectTo?: string): Promise<ServerSession> {
-  const session = await getServerSession();
-  if (!session) {
-    redirect(
-      redirectTo
-        ? `/login?redirect=${encodeURIComponent(redirectTo)}`
-        : "/login",
-    );
-  }
-  if (session.user.banned) redirect("/banned");
-  if (session.user.mustChangePassword) redirect(FORCED_PASSWORD_ROUTE);
-  return session;
+  return requireAdmin(redirectTo);
 }
 
 /**
- * Require an admin-role user. Non-admins are sent home; unauthenticated users
- * to login. This is the secure backstop behind the optimistic `proxy.ts` gate.
+ * Require an admin-role user. Non-admins are signed out via /post-login;
+ * unauthenticated users go to login. This is the secure backstop behind the
+ * optimistic `proxy.ts` gate and the sign-in check in the /api/auth proxy.
  */
-export async function requireAdmin(): Promise<ServerSession> {
+export async function requireAdmin(
+  redirectTo = "/admin",
+): Promise<ServerSession> {
   const session = await getServerSession();
-  if (!session) redirect("/login?redirect=/admin");
+  if (!session) redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
   if (session.user.banned) redirect("/banned");
+  if (session.user.role !== "admin") redirect(NON_ADMIN_ROUTE);
   if (session.user.mustChangePassword) redirect(FORCED_PASSWORD_ROUTE);
-  if (session.user.role !== "admin") redirect("/");
   return session;
 }

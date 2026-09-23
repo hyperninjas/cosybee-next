@@ -25,10 +25,17 @@ function LoginForm() {
   const params = useSearchParams();
   // Honour a valid explicit ?redirect= (e.g. bounced from a protected page);
   // otherwise hand off to /post-login, which routes admins to the dashboard
-  // and everyone else home based on the validated session role. This default
+  // and signs out anyone else (this app is admin-only). This default
   // also feeds the social `callbackURL` below, so OAuth sign-in lands the same.
   const redirectTo = safeRedirect(params.get("redirect"), "/post-login");
   const resetSuccess = params.get("reset") === "success";
+  // Non-admin refused — either by the /api/auth proxy on this sign-in (code
+  // ADMIN_ONLY) or by /post-login signing out an existing member session
+  // (?error=admin-only). Shown as a persistent Alert, not a toast, because it
+  // isn't a typo the user can retry their way out of.
+  const [adminOnly, setAdminOnly] = useState(
+    params.get("error") === "admin-only",
+  );
 
   // "credentials" → email+password; "twofa" → the second-factor challenge that
   // better-auth requires when the account has 2FA enabled.
@@ -49,9 +56,19 @@ function LoginForm() {
     router.refresh();
   }
 
+  // Refusal from the admin-only gate. Returns true when handled.
+  function handleAdminOnly(error: { code?: string } | null): boolean {
+    if (error?.code !== "ADMIN_ONLY") return false;
+    setAdminOnly(true);
+    setStep("credentials");
+    setLoading(false);
+    return true;
+  }
+
   async function onCredentials(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setAdminOnly(false);
 
     const form = new FormData(e.currentTarget);
     const { data, error } = await authClient.signIn.email({
@@ -59,6 +76,7 @@ function LoginForm() {
       password: String(form.get("password") ?? ""),
     });
 
+    if (handleAdminOnly(error)) return;
     if (error) {
       toast.danger(error.message || "Invalid email or password.");
       setLoading(false);
@@ -87,6 +105,7 @@ function LoginForm() {
         })
       : await authClient.twoFactor.verifyTotp({ code, trustDevice });
 
+    if (handleAdminOnly(error)) return;
     if (error) {
       toast.danger(error.message || "That code wasn't valid. Try again.");
       setLoading(false);
@@ -104,7 +123,7 @@ function LoginForm() {
             ? useBackup
               ? "Enter one of your backup codes."
               : "Enter the 6-digit code from your authenticator app."
-            : "Sign in to your EnergieBee account."}
+            : "Sign in to the EnergieBee admin panel."}
         </Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-col gap-4">
@@ -115,6 +134,19 @@ function LoginForm() {
               <Alert.Title>Password updated</Alert.Title>
               <Alert.Description>
                 Please sign in with your new password.
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
+        )}
+
+        {adminOnly && step === "credentials" && (
+          <Alert status="danger">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>Administrators only</Alert.Title>
+              <Alert.Description>
+                This sign-in is for EnergieBee administrators. Your account
+                doesn&apos;t have admin access.
               </Alert.Description>
             </Alert.Content>
           </Alert>
@@ -235,16 +267,6 @@ function LoginForm() {
           </form>
         )}
       </Card.Content>
-      {step === "credentials" && (
-        <Card.Footer className="justify-center">
-          <span className="text-sm text-muted">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium text-foreground underline">
-              Create one
-            </Link>
-          </span>
-        </Card.Footer>
-      )}
     </Card>
   );
 }
