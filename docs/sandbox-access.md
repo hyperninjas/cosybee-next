@@ -54,8 +54,7 @@ Two ways, both landing on the same signed cookie:
    The parameter is namespaced rather than a plain `key` on purpose: the proxy
    deletes it from **every** request it sees, unlocked ones included, so a
    generic name would silently eat somebody else's. `key` in particular is
-   already the S3 object in `/api/storage/download?key=…` and the address handle
-   in `/onboarding/building-profile?key=…`. Anything new the gate reads off the
+   already the S3 object in `/api/storage/download?key=…`. Anything new the gate reads off the
    query string needs the same treatment.
 
 The pass lasts **30 days**, then the screen reappears.

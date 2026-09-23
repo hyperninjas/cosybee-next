@@ -40,15 +40,10 @@ export const authClient = createAuthClient({
       user: {
         // Backend-managed extras: `required: false` so they're typed on the
         // session user without becoming required sign-up / update-user input.
-        isOnboardingDone: { type: "boolean", required: false, input: false },
+        //
         // Set by the auth server on admin-provisioned accounts; cleared when
         // the user sets their own password. Gates /set-password.
         mustChangePassword: { type: "boolean", required: false, input: false },
-        onboardingStatus: { type: "string", required: false, input: false },
-        location: { type: "string", required: false, input: false },
-        postcode: { type: "string", required: false, input: false },
-        homeName: { type: "string", required: false, input: false },
-        houseId: { type: "string", required: false, input: false },
       },
     }),
   ],

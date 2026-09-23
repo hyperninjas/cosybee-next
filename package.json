@@ -10,8 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test 'app/**/*.test.ts'"
+    "lint": "eslint"
   },
   "dependencies": {
     "@blocknote/core": "^0.51.4",
@@ -34,7 +33,6 @@
     "qrcode": "^1.5.4",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "recharts": "^3.10.1",
     "sharp": "^0.34.5"
   },
   "devDependencies": {

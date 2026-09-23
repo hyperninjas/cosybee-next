@@ -10,16 +10,7 @@ import { CTA_BASE_CLASSES, CTA_SIZE_CLASSES } from "@/app/components/ui/Cta";
 import { authClient } from "@/app/lib/auth-client";
 import { UserMenu } from "./UserMenu";
 
-/**
- * Two link sets — the navbar picks one at runtime based on session state.
- *
- * Marketing links are the current outward-facing site nav. App links are
- * for signed-in users on the product surface (dashboard + account). We
- * deliberately do NOT surface every marketing tab to a signed-in user —
- * they're on the app now, and the app is a distinct product with a
- * different mental model.
- */
-const MARKETING_LINKS = [
+const NAV_LINKS = [
   { label: "smart", href: "/smart" },
   { label: "heating", href: "/heating" },
   { label: "solar", href: "/solar" },
@@ -27,11 +18,6 @@ const MARKETING_LINKS = [
   { label: "hive", href: "/hive" },
   { label: "learn", href: "/learn" },
   // { label: "shop", href: "/shop" },
-];
-
-const APP_LINKS = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Account", href: "/account" },
 ];
 
 const MENU_ID = "site-mobile-menu";
@@ -135,22 +121,11 @@ export default function Navbar({
   const pathname = usePathname();
   const currentPath = activeHref ?? pathname;
 
-  // Live session — flips the link set + reveals the user menu without a
-  // full page reload. `isPending` is the initial suspense window before
-  // better-auth's cookie check resolves; we render the marketing links
-  // during that window so the first paint doesn't flash the wrong nav for
-  // a signed-out visitor (the majority of first paints).
+  // Live session — reveals the avatar menu without a full page reload.
+  // Anonymous visitors — and the `isPending` window before better-auth's
+  // cookie check resolves — see the download CTA.
   const { data, isPending } = authClient.useSession();
   const signedIn = !isPending && !!data?.user;
-  // 🔴 Admins keep the marketing nav — they've historically browsed the
-  // site with the same top bar as visitors, and switching them to the app
-  // nav would hide the marketing pages they still need to reach (product,
-  // learn, etc.). The `/admin` shell is separate and already renders its
-  // own header via `HideSiteChrome`, so this only affects admin browsing
-  // OUTSIDE the admin console — where they act like a visitor.
-  const isAdmin = !!data?.user?.role && data.user.role === "admin";
-  const useAppNav = signedIn && !isAdmin;
-  const NAV_LINKS = useAppNav ? APP_LINKS : MARKETING_LINKS;
 
   // A link is active when its href exactly matches the current path or
   // is a prefix of it (so `/solar/details` still highlights "solar").
@@ -244,17 +219,11 @@ export default function Navbar({
           >
             <UserIcon />
           </button> */}
-          {/* Right side: signed-in users get the avatar UserMenu (Profile,
-              Security, Admin, Sign out). Anonymous visitors get the
-              "Download free app" CTA — the primary conversion goal for the
-              marketing surface, and hidden below `sm` because at that
-              width the logo + hamburger already fill the bar (the mobile
-              menu carries the CTA instead). */}
           {/* Signed-in users get the avatar menu (Profile, Security, Admin,
-              Sign out). Admins ALSO get the avatar menu even though they
-              keep the marketing links — the menu is how they reach the
-              admin console + sign-out. Only fully anonymous visitors see
-              the download CTA. */}
+              Sign out). Everyone else gets the "Download free app" CTA — the
+              primary conversion goal for the marketing surface, and hidden
+              below `sm` because at that width the logo + hamburger already
+              fill the bar (the mobile menu carries the CTA instead). */}
           {signedIn ? (
             <UserMenu />
           ) : (

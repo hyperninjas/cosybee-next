@@ -134,9 +134,8 @@ const nextConfig: NextConfig = {
   // (react-compiler-runtime `c` → `useMemoCache`) prologue injected. That is a
   // hook, so the moment such a callback runs from an event handler instead of
   // from render, the dispatcher is null and React throws "Invalid hook call"
-  // (minified error #321). It took out the onboarding address picker: the
-  // ComboBox `onSelectionChange` handler threw before it could navigate, so
-  // step 1 could never reach step 2.
+  // (minified error #321) — it once broke a ComboBox `onSelectionChange`
+  // handler outright.
   reactCompiler: true,
   // NOTE: there is deliberately NO `env: {}` block here.
   //
@@ -188,15 +187,6 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         has: [{ type: "host", value: REDIRECT_FROM_HOST }],
         destination: `https://${CANONICAL_HOST}/:path*`,
-        permanent: true,
-      },
-      {
-        // The signed-in dashboard moved from /energyflow-home to /dashboard.
-        // Not an SEO concern — it was never in the sitemap and sits behind a
-        // session — but users bookmark their dashboard, and a stale bookmark
-        // 404ing is a bad way to find that out.
-        source: "/energyflow-home",
-        destination: "/dashboard",
         permanent: true,
       },
       {
