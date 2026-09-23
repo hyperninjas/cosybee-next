@@ -55,6 +55,7 @@ function SortableHeader({
 
 export function UsersTable({
   users,
+  currentUserId,
   loading,
   busy,
   sortDescriptor,
@@ -69,6 +70,8 @@ export function UsersTable({
   onUnban,
 }: {
   users: User[];
+  /** The signed-in admin — their own row can't be demoted or banned. */
+  currentUserId?: string;
   loading: boolean;
   busy: boolean;
   sortDescriptor: SortDescriptor;
@@ -153,52 +156,66 @@ export function UsersTable({
               )
             }
           >
-            {(user) => (
-              <Table.Row id={user.id}>
-                <Table.Cell>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-foreground">
-                      {user.name}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs text-muted">
-                      {user.email}
-                      {user.emailVerified && (
-                        <Chip color="success" size="sm" variant="soft">
-                          Verified
-                        </Chip>
-                      )}
-                    </span>
-                  </div>
-                </Table.Cell>
-                <Table.Cell>
-                  <RoleSelect
-                    userName={user.name}
-                    role={(user.role as Role) || "user"}
-                    onChange={(role) => onSetRole(user.id, role)}
-                  />
-                </Table.Cell>
-                <Table.Cell>
-                  {user.banned ? (
-                    <Chip color="danger" size="sm" variant="soft">
-                      Banned
-                    </Chip>
-                  ) : (
-                    <Chip color="success" size="sm" variant="soft">
-                      Active
-                    </Chip>
-                  )}
-                </Table.Cell>
-                <Table.Cell className="text-muted">
-                  {new Date(user.createdAt).toLocaleDateString(
-                    "en-GB",
-                    DATE_FORMAT,
-                  )}
-                </Table.Cell>
-                <Table.Cell className="text-end">
-                  <UserRowActions user={user} onBan={onBan} onUnban={onUnban} />
-                </Table.Cell>
-              </Table.Row>
-            )}
+            {(user) => {
+              // Demoting or banning yourself would sign you straight out of an
+              // admin-only app with no way back in, so your own row is locked.
+              // Another admin can still change it.
+              const isSelf = user.id === currentUserId;
+              return (
+                <Table.Row id={user.id}>
+                  <Table.Cell>
+                    <div className="flex flex-col">
+                      <span className="flex items-center gap-1.5 font-medium text-foreground">
+                        {user.name}
+                        {isSelf && (
+                          <Chip size="sm" variant="soft">
+                            You
+                          </Chip>
+                        )}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs text-muted">
+                        {user.email}
+                        {user.emailVerified && (
+                          <Chip color="success" size="sm" variant="soft">
+                            Verified
+                          </Chip>
+                        )}
+                      </span>
+                    </div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <RoleSelect
+                      userName={user.name}
+                      role={(user.role as Role) || "user"}
+                      isDisabled={isSelf}
+                      onChange={(role) => onSetRole(user.id, role)}
+                    />
+                  </Table.Cell>
+                  <Table.Cell>
+                    {user.banned ? (
+                      <Chip color="danger" size="sm" variant="soft">
+                        Banned
+                      </Chip>
+                    ) : (
+                      <Chip color="success" size="sm" variant="soft">
+                        Active
+                      </Chip>
+                    )}
+                  </Table.Cell>
+                  <Table.Cell className="text-muted">
+                    {new Date(user.createdAt).toLocaleDateString(
+                      "en-GB",
+                      DATE_FORMAT,
+                    )}
+                  </Table.Cell>
+                  <Table.Cell className="text-end">
+                    {!isSelf && (
+                      <UserRowActions user={user} onBan={onBan} onUnban={onUnban} />
+                    )}
+                  </Table.Cell>
+                </Table.Row>
+              );
+            }}
           </Table.Body>
         </Table.Content>
       </Table.ScrollContainer>

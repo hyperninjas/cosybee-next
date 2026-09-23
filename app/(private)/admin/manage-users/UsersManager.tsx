@@ -33,6 +33,9 @@ export default function UsersManager() {
 
   const [showCreate, setShowCreate] = useState(false);
 
+  // Who's looking — so the table can lock the admin's own row.
+  const { data: session } = authClient.useSession();
+
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   // `silent` refreshes the data without flipping the skeleton — keeps the
@@ -206,6 +209,7 @@ export default function UsersManager() {
 
       <UsersTable
         users={users}
+        currentUserId={session?.user.id}
         loading={loading}
         busy={busy}
         sortDescriptor={sort}

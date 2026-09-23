@@ -13,10 +13,12 @@ import type { Role } from "./types";
 export function RoleSelect({
   userName,
   role,
+  isDisabled = false,
   onChange,
 }: {
   userName: string;
   role: Role;
+  isDisabled?: boolean;
   onChange: (role: Role) => Promise<void>;
 }) {
   const [pending, setPending] = useState(false);
@@ -39,7 +41,7 @@ export function RoleSelect({
       aria-label={`Role for ${userName}`}
       variant="secondary"
       className="w-30"
-      isDisabled={pending}
+      isDisabled={pending || isDisabled}
       value={role}
       onChange={handleChange}
     >
