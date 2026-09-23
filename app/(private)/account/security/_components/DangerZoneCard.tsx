@@ -77,7 +77,7 @@ export function DangerZoneCard({ currentEmail }: { currentEmail: string }) {
       <Card.Content className="flex flex-col gap-8">
         {reauth && <ReauthNotice />}
         {/* Change email */}
-        <form onSubmit={changeEmail} className="flex max-w-md flex-col gap-3">
+        <form method="post" onSubmit={changeEmail} className="flex max-w-md flex-col gap-3">
           <TextField
             name="newEmail"
             type="email"

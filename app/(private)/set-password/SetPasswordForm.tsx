@@ -91,7 +91,7 @@ export function SetPasswordForm({
         <Card.Description>Signing in as {email}.</Card.Description>
       </Card.Header>
       <Card.Content>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
           <PasswordField
             name="current"
             label="Temporary password"

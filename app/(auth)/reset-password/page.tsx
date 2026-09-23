@@ -63,7 +63,7 @@ function ResetPasswordForm() {
         </Card.Description>
       </Card.Header>
       <Card.Content>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
           <TextInputField
             name="email"
             type="email"

@@ -146,7 +146,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
 
         {/* Enable — step 1: password */}
         {mode === "enable-password" && (
-          <form onSubmit={startEnable} className="flex max-w-md flex-col gap-4">
+          <form method="post" onSubmit={startEnable} className="flex max-w-md flex-col gap-4">
             <PasswordField
               name="password"
               label="Confirm your password"
@@ -168,7 +168,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
 
         {/* Enable — step 2: scan + verify */}
         {mode === "enable-verify" && (
-          <form onSubmit={confirmEnable} className="flex flex-col gap-4">
+          <form method="post" onSubmit={confirmEnable} className="flex flex-col gap-4">
             <p className="text-sm text-muted">
               Scan this QR code with your authenticator app, then enter the
               6-digit code it shows.
@@ -236,7 +236,7 @@ export function TwoFactorCard({ initialEnabled }: { initialEnabled: boolean }) {
 
         {/* Disable — confirm password */}
         {mode === "disable" && (
-          <form onSubmit={disable} className="flex max-w-md flex-col gap-4">
+          <form method="post" onSubmit={disable} className="flex max-w-md flex-col gap-4">
             <PasswordField
               name="password"
               label="Confirm your password to disable"

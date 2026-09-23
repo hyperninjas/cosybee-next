@@ -79,7 +79,7 @@ function VerifyEmailForm() {
         </Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-col gap-4">
-        <form onSubmit={onVerify} className="flex flex-col gap-4">
+        <form method="post" onSubmit={onVerify} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label>Verification code</Label>
             <InputOTP

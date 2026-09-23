@@ -154,7 +154,9 @@ function LoginForm() {
 
         {step === "credentials" ? (
           <>
-            <form onSubmit={onCredentials} className="flex flex-col gap-4">
+            {/* method="post" so a submit that lands before hydration can't put
+                the password in the URL (and the server logs) as a GET query. */}
+            <form method="post" onSubmit={onCredentials} className="flex flex-col gap-4">
               <TextInputField
                 name="email"
                 type="email"
@@ -189,7 +191,7 @@ function LoginForm() {
             <SocialButtons callbackURL={redirectTo} />
           </>
         ) : (
-          <form onSubmit={onVerify} className="flex flex-col gap-4">
+          <form method="post" onSubmit={onVerify} className="flex flex-col gap-4">
             {useBackup ? (
               <TextInputField
                 name="backupCode"
