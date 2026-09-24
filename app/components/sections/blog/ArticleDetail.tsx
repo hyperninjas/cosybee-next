@@ -198,7 +198,7 @@ export default async function ArticleDetail({
           // The whole sidebar is sticky: `self-start` keeps it content-height
           // (a stretched flex item can't stick), and max-height + overflow let
           // it scroll internally when the TOC + cards exceed the viewport.
-          <aside className="top-24 mt-18 hidden max-h-full w-full max-w-50 shrink-0 xl:col-start-1 xl:justify-self-start flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
+          <aside className="top-24 mt-18 hidden max-h-full w-full max-w-42 shrink-0 xl:col-start-1 xl:justify-self-start flex-col gap-10 self-start overflow-y-auto  pb-8 xl:flex scrollbar-overlay">
             {/* sticky={false}: the aside already pins it. */}
             {sidebarToc.length > 1 && (
               <ArticleToc items={sidebarToc} sticky={false} />
@@ -252,7 +252,7 @@ export default async function ArticleDetail({
           </div>
           {/* title + meta */}
           <header className="mt-4 lg:mt-5">
-            <h1 className="text-[32px] leading-[1.1] tracking-tight font-bold text-foreground sm:text-[48px]">
+            <h1 className="text-[32px] leading-[1.2] tracking-tight font-bold text-foreground sm:text-[48px]">
               {article.title}
             </h1>
 
@@ -362,7 +362,10 @@ export default async function ArticleDetail({
 
           {/* lede / subtitle */}
           {article.lede && (
-            <p className="mt-10 text-lg font-bold leading-snug hidden text-foreground sm:text-xl">
+            <p
+              aria-hidden
+              className="mt-10 text-lg font-bold leading-snug hidden text-foreground sm:text-xl"
+            >
               {article.lede}
             </p>
           )}
@@ -399,7 +402,7 @@ export default async function ArticleDetail({
         <Section
           spacing="none"
           overflow="visible"
-          className="xl:has-last:hidden"
+          // className="xl:has-last:hidden"
         >
           <Container size="prose" className="pb-16 sm:px-5 lg:pb-24">
             <h2 className="text-2xl font-extrabold text-foreground sm:text-3xl">
