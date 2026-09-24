@@ -1536,6 +1536,18 @@
   ) {
   margin-top: 0;
 }
+/* A block's own "Spacing…" top margin REPLACES the gap above, as it does on
+   the published page (where the inline style overrides `.article-body p` etc.
+   on the same element). In the editor the style lands on `.bn-block-content`
+   (see `withSpacing`) while the gap is on `.bn-block-outer`, and `.bn-block`
+   between them is a flex container, so the two margins never collapse — they
+   stacked, and a 4px override rendered as 1rem + 4px. `!important` because an
+   author's explicit value has to beat every rhythm rule above, including the
+   higher-specificity list-item one. */
+.post-editor
+  .bn-block-outer:has(> .bn-block > .bn-block-content[style*="margin-top"]) {
+  margin-top: 0 !important;
+}
 /* Mirrors `.article-body figcaption { margin-top: 0.5rem }` — BlockNote uses
    4px of padding instead. */
 .post-editor [data-file-block] .bn-file-caption {
