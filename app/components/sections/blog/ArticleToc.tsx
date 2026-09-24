@@ -46,7 +46,7 @@ export default function ArticleToc({
           <li key={i.id} style={{ paddingLeft: i.level === 3 ? 24 : 12 }}>
             <a
               href={`#${i.id}`}
-              className={`-ml-px block border-l-2 pl-3 leading-snug transition-colors ${
+              className={`-ml-px block border-l-2 pl-3 leading-snug text-[13px] transition-colors ${
                 active === i.id
                   ? "border-warning font-medium text-foreground"
                   : "border-transparent text-muted hover:text-foreground hover:underline"

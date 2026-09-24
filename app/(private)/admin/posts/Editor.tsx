@@ -18,9 +18,20 @@ import {
   useComponentsContext,
   useBlockNoteEditor,
   useEditorState,
+  useDictionary,
+  useExtensionState,
+  SideMenu,
+  SideMenuController,
+  DragHandleMenu,
+  RemoveBlockItem,
+  BlockColorsItem,
+  TableRowHeaderItem,
+  TableColumnHeaderItem,
   type DefaultReactSuggestionItem,
   type LinkToolbarProps,
+  type SideMenuProps,
 } from "@blocknote/react";
+import { SideMenuExtension } from "@blocknote/core/extensions";
 import { BlockNoteView } from "@blocknote/mantine";
 import { flip, offset, shift, size } from "@floating-ui/react";
 import {
@@ -47,11 +58,14 @@ import {
   CTA_PICK_IMAGE_EVENT,
   blockNoteSchema as schema,
   collectHeadingAnchors,
+  SPACING_PROPS,
+  type SpacingValues,
   LINK_REL_TOKENS,
   type LinkRelToken,
 } from "@/app/lib/blocknoteSchema";
 import { searchLinkTargets, type LinkTarget } from "@/app/lib/link-targets";
 import { MediaPickerModal } from "@/app/(private)/admin/media/MediaPickerModal";
+import { SpacingDialog } from "./SpacingDialog";
 
 type SchemaPartialBlock = typeof schema.PartialBlock;
 
@@ -334,6 +348,69 @@ function AltTextButton() {
       </Components.Generic.Popover.Content>
     </Components.Generic.Popover.Root>
   );
+}
+
+/**
+ * Opens the spacing dialog for a block. Context for the same reason as
+ * `LinkTargetsContext` below: the drag-handle menu is a component BlockNote
+ * renders (in its own portal), so there's no prop path to it, and the dialog
+ * has to live in `Editor` because the menu unmounts the moment an item is
+ * clicked.
+ */
+const SpacingContext = createContext<(blockId: string) => void>(() => {});
+
+/**
+ * "Spacing…" entry in a block's drag-handle (⋮⋮) menu. The drag handle is the
+ * one control every block type has — the formatting toolbar never appears for
+ * a divider, CTA or HTML block — so spacing lives here rather than there.
+ * Hidden for any block without the spacing props (see `withSpacing`).
+ */
+function SpacingMenuItem() {
+  "use no memo";
+  const Components = useComponentsContext()!;
+  const editor = useBlockNoteEditor();
+  const openSpacing = useContext(SpacingContext);
+  const block = useExtensionState(SideMenuExtension, {
+    editor,
+    selector: (state) => state?.block,
+  });
+
+  if (block === undefined || !("marginTop" in block.props)) return null;
+
+  return (
+    <Components.Generic.Menu.Item
+      className="bn-menu-item"
+      onClick={() => openSpacing(block.id)}
+    >
+      Spacing…
+    </Components.Generic.Menu.Item>
+  );
+}
+
+/** BlockNote's default drag-handle menu, plus "Spacing…" at the end. Passing
+ *  children REPLACES the defaults, so they are restated here. */
+function DragHandleMenuWithSpacing() {
+  "use no memo";
+  const dict = useDictionary();
+  return (
+    <DragHandleMenu>
+      <RemoveBlockItem>{dict.drag_handle.delete_menuitem}</RemoveBlockItem>
+      <BlockColorsItem>{dict.drag_handle.colors_menuitem}</BlockColorsItem>
+      <TableRowHeaderItem>
+        {dict.drag_handle.header_row_menuitem}
+      </TableRowHeaderItem>
+      <TableColumnHeaderItem>
+        {dict.drag_handle.header_column_menuitem}
+      </TableColumnHeaderItem>
+      <SpacingMenuItem />
+    </DragHandleMenu>
+  );
+}
+
+/** The stock side menu, pointed at the menu above. */
+function SideMenuWithSpacing(props: SideMenuProps) {
+  "use no memo";
+  return <SideMenu {...props} dragHandleMenu={DragHandleMenuWithSpacing} />;
 }
 
 /**
@@ -1000,6 +1077,11 @@ export default function Editor({
   });
 
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Block whose spacing dialog is open (see SpacingMenuItem), or null.
+  const [spacingBlockId, setSpacingBlockId] = useState<string | null>(null);
+  const spacingBlock = spacingBlockId
+    ? editor.getBlock(spacingBlockId)
+    : undefined;
   // When set, the next media pick updates THIS cta block's image instead of
   // inserting a new media block. A block spec is vanilla DOM and cannot mount
   // the picker itself, so it dispatches CTA_PICK_IMAGE_EVENT and this listens.
@@ -1186,56 +1268,86 @@ export default function Editor({
     <LinkTargetsContext.Provider
       value={{ targets: linkTargets, currentPath }}
     >
-      <BlockNoteView
-        editor={editor}
-        theme="light"
-        onChange={() => onChange(editor.document as unknown as PartialBlock[])}
-        slashMenu={false}
-        // Disable the built-in formatting toolbar — we render our own
-        // (with a justify button) via FormattingToolbarController below.
-        // Without this, BOTH toolbars mount and fight over focus/position,
-        // which blurs the editor on click and closes the toolbar.
-        formattingToolbar={false}
-        // Same deal for the link toolbar: replaced below by the variant
-        // with per-link rel (nofollow/sponsored/ugc) toggles.
-        linkToolbar={false}
-      >
-        <SuggestionMenuController
-          triggerCharacter="/"
-          floatingUIOptions={SLASH_MENU_FLOATING_OPTIONS}
-          getItems={async (query) =>
-            filterSuggestionItems(
-              combineByGroup(
-                getDefaultReactSlashMenuItems(editor),
-                getMultiColumnSlashMenuItems(editor),
-                [tocSlashItem, faqSlashItem, ctaSlashItem, htmlSlashItem, mediaSlashItem],
-              ),
-              query,
-            )
-          }
-        />
-        {/* Adds a justify button alongside the default left/center/right.
-            Component is React-Compiler-exempt (see its `"use no memo"`). */}
-        <FormattingToolbarController
-          formattingToolbar={FormattingToolbarWithJustify}
-        />
-        {/* Link toolbar with per-link SEO rel toggles (see LinkToolbarWithRel). */}
-        <LinkToolbarController linkToolbar={LinkToolbarWithRel} />
-      </BlockNoteView>
+      <SpacingContext.Provider value={setSpacingBlockId}>
+        <BlockNoteView
+          editor={editor}
+          theme="light"
+          onChange={() => onChange(editor.document as unknown as PartialBlock[])}
+          slashMenu={false}
+          // Disable the built-in formatting toolbar — we render our own
+          // (with a justify button) via FormattingToolbarController below.
+          // Without this, BOTH toolbars mount and fight over focus/position,
+          // which blurs the editor on click and closes the toolbar.
+          formattingToolbar={false}
+          // Same deal for the link toolbar: replaced below by the variant
+          // with per-link rel (nofollow/sponsored/ugc) toggles.
+          linkToolbar={false}
+          // Replaced below by the side menu whose drag-handle menu has
+          // "Spacing…" (see SideMenuWithSpacing).
+          sideMenu={false}
+        >
+          <SideMenuController sideMenu={SideMenuWithSpacing} />
+          <SuggestionMenuController
+            triggerCharacter="/"
+            floatingUIOptions={SLASH_MENU_FLOATING_OPTIONS}
+            getItems={async (query) =>
+              filterSuggestionItems(
+                combineByGroup(
+                  getDefaultReactSlashMenuItems(editor),
+                  getMultiColumnSlashMenuItems(editor),
+                  [tocSlashItem, faqSlashItem, ctaSlashItem, htmlSlashItem, mediaSlashItem],
+                ),
+                query,
+              )
+            }
+          />
+          {/* Adds a justify button alongside the default left/center/right.
+              Component is React-Compiler-exempt (see its `"use no memo"`). */}
+          <FormattingToolbarController
+            formattingToolbar={FormattingToolbarWithJustify}
+          />
+          {/* Link toolbar with per-link SEO rel toggles (see LinkToolbarWithRel). */}
+          <LinkToolbarController linkToolbar={LinkToolbarWithRel} />
+        </BlockNoteView>
 
-      <MediaPickerModal
-        isOpen={pickerOpen}
-        onOpenChange={(open) => {
-          // Dismissing without picking must DISARM the CTA. Otherwise the
-          // block id stays queued and the next ordinary /media insert would
-          // silently overwrite that card's image instead of adding a block.
-          // Safe to clear here because the modal calls onSelect *before* it
-          // closes, so a real pick has already consumed the id.
-          if (!open) ctaTargetRef.current = null;
-          setPickerOpen(open);
-        }}
-        onSelect={handlePick}
-      />
+        <MediaPickerModal
+          isOpen={pickerOpen}
+          onOpenChange={(open) => {
+            // Dismissing without picking must DISARM the CTA. Otherwise the
+            // block id stays queued and the next ordinary /media insert would
+            // silently overwrite that card's image instead of adding a block.
+            // Safe to clear here because the modal calls onSelect *before* it
+            // closes, so a real pick has already consumed the id.
+            if (!open) ctaTargetRef.current = null;
+            setPickerOpen(open);
+          }}
+          onSelect={handlePick}
+        />
+
+        {/* Keyed by block so the form always starts from that block's props;
+            unmounting on close is what resets it. */}
+        {spacingBlock && (
+          <SpacingDialog
+            key={spacingBlock.id}
+            blockLabel={
+              spacingBlock.type === "heading"
+                ? `Heading ${(spacingBlock.props as { level?: number }).level ?? ""}`.trim()
+                : spacingBlock.type
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (c) => c.toUpperCase())
+            }
+            initial={spacingBlock.props as SpacingValues}
+            onApply={(values) => {
+              // The block may have been deleted while the dialog was open.
+              if (!editor.getBlock(spacingBlock.id)) return;
+              const props: Record<string, string> = {};
+              for (const prop of SPACING_PROPS) props[prop] = values[prop];
+              editor.updateBlock(spacingBlock.id, { props } as never);
+            }}
+            onClose={() => setSpacingBlockId(null)}
+          />
+        )}
+      </SpacingContext.Provider>
     </LinkTargetsContext.Provider>
   );
 }

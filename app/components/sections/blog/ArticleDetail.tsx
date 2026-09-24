@@ -21,6 +21,7 @@ import Dot from "@/app/components/ui/Dot";
 import Avatar from "@/app/components/ui/Avatar";
 import ShareButton from "./ShareButton";
 import ReadingProgress from "./ReadingProgress";
+import BackToTop from "./BackToTop";
 import ArticleToc from "./ArticleToc";
 import JsonLd from "@/app/components/JsonLd";
 import Breadcrumbs from "@/app/components/ui/Breadcrumbs";
@@ -183,8 +184,40 @@ export default async function ArticleDetail({
       />
       <ReadingProgress targetSelector="#post" />
       {/* px-0 + xl:px-6 override the blog gutter: below xl the article body
-          carries its own padding. */}
-      <Container size="blog" className="flex justify-center gap-10 ">
+          carries its own padding. From xl it's a 1fr | article | 1fr grid, so
+          the article sits dead-centre on the page and the aside fills the
+          left track (pinned to its left edge) instead of the pair being centred
+          as a group. The wider max-width gives the side tracks room for the
+          aside's full width. */}
+      <Container
+        size="blog"
+        className="flex justify-center xl:grid  xl:grid-cols-[minmax(0,1fr)_minmax(0,42.5rem)_minmax(0,1fr)] xl:gap-10"
+      >
+        <BackToTop />
+        {(sidebarToc.length > 1 || related.length > 0) && (
+          // The whole sidebar is sticky: `self-start` keeps it content-height
+          // (a stretched flex item can't stick), and max-height + overflow let
+          // it scroll internally when the TOC + cards exceed the viewport.
+          <aside className="top-24 mt-18 hidden max-h-full w-full max-w-50 shrink-0 xl:col-start-1 xl:justify-self-start flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
+            {/* sticky={false}: the aside already pins it. */}
+            {sidebarToc.length > 1 && (
+              <ArticleToc items={sidebarToc} sticky={false} />
+            )}
+
+            {/* {related.length > 0 && (
+              <div>
+                <h3 className="text-lg font-extrabold text-foreground">
+                  More blogs
+                </h3>
+                <div className="mt-4 flex flex-col gap-1">
+                  {related.map((a) => (
+                    <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
+                  ))}
+                </div>
+              </div>
+            )} */}
+          </aside>
+        )}
         {/* `id="post"`, not `article-body`: this element spans the whole post
             — breadcrumb, header, hero, body, CTA — while `.article-body`
             below is the prose alone. Sharing one name made it easy to read
@@ -192,39 +225,39 @@ export default async function ArticleDetail({
             as NewsNow (or any extractor) should see it. */}
         <article
           id="post"
-          className="w-full max-w-225 px-6 pt-10 pb-16 sm:px-5 xl:px-0 lg:pt-18.5 lg:pb-20"
+          className="w-full max-w-170 px-6 pt-10 pb-16 sm:px-5 xl:col-start-2 xl:px-0 lg:pt-18.5 lg:pb-20"
         >
           {/* breadcrumb trail (replaces the old "Back to Blog" button) */}
           <Breadcrumbs items={crumbs} />
-
-          {/* title + meta */}
-          <header className="mt-4 lg:mt-7">
-            <h1 className="text-[24px] leading-[110%] font-bold text-foreground sm:text-[36px]">
-              {article.title}
-            </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
-              {/* Clickable when the category has a landing page; a plain chip
+          <div className="mt-6 flex flex-wrap items-center gap-2 text-xs">
+            {/* Clickable when the category has a landing page; a plain chip
                   otherwise, so a placeholder category never becomes a dead
                   link. Hover mirrors the tag chips below it. */}
-              {categoryHref ? (
-                <Link
-                  href={categoryHref}
-                  className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
-                >
-                  {article.category.name}
-                </Link>
-              ) : (
-                <span className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
-                  {article.category?.name ?? "Uncategorised"}
-                </span>
-              )}
-              <Dot />
-              <span className="text-muted">
-                {formatReadTime(article.readTime)}
+            {categoryHref ? (
+              <Link
+                href={categoryHref}
+                className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold transition-colors hover:bg-[#E6EEF1] hover:text-[#1b4a5e]"
+              >
+                {article.category.name}
+              </Link>
+            ) : (
+              <span className="inline-flex items-center rounded-full border border-border bg-[#EBF2F5] px-1.5 py-[2.5px] text-xs font-semibold">
+                {article.category?.name ?? "Uncategorised"}
               </span>
-            </div>
+            )}
+            <Dot />
+            <span className="text-muted">
+              {formatReadTime(article.readTime)}
+            </span>
+          </div>
+          {/* title + meta */}
+          <header className="mt-4 lg:mt-5">
+            <h1 className="text-[32px] leading-[1.1] tracking-tight font-bold text-foreground sm:text-[48px]">
+              {article.title}
+            </h1>
+
             {article.tags.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-1">
                 {article.tags.map((tag) => (
                   <Link
                     key={tag.id}
@@ -292,7 +325,7 @@ export default async function ArticleDetail({
               GENUINE cover (`coverImageReal`): a coverless post shows no hero,
               never the listing og/placeholder fallback. */}
           {article.coverImageReal && (
-            <figure className="mt-10">
+            <figure className="mt-6">
               <div
                 {...(article.coverImageTitle
                   ? { title: article.coverImageTitle }
@@ -360,31 +393,6 @@ export default async function ArticleDetail({
             </div>
           )}
         </article>
-
-        {(sidebarToc.length > 1 || related.length > 0) && (
-          // The whole sidebar is sticky: `self-start` keeps it content-height
-          // (a stretched flex item can't stick), and max-height + overflow let
-          // it scroll internally when the TOC + cards exceed the viewport.
-          <aside className="sticky top-24 mt-18 hidden max-h-full w-100 shrink-0 flex-col gap-10 self-start overflow-y-auto px-5 -mx-5 pb-8 xl:flex scrollbar-overlay">
-            {/* sticky={false}: the aside already pins it. */}
-            {sidebarToc.length > 1 && (
-              <ArticleToc items={sidebarToc} sticky={false} />
-            )}
-
-            {related.length > 0 && (
-              <div>
-                <h3 className="text-lg font-extrabold text-foreground">
-                  More blogs
-                </h3>
-                <div className="mt-4 flex flex-col gap-1">
-                  {related.map((a) => (
-                    <MoreArticlesCard key={a.slug} a={a} basePath={basePath} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
-        )}
       </Container>
       {/* more blogs */}
       {related.length > 0 && (

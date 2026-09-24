@@ -35,11 +35,37 @@ export function createAnchorAssigner(): (text: string) => string {
  * this from BlockNote's own `.tableWrapper`; the export ships the table naked,
  * so without this an author-resized table wider than the article column would
  * overflow the page on small screens. Safe as a plain string replace —
- * BlockNote tables can't nest.
+ * BlockNote tables can't nest. Any margin/padding on the table moves to the
+ * wrapper (see inside).
  */
 export function wrapArticleTables(html: string): string {
   return html
-    .replace(/<table(?=[\s>])/g, '<div class="article-table-wrap"><table')
+    .replace(/<table(?=[\s>])([^>]*)>/g, (_m, attrs: string) => {
+      // Per-block spacing (blocknoteSchema.ts → withSpacing) is exported as
+      // margin/padding on the <table>. Moved to the wrapper, because the
+      // wrapper is the block in the article's flow: a margin left on the table
+      // would stack on top of the default gap instead of replacing it, and
+      // padding does nothing on a `border-collapse: collapse` table.
+      const style = /\sstyle="([^"]*)"/.exec(attrs);
+      if (!style) return `<div class="article-table-wrap"><table${attrs}>`;
+      const decls = style[1]
+        .split(";")
+        .map((d) => d.trim())
+        .filter(Boolean);
+      // Only the exact form the spacing dialog writes (`margin-top: 24px`).
+      // Anything else — `margin: 0 auto` centring a table hand-written in an
+      // HTML block, say — belongs to the table and stays on it.
+      const isSpacing = (d: string) =>
+        /^(?:margin|padding)-(?:top|right|bottom|left):\s*-?\d+px$/i.test(d);
+      const moved = decls.filter(isSpacing);
+      const kept = decls.filter((d) => !isSpacing(d));
+      const tableAttrs = attrs.replace(
+        style[0],
+        kept.length ? ` style="${kept.join("; ")}"` : "",
+      );
+      const wrapStyle = moved.length ? ` style="${moved.join("; ")}"` : "";
+      return `<div class="article-table-wrap"${wrapStyle}><table${tableAttrs}>`;
+    })
     .replace(/<\/table>/g, "</table></div>");
 }
 

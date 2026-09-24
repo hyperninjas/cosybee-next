@@ -13,7 +13,9 @@ import {
   imageParse,
   imageRender,
   imageToExternalHTML,
+  propsToAttributes,
 } from "@blocknote/core";
+import type { Node as TiptapNode } from "@tiptap/core";
 import { withMultiColumn } from "@blocknote/xl-multi-column";
 import DOMPurify from "dompurify";
 import { createAnchorAssigner } from "./toc";
@@ -1099,11 +1101,281 @@ const ctaBlock = createBlockSpec(
   },
 );
 
+// ── per-block spacing ────────────────────────────────────────────────────
+
+/**
+ * Per-block margin/padding overrides, set from the block's drag-handle menu
+ * (Editor.tsx → SpacingDialog).
+ *
+ * Every prop defaults to `""`, which means "not set": no inline style is
+ * written and the block keeps the stylesheet's spacing (`.article-body` in
+ * globals.css). So every existing document renders exactly as before, and an
+ * author only overrides the sides they actually fill in.
+ *
+ * Values are stored as bare pixel numbers ("24"), never raw CSS: they are
+ * parsed and range-checked on the way out (`spacingDeclarations`), so a
+ * hand-edited contentJson cannot smuggle arbitrary CSS into a `style`.
+ */
+export const SPACING_PROPS = [
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+] as const;
+export type SpacingProp = (typeof SPACING_PROPS)[number];
+export type SpacingValues = Partial<Record<SpacingProp, string>>;
+
+/** Accepted range, in px. Negative margins are allowed (pulling a block up
+ *  under the one before it is a legitimate layout move); negative padding is
+ *  not valid CSS. */
+export const SPACING_LIMITS = {
+  margin: { min: -200, max: 400 },
+  padding: { min: 0, max: 400 },
+} as const;
+
+const spacingPropSchema = {
+  marginTop: { default: "" as const },
+  marginRight: { default: "" as const },
+  marginBottom: { default: "" as const },
+  marginLeft: { default: "" as const },
+  paddingTop: { default: "" as const },
+  paddingRight: { default: "" as const },
+  paddingBottom: { default: "" as const },
+  paddingLeft: { default: "" as const },
+};
+
+/** `marginTop` → `margin-top`. */
+function cssProperty(prop: SpacingProp): string {
+  return prop.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+}
+
+/**
+ * The inline declarations for a block's spacing props, or `[]` when none are
+ * set. Anything that isn't a finite number inside `SPACING_LIMITS` is ignored
+ * (treated as unset), never passed through.
+ */
+export function spacingDeclarations(
+  props: SpacingValues,
+): [property: string, value: string][] {
+  const out: [string, string][] = [];
+  for (const prop of SPACING_PROPS) {
+    const raw = props[prop];
+    if (raw === undefined || raw === "") continue;
+    const n = Number(raw);
+    const limits = prop.startsWith("margin")
+      ? SPACING_LIMITS.margin
+      : SPACING_LIMITS.padding;
+    if (!Number.isFinite(n) || n < limits.min || n > limits.max) continue;
+    out.push([cssProperty(prop), `${n}px`]);
+  }
+  return out;
+}
+
+/** Write the spacing onto an element's inline style, keeping what's there.
+ *  `style.setProperty` rather than string-building, so an existing declaration
+ *  (e.g. an alignment the export already wrote) is merged, not clobbered. */
+function applySpacing(el: Element | null | undefined, props: SpacingValues) {
+  // Tag/duck check, not `instanceof HTMLElement` — see `patchAlt` (jsdom on
+  // the server has no DOM constructors on the global scope).
+  const style = (el as HTMLElement | null | undefined)?.style;
+  if (!style) return;
+  for (const [property, value] of spacingDeclarations(props)) {
+    style.setProperty(property, value);
+  }
+}
+
+/** Like `applySpacing`, but also CLEARS the sides that are unset — for a view
+ *  that is updated in place rather than rebuilt, where a removed value would
+ *  otherwise linger. */
+function syncSpacing(el: HTMLElement, props: SpacingValues) {
+  for (const prop of SPACING_PROPS) el.style.removeProperty(cssProperty(prop));
+  applySpacing(el, props);
+}
+
+/**
+ * The table's editor node, with the spacing attributes added.
+ *
+ * Every other block's node is built by `BlockNoteSchema.create` from its
+ * config, but the table ships a prebuilt Tiptap node — so extending the config
+ * alone would leave the props with nowhere to live, and `updateBlock` would
+ * silently drop them. The node is extended instead.
+ *
+ * Its view (`BlockNoteTableView`) is also special: it is kept alive across
+ * updates so column resizing works, and its `update` re-applies only the
+ * table's own props. So the spacing style is re-synced on every update here,
+ * or a change would only show after reloading the editor.
+ */
+function withSpacingNode(node: TiptapNode): TiptapNode {
+  return node.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        ...propsToAttributes(spacingPropSchema),
+      };
+    },
+    addNodeView() {
+      const parentView = this.parent?.();
+      if (!parentView) return null;
+      return (viewProps) => {
+        const view = parentView(viewProps) as unknown as {
+          dom: HTMLElement;
+          update?: (...args: unknown[]) => boolean;
+        };
+        syncSpacing(view.dom, viewProps.node.attrs as SpacingValues);
+        const update = view.update?.bind(view);
+        if (update) {
+          view.update = (...args: unknown[]) => {
+            const ok = update(...args);
+            if (ok) {
+              syncSpacing(
+                view.dom,
+                (args[0] as { attrs: SpacingValues }).attrs,
+              );
+            }
+            return ok;
+          };
+        }
+        return view as never;
+      };
+    },
+  });
+}
+
+/** The `data-*` names `propsToAttributes` renders for the spacing props. A
+ *  literal list, not a `.map` at module load (see the React Compiler note in
+ *  the project memory — this module is also bundled for the editor). */
+const SPACING_DATA_ATTRS = [
+  "data-margin-top",
+  "data-margin-right",
+  "data-margin-bottom",
+  "data-margin-left",
+  "data-padding-top",
+  "data-padding-right",
+  "data-padding-bottom",
+  "data-padding-left",
+];
+
+/**
+ * Give a block spec the spacing props and apply them in both outputs.
+ *
+ *  - Editor (`render`): on the `.bn-block-content` wrapper, so the author sees
+ *    the change while writing.
+ *  - Published HTML (`toExternalHTML`): on the element that actually ships.
+ *    The lossy export unwraps `.bn-block-content` and keeps only its first
+ *    child (copying across `data-*` attributes, but NOT `style`), so the style
+ *    has to go on that child. When a block has no `toExternalHTML` the export
+ *    falls back to `render`, so this does the same fallback itself — otherwise
+ *    the spacing would land on the wrapper and be discarded with it.
+ *
+ * Works because `BlockNoteSchema.create` builds each block's editor node from
+ * `config.propSchema` at schema-creation time: extending the config here is
+ * enough for the new props to exist on the node and in contentJson. The table
+ * ships a prebuilt node instead, which is extended separately
+ * (`withSpacingNode`).
+ */
+function withSpacing<S extends AnySpec>(spec: S): S {
+  const impl = spec.implementation;
+  const node = (impl as { node?: TiptapNode }).node;
+  // The wrapped implementation must never see the spacing props: BlockNote's
+  // own `createBlockSpec` wrapper stamps every prop as a `data-*` attribute by
+  // looking it up in the ORIGINAL prop schema, and throws on one it doesn't
+  // know. So it gets the block with those props removed.
+  const inner = (block: SpacedBlock) => {
+    const props = { ...block.props };
+    for (const prop of SPACING_PROPS) delete props[prop];
+    return { ...block, props };
+  };
+  return {
+    ...spec,
+    config: {
+      ...spec.config,
+      propSchema: { ...spec.config.propSchema, ...spacingPropSchema },
+    },
+    implementation: {
+      ...impl,
+      ...(node ? { node: withSpacingNode(node) } : {}),
+      render(this: unknown, block: SpacedBlock, editor: unknown) {
+        const out = impl.render.call(
+          this,
+          inner(block) as never,
+          editor as never,
+        );
+        applySpacing(out.dom as Element, block.props);
+        return out;
+      },
+      toExternalHTML(
+        this: unknown,
+        block: SpacedBlock,
+        editor: unknown,
+        context: unknown,
+      ) {
+        const out =
+          impl.toExternalHTML?.call(
+            this,
+            inner(block) as never,
+            editor as never,
+            context as never,
+          ) ??
+          impl.render.call(
+            { ...(this as object), renderType: "dom", props: undefined },
+            inner(block) as never,
+            editor as never,
+          );
+        if (!out) return out;
+        const dom = out.dom as HTMLElement;
+        // The table's export renders its node attributes as `data-*` on the
+        // wrapper, which the exporter would copy onto the <table>. The inline
+        // style below is the published form; the raw values stay in
+        // contentJson only.
+        for (const attr of SPACING_DATA_ATTRS) dom.removeAttribute?.(attr);
+        applySpacing(
+          dom.classList?.contains("bn-block-content")
+            ? dom.firstElementChild
+            : dom,
+          block.props,
+        );
+        return out;
+      },
+    },
+  } as S;
+}
+
+type SpacedBlock = { props: SpacingValues };
+// Loose on purpose: the block specs differ in every type parameter, and the
+// wrapper only touches `render`/`toExternalHTML` and the prop schema.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySpec = { config: any; implementation: any; extensions?: any };
+
+/** The schema-level type of `withSpacing(spec)`: same spec, plus the props. */
+type Spaced<S> = S extends { config: infer C }
+  ? Omit<S, "config"> & {
+      config: Omit<C, "propSchema"> & {
+        propSchema: (C extends { propSchema: infer P } ? P : never) &
+          typeof spacingPropSchema;
+      };
+    }
+  : S;
+
+/** `withSpacing` over a whole spec map. */
+function withSpacingAll<T extends Record<string, AnySpec>>(
+  specs: T,
+): { [K in keyof T]: Spaced<T[K]> } {
+  return Object.fromEntries(
+    Object.entries(specs).map(([k, s]) => [k, withSpacing(s)]),
+  ) as never;
+}
+
 // ── schema ───────────────────────────────────────────────────────────────
 
 export const blockNoteSchema = withMultiColumn(
   BlockNoteSchema.create({
-    blockSpecs: {
+    // Every block gets the optional spacing props — see
+    // `withSpacing`. Unset spacing leaves a block exactly as it was.
+    blockSpecs: withSpacingAll({
       ...defaultBlockSpecs,
       // Replaces the stock `image` block with the alt-aware one above. Same
       // block type and same props plus `alt`, so existing documents keep
@@ -1113,7 +1385,7 @@ export const blockNoteSchema = withMultiColumn(
       cta: ctaBlock(),
       tableOfContents: tableOfContentsBlock(),
       htmlBlock: htmlBlock(),
-    },
+    }),
     styleSpecs: {
       ...defaultStyleSpecs,
       linkRel: linkRelStyle,
