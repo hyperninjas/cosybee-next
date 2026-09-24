@@ -4,6 +4,9 @@ import { AppLink as Link } from "@/app/components/ui/AppLink";
  * Visible breadcrumb trail. Pair it with `breadcrumbSchema(items)` JSON-LD
  * (same items) so the on-page trail and the structured data match. The last
  * item is rendered as the current page (not a link) and marked aria-current.
+ * It is clamped to one line with an ellipsis — `flex-1` + `min-w-0` gives it a
+ * zero base size, so a long article title stays on the trail's line instead of
+ * wrapping onto its own (the full name lives in `title` and the JSON-LD).
  */
 export default function Breadcrumbs({
   items,
@@ -19,7 +22,7 @@ export default function Breadcrumbs({
 
   const isDark = tone === "dark";
   const base = isDark ? "text-white/70" : "text-muted";
-  const current = isDark ? "text-white" : "text-muted";
+  const current = isDark ? "text-white" : "text-foreground";
   const sep = isDark ? "text-white/40" : "text-muted";
   const hover = isDark
     ? "hover:text-white"
@@ -31,9 +34,20 @@ export default function Breadcrumbs({
         {items.map((item, i) => {
           const isLast = i === items.length - 1;
           return (
-            <li key={item.path} className="flex items-center gap-1.5">
+            <li
+              key={item.path}
+              className={
+                isLast
+                  ? "flex min-w-0 flex-1 items-center"
+                  : "flex shrink-0 items-center gap-1.5"
+              }
+            >
               {isLast ? (
-                <span aria-current="page" className={`font-medium ${current}`}>
+                <span
+                  aria-current="page"
+                  title={item.name}
+                  className={`truncate font-medium ${current}`}
+                >
                   {item.name}
                 </span>
               ) : (
