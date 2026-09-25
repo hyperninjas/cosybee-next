@@ -163,6 +163,13 @@ const ARTICLE_COLUMN_PX = 680;
  */
 const ARTICLE_COLUMN_BREAKPOINT_PX = 768;
 
+/**
+ * The rung an un-resized body image is served at (see `optimizeArticleImages`).
+ * Wider than the column so it stays sharp on high-density screens; must be a
+ * member of `IMAGE_WIDTHS`.
+ */
+const UNSIZED_IMAGE_PX = 1200;
+
 /** `<img …>`, self-closing or not. Attribute values may contain `>`-free text. */
 const IMG_TAG = /<img\b([^>]*)>/gi;
 
@@ -237,10 +244,34 @@ export function optimizeArticleImages(html: string): string {
     // real render width and beats the column default. Anything wider than the
     // column is clamped by CSS, so the column is always the ceiling.
     const declared = Number(readAttr(attrs, "width"));
-    const target = Math.min(
-      Number.isFinite(declared) && declared > 0 ? declared : ARTICLE_COLUMN_PX,
-      ARTICLE_COLUMN_PX,
-    );
+    const hasDeclared = Number.isFinite(declared) && declared > 0;
+
+    // No declared width — an image the author never resized — must NOT get a
+    // `srcset`. Its on-page size is its intrinsic size (capped by the column),
+    // exactly as in the editor, which shows the raw file. With `w` descriptors
+    // the browser derives that intrinsic size from the rung it picked, not the
+    // pixels it got: on a 2x screen it takes the 1920 rung for 1x-680, the
+    // optimizer (which never upscales) returns a 942px original untouched, and
+    // the browser, assuming ~2.8x density, lays it out at 334px. Un-resized
+    // images showed at a fraction of the editor's size on every Retina screen.
+    //
+    // One `src` at a rung above the column instead: the file arrives at
+    // min(original, UNSIZED_IMAGE_PX) and is laid out at that many CSS px,
+    // capped at the column by CSS — so a wide image fills the column, and a
+    // narrow one keeps its own size, both as in the editor.
+    if (!hasDeclared) {
+      let next = attrs
+        .replace(
+          /\bsrc\s*=\s*("[^"]*"|'[^']*')/i,
+          `src="${escapeAttr(optimizedImageUrl(src, UNSIZED_IMAGE_PX))}"`,
+        )
+        .replace(/\s*\/\s*$/, "");
+      if (!hasAttr(attrs, "loading")) next += ` loading="lazy"`;
+      if (!hasAttr(attrs, "decoding")) next += ` decoding="async"`;
+      return `<img${next}>`;
+    }
+
+    const target = Math.min(declared, ARTICLE_COLUMN_PX);
 
     const widths = candidateWidths(target);
     const srcSet = widths

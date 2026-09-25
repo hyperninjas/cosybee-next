@@ -1,7 +1,11 @@
 import "server-only";
 import { ServerBlockNoteEditor } from "@blocknote/server-util";
 import type { PartialBlock } from "@blocknote/core";
-import { blockNoteSchema, LINK_REL_TOKENS } from "./blocknoteSchema";
+import {
+  blockNoteSchema,
+  LINK_REL_TOKENS,
+  withExportWidths,
+} from "./blocknoteSchema";
 import { PRODUCTION_URL, SITE_URL } from "./site";
 
 /** Is this href off-site? Relative paths, #anchors, mailto/tel and our own
@@ -251,7 +255,9 @@ function dropDeclaration(style: string, property: string): string {
  */
 export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   const editor = ServerBlockNoteEditor.create({ schema: blockNoteSchema });
-  const html = await editor.blocksToHTMLLossy(blocks);
+  // Resized images/videos publish as a percentage of the space they were
+  // resized in, not the editor's raw pixels (see `withExportWidths`).
+  const html = await editor.blocksToHTMLLossy(withExportWidths(blocks));
   // Apply the site link policy (hoist author rel tokens, un-nofollow internal
   // links, external → noopener/new-tab), give media blocks their player
   // controls, and drop pasted-in text colours before the HTML goes anywhere.

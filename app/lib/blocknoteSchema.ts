@@ -1259,6 +1259,107 @@ const SPACING_DATA_ATTRS = [
   "data-padding-left",
 ];
 
+// ── resized media width ──────────────────────────────────────────────────
+
+/**
+ * How wide a resized image/video publishes.
+ *
+ * BlockNote stores a resize as `previewWidth` in PIXELS — pixels of the editor
+ * the author dragged in. Published as-is (the stock export writes it as the
+ * `width` attribute), it only matches the editor while the page column is as
+ * wide as the editor's. It isn't on a phone: a 400px image, 60% of the editor,
+ * hit the column's `max-width` and went full width, while a 180px image in a
+ * column kept its 180px and became a thumbnail once the columns stacked.
+ *
+ * So the width is published as a PERCENTAGE of the space the author resized
+ * it in, which scales with whatever the page gives it. That space is derived
+ * from the editor's own geometry (below), and written onto a throwaway copy of
+ * the document by `withExportWidths` just before export — the editor never
+ * sets `exportWidth`, and an unset one leaves the stock pixel width alone.
+ */
+
+/** The editor's writing column: `max-w-2xl` in PostForm.tsx, with the editor's
+ *  own inline padding zeroed in globals.css. Keep in step with both. */
+const EDITOR_COLUMN_PX = 672;
+/** BlockNote's `.bn-block-column` padding: 20px each side, none on the
+ *  outermost edges — so 40px between each pair of columns. */
+const EDITOR_COLUMN_GUTTER_PX = 40;
+/** BlockNote's indent for nested blocks (`.bn-block-group .bn-block-group`). */
+const EDITOR_NEST_INDENT_PX = 24;
+
+const mediaWidthPropSchema = {
+  /** Export-only: % of the container, set by `withExportWidths`. */
+  exportWidth: { default: "" as const },
+};
+
+type LooseBlock = {
+  type?: string;
+  props?: Record<string, unknown>;
+  children?: LooseBlock[];
+  [key: string]: unknown;
+};
+
+/**
+ * A copy of `blocks` with `exportWidth` filled in on every resized media
+ * block: its `previewWidth` as a percentage of the editor space it sat in —
+ * the writing column, a column's share of it, or either less the indent of
+ * each nesting level. The input is not modified.
+ */
+export function withExportWidths<T>(blocks: T[]): T[] {
+  const walk = (list: LooseBlock[], containerPx: number): LooseBlock[] =>
+    list.map((block) => {
+      const next: LooseBlock = { ...block };
+      const width = Number(block.props?.previewWidth);
+      if (Number.isFinite(width) && width > 0 && containerPx > 0) {
+        const pct = Math.min(100, (width / containerPx) * 100);
+        next.props = { ...block.props, exportWidth: pct.toFixed(2) };
+      }
+      if (block.type === "columnList" && block.children?.length) {
+        // `flex: 1` columns with padding: the padding comes off first, then
+        // the rest is shared by each column's `width` ratio (default 1).
+        const ratios = block.children.map((c) => {
+          const w = Number(c.props?.width);
+          return Number.isFinite(w) && w > 0 ? w : 1;
+        });
+        const total = ratios.reduce((a, b) => a + b, 0);
+        const free =
+          containerPx - EDITOR_COLUMN_GUTTER_PX * (block.children.length - 1);
+        next.children = block.children.map((column, i) => ({
+          ...column,
+          children: walk(column.children ?? [], (free * ratios[i]) / total),
+        }));
+      } else if (block.children?.length) {
+        next.children = walk(
+          block.children,
+          containerPx - EDITOR_NEST_INDENT_PX,
+        );
+      }
+      return next;
+    });
+  return walk(blocks as LooseBlock[], EDITOR_COLUMN_PX) as T[];
+}
+
+/**
+ * Publish `exportWidth` on the exported media element. A captioned block is a
+ * <figure> — the percentage goes on it (so the caption wraps to the same
+ * width, see `figure[data-url]` in globals.css) and the media fills it; a bare
+ * <img>/<video> takes it directly. A file shown as a link has neither and is
+ * left alone. Only a sane percentage is ever written.
+ */
+function applyExportWidth(el: Element | null | undefined, raw: unknown) {
+  const pct = Number(raw);
+  if (!el || !Number.isFinite(pct) || pct <= 0 || pct > 100) return;
+  const target = el as HTMLElement;
+  const tag = target.tagName;
+  if (tag === "FIGURE") {
+    target.style.setProperty("width", `${pct}%`);
+    const media = target.querySelector("img, video") as HTMLElement | null;
+    media?.style.setProperty("width", "100%");
+  } else if (tag === "IMG" || tag === "VIDEO") {
+    target.style.setProperty("width", `${pct}%`);
+  }
+}
+
 /**
  * Give a block spec the spacing props and apply them in both outputs.
  *
@@ -1284,16 +1385,24 @@ function withSpacing<S extends AnySpec>(spec: S): S {
   // own `createBlockSpec` wrapper stamps every prop as a `data-*` attribute by
   // looking it up in the ORIGINAL prop schema, and throws on one it doesn't
   // know. So it gets the block with those props removed.
+  // Resizable media (anything with `previewWidth`) also gets `exportWidth`
+  // — see `withExportWidths`.
+  const resizable = "previewWidth" in (spec.config.propSchema ?? {});
   const inner = (block: SpacedBlock) => {
-    const props = { ...block.props };
+    const props: Record<string, unknown> = { ...block.props };
     for (const prop of SPACING_PROPS) delete props[prop];
+    delete props.exportWidth;
     return { ...block, props };
   };
   return {
     ...spec,
     config: {
       ...spec.config,
-      propSchema: { ...spec.config.propSchema, ...spacingPropSchema },
+      propSchema: {
+        ...spec.config.propSchema,
+        ...spacingPropSchema,
+        ...(resizable ? mediaWidthPropSchema : {}),
+      },
     },
     implementation: {
       ...impl,
@@ -1332,19 +1441,18 @@ function withSpacing<S extends AnySpec>(spec: S): S {
         // style below is the published form; the raw values stay in
         // contentJson only.
         for (const attr of SPACING_DATA_ATTRS) dom.removeAttribute?.(attr);
-        applySpacing(
-          dom.classList?.contains("bn-block-content")
-            ? dom.firstElementChild
-            : dom,
-          block.props,
-        );
+        const published = dom.classList?.contains("bn-block-content")
+          ? dom.firstElementChild
+          : dom;
+        applySpacing(published, block.props);
+        if (resizable) applyExportWidth(published, block.props.exportWidth);
         return out;
       },
     },
   } as S;
 }
 
-type SpacedBlock = { props: SpacingValues };
+type SpacedBlock = { props: SpacingValues & { exportWidth?: unknown } };
 // Loose on purpose: the block specs differ in every type parameter, and the
 // wrapper only touches `render`/`toExternalHTML` and the prop schema.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
