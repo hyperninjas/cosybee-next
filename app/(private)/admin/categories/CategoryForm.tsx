@@ -18,6 +18,10 @@ import { saveCategory } from "../taxonomy/actions";
 import { initialSaveState, type EntitySaveState } from "../lib/form-state";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { slugify, slugifyInput } from "@/app/lib/slug";
+import {
+  SEO_DESCRIPTION_MAX,
+  SEO_DESCRIPTION_RECOMMENDED,
+} from "@/app/lib/seo-limits";
 
 function Labeled({
   label,
@@ -197,7 +201,14 @@ export default function CategoryForm({
               placeholder={name || "Defaults to name"}
             />
           </Labeled>
-          <Labeled label="SEO description" hint="Defaults to the description.">
+          <Labeled
+            label="SEO description"
+            hint={
+              seoDescription.length > SEO_DESCRIPTION_RECOMMENDED
+                ? `${seoDescription.length}/${SEO_DESCRIPTION_RECOMMENDED} — longer than Google usually shows; the end will be cut off in search results.`
+                : `${seoDescription.length}/${SEO_DESCRIPTION_RECOMMENDED} · Defaults to the description.`
+            }
+          >
             <TextArea
               variant="secondary"
               fullWidth
@@ -205,6 +216,7 @@ export default function CategoryForm({
               value={seoDescription}
               onChange={(e) => setSeoDescription(e.target.value)}
               rows={2}
+              maxLength={SEO_DESCRIPTION_MAX}
               placeholder={description || "Defaults to description"}
             />
           </Labeled>

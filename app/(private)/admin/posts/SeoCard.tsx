@@ -4,6 +4,10 @@ import { Card, Chip, Input, Switch, TextArea, Tooltip } from "@heroui/react";
 import { CircleCheckFill, CircleXmarkFill } from "@gravity-ui/icons";
 import { PublicImageUpload } from "@/app/components/storage/PublicImageUpload";
 import { Labeled } from "./Labeled";
+import {
+  SEO_DESCRIPTION_MAX,
+  SEO_DESCRIPTION_RECOMMENDED,
+} from "@/app/lib/seo-limits";
 
 function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
@@ -83,6 +87,11 @@ export function SeoCard({
       label: "Meta description present",
       passed: metaDesc.length > 0,
       fix: "Add an SEO description (or article excerpt) so search engines can show a snippet.",
+    },
+    {
+      label: `Description ${SEO_DESCRIPTION_RECOMMENDED} characters or fewer`,
+      passed: metaDesc.length <= SEO_DESCRIPTION_RECOMMENDED,
+      fix: `Description is ${metaDesc.length} characters — Google cuts it off around ${SEO_DESCRIPTION_RECOMMENDED}. It still saves; trim it if the end matters.`,
     },
     {
       label: "Crawlable URL slug",
@@ -175,13 +184,21 @@ export function SeoCard({
             placeholder={title || "Defaults to title"}
           />
         </Labeled>
-        <Labeled label="SEO description" hint="Defaults to the excerpt.">
+        <Labeled
+          label="SEO description"
+          hint={
+            seoDescription.length > SEO_DESCRIPTION_RECOMMENDED
+              ? `${seoDescription.length}/${SEO_DESCRIPTION_RECOMMENDED} — longer than Google usually shows; the end will be cut off in search results.`
+              : `${seoDescription.length}/${SEO_DESCRIPTION_RECOMMENDED} · Defaults to the excerpt.`
+          }
+        >
           <TextArea
             variant="secondary"
             fullWidth
             value={seoDescription}
             onChange={(e) => setSeoDescription(e.target.value)}
             rows={2}
+            maxLength={SEO_DESCRIPTION_MAX}
             placeholder={description || "Defaults to excerpt"}
           />
         </Labeled>
