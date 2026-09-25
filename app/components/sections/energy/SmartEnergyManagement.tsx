@@ -14,7 +14,7 @@ export default function SmartEnergyManagement() {
         <Image
           src={featureImage}
           alt="A Sunsynk inverter and battery beside the app's Agile price chart, flagging right now as expensive at 31.01p"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

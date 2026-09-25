@@ -35,7 +35,7 @@ export default function ReadyToReduce() {
               alt=""
               aria-hidden
               fill
-              sizes="(min-width: 1440px) 1440px, 100vw"
+              sizes="(min-width: 1440px) 1200px, 100vw"
               quality={100}
               className="object-cover object-right"
             />

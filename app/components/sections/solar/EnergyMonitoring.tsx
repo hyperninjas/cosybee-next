@@ -54,7 +54,7 @@ export default function EnergyMonitoring({
         <Image
           src={featureImage}
           alt="Rooftop solar panels beside the EnergieBee app, showing today's solar cycle and a live 170 W flow into the house"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9 object-cover object-right"
         />

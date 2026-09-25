@@ -75,7 +75,7 @@ export default function ConnectedEcosystem() {
         <Image
           src={featureImage}
           alt="An EnergieBee hub and a 21.5° hybrid heating control beside the app's live energy flow — 170 W solar, 350 W imported, 870 W to the house"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

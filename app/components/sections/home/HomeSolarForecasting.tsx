@@ -46,7 +46,7 @@ export default function HomeSolarForecasting() {
         <Image
           src={featureImage}
           alt="A rooftop array beside the app's solar cycle — sunrise 06:42, a 3.0 kW peak at 13:00, sunset 20:18 — and an Aug 26 bill of £4.82"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

@@ -24,7 +24,7 @@ export default function WhyChoose() {
         <Image
           src={featureImage}
           alt="The app's savings tips — £300 a year from a heat pump, £392 from solar — beside a blended 2.63p per kWh against a 33.75p standard rate"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

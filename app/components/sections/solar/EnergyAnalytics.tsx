@@ -66,7 +66,7 @@ export default function EnergyAnalytics({
           <Image
             src={featureImage}
             alt="EnergieBee's solar analytics: 41.8 g CO2 per kWh, 43% cleaner than the grid, and where the day's energy was routed"
-            sizes="(min-width: 1440px) 1440px, 100vw"
+            sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
             quality={100}
           />
         </div>

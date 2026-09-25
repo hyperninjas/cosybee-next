@@ -46,7 +46,7 @@ export default function EnergyAnalytics() {
           <Image
             src={featureImage}
             alt="The app's solar tab: a £1.46 bill, £0.35 earned exporting 2.9 kWh, and a 41.8 g CO2 per kWh footprint — 43% cleaner than the grid"
-            sizes="(min-width: 1440px) 1440px, 100vw"
+            sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
             quality={100}
           />
         </div>

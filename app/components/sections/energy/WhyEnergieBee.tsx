@@ -53,7 +53,7 @@ export default function WhyEnergieBee() {
           <Image
             src={featureImage}
             alt="The app splitting a day's demand 18% direct solar, 27% battery, 55% grid — beside an Aug 26 bill of £4.82, £1.26 of it earned exporting"
-            sizes="(min-width: 1440px) 1440px, 100vw"
+            sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
             quality={100}
           />
         </div>
