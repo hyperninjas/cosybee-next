@@ -45,7 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3"
   },
   "browserslist": [
     "Chrome >= 100",
