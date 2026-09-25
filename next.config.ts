@@ -49,7 +49,10 @@ const CSP_REPORT_ONLY = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // Standalone is for the Docker image (Dokploy). Vercel builds through its own
+  // adapter, and standalone then fails looking for next-server.js.nft.json —
+  // VERCEL=1 is set on every Vercel build.
+  output: process.env.VERCEL ? undefined : "standalone",
 
   // Dev-only: allow phones/tablets on the local network to load dev resources
   // (HMR, chunks) when browsing via the machine's LAN IP — otherwise Next

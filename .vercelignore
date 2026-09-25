@@ -1,0 +1,6 @@
+# Never upload local env files — Vercel project env vars are the source of truth.
+.env*
+.next
+node_modules
+Dockerfile
+.dockerignore
