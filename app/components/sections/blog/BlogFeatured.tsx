@@ -219,7 +219,7 @@ export default function BlogFeatured({
       <div className="mt-8 relative h-13 flex items-center justify-between">
         <div className="flex-1 flex items-center md:justify-center">
           <div
-            className="flex items-center gap-2 px-2"
+            className="flex items-center px-2"
             role="tablist"
             aria-label="Featured article slides"
           >
@@ -233,12 +233,18 @@ export default function BlogFeatured({
                   aria-selected={isActive}
                   aria-label={`Go to slide ${i + 1}`}
                   onClick={() => scrollTo(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    isActive
-                      ? "w-2 bg-black"
-                      : "w-2 bg-[#1F1F1F29] hover:bg-neutral-400"
-                  }`}
-                />
+                  // 24px hit area (WCAG 2.5.8 target size) around the 8px dot.
+                  className="group flex size-6 items-center justify-center rounded-full"
+                >
+                  <span
+                    aria-hidden
+                    className={`size-2 rounded-full transition-all ${
+                      isActive
+                        ? "bg-black"
+                        : "bg-[#1F1F1F29] group-hover:bg-neutral-400"
+                    }`}
+                  />
+                </button>
               );
             })}
           </div>
