@@ -41,6 +41,9 @@ Recent additions to the editor:
   **sponsored** or **ugc** on it. See section 4.
 - **Link to section (⚓)** — connect selected text to any Heading 2 or 3 of the
   page — pick it from a list, no hand-typed anchors. See section 4.
+- **Block spacing** — give any block its own margin or padding from the
+  **⠿ handle → Spacing…** menu. Blank fields keep the normal spacing. See
+  section 11.
 
 ---
 
@@ -257,7 +260,15 @@ card has no side column to pin against.
 ## 11. Moving & organising blocks
 
 - Hover a block → **⠿ drag handle** appears on the left. Drag it to move the
-  block; click it for actions (delete, duplicate, colours…).
+  block; click it for actions (delete, duplicate, colours, spacing…).
+- **Spacing:** click the **⠿ handle → Spacing…** to set a block's **margin**
+  (space outside it) and **padding** (space inside it), in pixels, for each
+  side. Works on every block, tables included.
+  - Leave a field **blank** to keep the normal spacing for that side — only
+    what you fill in changes. **Reset to default** clears them all.
+  - Margins between two blocks overlap: the gap is the **larger** of the upper
+    block's bottom margin and the lower block's top margin. To tighten a gap,
+    lower the **top** margin of the block below it.
 - **Tab / Shift+Tab** nests / un-nests list items.
 - **Tables:** type `/table`. Click into cells to type; hover the edges for
   **+** buttons and handles to add, move or delete rows and columns.

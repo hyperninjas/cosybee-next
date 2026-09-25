@@ -36,12 +36,36 @@ export default function HeroBackgroundVideo({ src }: { src: string }) {
   const [isMuted, setIsMuted] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
 
+  // Mount only once the page has finished loading and the main thread is
+  // idle. Mounting straight after hydration started the ~13MB fetch while the
+  // hero photo (the LCP image), CSS and fonts were still arriving, and the
+  // video repainting over the photo pushed Speed Index out by seconds. The
+  // photo carries first paint; the video is an enhancement on top.
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
     const update = () => setShow(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const start = () => {
+      // Safari has no requestIdleCallback — a short timeout stands in.
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(update, { timeout: 2000 });
+      } else {
+        timeoutId = setTimeout(update, 200);
+      }
+      mq.addEventListener("change", update);
+    };
+
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+
+    return () => {
+      window.removeEventListener("load", start);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      mq.removeEventListener("change", update);
+    };
   }, []);
 
   // Pause offscreen so a hero scrolled past isn't decoding frames nobody sees.

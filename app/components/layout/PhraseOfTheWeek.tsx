@@ -91,7 +91,7 @@ export default function PhraseOfTheWeek({
             single tab stop and a short, meaningful accessible name. */}
         <Link
           href={phrase.article}
-          aria-label={`Read the article behind this week's phrase, quoting ${phrase.author}`}
+          aria-label={`Read article: the story behind this week's phrase, quoting ${phrase.author}`}
           className="group inline-flex items-center gap-1.5 font-semibold text-[#FF8A7A] transition-colors after:absolute after:inset-0 hover:text-white focus-visible:text-white"
         >
           Read article

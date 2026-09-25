@@ -79,14 +79,15 @@ export default function robots(): MetadataRoute.Robots {
         disallow,
       },
     ],
-    // All three files are advertised. The video and news sitemaps are separate
+    // All four files are advertised. The article, video and news sitemaps are separate
     // documents because Google reads the `video:` and `news:` namespaces only
     // from a sitemap that declares them, and Next's sitemap route has no
     // vocabulary for either. `/sitemap.xml` stays the complete URL list; the
-    // news file is just the last two days of articles (see lib/news-sitemap.ts),
-    // so it is additional discovery, never a replacement.
+    // article file contains only `/hive/*` and `/learn/*` articles, while the
+    // news file is just the last two days of Hive articles (see lib/news-sitemap.ts).
     sitemap: [
       `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/article-sitemap.xml`,
       `${SITE_URL}/video-sitemap.xml`,
       `${SITE_URL}/news-sitemap.xml`,
     ],

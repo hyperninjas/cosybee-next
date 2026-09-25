@@ -14,7 +14,7 @@ export default function EnergyMonitoring() {
         <Image
           src={featureImage}
           alt="The app's weekly electricity overview — £10.45 spent, £3.26 of it standing charge — with a daily bar for each day from 8/21 to 8/27"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

@@ -146,7 +146,7 @@ function FeaturedCarousel({ articles }: { articles: Article[] }) {
       <div className="relative mt-8 flex h-13 items-center justify-between">
         <div className="flex flex-1 items-center md:justify-center">
           <div
-            className="flex items-center gap-2 px-2"
+            className="flex items-center px-2"
             role="tablist"
             aria-label="Featured articles pages"
           >
@@ -160,12 +160,18 @@ function FeaturedCarousel({ articles }: { articles: Article[] }) {
                   aria-selected={isActive}
                   aria-label={`Go to page ${i + 1}`}
                   onClick={() => goTo(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    isActive
-                      ? "w-2 bg-black"
-                      : "w-2 bg-[#1F1F1F29] hover:bg-neutral-400"
-                  }`}
-                />
+                  // 24px hit area (WCAG 2.5.8 target size) around the 8px dot.
+                  className="group flex size-6 items-center justify-center rounded-full"
+                >
+                  <span
+                    aria-hidden
+                    className={`size-2 rounded-full transition-all ${
+                      isActive
+                        ? "bg-black"
+                        : "bg-[#1F1F1F29] group-hover:bg-neutral-400"
+                    }`}
+                  />
+                </button>
               );
             })}
           </div>

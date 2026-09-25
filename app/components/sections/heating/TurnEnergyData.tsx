@@ -14,7 +14,7 @@ export default function TurnEnergyData() {
         <Image
           src={featureImage}
           alt="The app's 30-day view at 15.4 kWh a day billed, beside a carbon card reading 41.8 g CO2 per kWh — 43% cleaner than the grid"
-          sizes="(min-width: 1440px) 1440px, 100vw"
+          sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
           quality={100}
           className="z-9"
         />

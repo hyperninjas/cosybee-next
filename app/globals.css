@@ -201,7 +201,7 @@
   margin-top: 1.25rem;
 }
 .article-body p {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.125rem; /* 18px */
   line-height: 1.5;
   margin-top: 2.25rem;
 
@@ -218,18 +218,18 @@
 .article-body h6 {
   color: var(--article-foreground) !important;
   margin-top: 2.25rem;
-  margin-bottom: -1rem;
+  /* margin-bottom: -1rem; */
 }
 .article-body h1 {
-  font-size: 2.25rem; /* 36px */
+  font-size: 3rem; /* 48px */
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.2;
   letter-spacing: -0.01em;
 }
 .article-body h2 {
-  font-size: 1.5rem; /* 24px */
+  font-size: 2.25rem; /* 36px */
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.4;
   letter-spacing: -0.01em;
 }
 /* h3 keeps the published size but takes the EDITOR's spacing, so a
@@ -240,30 +240,30 @@
    margin, and adjacent margins collapse to the sum of the largest positive and
    the smallest negative: 2.25rem - 1.875rem leaves the 6px. */
 .article-body h3 {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.75rem; /* 28px */
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -0.01em;
   margin-top: 1.3125rem; /* 21px */
   /* margin-bottom: 1.875rem; nets 6px against the next paragraph */
 }
 .article-body h4 {
-  font-size: 1.125rem; /* 18px */
+  font-size: 1.5rem; /* 24px */
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 .article-body h5 {
-  font-size: 1rem; /* 16px */
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
 }
-/* h6 has no line in the spec. BlockNote lets an author pick it, and an
-   unstyled h6 renders as plain body text — so it continues the ladder's 4px
-   step at the body size, semibold like the levels above it. */
+/* h5/h6 have no line in the spec. BlockNote lets an author pick them, so
+   they continue the ladder down to the body size (20px, then 18px), semibold
+   like the levels above them. */
 .article-body h6 {
-  font-size: 0.875rem; /* 14px */
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 .article-body ul,
 .article-body ol {
@@ -1334,7 +1334,7 @@
 }
 /* Heading sizes in the editor come from BlockNote's `--level` em multiplier
    (3em / 2em / 1.3em / 1em / .9em / .8em of the editor base). Re-point that
-   ladder at the published one — 36 / 24 / 20 / 18 / 16 / 14px against the 1rem
+   ladder at the published one — 48 / 36 / 28 / 24 / 20 / 18px against the 1rem
    base above. `--prev-level` is the same ladder for BlockNote's transient
    block-transition state, so a heading doesn't flash the old size mid-change.
 
@@ -1343,40 +1343,40 @@
    36/32/28/24/20/16 scale, so an h3 was written at 28px and published at 20px,
    wrapping differently in the two views. */
 .post-editor [data-content-type="heading"] {
-  --level: 2.25em; /* 36px */
+  --level: 3em; /* 48px */
 }
 .post-editor [data-content-type="heading"][data-level="2"] {
-  --level: 1.5em; /* 24px */
+  --level: 2.25em; /* 36px */
 }
 .post-editor [data-content-type="heading"][data-level="3"] {
-  --level: 1.25em; /* 20px */
+  --level: 1.75em; /* 28px */
 }
 .post-editor [data-content-type="heading"][data-level="4"] {
-  --level: 1.125em; /* 18px */
+  --level: 1.5em; /* 24px */
 }
 .post-editor [data-content-type="heading"][data-level="5"] {
-  --level: 1em; /* 16px */
+  --level: 1.25em; /* 20px */
 }
 .post-editor [data-content-type="heading"][data-level="6"] {
-  --level: 0.875em; /* 14px */
+  --level: 1.125em; /* 18px */
 }
 .post-editor [data-prev-level="1"] {
-  --prev-level: 2.25em;
+  --prev-level: 3em;
 }
 .post-editor [data-prev-level="2"] {
-  --prev-level: 1.5em;
+  --prev-level: 2.25em;
 }
 .post-editor [data-prev-level="3"] {
-  --prev-level: 1.25em;
+  --prev-level: 1.75em;
 }
 .post-editor [data-prev-level="4"] {
-  --prev-level: 1.125em;
+  --prev-level: 1.5em;
 }
 .post-editor [data-prev-level="5"] {
-  --prev-level: 1em;
+  --prev-level: 1.25em;
 }
 .post-editor [data-prev-level="6"] {
-  --prev-level: 0.875em;
+  --prev-level: 1.125em;
 }
 /* Leading and tracking to match the published headings. BlockNote hard-codes
    `font-weight: 700` on a five-class selector, so the semibold levels are
@@ -1385,15 +1385,21 @@
   .bn-editor
   .bn-block
   .bn-block-content[data-content-type="heading"] {
-  line-height: 1.1;
+  line-height: 1.2;
   letter-spacing: -0.01em;
+}
+.post-editor
+  .bn-editor
+  .bn-block
+  .bn-block-content[data-content-type="heading"][data-level="2"] {
+  line-height: 1.4;
 }
 .post-editor
   .bn-editor
   .bn-block
   .bn-block-content[data-content-type="heading"][data-level="3"] {
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 .post-editor
   .bn-editor
@@ -1408,7 +1414,7 @@
   .bn-block
   .bn-block-content[data-content-type="heading"][data-level="6"] {
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: normal;
 }
 /* Mirrors `.article-body p`. The editor's base stays at 1rem — matching what
@@ -1417,13 +1423,13 @@
    Sizing the base instead would drag every `em` with it, the heading ladder
    above included. */
 .post-editor .bn-editor [data-content-type="paragraph"] {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.125rem; /* 18px */
   line-height: 1.5;
 }
 /* Mirrors `.article-body td > p`, which takes the same body size — `th` is the
    exception and is set to 1rem further down, as it is on the page. */
 .post-editor .bn-editor [data-content-type="table"] td {
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.125rem; /* 18px */
 }
 /* Mirrors `.article-body li` — list items sit one step below body copy, with
    their own tighter leading (the `.bn-block-outer` rule above would otherwise
@@ -1573,6 +1579,18 @@
     > .bn-block > .bn-block-content[data-content-type="faqItem"]
   ) {
   margin-top: 0;
+}
+/* A block's own "Spacing…" top margin REPLACES the gap above, as it does on
+   the published page (where the inline style overrides `.article-body p` etc.
+   on the same element). In the editor the style lands on `.bn-block-content`
+   (see `withSpacing`) while the gap is on `.bn-block-outer`, and `.bn-block`
+   between them is a flex container, so the two margins never collapse — they
+   stacked, and a 4px override rendered as 1rem + 4px. `!important` because an
+   author's explicit value has to beat every rhythm rule above, including the
+   higher-specificity list-item one. */
+.post-editor
+  .bn-block-outer:has(> .bn-block > .bn-block-content[style*="margin-top"]) {
+  margin-top: 0 !important;
 }
 /* Mirrors `.article-body figcaption { margin-top: 0.5rem }` — BlockNote uses
    4px of padding instead. */

@@ -89,6 +89,22 @@ export type FeedDefinition = {
    * the aggregator would show it as if it were the article's own picture.
    */
   thumbnails?: boolean;
+  /** Namespace URI for `media:`; Yahoo's ingestion spec uses this exact URI. */
+  mediaNamespace?: string;
+  /** Emit Yahoo's required article update timestamp. */
+  includeUpdated?: boolean;
+  /** Emit one category instead of the normal category and tag list. */
+  singleCategory?: boolean;
+  /** Require a `<figcaption>` on the lead image in `content:encoded`. */
+  captionLeadImage?: boolean;
+  /** Minimum plain-text body word count for partner ingestion. */
+  minBodyWords?: number;
+  /** Minimum description word count for partner ingestion. */
+  minDescriptionWords?: number;
+  /** Drop items without a real article image. */
+  requireThumbnail?: boolean;
+  /** Remove markup Yahoo explicitly rejects from syndicated article HTML. */
+  stripUnsafeMarkup?: boolean;
   /**
    * Cap on how many items the feed carries, newest first.
    *
@@ -169,6 +185,37 @@ export const FEEDS = {
   newsnow: {
     path: "/newsnow/newsnow.xml",
     title: `${SITE_NAME} — News`,
+  },
+  /** Registered with MSN Partner Hub when the publisher account is onboarded. */
+  msn: {
+    path: "/msn/msn.xml",
+    title: `${SITE_NAME} — News`,
+    description:
+      "Latest smart energy news, solar insights, heating tips and home energy updates.",
+    language: "en-GB",
+    fullContent: true,
+    thumbnails: true,
+    // Keep the MSN feed focused on the latest articles and limit payload size.
+    maxItems: 10,
+  },
+  /** Registered with Yahoo Partner Portal when the publisher is onboarded. */
+  yahoo: {
+    path: "/yahoo/yahoo.xml",
+    title: `${SITE_NAME} — News`,
+    description:
+      "Latest smart energy news, solar insights, heating tips and home energy updates.",
+    language: "en-GB",
+    fullContent: true,
+    thumbnails: true,
+    mediaNamespace: "http://search.yahoo.com/rss",
+    includeUpdated: true,
+    singleCategory: true,
+    captionLeadImage: true,
+    minBodyWords: 150,
+    minDescriptionWords: 4,
+    requireThumbnail: true,
+    stripUnsafeMarkup: true,
+    maxItems: 10,
   },
   /** Polled by Apple News; the title becomes the channel name in the app. */
   applenews: {
@@ -357,6 +404,7 @@ function itemXml(
   const categories = a.tags
     .map((t) => `<category>${escapeXml(t.name)}</category>`)
     .join("");
+  const category = a.category?.name || a.tags[0]?.name || "News";
 
   const extra: string[] = [];
 
@@ -397,9 +445,9 @@ function itemXml(
       <link>${escapeXml(link)}</link>
       <guid isPermaLink="true">${escapeXml(link)}</guid>
       <pubDate>${rfc822(a.publishedAt ?? a.authorDate)}</pubDate>
+      ${feed.includeUpdated ? `<updated>${rfc822(a.updatedAt ?? a.publishedAt ?? a.authorDate)}</updated>` : ""}
       ${a.author?.name ? `<dc:creator>${escapeXml(a.author.name)}</dc:creator>` : ""}
-      ${a.category?.name ? `<category>${escapeXml(a.category.name)}</category>` : ""}
-      ${categories}
+      ${feed.singleCategory ? `<category>${escapeXml(category)}</category>` : `${a.category?.name ? `<category>${escapeXml(a.category.name)}</category>` : ""}${categories}`}
       <description>${escapeXml(desc)}</description>
 ${extra.join("\n")}
     </item>`;
@@ -432,10 +480,12 @@ export function buildRssFeed(
     ...(feed.fullContent
       ? [`xmlns:content="http://purl.org/rss/1.0/modules/content/"`]
       : []),
-    ...(feed.thumbnails ? [`xmlns:media="http://search.yahoo.com/mrss/"`] : []),
-    ...(feed.smartFormat
-      ? [`xmlns:snf="http://www.smartnews.be/snf"`]
+    ...(feed.thumbnails
+      ? [
+          `xmlns:media="${feed.mediaNamespace ?? "http://search.yahoo.com/mrss/"}"`,
+        ]
       : []),
+    ...(feed.smartFormat ? [`xmlns:snf="http://www.smartnews.be/snf"`] : []),
     ...(feed.newsBreak ? [`xmlns:nb="https://www.newsbreak.com/"`] : []),
   ].join("\n     ");
 

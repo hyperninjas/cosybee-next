@@ -38,15 +38,22 @@ export default function ArticleToc({
 
   return (
     <nav className={`text-sm ${sticky ? "sticky top-24" : ""}`}>
-      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">
+      <p className="mb-3 text-xs font-bold uppercase underline tracking-wide text-muted">
         On this page
       </p>
-      <ul className="space-y-2 border-l border-border">
+      <ul className="space-y-3">
         {items.map((i) => (
-          <li key={i.id} style={{ paddingLeft: i.level === 3 ? 24 : 12 }}>
+          <li
+            key={i.id}
+            className={`flex  gap-2 text-[13px] ${
+              active === i.id
+                ? "border-warning font-medium text-foreground"
+                : "border-transparent text-muted hover:text-foreground hover:underline"
+            }`}
+          >
             <a
               href={`#${i.id}`}
-              className={`-ml-px block border-l-2 pl-3 leading-snug transition-colors ${
+              className={` block leading-snug text-[13px] transition-colors ${
                 active === i.id
                   ? "border-warning font-medium text-foreground"
                   : "border-transparent text-muted hover:text-foreground hover:underline"

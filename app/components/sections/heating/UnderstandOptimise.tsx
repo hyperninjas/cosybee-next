@@ -47,7 +47,7 @@ export default function UnderstandOptimise() {
           <Image
             src={featureImage}
             alt="A smart radiator valve beside the app's heating tab — a Worcester Bosch combi at 95% efficiency, a £7,500 boiler upgrade grant"
-            sizes="(min-width: 1440px) 1440px, 100vw"
+            sizes="(min-width: 1200px) 560px, (min-width: 1024px) calc(100vw - 240px), (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)"
             quality={100}
           />
         </div>

@@ -21,10 +21,12 @@ import {
  *
  *  1. News only. `NEWS_BLOG` is the hive; the `learn` guides are evergreen
  *     reference material and Google asks publishers to keep them out.
- *  2. Recent only. Anything past the two-day window is dropped, which is the
- *     spec's own instruction — and means an EMPTY file whenever nothing has
- *     been published in the last two days. That is correct, not a fault; see
- *     `NEWS_WINDOW_DAYS` before "fixing" it.
+ *  2. Recent only. Anything past the two-day window loses its news metadata,
+ *     which is the spec's own instruction. When that leaves nothing, the newest
+ *     article stays as a plain `<url>` — an empty `<urlset>` is schema-invalid
+ *     and Search Console reports it as an error, which is how this was found.
+ *     `X-News-Article-Count: 0` with `X-News-Placeholder: 1` is that state, and
+ *     it is correct; see `NEWS_WINDOW_DAYS` before "fixing" it.
  *  3. Only articles we can describe completely. `news:publication_date` and
  *     `news:title` are required, so an article missing either is dropped rather
  *     than emitted with a guessed date.
@@ -61,7 +63,8 @@ export async function GET() {
 
   const articles = await getIndexableArticles(NEWS_BLOG);
 
-  const { xml, urlCount, qualifiedCount } = buildNewsSitemap(articles);
+  const { xml, urlCount, qualifiedCount, placeholder } =
+    buildNewsSitemap(articles);
 
   if (qualifiedCount > MAX_NEWS_URLS) {
     // Sliced to stay valid — a news sitemap over the cap is rejected outright,
@@ -86,6 +89,10 @@ export async function GET() {
       // because nothing was published or because the read came back wrong,
       // without parsing the body.
       "X-News-Article-Count": String(urlCount),
+      // 1 when the window was empty and the newest article is listed without
+      // news metadata purely to keep the <urlset> schema-valid. Together with
+      // the count above: 0/1 is "nothing new this week", 0/0 is "no articles".
+      "X-News-Placeholder": placeholder ? "1" : "0",
     },
   });
 }

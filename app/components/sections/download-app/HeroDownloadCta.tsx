@@ -15,13 +15,34 @@ import { APP_STORE_ID, PLAY_STORE_PACKAGE_NAME } from "@/app/lib/app-links";
  * app/lib/download-qr.ts), so no QR library ships to the client. It points at
  * /download-app: scanning on a phone lands on that page's device-aware CTA, so
  * the same code stays correct before and after launch and for both platforms.
+ *
+ * Both layouts are server-rendered and CSS picks one before JS runs (the QR
+ * panel on fine-pointer devices, the badge row on touch). Swapping one for the
+ * other after hydration moved the hero copy and was the page's whole CLS; now
+ * the detected platform only corrects the rare device the media query guesses
+ * wrong (e.g. an iPad with a trackpad).
  */
 export default function HeroDownloadCta({ qrSvg }: { qrSvg: string }) {
   const platform = useDevicePlatform();
 
-  if (platform === "desktop") {
-    return (
-      <div className="flex flex-col items-stretch gap-4 rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm">
+  const panelVisibility =
+    platform === null
+      ? "hidden pointer-fine:flex"
+      : platform === "desktop"
+        ? "flex"
+        : "hidden";
+  const badgesVisibility =
+    platform === null
+      ? "flex pointer-fine:hidden"
+      : platform === "desktop"
+        ? "hidden"
+        : "flex";
+
+  return (
+    <>
+      <div
+        className={`${panelVisibility} flex-col items-stretch gap-4 rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm`}
+      >
         {/* QR — scan to open this page on a phone */}
         <div className="flex flex-col items-center gap-2">
           <div
@@ -44,15 +65,13 @@ export default function HeroDownloadCta({ qrSvg }: { qrSvg: string }) {
           {/* <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} /> */}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="flex flex-wrap items-center gap-4">
-      {platform !== "android" && <AppStoreButton appId={APP_STORE_ID} />}
-      {platform !== "ios" && (
-        <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} />
-      )}
-    </div>
+      <div className={`${badgesVisibility} flex-wrap items-center gap-4`}>
+        {platform !== "android" && <AppStoreButton appId={APP_STORE_ID} />}
+        {platform !== "ios" && (
+          <GooglePlayButton packageName={PLAY_STORE_PACKAGE_NAME} />
+        )}
+      </div>
+    </>
   );
 }
