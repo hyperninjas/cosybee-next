@@ -1,10 +1,70 @@
 @import "tailwindcss";
-/* HeroUI v3 design system. Must come after Tailwind. Its default theme is
-   declared on :root (light), so HeroUI components render correctly without
-   adding any theme class to <html> — keeping the existing site untouched.
-   We deliberately do NOT add `bg-background text-foreground` to <body>, so
-   HeroUI's neutral background never overrides the site's own white canvas. */
-@import "@heroui/styles";
+/* HeroUI v3 design system, imported piece by piece. Must come after Tailwind.
+   Its default theme is declared on :root (light), so HeroUI components render
+   correctly without adding any theme class to <html> — keeping the existing
+   site untouched. We deliberately do NOT add `bg-background text-foreground`
+   to <body>, so HeroUI's neutral background never overrides the site's own
+   white canvas.
+
+   This mirrors node_modules/@heroui/styles/dist/index.css, except that the
+   component list is only what the app renders instead of all ~84 components.
+   The full set was ~390KB of the ~506KB render-blocking stylesheet every page
+   waits on (calendars, colour pickers, tables… on a marketing homepage).
+
+   ADDING A HEROUI COMPONENT? Import its CSS below, or it renders unstyled.
+   Also add any HeroUI component it renders internally (check its imports in
+   node_modules/@heroui/react/dist/components/<name>/). Keep HeroUI's order
+   from dist/components/index.css — shared primitives first, so composite
+   components can override them. Layer order comes from `tailwindcss` above. */
+@import "tw-animate-css";
+@import "@heroui/styles/base" layer(base);
+@import "@heroui/styles/base/scrollbar.css" layer(base);
+@import "@heroui/styles/components/close-button.css" layer(components);
+@import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/error-message.css" layer(components);
+@import "@heroui/styles/components/field-error.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/accordion.css" layer(components);
+@import "@heroui/styles/components/breadcrumbs.css" layer(components);
+@import "@heroui/styles/components/link.css" layer(components);
+@import "@heroui/styles/components/pagination.css" layer(components);
+@import "@heroui/styles/components/button.css" layer(components);
+@import "@heroui/styles/components/button-group.css" layer(components);
+@import "@heroui/styles/components/dropdown.css" layer(components);
+@import "@heroui/styles/components/list-box-item.css" layer(components);
+@import "@heroui/styles/components/list-box-section.css" layer(components);
+@import "@heroui/styles/components/list-box.css" layer(components);
+@import "@heroui/styles/components/menu-item.css" layer(components);
+@import "@heroui/styles/components/menu-section.css" layer(components);
+@import "@heroui/styles/components/menu.css" layer(components);
+@import "@heroui/styles/components/switch.css" layer(components);
+@import "@heroui/styles/components/chip.css" layer(components);
+@import "@heroui/styles/components/alert.css" layer(components);
+@import "@heroui/styles/components/empty-state.css" layer(components);
+@import "@heroui/styles/components/progress-circle.css" layer(components);
+@import "@heroui/styles/components/spinner.css" layer(components);
+@import "@heroui/styles/components/toast.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/input-group.css" layer(components);
+@import "@heroui/styles/components/number-field.css" layer(components);
+@import "@heroui/styles/components/radio-group.css" layer(components);
+@import "@heroui/styles/components/radio.css" layer(components);
+@import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/search-field.css" layer(components);
+@import "@heroui/styles/components/textarea.css" layer(components);
+@import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/separator.css" layer(components);
+@import "@heroui/styles/components/surface.css" layer(components);
+@import "@heroui/styles/components/avatar.css" layer(components);
+@import "@heroui/styles/components/alert-dialog.css" layer(components);
+@import "@heroui/styles/components/modal.css" layer(components);
+@import "@heroui/styles/components/popover.css" layer(components);
+@import "@heroui/styles/components/tooltip.css" layer(components);
+@import "@heroui/styles/components/combo-box.css" layer(components);
+@import "@heroui/styles/components/select.css" layer(components);
+@import "@heroui/styles/themes/default" layer(theme);
+@import "@heroui/styles/utilities";
+@import "@heroui/styles/variants";
 /*
  * HeroUI Theme Customization
  * Add this to your global.css after importing @heroui/styles

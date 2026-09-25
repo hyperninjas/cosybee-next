@@ -153,6 +153,11 @@
   gap: 10px;
 }
 .rating-doc .tag {
+  /* Layout it used to inherit from HeroUI's `.tag` before the global
+     stylesheet stopped importing that component (see app/globals.css). */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
