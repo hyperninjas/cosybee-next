@@ -394,10 +394,31 @@
 .article-body figure {
   margin-top: 0;
 }
+/* A captioned image/video box sized the way the editor sizes it. In BlockNote
+   the image and its caption share one wrapper whose width IS the image's
+   (the author's resized `previewWidth`, else `fit-content`), so the caption
+   wraps under the image. The exported <figure> is a plain block, so it spanned
+   the whole column and a caption under a 400px image ran the full 680px.
+
+   `fit-content` shrinks the figure to the image (capped at the column), and
+   the caption is kept out of that measurement — `width: 0` so it adds nothing
+   to the figure's width, `min-width: 100%` so it then fills it. `[data-url]`
+   scopes this to BlockNote's own export: a <figure> hand-written in an HTML
+   block keeps its normal layout. */
+.article-body figure[data-url] {
+  width: fit-content;
+  max-width: 100%;
+}
+.article-body figure[data-url] > figcaption {
+  width: 0;
+  min-width: 100%;
+}
 .article-body figcaption {
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  line-height: 1;
+  /* Captions wrap to the image's width (see `figure[data-url]`), so they
+     often run to two lines — leading of 1 set those lines touching. */
+  line-height: 1.4;
   color: var(--muted);
 }
 /* Honour BlockNote's per-block image alignment. The lossy export emits
@@ -406,8 +427,12 @@
    (Tailwind preflight resets `img` to display:block), so `text-align` alone
    can't move them — the image itself is centred/pushed with auto margins,
    while `text-align` handles the caption text. */
+/* The figure itself moves too, now that it is only as wide as its image
+   (see `figure[data-url]` above) — otherwise a narrow captioned image would
+   sit on the left with its image centred inside a box of the same width. */
 .article-body figure[data-text-alignment="center"] {
   text-align: center;
+  margin-inline: auto;
 }
 .article-body figure[data-text-alignment="center"] img,
 .article-body figure[data-text-alignment="center"] video {
@@ -415,6 +440,8 @@
 }
 .article-body figure[data-text-alignment="right"] {
   text-align: right;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
 }
 .article-body figure[data-text-alignment="right"] img,
 .article-body figure[data-text-alignment="right"] video {
@@ -1518,7 +1545,7 @@
 /* Mirrors `.article-body figcaption`. */
 .post-editor [data-file-block] .bn-file-caption {
   font-size: 0.85rem;
-  line-height: 1;
+  line-height: 1.4;
   color: var(--muted);
 }
 

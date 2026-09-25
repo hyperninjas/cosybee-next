@@ -260,10 +260,15 @@ export async function blocksToHtml(blocks: PartialBlock[]): Promise<string> {
   // the sanitized markup; the raw source belongs only in contentJson.
   // The colour pass runs LAST, on purpose: it walks tags as `<[^>]*>`, and the
   // CTA's stamped props can legally contain a `>` — so it must not see them.
+  // Also drop image blocks that never got an image: the editor shows them as
+  // an "Add image" placeholder, but they export as a src-less `<img>` that
+  // publishes as nothing but an empty 2rem gap.
   return stripPastedColors(
     stripCtaStampedProps(
       decorateMediaPlayers(decorateArticleLinks(html)),
-    ).replace(/\s*data-html="[^"]*"/g, ""),
+    )
+      .replace(/\s*data-html="[^"]*"/g, "")
+      .replace(/<img\b(?![^>]*\ssrc=)[^>]*>/g, ""),
   );
 }
 
