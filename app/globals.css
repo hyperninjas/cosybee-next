@@ -28,6 +28,7 @@
 @import "@heroui/styles/components/breadcrumbs.css" layer(components);
 @import "@heroui/styles/components/link.css" layer(components);
 @import "@heroui/styles/components/pagination.css" layer(components);
+@import "@heroui/styles/components/tabs.css" layer(components);
 @import "@heroui/styles/components/button.css" layer(components);
 @import "@heroui/styles/components/button-group.css" layer(components);
 @import "@heroui/styles/components/dropdown.css" layer(components);
@@ -39,11 +40,15 @@
 @import "@heroui/styles/components/menu.css" layer(components);
 @import "@heroui/styles/components/switch.css" layer(components);
 @import "@heroui/styles/components/chip.css" layer(components);
+@import "@heroui/styles/components/table.css" layer(components);
 @import "@heroui/styles/components/alert.css" layer(components);
 @import "@heroui/styles/components/empty-state.css" layer(components);
 @import "@heroui/styles/components/progress-circle.css" layer(components);
 @import "@heroui/styles/components/spinner.css" layer(components);
 @import "@heroui/styles/components/toast.css" layer(components);
+@import "@heroui/styles/components/checkbox-group.css" layer(components);
+@import "@heroui/styles/components/checkbox.css" layer(components);
+@import "@heroui/styles/components/input-otp.css" layer(components);
 @import "@heroui/styles/components/input.css" layer(components);
 @import "@heroui/styles/components/input-group.css" layer(components);
 @import "@heroui/styles/components/number-field.css" layer(components);
@@ -52,7 +57,14 @@
 @import "@heroui/styles/components/textfield.css" layer(components);
 @import "@heroui/styles/components/search-field.css" layer(components);
 @import "@heroui/styles/components/textarea.css" layer(components);
+@import "@heroui/styles/components/calendar.css" layer(components);
+@import "@heroui/styles/components/calendar-year-picker.css" layer(components);
+@import "@heroui/styles/components/date-field.css" layer(components);
+@import "@heroui/styles/components/time-field.css" layer(components);
+@import "@heroui/styles/components/date-input-group.css" layer(components);
+@import "@heroui/styles/components/date-picker.css" layer(components);
 @import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/header.css" layer(components);
 @import "@heroui/styles/components/separator.css" layer(components);
 @import "@heroui/styles/components/surface.css" layer(components);
 @import "@heroui/styles/components/avatar.css" layer(components);
@@ -62,6 +74,7 @@
 @import "@heroui/styles/components/tooltip.css" layer(components);
 @import "@heroui/styles/components/combo-box.css" layer(components);
 @import "@heroui/styles/components/select.css" layer(components);
+@import "@heroui/styles/components/autocomplete.css" layer(components);
 @import "@heroui/styles/themes/default" layer(theme);
 @import "@heroui/styles/utilities";
 @import "@heroui/styles/variants";
