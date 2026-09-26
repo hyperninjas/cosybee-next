@@ -6,7 +6,11 @@
 # container, not a CDN).
 
 # ---- Base -------------------------------------------------------------------
-FROM node:22-alpine AS base
+# Pinned to the exact version in .nvmrc so the npm that runs `npm ci` here is
+# the same npm that writes package-lock.json locally (npm 10 and 11 disagree on
+# the lockfile's optional entries). Bump both together. 24.21.0-alpine
+# segfaults on arm64 — check `docker run --rm node:<ver>-alpine node -v` first.
+FROM node:24.19.0-alpine AS base
 # libc6-compat: sharp (Next image optimization) needs it on Alpine/musl.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app

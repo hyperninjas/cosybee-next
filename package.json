@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "22.x",
-    "npm": "10.x"
+    "node": "24.x",
+    "npm": "11.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -53,5 +53,10 @@
     "Edge >= 100",
     "Safari >= 15.4",
     "iOS >= 15.4"
-  ]
+  ],
+  "allowScripts": {
+    "sharp@0.35.4": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
+  }
 }
